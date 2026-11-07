@@ -6,6 +6,7 @@ import { recommend } from './analysis/recommendations';
 import { PLATFORMS, PLATFORM_LABEL, accountLabel, platformColor } from './platforms';
 import { TooltipProvider } from './components/Tooltip';
 import { Overview } from './views/Overview';
+import { BigPictureView } from './views/BigPicture';
 import { Suggestions } from './views/Suggestions';
 import { Insights } from './views/Insights';
 import { Content } from './views/Content';
@@ -13,11 +14,12 @@ import { Clips } from './views/Clips';
 import { ImportView } from './views/Import';
 import { SettingsView } from './views/Settings';
 
-const TABS = ['Overview', 'Suggestions', 'Insights', 'Content', 'Clips', 'Import', 'Settings'] as const;
+const TABS = ['Overview', 'Big Picture', 'Suggestions', 'Insights', 'Content', 'Clips', 'Import', 'Settings'] as const;
 type Tab = (typeof TABS)[number];
 
 const HASH: Record<Tab, string> = {
   Overview: 'overview',
+  'Big Picture': 'big-picture',
   Suggestions: 'suggestions',
   Insights: 'insights',
   Content: 'content',
@@ -49,6 +51,11 @@ export default function App() {
     [store.posts, store.accounts, filters, store.settings.topics],
   );
   const recs = useMemo(() => recommend(analysis), [analysis]);
+  // The big picture always looks at the last 12 months: long enough to be reliable, recent enough to be your current audience.
+  const yearAnalysis = useMemo(
+    () => analyze(store.posts, store.accounts, { ...filters, rangeDays: 365 }, store.settings.topics),
+    [store.posts, store.accounts, filters, store.settings.topics],
+  );
   const isDemo = store.posts.length > 0 && store.posts.every((p) => p.source === DEMO_SOURCE);
   const presentPlatforms = PLATFORMS.filter((p) => store.posts.some((x) => x.platform === p));
 
@@ -92,6 +99,9 @@ export default function App() {
 
         {showFilters && (
           <div className="filters">
+            {tab === 'Big Picture' ? (
+              <span className="chip" aria-pressed="true">Last 12 months</span>
+            ) : (
             <div className="seg" role="group" aria-label="Date range">
               {RANGES.map((r) => (
                 <button key={r.days} aria-pressed={filters.rangeDays === r.days} onClick={() => setFilters((f) => ({ ...f, rangeDays: r.days }))}>
@@ -99,6 +109,7 @@ export default function App() {
                 </button>
               ))}
             </div>
+            )}
             {presentPlatforms.map((p) => (
               <button key={p} className="chip" aria-pressed={filters.platforms.includes(p)} onClick={() => togglePlatform(p)}>
                 <span className="dot" style={{ background: platformColor(p) }} />
@@ -127,6 +138,7 @@ export default function App() {
         ) : (
           <main>
             {tab === 'Overview' && <Overview a={analysis} recs={recs} onSeeAll={() => go('Suggestions')} />}
+            {tab === 'Big Picture' && <BigPictureView a={yearAnalysis} topics={store.settings.topics} />}
             {tab === 'Suggestions' && <Suggestions a={analysis} recs={recs} apiKey={store.settings.anthropicApiKey} />}
             {tab === 'Insights' && <Insights a={analysis} />}
             {tab === 'Content' && <Content a={analysis} topics={store.settings.topics} />}

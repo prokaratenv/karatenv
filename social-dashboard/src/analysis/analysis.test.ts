@@ -72,3 +72,21 @@ describe('buildClusters', () => {
     expect(c.map((x) => x.posts.length).sort()).toEqual([1, 2]);
   });
 });
+
+import { bigPicture } from './bigpicture';
+
+describe('bigPicture', () => {
+  it('builds a formula, findings and a 7-day plan from demo data', () => {
+    const a = analyze(sample, DEFAULT_ACCOUNTS, all, DEFAULT_TOPICS);
+    const bp = bigPicture(a, DEFAULT_TOPICS);
+    expect(bp.enough).toBe(true);
+    expect(bp.formula.map((f) => f.label)).toEqual(expect.arrayContaining(['Topic', 'Format', 'Length', 'When']));
+    expect(bp.pillars.more.length).toBeGreaterThan(0);
+    expect(bp.plan).toHaveLength(7);
+    expect(bp.findings.length).toBeGreaterThan(2);
+    expect(bp.matrix.every((c) => c.n >= 0)).toBe(true);
+  });
+  it('says so when there is too little data', () => {
+    expect(bigPicture(analyze(sample.slice(0, 5), DEFAULT_ACCOUNTS, all, DEFAULT_TOPICS), DEFAULT_TOPICS).enough).toBe(false);
+  });
+});

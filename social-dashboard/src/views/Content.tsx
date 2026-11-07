@@ -2,8 +2,9 @@ import { useMemo, useState } from 'react';
 import type { Analysis, EnrichedPost } from '../analysis/analyze';
 import type { Topic } from '../types';
 import { PLATFORM_LABEL, platformColor } from '../platforms';
-import { compact, duration, lift, pct, shortDate } from '../lib/format';
+import { compact, duration, pct, shortDate } from '../lib/format';
 import { Empty } from '../components/charts';
+import { LiftPill } from '../components/LiftPill';
 
 export function PostLink({ p }: { p: EnrichedPost }) {
   return p.url ? (
@@ -108,7 +109,7 @@ export function Content({ a, topics }: { a: Analysis; topics: Topic[] }) {
                   </td>
                   <td style={{ whiteSpace: 'nowrap' }}>{shortDate(p.publishedAt)}</td>
                   <td className="num">{compact(p.views)}</td>
-                  <td className="num">{p.mature ? lift(p.lift) : <span className="muted">new</span>}</td>
+                  <td className="num">{p.mature ? <LiftPill value={p.lift} /> : <span className="muted">new</span>}</td>
                   <td className="num">{pct(p.engRate)}</td>
                   <td className="num">{compact(p.shares)}</td>
                   <td className="num">{compact(p.comments)}</td>

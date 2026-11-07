@@ -2,9 +2,10 @@ import type { Analysis, Totals } from '../analysis/analyze';
 import type { Recommendation } from '../analysis/recommendations';
 import { LineChart, StatTile, Empty, InlineBar } from '../components/charts';
 import { PLATFORM_LABEL, platformColor } from '../platforms';
-import { compact, full, lift, pct, shortDate } from '../lib/format';
+import { compact, full, pct, shortDate } from '../lib/format';
 import { RecCard } from './Suggestions';
 import { PostLink } from './Content';
+import { LiftPill } from '../components/LiftPill';
 
 const delta = (cur: number, prev?: number) => (prev ? cur / prev - 1 : undefined);
 
@@ -141,7 +142,7 @@ export function Overview({ a, recs, onSeeAll }: { a: Analysis; recs: Recommendat
                   </td>
                   <td>{shortDate(x.publishedAt)}</td>
                   <td className="num">{compact(x.views)}</td>
-                  <td className="num">{x.mature ? lift(x.lift) : <span className="muted">new</span>}</td>
+                  <td className="num">{x.mature ? <LiftPill value={x.lift} /> : <span className="muted">new</span>}</td>
                   <td className="num">{pct(x.engRate)}</td>
                   <td className="num">{compact(x.shares)}</td>
                 </tr>
