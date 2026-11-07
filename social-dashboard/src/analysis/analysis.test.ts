@@ -18,6 +18,10 @@ describe('topic tagging', () => {
     expect(tagPost(p, c)).toEqual(expect.arrayContaining(['selfdefense', 'technique']));
     const q = { title: 'Skidding around', caption: '', hashtags: [] } as unknown as Post;
     expect(tagPost(q, c)).not.toContain('kids');
+    // The brand name "Engage Lifestyle Martial Arts" must not tag every post as adult training.
+    const brand = { title: 'Engage Winter Sale', caption: 'Engage Lifestyle Martial Arts, Henderson NV', hashtags: [] } as unknown as Post;
+    expect(tagPost(brand, c)).not.toContain('adults');
+    expect(tagPost(brand, c)).toContain('promo');
   });
 });
 

@@ -175,7 +175,7 @@ export function recommend(a: Analysis): Recommendation[] {
     const hours = Object.entries(a.bestHourByPlatform)
       .map(([pl, h]) => `${PLATFORM_LABEL[pl as keyof typeof PLATFORM_LABEL]} ${hourLabel(h!.hour)} (${lift(h!.medianLift)})`)
       .join(' · ');
-    if (hours) {
+    if (hours && Object.keys(a.bestHourByPlatform).length >= 2) {
       recs.push({
         id: 'timing-platform',
         category: 'timing',

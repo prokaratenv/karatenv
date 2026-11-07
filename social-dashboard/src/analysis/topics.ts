@@ -14,11 +14,11 @@ export const DEFAULT_TOPICS: Topic[] = [
   { id: 'belts', label: 'Belt tests & milestones', keywords: ['belt', 'black belt', 'belt test', 'testing', 'graduation', 'promotion', 'stripe', 'milestone', 'ceremony'] },
   { id: 'sparring', label: 'Sparring & competition', keywords: ['sparring', 'spar', 'tournament', 'competition', 'fight', 'match', 'compete', 'medal', 'champion'] },
   { id: 'fitness', label: 'Fitness & health', keywords: ['fitness', 'workout', 'cardio', 'flexibility', 'stretch', 'stretching', 'health', 'weight loss', 'conditioning', 'strength', 'energy', 'calories'] },
-  { id: 'adults', label: 'Adult training & lifestyle', keywords: ['adult', 'adults', 'stress', 'lifestyle', 'busy', 'over 40', 'women', 'moms', 'beginner', 'never too late'] },
+  { id: 'adults', label: 'Adult training & lifestyle', keywords: ['adult', 'adults', 'adult class', 'pro training', 'stress', 'busy', 'over 40', 'women', 'moms', 'beginner', 'never too late'] },
   { id: 'stories', label: 'Student stories & results', keywords: ['student', 'students', 'transformation', 'journey', 'story', 'testimonial', 'proud', 'before and after', 'results', 'first class'] },
   { id: 'bts', label: 'Behind the scenes & community', keywords: ['studio', 'dojo', 'behind the scenes', 'bts', 'class', 'instructor', 'sensei', 'coach', 'team', 'community', 'event', 'day in the life'] },
   { id: 'business', label: 'Business & leadership', keywords: ['business', 'entrepreneur', 'entrepreneurship', 'leadership', 'leader', 'owner', 'marketing', 'money', 'sales', 'ceo', 'hiring', 'school owner'] },
-  { id: 'promo', label: 'Promos & announcements', keywords: ['sale', 'promo', 'special', 'offer', 'discount', 'register', 'registration', 'sign up', 'enroll', 'open house', 'spots', 'limited', 'deadline', 'graduation weekend', 'cookies', 'winter sale', 'summer camp', 'birthday party', 'private lessons', 'free class', 'free trial', 'team intro'] },
+  { id: 'promo', label: 'Promos & announcements', keywords: ['sale', 'promo', 'special', 'offer', 'discount', 'register', 'registration', 'sign up', 'enroll', 'open house', 'spots', 'limited', 'deadline', 'graduation weekend', 'cookies', 'winter sale', 'summer camp', 'birthday party', 'private lessons', 'free class', 'free trial', 'team intro', 'ninja night', 'drawing', 'winners', 'prizes', 'haunted', 'demo team', 'parent days'] },
   { id: 'humor', label: 'Humor & trends', keywords: ['funny', 'lol', 'trend', 'challenge', 'prank', 'fail', 'wait for it', 'pov', 'when your', 'meme'] },
 ];
 
