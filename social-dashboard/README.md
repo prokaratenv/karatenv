@@ -68,3 +68,21 @@ The demo data (clearly labeled) loads on first run and is removed automatically 
   Each needs a registered developer app and OAuth, and Meta/TikTok require app review.
 * A small backend so data syncs across devices and a nightly job pulls fresh numbers.
 * Pull follower counts over time (account-level exports) to chart audience growth.
+
+## Automatic YouTube sync and weekly email
+
+Every Monday at 6:40am Pacific a scheduled Claude session:
+
+1. runs `npm run sync:youtube`, which reads the channel's videos and public stats (views, likes, comments)
+   from the YouTube Data API into `public/data/youtube.json`, plus a subscriber/view snapshot in
+   `public/data/youtube-channel.json` (audience growth history);
+2. commits that data to this branch;
+3. republishes the hosted dashboard with the new data file (the dashboard loads `data/youtube.json` on start);
+4. runs `npm run report:weekly` and emails the summary via Gmail.
+
+Setup: a YouTube Data API v3 key saved as a network secret in the cloud environment
+(host `www.googleapis.com`, header `X-Goog-Api-Key`). Locally, set `YOUTUBE_API_KEY` instead.
+The channel is set in `sync/config.json` (`npx tsx sync/youtube.ts --find` lists matches).
+
+The API key only gives public numbers. Shares, watch time and subscribers gained per video need
+YouTube Analytics (OAuth); keep importing the Studio CSV for those.

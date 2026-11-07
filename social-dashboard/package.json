@@ -10,6 +10,8 @@
     "build:artifact": "tsc --noEmit && vite build --mode artifact && node scripts/strip-shell.mjs dist-artifact/index.html",
     "preview": "vite preview",
     "test": "vitest run",
+    "sync:youtube": "tsx sync/youtube.ts",
+    "report:weekly": "tsx sync/weekly-report.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -24,6 +26,7 @@
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
     "@vitejs/plugin-react": "^4.3.4",
+    "tsx": "^4.19.2",
     "typescript": "^5.6.3",
     "vite": "^5.4.11",
     "vite-plugin-singlefile": "^2.0.3",
