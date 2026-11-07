@@ -14,7 +14,11 @@ export interface Stored {
   settings: Settings;
 }
 
-const initial = (): Stored => ({ posts: [], accounts: DEFAULT_ACCOUNTS, settings: { topics: DEFAULT_TOPICS } });
+const initial = (): Stored => ({
+  posts: [],
+  accounts: DEFAULT_ACCOUNTS,
+  settings: { topics: DEFAULT_TOPICS, seenDefaultTopics: DEFAULT_TOPICS.map((t) => t.id) },
+});
 
 export const DEMO_SOURCE = 'Demo data';
 
@@ -29,7 +33,21 @@ export function useStore() {
   useEffect(() => {
     get<Stored>(KEY)
       .then((s) => {
-        if (s) setState({ ...initial(), ...s, settings: { ...initial().settings, ...s.settings } });
+        if (s) {
+          // Add default topics introduced after this browser first saved its settings.
+          const seen = new Set(s.settings?.seenDefaultTopics ?? s.settings?.topics?.map((t) => t.id) ?? []);
+          const added = DEFAULT_TOPICS.filter((t) => !seen.has(t.id) && !s.settings.topics.some((x) => x.id === t.id));
+          setState({
+            ...initial(),
+            ...s,
+            settings: {
+              ...initial().settings,
+              ...s.settings,
+              topics: [...s.settings.topics, ...added],
+              seenDefaultTopics: DEFAULT_TOPICS.map((t) => t.id),
+            },
+          });
+        }
         else setState((x) => ({ ...x, posts: generateSample(x.accounts) }));
       })
       .catch(() => {

@@ -54,6 +54,8 @@ export interface Topic {
 
 export interface Settings {
   topics: Topic[];
+  /** Default topic ids this browser has already been offered (so deleted ones stay deleted). */
+  seenDefaultTopics?: string[];
   anthropicApiKey?: string;
 }
 
