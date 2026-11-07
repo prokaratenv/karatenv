@@ -73,7 +73,7 @@ The demo data (clearly labeled) loads on first run and is removed automatically 
 
 Every Monday at 6:40am Pacific a scheduled Claude session:
 
-1. runs `npm run sync:youtube`, which reads the channel's videos and public stats (views, likes, comments)
+1. runs `npm run sync:youtube` and `npm run sync:meta` (see below). The YouTube sync reads the channel's videos and public stats (views, likes, comments)
    from the YouTube Data API into `public/data/youtube.json`, plus a subscriber/view snapshot in
    `public/data/youtube-channel.json` (audience growth history);
 2. commits that data to this branch;
@@ -86,3 +86,18 @@ The channel is set in `sync/config.json` (`npx tsx sync/youtube.ts --find` lists
 
 The API key only gives public numbers. Shares, watch time and subscribers gained per video need
 YouTube Analytics (OAuth); keep importing the Studio CSV for those.
+
+### Instagram + Facebook (Meta) sync
+
+`npm run sync:meta` reads the Facebook Pages and linked Instagram professional accounts that a
+Meta **system user token** can see (Business settings → System users → Generate token, expiration
+"Never", permissions `pages_show_list, pages_read_engagement, read_insights, instagram_basic,
+instagram_manage_insights, business_management`). The token is saved as a network secret for
+`graph.facebook.com` (Authorization: Bearer); locally set `META_ACCESS_TOKEN`.
+
+* Output: `public/data/meta.json` (posts) and `public/data/meta-accounts.json` (follower history).
+* Per-post insights (views, reach, saves, shares, average watch time) are fetched for the last
+  `insightsDays` (default 120); older posts keep likes/comments.
+* `sync/meta-config.json` maps each Page / Instagram id to a dashboard account; it's filled on
+  the first run (`npx tsx sync/meta.ts --accounts` previews the mapping).
+* Personal Facebook profiles have no API access; keep importing those as CSV.

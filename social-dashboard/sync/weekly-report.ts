@@ -14,6 +14,8 @@ import { DEFAULT_ACCOUNTS } from '../src/platforms';
 import { DEFAULT_TOPICS } from '../src/analysis/topics';
 import { compact, lift, pct } from '../src/lib/format';
 import type { ChannelSnapshot } from './youtube';
+import type { FollowerSnapshot } from './meta';
+import { PLATFORM_LABEL } from '../src/platforms';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const DAY = 86_400_000;
@@ -39,7 +41,25 @@ function channelDelta(history: ChannelSnapshot[], asOf: number) {
   return { views: latest.views - past.views, subscribers: latest.subscribers - past.subscribers, since: past.date, latest };
 }
 
-export function buildWeeklyReport(posts: Post[], history: ChannelSnapshot[], dashboardUrl: string, now = new Date()): WeeklyReport {
+/** Latest follower count per account, with the change since ~a week ago when we have it. */
+export function followerChanges(snaps: FollowerSnapshot[], asOf: number) {
+  const byAcc = new Map<string, FollowerSnapshot[]>();
+  for (const s of snaps) byAcc.set(s.accountId, [...(byAcc.get(s.accountId) ?? []), s]);
+  return [...byAcc.values()].map((list) => {
+    const sorted = [...list].sort((a, b) => a.date.localeCompare(b.date));
+    const latest = sorted[sorted.length - 1];
+    const past = sorted.filter((h) => Date.parse(h.date) <= asOf - 5 * DAY).pop();
+    return { ...latest, change: past ? latest.followers - past.followers : undefined };
+  });
+}
+
+export function buildWeeklyReport(
+  posts: Post[],
+  history: ChannelSnapshot[],
+  dashboardUrl: string,
+  now = new Date(),
+  followerSnaps: FollowerSnapshot[] = [],
+): WeeklyReport {
   const asOf = now.getTime();
   const weekAgo = asOf - 7 * DAY;
   const all = { rangeDays: 0, platforms: [], accountIds: [] };
@@ -55,11 +75,14 @@ export function buildWeeklyReport(posts: Post[], history: ChannelSnapshot[], das
   const last30 = enriched.filter((p) => p.mature && Date.parse(p.publishedAt) > asOf - 30 * DAY).sort((x, y) => y.lift - x.lift);
   const delta = channelDelta(history, asOf);
   const latest = history[history.length - 1];
+  const followers = followerChanges(followerSnaps, asOf);
+  const platforms = [...new Set(posts.map((p) => p.platform))];
+  const label = (p: Post) => PLATFORM_LABEL[p.platform];
   const dateLabel = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'America/Los_Angeles' });
 
   const headline = delta
     ? `${delta.views >= 0 ? '+' : ''}${compact(delta.views)} YouTube views, ${delta.subscribers >= 0 ? '+' : ''}${delta.subscribers} subscribers`
-    : `${newThisWeek.length} new YouTube videos`;
+    : `${newThisWeek.length} new posts`;
   const subject = `Weekly social report (${dateLabel}): ${headline}`;
 
   // ---- plain text ----
@@ -71,14 +94,17 @@ export function buildWeeklyReport(posts: Post[], history: ChannelSnapshot[], das
   } else if (latest) {
     T.push(`YouTube channel: ${latest.subscribers.toLocaleString('en-US')} subscribers, ${latest.views.toLocaleString('en-US')} lifetime views. Week-over-week change starts next week.`);
   }
-  T.push('', `New videos this week: ${newThisWeek.length} (previous week: ${prevWeek.length})`);
-  for (const p of newThisWeek.slice(0, 5)) T.push(`- ${p.title}: ${compact(p.views)} views, ${p.likes} likes, ${p.comments} comments`);
-  T.push('', 'Best performers, last 30 days (vs a typical video):');
-  for (const p of last30.slice(0, 3)) T.push(`- ${p.title}: ${lift(p.lift)}, ${compact(p.views)} views`);
+  for (const f of followers) {
+    T.push(`${PLATFORM_LABEL[f.platform]} ${f.name}: ${f.followers.toLocaleString('en-US')} followers${f.change !== undefined ? ` (${f.change >= 0 ? '+' : ''}${f.change} this week)` : ''}`);
+  }
+  T.push('', `New posts this week: ${newThisWeek.length} (previous week: ${prevWeek.length})`);
+  for (const p of newThisWeek.slice(0, 7)) T.push(`- [${label(p)}] ${p.title}: ${compact(p.views)} views, ${p.likes} likes, ${p.comments} comments`);
+  T.push('', 'Best performers, last 30 days (vs a typical post on the same account):');
+  for (const p of last30.slice(0, 5)) T.push(`- [${label(p)}] ${p.title}: ${lift(p.lift)}, ${compact(p.views)} views`);
   T.push('', 'Top suggestions:');
   recs.forEach((r, i) => T.push(`${i + 1}. ${r.title}`, `   ${r.why}`, `   Do this: ${r.action}`));
   T.push('', `Open the dashboard: ${dashboardUrl}`);
-  T.push('YouTube numbers sync automatically. For Instagram, Facebook and TikTok, import fresh exports on the Import tab.');
+  T.push(`Synced automatically: ${platforms.map((x) => PLATFORM_LABEL[x]).join(', ')}. Import the rest (personal Facebook, TikTok) on the Import tab.`);
 
   // ---- HTML (inline styles for email clients) ----
   const ink = '#1a1a19';
@@ -104,8 +130,15 @@ export function buildWeeklyReport(posts: Post[], history: ChannelSnapshot[], das
   } else if (latest) {
     H.push(stat('Subscribers', compact(latest.subscribers)));
   }
-  H.push(stat('New videos', `${newThisWeek.length}`));
+  H.push(stat('New posts', `${newThisWeek.length}`));
   H.push('</tr></table>');
+  if (followers.length) {
+    H.push(`<h2 style="font-size:16px;margin:20px 0 8px;">Followers</h2><table style="border-collapse:collapse;width:100%;">`);
+    H.push(row(['Account', 'Followers', 'This week'], true));
+    for (const f of followers)
+      H.push(row([`${PLATFORM_LABEL[f.platform]} · ${esc(f.name)}`, f.followers.toLocaleString('en-US'), f.change === undefined ? 'starts next week' : `${f.change >= 0 ? '+' : ''}${f.change}`]));
+    H.push('</table>');
+  }
   if (!delta && latest) H.push(`<p style="color:${muted};font-size:13px;">Week-over-week change starts with next week's report.</p>`);
 
   H.push(`<h2 style="font-size:16px;margin:20px 0 8px;">Top suggestions</h2>`);
@@ -121,22 +154,23 @@ export function buildWeeklyReport(posts: Post[], history: ChannelSnapshot[], das
 
   if (newThisWeek.length) {
     H.push(`<h2 style="font-size:16px;margin:20px 0 8px;">New this week</h2><table style="border-collapse:collapse;width:100%;">`);
-    H.push(row(['Video', 'Views', 'Likes', 'Comments'], true));
-    for (const p of newThisWeek.slice(0, 7))
-      H.push(row([`<a href="${esc(p.url ?? '#')}" style="color:${ink};">${esc(p.title)}</a>`, compact(p.views), compact(p.likes), compact(p.comments)]));
+    H.push(row(['Post', 'Views', 'Likes', 'Comments'], true));
+    for (const p of newThisWeek.slice(0, 10))
+      H.push(row([`<span style="color:${muted};">${label(p)}</span> <a href="${esc(p.url ?? '#')}" style="color:${ink};">${esc(p.title)}</a>`, compact(p.views), compact(p.likes), compact(p.comments)]));
     H.push('</table>');
   }
   if (last30.length) {
     H.push(`<h2 style="font-size:16px;margin:20px 0 8px;">Best performers, last 30 days</h2><table style="border-collapse:collapse;width:100%;">`);
-    H.push(row(['Video', 'vs typical', 'Views', 'Engagement'], true));
-    for (const p of last30.slice(0, 5)) H.push(row([`<a href="${esc(p.url ?? '#')}" style="color:${ink};">${esc(p.title)}</a>`, lift(p.lift), compact(p.views), pct(p.engRate)]));
+    H.push(row(['Post', 'vs typical', 'Views', 'Engagement'], true));
+    for (const p of last30.slice(0, 5))
+      H.push(row([`<span style="color:${muted};">${label(p)}</span> <a href="${esc(p.url ?? '#')}" style="color:${ink};">${esc(p.title)}</a>`, lift(p.lift), compact(p.views), pct(p.engRate)]));
     H.push('</table>');
   }
   H.push(
     `<p style="margin:24px 0 8px;"><a href="${esc(dashboardUrl)}" style="background:${accent};color:#fff;text-decoration:none;padding:9px 14px;border-radius:8px;font-size:14px;">Open the dashboard</a></p>`,
   );
   H.push(
-    `<p style="color:${muted};font-size:12px;">YouTube numbers sync automatically every Monday. For Instagram, Facebook and TikTok, import fresh exports on the dashboard's Import tab. "vs typical" compares a video's views with the channel's median video.</p></div>`,
+    `<p style="color:${muted};font-size:12px;">Synced automatically every Monday: ${platforms.map((x) => PLATFORM_LABEL[x]).join(', ')}. For anything else (personal Facebook, TikTok), import exports on the dashboard's Import tab. "vs typical" compares a post's views with the median post on the same account.</p></div>`,
   );
 
   return { subject, html: H.join('\n'), text: T.join('\n') };
@@ -147,15 +181,17 @@ if (isMain) {
   const i = process.argv.indexOf('--dashboard');
   const dashboardUrl = i > 0 ? process.argv[i + 1] : 'https://claude.ai/artifact/CxTSLnZ9V1cXZEebotPqos';
   const dataDir = resolve(here, '../public/data');
-  const posts: Post[] = existsSync(resolve(dataDir, 'youtube.json')) ? JSON.parse(readFileSync(resolve(dataDir, 'youtube.json'), 'utf8')) : [];
+  const load = <T,>(f: string, fallback: T): T => (existsSync(resolve(dataDir, f)) ? JSON.parse(readFileSync(resolve(dataDir, f), 'utf8')) : fallback);
+  const posts: Post[] = [...load<Post[]>('youtube.json', []), ...load<Post[]>('meta.json', [])];
+  const followerSnaps = load<FollowerSnapshot[]>('meta-accounts.json', []);
   const history: ChannelSnapshot[] = existsSync(resolve(dataDir, 'youtube-channel.json'))
     ? JSON.parse(readFileSync(resolve(dataDir, 'youtube-channel.json'), 'utf8'))
     : [];
   if (!posts.length) {
-    console.error('No synced YouTube data. Run sync/youtube.ts first.');
+    console.error('No synced data. Run npm run sync:youtube (and sync:meta) first.');
     process.exit(1);
   }
-  const report = buildWeeklyReport(posts, history, dashboardUrl);
+  const report = buildWeeklyReport(posts, history, dashboardUrl, new Date(), followerSnaps);
   mkdirSync(resolve(here, 'out'), { recursive: true });
   writeFileSync(resolve(here, 'out/weekly-report.json'), JSON.stringify(report, null, 2));
   console.log(report.subject);

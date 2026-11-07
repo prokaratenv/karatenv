@@ -57,15 +57,20 @@ export function useStore() {
       .finally(() => setLoaded(true));
   }, []);
 
-  // Pull in data synced on a schedule (public/data/youtube.json), if this build has it.
+  // Pull in data synced on a schedule (public/data/*.json), if this build has it.
   useEffect(() => {
     if (!loaded) return;
-    fetch('data/youtube.json', { cache: 'no-store' })
-      .then((r) => (r.ok ? r.json() : []))
-      .then((synced: unknown) => {
-        if (Array.isArray(synced) && synced.length) addPosts(synced as Post[]);
-      })
-      .catch(() => {});
+    const files = ['data/youtube.json', 'data/meta.json'];
+    Promise.all(
+      files.map((f) =>
+        fetch(f, { cache: 'no-store' })
+          .then((r) => (r.ok ? r.json() : []))
+          .catch(() => []),
+      ),
+    ).then((lists: unknown[]) => {
+      const synced = lists.flatMap((l) => (Array.isArray(l) ? (l as Post[]) : []));
+      if (synced.length) addPosts(synced);
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loaded]);
 
