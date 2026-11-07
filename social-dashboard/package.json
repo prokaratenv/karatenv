@@ -12,7 +12,7 @@
     "test": "vitest run",
     "sync:youtube": "NODE_USE_ENV_PROXY=1 NODE_NO_WARNINGS=1 tsx sync/youtube.ts",
     "sync:meta": "NODE_USE_ENV_PROXY=1 NODE_NO_WARNINGS=1 tsx sync/meta.ts",
-    "report:weekly": "tsx sync/weekly-report.ts",
+    "report:weekly": "TZ=America/Los_Angeles tsx sync/weekly-report.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

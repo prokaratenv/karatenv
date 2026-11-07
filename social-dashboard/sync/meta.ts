@@ -58,9 +58,14 @@ function loadConfig(): MetaConfig {
 
 let version = DEFAULT_CONFIG.apiVersion;
 
-async function graph<T>(path: string, params: Record<string, string> = {}): Promise<T> {
+/**
+ * `pageToken`: Facebook Page endpoints need a Page access token. It's fetched at run time from
+ * me/accounts using the system-user token and only ever kept in memory.
+ */
+async function graph<T>(path: string, params: Record<string, string> = {}, pageToken?: string): Promise<T> {
   const url = new URL(path.startsWith('https://') ? path : `https://graph.facebook.com/${version}/${path}`);
   for (const [k, v] of Object.entries(params)) url.searchParams.set(k, v);
+  if (pageToken && !url.searchParams.has('access_token')) url.searchParams.set('access_token', pageToken);
   const headers: Record<string, string> = {};
   if (process.env.META_ACCESS_TOKEN) headers.Authorization = `Bearer ${process.env.META_ACCESS_TOKEN}`;
   const res = await fetch(url, { headers });
@@ -74,15 +79,13 @@ async function graph<T>(path: string, params: Record<string, string> = {}): Prom
 }
 
 /** Follow `paging.next` until `max` items. */
-async function all<T>(path: string, params: Record<string, string>, max: number, stopBefore?: number): Promise<T[]> {
+async function all<T>(path: string, params: Record<string, string>, max: number, pageToken?: string): Promise<T[]> {
   const out: T[] = [];
-  let page = await graph<{ data: T[]; paging?: { next?: string } }>(path, params);
+  let page = await graph<{ data: T[]; paging?: { next?: string } }>(path, params, pageToken);
   for (;;) {
     out.push(...page.data);
-    const last = page.data[page.data.length - 1] as { timestamp?: string; created_time?: string } | undefined;
-    const lastTime = last ? Date.parse(last.timestamp ?? last.created_time ?? '') : NaN;
-    if (!page.paging?.next || out.length >= max || (stopBefore && lastTime < stopBefore)) break;
-    page = await graph(page.paging.next);
+    if (!page.paging?.next || out.length >= max) break;
+    page = await graph(page.paging.next, {}, pageToken);
   }
   return out.slice(0, max);
 }
@@ -92,7 +95,7 @@ async function all<T>(path: string, params: Record<string, string>, max: number,
  * retired), fall back to asking one at a time and remember which ones work for the rest of the run.
  */
 const metricOk = new Map<string, boolean>();
-async function insights(objectId: string, metrics: string[], edge = 'insights'): Promise<Record<string, number>> {
+async function insights(objectId: string, metrics: string[], pageToken?: string, edge = 'insights'): Promise<Record<string, number>> {
   const want = metrics.filter((m) => metricOk.get(m) !== false);
   const read = (data: { name: string; values?: { value: unknown }[]; total_value?: { value: number } }[]) => {
     const out: Record<string, number> = {};
@@ -104,7 +107,7 @@ async function insights(objectId: string, metrics: string[], edge = 'insights'):
   };
   if (!want.length) return {};
   try {
-    const r = await graph<{ data: Parameters<typeof read>[0] }>(`${objectId}/${edge}`, { metric: want.join(',') });
+    const r = await graph<{ data: Parameters<typeof read>[0] }>(`${objectId}/${edge}`, { metric: want.join(',') }, pageToken);
     want.forEach((m) => metricOk.set(m, true));
     return read(r.data);
   } catch (e) {
@@ -112,7 +115,7 @@ async function insights(objectId: string, metrics: string[], edge = 'insights'):
     const out: Record<string, number> = {};
     for (const m of want) {
       try {
-        const r = await graph<{ data: Parameters<typeof read>[0] }>(`${objectId}/${edge}`, { metric: m });
+        const r = await graph<{ data: Parameters<typeof read>[0] }>(`${objectId}/${edge}`, { metric: m }, pageToken);
         Object.assign(out, read(r.data));
         metricOk.set(m, true);
       } catch {
@@ -221,15 +224,19 @@ export function guessAccountId(platform: 'facebook' | 'instagram', name: string)
 interface PageRow {
   id: string;
   name: string;
+  access_token?: string;
   followers_count?: number;
   fan_count?: number;
   instagram_business_account?: { id: string; username?: string; followers_count?: number };
 }
 
-async function discover(): Promise<PageRow[]> {
+async function discover(withTokens = false): Promise<PageRow[]> {
   return all<PageRow>(
     'me/accounts',
-    { fields: 'id,name,followers_count,fan_count,instagram_business_account{id,username,followers_count}', limit: '100' },
+    {
+      fields: `id,name,followers_count,fan_count,instagram_business_account{id,username,followers_count}${withTokens ? ',access_token' : ''}`,
+      limit: '100',
+    },
     100,
   );
 }
@@ -239,7 +246,7 @@ export async function syncMeta() {
   version = cfg.apiVersion;
   const now = new Date().toISOString();
   const insightsSince = Date.now() - cfg.insightsDays * 86_400_000;
-  const pages = await discover();
+  const pages = await discover(true);
   if (!pages.length) throw new Error('The token sees no Facebook Pages. Assign the Pages to the system user in Business settings.');
 
   const posts: Post[] = [];
@@ -259,9 +266,13 @@ export async function syncMeta() {
           limit: '50',
         },
         cfg.maxPostsPerAccount,
+        pg.access_token,
       );
       for (const p of raw) {
-        const ins = Date.parse(p.created_time) > insightsSince ? await insights(p.id, ['post_media_view', 'post_impressions_unique', 'post_video_views']) : {};
+        const ins =
+          Date.parse(p.created_time) > insightsSince
+            ? await insights(p.id, ['post_media_view', 'post_impressions_unique', 'post_video_views'], pg.access_token)
+            : {};
         posts.push(fbToPost(p, fbId, ins, now));
       }
       log.push(`Facebook "${pg.name}" -> ${fbId}: ${raw.length} posts`);

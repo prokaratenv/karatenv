@@ -1,0 +1,9 @@
+{
+  "apiVersion": "v25.0",
+  "insightsDays": 120,
+  "maxPostsPerAccount": 600,
+  "accounts": {
+    "427414610628538": "fb-engage",
+    "17841400055655022": "ig-engage"
+  }
+}

@@ -339,8 +339,16 @@ export function analyze(allPosts: Post[], accounts: Account[], filters: Filters,
   // Same clip across platforms.
   const clusters = buildClusters(posts).filter((c) => c.posts.length >= 2);
   const winTally = new Map<Platform, { wins: number; appearances: number }>();
+  // Judge each clip against that account's typical post of the same format, so an account whose
+  // normal post is a low-reach photo doesn't make every video on it look like a win.
+  const formatBase = new Map<string, number>();
+  for (const [k, ps] of groupBy(mature, (p) => `${p.accountId}|${p.format}`)) if (ps.length >= MIN_N) formatBase.set(k, Math.max(1, median(ps.map((p) => p.views))));
+  const clipLift = (p: EnrichedPost) => {
+    const b = formatBase.get(`${p.accountId}|${p.format}`);
+    return b ? p.views / b : p.lift;
+  };
   for (const c of clusters.filter((c) => c.posts.every((p) => p.mature))) {
-    const best = c.posts.reduce((a, b) => (b.lift > a.lift ? b : a));
+    const best = c.posts.reduce((a, b) => (clipLift(b) > clipLift(a) ? b : a));
     const seen = new Set<Platform>();
     for (const p of c.posts) {
       if (seen.has(p.platform)) continue;

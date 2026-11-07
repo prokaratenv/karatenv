@@ -198,7 +198,7 @@ export function recommend(a: Analysis): Recommendation[] {
         category: 'platform',
         score: Math.round(40 * confidence(top.appearances) + rate * 30),
         title: `${PLATFORM_LABEL[top.platform]} gets the most out of each clip`,
-        why: `When the same clip goes everywhere, ${PLATFORM_LABEL[top.platform]} has the strongest result ${pct(rate, 0)} of the time (relative to each account's normal).`,
+        why: `When the same clip goes everywhere, ${PLATFORM_LABEL[top.platform]} beats its own typical video by the most ${pct(rate, 0)} of the time.`,
         action: `Publish there first, reply to comments in the first hour, and save platform-native extras (trending audio, polls, pinned comments) for it.`,
         evidence: `${top.appearances} cross-posted clips`,
       });
