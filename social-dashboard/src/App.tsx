@@ -14,7 +14,29 @@ import { Clips } from './views/Clips';
 import { ImportView } from './views/Import';
 import { SettingsView } from './views/Settings';
 
-const TABS = ['Overview', 'Big Picture', 'Suggestions', 'Insights', 'Content', 'Clips', 'Import', 'Settings'] as const;
+const TABS = ['Big Picture', 'Overview', 'Suggestions', 'Insights', 'Content', 'Clips', 'Import', 'Settings'] as const;
+
+/** Plain names shown on the tabs, and one line on what each one is for. */
+const TAB_LABEL: Record<(typeof TABS)[number], string> = {
+  'Big Picture': 'Big Picture',
+  Overview: 'Overview',
+  Suggestions: 'To-do list',
+  Insights: 'Patterns',
+  Content: 'All posts',
+  Clips: 'Clip comparison',
+  Import: 'Add data',
+  Settings: 'Settings',
+};
+const TAB_INTRO: Record<(typeof TABS)[number], string> = {
+  'Big Picture': "Start here: what's working across all your accounts, and what to do about it.",
+  Overview: "This period's totals, each account's numbers and your most-viewed posts.",
+  Suggestions: 'Specific changes ranked by how much they should help, each with the evidence behind it.',
+  Insights: 'The detail behind the big picture: topics, words, video length, title style and posting times.',
+  Content: 'Every post in one list. Search, filter by topic, or click a column to sort.',
+  Clips: 'The same clip on different platforms, side by side, so you can see where it does best.',
+  Import: 'YouTube, Instagram and the Engage Facebook Page sync every Monday. Add TikTok and personal Facebook files here.',
+  Settings: 'Your accounts, the topics posts are sorted into, and optional add-ons.',
+};
 type Tab = (typeof TABS)[number];
 
 const HASH: Record<Tab, string> = {
@@ -27,7 +49,7 @@ const HASH: Record<Tab, string> = {
   Import: 'import',
   Settings: 'setup',
 };
-const tabFromHash = (): Tab => (Object.keys(HASH) as Tab[]).find((t) => `#${HASH[t]}` === location.hash) ?? 'Overview';
+const tabFromHash = (): Tab => (Object.keys(HASH) as Tab[]).find((t) => `#${HASH[t]}` === location.hash) ?? 'Big Picture';
 
 const RANGES: { days: number; label: string }[] = [
   { days: 7, label: '7d' },
@@ -83,7 +105,7 @@ export default function App() {
 
         {isDemo && (
           <div className="notice warn" style={{ marginBottom: 12 }}>
-            You're looking at <strong>demo data</strong>. Go to <a href="#import" onClick={(e) => { e.preventDefault(); go('Import'); }}>Import</a> and add your own exports; the demo is removed as soon as you do.
+            You're looking at <strong>demo data</strong>. Go to <a href="#import" onClick={(e) => { e.preventDefault(); go('Import'); }}>Add data</a> and add your own exports; the demo is removed as soon as you do.
           </div>
         )}
         {store.persistError && <div className="notice warn" style={{ marginBottom: 12 }}>{store.persistError}</div>}
@@ -91,11 +113,12 @@ export default function App() {
         <nav className="tabs" role="tablist">
           {TABS.map((t) => (
             <button key={t} role="tab" className="tab" aria-selected={tab === t} onClick={() => go(t)}>
-              {t}
+              {TAB_LABEL[t]}
               {t === 'Suggestions' && recs.length > 0 ? ` (${recs.length})` : ''}
             </button>
           ))}
         </nav>
+        <p className="tab-intro">{TAB_INTRO[tab]}</p>
 
         {showFilters && (
           <div className="filters">

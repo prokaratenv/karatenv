@@ -43,7 +43,7 @@ export function recommend(a: Analysis): Recommendation[] {
         score: 100,
         title: 'Import more posts to unlock suggestions',
         why: `Only ${n} posts are old enough (2+ days) to judge. Patterns need a few dozen.`,
-        action: 'Import the last 90 days from each platform (see the Import tab for where each export lives).',
+        action: 'Import the last 90 days from each platform (see the Add data tab for where each export lives).',
         evidence: `${n} mature posts in the current filter.`,
       },
     ];
@@ -273,7 +273,7 @@ export function recommend(a: Analysis): Recommendation[] {
       why: `Correlation between the score and actual performance: ${c.toFixed(2)} (1.0 = perfect, 0 = none).`,
       action:
         Math.abs(c) < 0.2
-          ? 'Pick clips by topic and hook (see Insights) instead of by score alone.'
+          ? 'Pick clips by topic and hook (see the Patterns tab) instead of by score alone.'
           : 'Post the highest-scored clips at your best times and skip the lowest-scored ones.',
       evidence: `${a.opus.viralityN} scored clips`,
     });

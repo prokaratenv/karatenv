@@ -104,7 +104,7 @@ export function buildWeeklyReport(
   T.push('', 'Top suggestions:');
   recs.forEach((r, i) => T.push(`${i + 1}. ${r.title}`, `   ${r.why}`, `   Do this: ${r.action}`));
   T.push('', `Open the dashboard: ${dashboardUrl}`);
-  T.push(`Synced automatically: ${platforms.map((x) => PLATFORM_LABEL[x]).join(', ')}. Import the rest (personal Facebook, TikTok) on the Import tab.`);
+  T.push(`Synced automatically: ${platforms.map((x) => PLATFORM_LABEL[x]).join(', ')}. Import the rest (personal Facebook, TikTok) on the Add data tab.`);
 
   // ---- HTML (inline styles for email clients) ----
   const ink = '#1a1a19';
@@ -170,7 +170,7 @@ export function buildWeeklyReport(
     `<p style="margin:24px 0 8px;"><a href="${esc(dashboardUrl)}" style="background:${accent};color:#fff;text-decoration:none;padding:9px 14px;border-radius:8px;font-size:14px;">Open the dashboard</a></p>`,
   );
   H.push(
-    `<p style="color:${muted};font-size:12px;">Synced automatically every Monday: ${platforms.map((x) => PLATFORM_LABEL[x]).join(', ')}. For anything else (personal Facebook, TikTok), import exports on the dashboard's Import tab. "vs typical" compares a post's views with the median post on the same account.</p></div>`,
+    `<p style="color:${muted};font-size:12px;">Synced automatically every Monday: ${platforms.map((x) => PLATFORM_LABEL[x]).join(', ')}. For anything else (personal Facebook, TikTok), import exports on the dashboard's Add data tab. "vs typical" compares a post's views with the median post on the same account.</p></div>`,
   );
 
   return { subject, html: H.join('\n'), text: T.join('\n') };

@@ -3,9 +3,10 @@
   --page: #f9f9f7;
   --surface-1: #fcfcfb;
   --surface-2: #f3f2ee;
-  --text-primary: #0b0b0b;
-  --text-secondary: #52514e;
-  --text-muted: #6f6d68;
+  --text-primary: #1d2733;
+  --text-secondary: #46505c;
+  --text-muted: #5d6672;
+  --heading: #12406f;
   --grid: #e1e0d9;
   --axis: #c3c2b7;
   --border: rgba(11, 11, 11, 0.1);
@@ -50,9 +51,10 @@
     --page: #0d0d0d;
     --surface-1: #1a1a19;
     --surface-2: #232321;
-    --text-primary: #f0efec;
-    --text-secondary: #c3c2b7;
-    --text-muted: #9a988f;
+    --text-primary: #eef1f5;
+    --text-secondary: #c9d0d9;
+    --text-muted: #a3acb8;
+    --heading: #cfe2fa;
     --grid: #2c2c2a;
     --axis: #383835;
     --border: rgba(255, 255, 255, 0.1);
@@ -97,9 +99,10 @@
   --page: #0d0d0d;
   --surface-1: #1a1a19;
   --surface-2: #232321;
-  --text-primary: #f0efec;
-  --text-secondary: #c3c2b7;
-  --text-muted: #9a988f;
+  --text-primary: #eef1f5;
+  --text-secondary: #c9d0d9;
+  --text-muted: #a3acb8;
+  --heading: #cfe2fa;
   --grid: #2c2c2a;
   --axis: #383835;
   --border: rgba(255, 255, 255, 0.1);
@@ -115,11 +118,13 @@
 }
 
 * { box-sizing: border-box; }
-body { margin: 0; background: var(--page); font-size: 14px; line-height: 1.45; }
-h1, h2, h3 { margin: 0; font-weight: 600; letter-spacing: -0.01em; }
-h1 { font-size: 20px; }
-h2 { font-size: 16px; }
-h3 { font-size: 14px; }
+html, body { background: var(--page); color: var(--text-primary); }
+body { margin: 0; font-size: 15px; line-height: 1.5; font-family: system-ui, -apple-system, 'Segoe UI', sans-serif; }
+table, input, select, textarea, button, .tooltip, td, th, li, p, summary { color: inherit; }
+h1, h2, h3 { margin: 0; font-weight: 700; letter-spacing: -0.01em; color: var(--heading); text-wrap: balance; }
+h1 { font-size: 24px; }
+h2 { font-size: 18px; }
+h3 { font-size: 15px; }
 p { margin: 0; }
 a { color: var(--accent-ink); }
 button, input, select, textarea { font: inherit; color: inherit; }
@@ -326,3 +331,19 @@ td.num { font-weight: 600; color: var(--num); }
 .spread-num .big-num { font-size: 18px; }
 .glossary { display: grid; gap: 2px; }
 .glossary p { max-width: 75ch; margin: 0 0 8px; }
+
+/* Readability pass */
+.tab { font-size: 15px; padding: 11px 14px; }
+.tab-intro { margin: -6px 0 16px; color: var(--text-secondary); font-size: 15px; max-width: 80ch; }
+.card-head p { font-size: 13px; color: var(--text-secondary); }
+table { font-size: 14px; }
+th { color: var(--heading); }
+.section-title { color: var(--heading); }
+.eyebrow { color: var(--heading); opacity: 0.85; }
+.barlist-label { color: var(--text-primary); }
+.tile-label { color: var(--text-secondary); font-weight: 600; }
+.legend, .tick { color: var(--text-secondary); }
+.chart-svg .tick { fill: var(--text-secondary); }
+.chart-svg .end-label { fill: var(--text-primary); }
+.rec h3, .finding h3 { color: var(--heading); }
+.notice { color: var(--text-primary); }

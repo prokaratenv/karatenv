@@ -23,7 +23,7 @@ type SortKey = 'publishedAt' | 'views' | 'lift' | 'engRate' | 'shares' | 'commen
 const COLS: { key: SortKey; label: string }[] = [
   { key: 'publishedAt', label: 'Date' },
   { key: 'views', label: 'Views' },
-  { key: 'lift', label: 'Lift' },
+  { key: 'lift', label: '× typical' },
   { key: 'engRate', label: 'Engagement' },
   { key: 'shares', label: 'Shares' },
   { key: 'comments', label: 'Comments' },

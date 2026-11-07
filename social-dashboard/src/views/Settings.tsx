@@ -145,7 +145,7 @@ export function SettingsView({ store }: { store: Store }) {
       {!HOSTED && <section className="card">
         <div className="card-head">
           <h2>Claude API key (optional)</h2>
-          <p>Only needed for "Generate plan with Claude" on the Suggestions tab</p>
+          <p>Only needed for "Generate plan with Claude" on the To-do list tab</p>
         </div>
         <div className="row">
           <input type="password" placeholder="sk-ant-…" value={key} onChange={(e) => setKey(e.target.value)} style={{ minWidth: 280 }} aria-label="Anthropic API key" />

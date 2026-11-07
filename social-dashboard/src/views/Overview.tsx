@@ -41,7 +41,11 @@ export function Overview({ a, recs, onSeeAll }: { a: Analysis; recs: Recommendat
         <StatTile label="Posts" value={full(t.posts)} delta={delta(t.posts, p?.posts)} />
         <StatTile label="Engagement rate" value={pct(t.engRate)} delta={p ? t.engRate / p.engRate - 1 : undefined} hint="likes + comments + shares + saves ÷ views" />
         <StatTile label="Shares" value={compact(t.shares)} delta={delta(t.shares, p?.shares)} />
-        <StatTile label="Followers gained" value={compact(t.followersGained)} delta={delta(t.followersGained, p?.followersGained)} hint="where the export includes it" />
+        {t.followersGained > 0 ? (
+          <StatTile label="Followers gained" value={compact(t.followersGained)} delta={delta(t.followersGained, p?.followersGained)} hint="from posts whose data includes it" />
+        ) : (
+          <StatTile label="Followers gained" value="–" hint="Not in the synced data. Follower totals are in the Monday email." />
+        )}
       </div>
 
       <div className="grid split">
@@ -70,7 +74,7 @@ export function Overview({ a, recs, onSeeAll }: { a: Analysis; recs: Recommendat
       <section className="card" style={{ marginTop: 16 }}>
         <div className="card-head">
           <h2>Accounts</h2>
-          <p>Median views = what a typical post on that account gets; the baseline for "lift"</p>
+          <p>"Median / post" is what a typical post on that account gets. Every "× typical" number is measured against it.</p>
         </div>
         <div className="table-wrap">
           <table>
@@ -115,7 +119,7 @@ export function Overview({ a, recs, onSeeAll }: { a: Analysis; recs: Recommendat
       <section className="card" style={{ marginTop: 16 }}>
         <div className="card-head">
           <h2>Most-viewed posts</h2>
-          <p>Lift = views ÷ that account's typical post</p>
+          <p>"× typical" = views compared with a typical post on the same account</p>
         </div>
         <div className="table-wrap">
           <table>
@@ -125,7 +129,7 @@ export function Overview({ a, recs, onSeeAll }: { a: Analysis; recs: Recommendat
                 <th>Account</th>
                 <th>Date</th>
                 <th className="num">Views</th>
-                <th className="num">Lift</th>
+                <th className="num">× typical</th>
                 <th className="num">Engagement</th>
                 <th className="num">Shares</th>
               </tr>

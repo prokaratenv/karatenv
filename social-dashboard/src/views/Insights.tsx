@@ -198,7 +198,7 @@ export function Insights({ a }: { a: Analysis }) {
             </div>
           ) : (
             <Empty>
-              Mark imports as "Posted by Opus Clip" on the Import tab (or import an Opus Clip export) to compare Opus posts with everything else.
+              Mark imports as "Posted by Opus Clip" on the Add data tab (or import an Opus Clip export) to compare Opus posts with everything else.
             </Empty>
           )}
         </section>
