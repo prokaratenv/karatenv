@@ -32,7 +32,7 @@ interface MetaConfig {
   accounts: Record<string, string>;
 }
 
-const DEFAULT_CONFIG: MetaConfig = { apiVersion: 'v25.0', insightsDays: 120, maxPostsPerAccount: 600, accounts: {} };
+const DEFAULT_CONFIG: MetaConfig = { apiVersion: 'v25.0', insightsDays: 365, maxPostsPerAccount: 800, accounts: {} };
 
 export interface FollowerSnapshot {
   date: string;
@@ -252,6 +252,18 @@ export async function syncMeta() {
   const posts: Post[] = [];
   const snaps: FollowerSnapshot[] = [];
   const log: string[] = [];
+  const existing: Post[] = existsSync(META_POSTS_PATH) ? JSON.parse(readFileSync(META_POSTS_PATH, 'utf8')) : [];
+  const known = new Map(existing.map((p) => [p.id, p]));
+  /**
+   * Views only come from insights. A post outside the insights window keeps the views stored on an
+   * earlier run; if we never had them, the post is skipped rather than stored as 0 views, which
+   * would drag the account's "typical post" baseline toward zero.
+   */
+  const keep = (p: Post, hadInsights: boolean): Post | undefined => {
+    if (hadInsights) return p;
+    const prev = known.get(p.id);
+    return prev ? { ...p, views: prev.views, reach: prev.reach, saves: prev.saves, avgViewDurationSec: prev.avgViewDurationSec } : undefined;
+  };
 
   for (const pg of pages) {
     // Facebook Page
@@ -268,14 +280,17 @@ export async function syncMeta() {
         cfg.maxPostsPerAccount,
         pg.access_token,
       );
+      let kept = 0;
       for (const p of raw) {
-        const ins =
-          Date.parse(p.created_time) > insightsSince
-            ? await insights(p.id, ['post_media_view', 'post_impressions_unique', 'post_video_views'], pg.access_token)
-            : {};
-        posts.push(fbToPost(p, fbId, ins, now));
+        const inWindow = Date.parse(p.created_time) > insightsSince;
+        const ins = inWindow ? await insights(p.id, ['post_media_view', 'post_impressions_unique', 'post_video_views'], pg.access_token) : {};
+        const post = keep(fbToPost(p, fbId, ins, now), inWindow && Object.keys(ins).length > 0);
+        if (post) {
+          posts.push(post);
+          kept++;
+        }
       }
-      log.push(`Facebook "${pg.name}" -> ${fbId}: ${raw.length} posts`);
+      log.push(`Facebook "${pg.name}" -> ${fbId}: ${kept} posts with views (of ${raw.length} read)`);
     } catch (e) {
       log.push(`Facebook "${pg.name}": skipped (${e instanceof Error ? e.message : e})`);
     }
@@ -292,13 +307,19 @@ export async function syncMeta() {
         { fields: 'id,caption,media_type,media_product_type,permalink,timestamp,like_count,comments_count', limit: '50' },
         cfg.maxPostsPerAccount,
       );
+      let kept = 0;
       for (const m of media) {
         const isVideo = m.media_product_type === 'REELS' || m.media_type === 'VIDEO';
         const metrics = ['views', 'reach', 'saved', 'shares', 'follows', ...(isVideo ? ['ig_reels_avg_watch_time'] : [])];
-        const ins = Date.parse(m.timestamp) > insightsSince && m.media_product_type !== 'STORY' ? await insights(m.id, metrics) : {};
-        posts.push(igToPost(m, igId, ins, now));
+        const inWindow = Date.parse(m.timestamp) > insightsSince && m.media_product_type !== 'STORY';
+        const ins = inWindow ? await insights(m.id, metrics) : {};
+        const post = keep(igToPost(m, igId, ins, now), inWindow && (ins.views !== undefined || ins.reach !== undefined));
+        if (post) {
+          posts.push(post);
+          kept++;
+        }
       }
-      log.push(`Instagram @${igName} -> ${igId}: ${media.length} posts`);
+      log.push(`Instagram @${igName} -> ${igId}: ${kept} posts with views (of ${media.length} read)`);
     } catch (e) {
       log.push(`Instagram @${igName}: skipped (${e instanceof Error ? e.message : e})`);
     }
@@ -306,8 +327,8 @@ export async function syncMeta() {
 
   writeFileSync(CONFIG_PATH, JSON.stringify(cfg, null, 2) + '\n');
   mkdirSync(DATA_DIR, { recursive: true });
-  const existing: Post[] = existsSync(META_POSTS_PATH) ? JSON.parse(readFileSync(META_POSTS_PATH, 'utf8')) : [];
-  const merged = mergePosts(existing, posts);
+  // Drop stored posts that never had view data (written by older versions of this script).
+  const merged = mergePosts(existing.filter((p) => p.views > 0 || posts.some((q) => q.id === p.id)), posts);
   merged.posts.sort((a, b) => b.publishedAt.localeCompare(a.publishedAt));
   writeFileSync(META_POSTS_PATH, JSON.stringify(merged.posts, null, 1) + '\n');
 
