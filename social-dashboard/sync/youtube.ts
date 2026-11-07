@@ -65,7 +65,8 @@ export function videoToPost(v: YtVideo, accountId: string, now: string): Post {
     comments: Number(v.statistics.commentCount ?? 0),
     shares: 0,
     saves: 0,
-    hashtags: [...new Set([...extractHashtags(`${title} ${caption}`), ...(v.snippet.tags ?? []).filter((t) => !t.includes(' ')).map((t) => `#${t.toLowerCase()}`)])],
+    // Only hashtags viewers actually see. YouTube's hidden tags would make "uses hashtags" mean "is a Short".
+    hashtags: extractHashtags(`${title} ${caption}`),
     importedAt: now,
     source: SOURCE,
   };

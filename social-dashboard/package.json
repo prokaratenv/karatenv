@@ -10,7 +10,7 @@
     "build:artifact": "tsc --noEmit && vite build --mode artifact && node scripts/strip-shell.mjs dist-artifact/index.html",
     "preview": "vite preview",
     "test": "vitest run",
-    "sync:youtube": "tsx sync/youtube.ts",
+    "sync:youtube": "NODE_USE_ENV_PROXY=1 NODE_NO_WARNINGS=1 tsx sync/youtube.ts",
     "report:weekly": "tsx sync/weekly-report.ts",
     "typecheck": "tsc --noEmit"
   },

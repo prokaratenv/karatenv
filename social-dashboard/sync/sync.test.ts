@@ -15,8 +15,7 @@ describe('videoToPost', () => {
   it('maps a short with stats and tags', () => {
     const p = videoToPost(v, 'yt-engage', '2026-11-07T00:00:00Z');
     expect(p).toMatchObject({ id: 'yt-engage:abc123', platform: 'youtube', views: 8100, likes: 300, comments: 12, durationSec: 42, format: 'short', url: 'https://www.youtube.com/shorts/abc123' });
-    expect(p.hashtags).toEqual(expect.arrayContaining(['#selfdefense', '#karate']));
-    expect(p.hashtags).not.toContain('#self defense');
+    expect(p.hashtags).toEqual(['#selfdefense']); // hidden YouTube tags are not hashtags
   });
   it('treats long videos as watch links', () => {
     const p = videoToPost({ ...v, contentDetails: { duration: 'PT12M3S' } }, 'yt-engage', '');

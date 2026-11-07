@@ -18,6 +18,7 @@ export const DEFAULT_TOPICS: Topic[] = [
   { id: 'stories', label: 'Student stories & results', keywords: ['student', 'students', 'transformation', 'journey', 'story', 'testimonial', 'proud', 'before and after', 'results', 'first class'] },
   { id: 'bts', label: 'Behind the scenes & community', keywords: ['studio', 'dojo', 'behind the scenes', 'bts', 'class', 'instructor', 'sensei', 'coach', 'team', 'community', 'event', 'day in the life'] },
   { id: 'business', label: 'Business & leadership', keywords: ['business', 'entrepreneur', 'entrepreneurship', 'leadership', 'leader', 'owner', 'marketing', 'money', 'sales', 'ceo', 'hiring', 'school owner'] },
+  { id: 'promo', label: 'Promos & announcements', keywords: ['sale', 'promo', 'special', 'offer', 'discount', 'register', 'registration', 'sign up', 'enroll', 'open house', 'spots', 'limited', 'deadline', 'graduation weekend', 'cookies', 'winter sale', 'summer camp', 'birthday party', 'private lessons', 'free class', 'free trial', 'team intro'] },
   { id: 'humor', label: 'Humor & trends', keywords: ['funny', 'lol', 'trend', 'challenge', 'prank', 'fail', 'wait for it', 'pov', 'when your', 'meme'] },
 ];
 

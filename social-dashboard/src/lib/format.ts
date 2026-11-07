@@ -15,7 +15,7 @@ export const full = (n: number | undefined) =>
 export const pct = (x: number | undefined, digits = 1) =>
   x === undefined || !Number.isFinite(x) ? '–' : `${(x * 100).toFixed(digits)}%`;
 
-export const lift = (x: number) => `${x >= 10 ? x.toFixed(0) : x.toFixed(1)}×`;
+export const lift = (x: number) => (x > 0 && x < 0.1 ? '<0.1×' : `${x >= 10 ? x.toFixed(0) : x.toFixed(1)}×`);
 
 export function duration(sec: number | undefined): string {
   if (sec === undefined) return '–';

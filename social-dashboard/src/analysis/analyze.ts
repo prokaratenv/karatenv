@@ -192,7 +192,6 @@ const HOOKS: { key: string; label: string; test: (p: Post) => boolean }[] = [
   { key: 'short', label: 'Short title (≤ 6 words)', test: (p) => p.title.split(/\s+/).filter(Boolean).length <= 6 },
   { key: 'caps', label: 'Has an ALL-CAPS word', test: (p) => /\b[A-Z]{3,}\b/.test(p.title) },
   { key: 'emoji', label: 'Uses emoji', test: (p) => /\p{Extended_Pictographic}/u.test(p.title) },
-  { key: 'hashtags', label: '4+ hashtags', test: (p) => p.hashtags.length >= 4 },
 ];
 
 function weekKey(t: number): string {
@@ -326,9 +325,11 @@ export function analyze(allPosts: Post[], accounts: Account[], filters: Filters,
   }
 
   // Title / hook features.
+  // Compare title patterns within regular content; promos and announcements are a different job.
+  const hookPool = mature.filter((p) => !p.topics.includes('promo'));
   const hooks: FeatureStat[] = HOOKS.map((h) => {
-    const w = mature.filter(h.test);
-    const wo = mature.filter((p) => !h.test(p));
+    const w = hookPool.filter(h.test);
+    const wo = hookPool.filter((p) => !h.test(p));
     const withLift = median(w.map((p) => p.lift));
     const withoutLift = median(wo.map((p) => p.lift));
     return { key: h.key, label: h.label, withN: w.length, withoutN: wo.length, withLift, withoutLift, ratio: withoutLift ? withLift / withoutLift : 0 };

@@ -65,6 +65,19 @@ export function recommend(a: Analysis): Recommendation[] {
   }
   const weak = topics.filter((t) => t.medianLift <= 0.7 && t.n >= MIN_N + 2).slice(-2);
   for (const t of weak) {
+    if (t.key === 'promo' || t.key === 'belts') {
+      // These serve current families, not discovery. Say so instead of "cut back".
+      recs.push({
+        id: `topic-down-${t.key}`,
+        category: 'content',
+        score: Math.round(scoreOf(t.medianLift, t.clips) * 0.5),
+        title: `"${t.label}" posts don't grow your audience`,
+        why: `They run at ${lift(t.medianLift)} of a typical post. That's expected: they're made for current families, and the algorithm doesn't push them to new people.`,
+        action: `Keep them for members (Stories, Facebook group, email), and don't count them toward your growth posts. If you post one publicly, open with a hook from your best-performing topic.`,
+        evidence: `${t.n} posts`,
+      });
+      continue;
+    }
     recs.push({
       id: `topic-down-${t.key}`,
       category: 'content',
@@ -91,7 +104,8 @@ export function recommend(a: Analysis): Recommendation[] {
   }
 
   // Hooks.
-  const hook = a.hooks.find((h) => h.ratio >= 1.25);
+  // Both sides must be real audiences: a pattern vs a pile of near-zero uploads is not a hook insight.
+  const hook = a.hooks.find((h) => h.ratio >= 1.25 && h.withoutLift >= 0.25);
   if (hook) {
     recs.push({
       id: `hook-${hook.key}`,
@@ -103,7 +117,7 @@ export function recommend(a: Analysis): Recommendation[] {
       evidence: `${hook.withN} with · ${hook.withoutN} without`,
     });
   }
-  const badHook = a.hooks.find((h) => h.ratio <= 0.75 && h.withN >= MIN_N * 2);
+  const badHook = a.hooks.find((h) => h.ratio <= 0.75 && h.withN >= MIN_N * 2 && h.withLift >= 0.25);
   if (badHook) {
     recs.push({
       id: `hook-bad-${badHook.key}`,
