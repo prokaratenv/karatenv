@@ -65,3 +65,13 @@ export interface Filters {
   platforms: Platform[];
   accountIds: string[];
 }
+
+/** Latest follower count for an account (from synced snapshots), with the change over ~a week. */
+export interface FollowerInfo {
+  accountId: string;
+  platform: Platform;
+  name: string;
+  followers: number;
+  change?: number;
+  date: string;
+}

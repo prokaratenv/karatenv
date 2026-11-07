@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { get, set } from 'idb-keyval';
-import type { Account, Post, Settings } from './types';
+import type { Account, FollowerInfo, Post, Settings } from './types';
 import { DEFAULT_ACCOUNTS } from './platforms';
 import { DEFAULT_TOPICS } from './analysis/topics';
 import { mergePosts } from './import/parse';
@@ -26,6 +26,7 @@ export function useStore() {
   const [state, setState] = useState<Stored>(initial);
   const [loaded, setLoaded] = useState(false);
   const [persistError, setPersistError] = useState<string>();
+  const [followers, setFollowers] = useState<FollowerInfo[]>([]);
   const first = useRef(true);
   const ref = useRef(state);
   ref.current = state;
@@ -71,6 +72,26 @@ export function useStore() {
       const synced = lists.flatMap((l) => (Array.isArray(l) ? (l as Post[]) : []));
       if (synced.length) addPosts(synced);
     });
+    // Follower history: Meta accounts and the YouTube channel.
+    Promise.all(
+      ['data/meta-accounts.json', 'data/youtube-channel.json'].map((f) =>
+        fetch(f, { cache: 'no-store' })
+          .then((r) => (r.ok ? r.json() : []))
+          .catch(() => []),
+      ),
+    ).then(([meta, yt]) => {
+      const snaps: Omit<FollowerInfo, 'change'>[] = [
+        ...(Array.isArray(meta) ? meta : []),
+        ...(Array.isArray(yt) ? yt : []).map((y: { date: string; subscribers: number }) => ({
+          date: y.date,
+          accountId: 'yt-engage',
+          platform: 'youtube' as const,
+          name: 'YouTube channel',
+          followers: y.subscribers,
+        })),
+      ];
+      setFollowers(latestFollowers(snaps));
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loaded]);
 
@@ -100,7 +121,19 @@ export function useStore() {
   const setSettings = useCallback((settings: Settings) => setState((s) => ({ ...s, settings })), []);
   const replaceAll = useCallback((next: Stored) => setState({ ...initial(), ...next }), []);
 
-  return { ...state, loaded, persistError, addPosts, removeSource, loadDemo, setAccounts, setSettings, replaceAll };
+  return { ...state, followers, loaded, persistError, addPosts, removeSource, loadDemo, setAccounts, setSettings, replaceAll };
 }
 
 export type Store = ReturnType<typeof useStore>;
+
+export function latestFollowers(snaps: Omit<FollowerInfo, 'change'>[]): FollowerInfo[] {
+  const byAcc = new Map<string, Omit<FollowerInfo, 'change'>[]>();
+  for (const s of snaps) byAcc.set(s.accountId, [...(byAcc.get(s.accountId) ?? []), s]);
+  return [...byAcc.values()].map((list) => {
+    const sorted = [...list].sort((a, b) => a.date.localeCompare(b.date));
+    const latest = sorted[sorted.length - 1];
+    const weekAgo = Date.parse(latest.date) - 5 * 86_400_000;
+    const past = sorted.filter((h) => Date.parse(h.date) <= weekAgo).pop();
+    return { ...latest, change: past ? latest.followers - past.followers : undefined };
+  });
+}

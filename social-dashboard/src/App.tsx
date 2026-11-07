@@ -6,7 +6,7 @@ import { recommend } from './analysis/recommendations';
 import { PLATFORMS, PLATFORM_LABEL, accountLabel, platformColor } from './platforms';
 import { TooltipProvider } from './components/Tooltip';
 import { Overview } from './views/Overview';
-import { BigPictureView } from './views/BigPicture';
+import { Home } from './views/Home';
 import { Suggestions } from './views/Suggestions';
 import { Insights } from './views/Insights';
 import { Content } from './views/Content';
@@ -14,11 +14,11 @@ import { Clips } from './views/Clips';
 import { ImportView } from './views/Import';
 import { SettingsView } from './views/Settings';
 
-const TABS = ['Big Picture', 'Overview', 'Suggestions', 'Insights', 'Content', 'Clips', 'Import', 'Settings'] as const;
+const TABS = ['Home', 'Overview', 'Suggestions', 'Insights', 'Content', 'Clips', 'Import', 'Settings'] as const;
 
 /** Plain names shown on the tabs, and one line on what each one is for. */
 const TAB_LABEL: Record<(typeof TABS)[number], string> = {
-  'Big Picture': 'Big Picture',
+  Home: 'Home',
   Overview: 'Overview',
   Suggestions: 'To-do list',
   Insights: 'Patterns',
@@ -28,7 +28,7 @@ const TAB_LABEL: Record<(typeof TABS)[number], string> = {
   Settings: 'Settings',
 };
 const TAB_INTRO: Record<(typeof TABS)[number], string> = {
-  'Big Picture': "Start here: what's working across all your accounts, and what to do about it.",
+  Home: 'Your key numbers at the top; what they mean and what to do about them below.',
   Overview: "This period's totals, each account's numbers and your most-viewed posts.",
   Suggestions: 'Specific changes ranked by how much they should help, each with the evidence behind it.',
   Insights: 'The detail behind the big picture: topics, words, video length, title style and posting times.',
@@ -41,7 +41,7 @@ type Tab = (typeof TABS)[number];
 
 const HASH: Record<Tab, string> = {
   Overview: 'overview',
-  'Big Picture': 'big-picture',
+  Home: 'home',
   Suggestions: 'suggestions',
   Insights: 'insights',
   Content: 'content',
@@ -49,7 +49,8 @@ const HASH: Record<Tab, string> = {
   Import: 'import',
   Settings: 'setup',
 };
-const tabFromHash = (): Tab => (Object.keys(HASH) as Tab[]).find((t) => `#${HASH[t]}` === location.hash) ?? 'Big Picture';
+// Old #big-picture links land on Home, which now contains the big picture.
+const tabFromHash = (): Tab => (Object.keys(HASH) as Tab[]).find((t) => `#${HASH[t]}` === location.hash) ?? 'Home';
 
 const RANGES: { days: number; label: string }[] = [
   { days: 7, label: '7d' },
@@ -122,9 +123,6 @@ export default function App() {
 
         {showFilters && (
           <div className="filters">
-            {tab === 'Big Picture' ? (
-              <span className="chip" aria-pressed="true">Last 12 months</span>
-            ) : (
             <div className="seg" role="group" aria-label="Date range">
               {RANGES.map((r) => (
                 <button key={r.days} aria-pressed={filters.rangeDays === r.days} onClick={() => setFilters((f) => ({ ...f, rangeDays: r.days }))}>
@@ -132,7 +130,6 @@ export default function App() {
                 </button>
               ))}
             </div>
-            )}
             {presentPlatforms.map((p) => (
               <button key={p} className="chip" aria-pressed={filters.platforms.includes(p)} onClick={() => togglePlatform(p)}>
                 <span className="dot" style={{ background: platformColor(p) }} />
@@ -160,8 +157,18 @@ export default function App() {
           <div className="empty muted">Loading…</div>
         ) : (
           <main>
-            {tab === 'Overview' && <Overview a={analysis} recs={recs} onSeeAll={() => go('Suggestions')} />}
-            {tab === 'Big Picture' && <BigPictureView a={yearAnalysis} topics={store.settings.topics} />}
+            {tab === 'Overview' && <Overview a={analysis} recs={recs} followers={store.followers} onSeeAll={() => go('Suggestions')} />}
+            {tab === 'Home' && (
+              <Home
+                a={analysis}
+                year={yearAnalysis}
+                recs={recs}
+                followers={store.followers}
+                topics={store.settings.topics}
+                rangeDays={filters.rangeDays}
+                onSeeAll={() => go('Suggestions')}
+              />
+            )}
             {tab === 'Suggestions' && <Suggestions a={analysis} recs={recs} apiKey={store.settings.anthropicApiKey} />}
             {tab === 'Insights' && <Insights a={analysis} />}
             {tab === 'Content' && <Content a={analysis} topics={store.settings.topics} />}

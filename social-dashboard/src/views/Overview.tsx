@@ -1,5 +1,7 @@
 import type { Analysis, Totals } from '../analysis/analyze';
 import type { Recommendation } from '../analysis/recommendations';
+import type { FollowerInfo, Platform } from '../types';
+import { median } from '../lib/stats';
 import { LineChart, StatTile, Empty, InlineBar } from '../components/charts';
 import { PLATFORM_LABEL, platformColor } from '../platforms';
 import { compact, full, pct, shortDate } from '../lib/format';
@@ -9,7 +11,15 @@ import { LiftPill } from '../components/LiftPill';
 
 const delta = (cur: number, prev?: number) => (prev ? cur / prev - 1 : undefined);
 
-export function Overview({ a, recs, onSeeAll }: { a: Analysis; recs: Recommendation[]; onSeeAll: () => void }) {
+interface GlanceProps {
+  a: Analysis;
+  recs: Recommendation[];
+  onSeeAll: () => void;
+  followers: FollowerInfo[];
+}
+
+/** The numbers-first view: totals, one scoreboard card per platform, the weekly trend and the top to-dos. */
+export function AtAGlance({ a, recs, onSeeAll, followers }: GlanceProps) {
   if (!a.posts.length) return <Empty>No posts in this range. Try a wider date range or import data.</Empty>;
   const t = a.totals;
   const p: Totals | undefined = a.prevTotals;
@@ -22,8 +32,10 @@ export function Overview({ a, recs, onSeeAll }: { a: Analysis; recs: Recommendat
     color: platformColor(pl),
     values: weeks.map((w) => w.views[pl]),
   }));
-  const maxAcc = Math.max(...a.byAccount.map((x) => x.views));
-  const top = [...a.posts].sort((x, y) => y.views - x.views).slice(0, 8);
+  const shownAccounts = new Set(a.posts.map((x) => x.accountId));
+  const fol = followers.filter((f) => shownAccounts.has(f.accountId));
+  const folTotal = fol.reduce((s, f) => s + f.followers, 0);
+  const folChange = fol.every((f) => f.change !== undefined) && fol.length ? fol.reduce((s, f) => s + (f.change ?? 0), 0) : undefined;
 
   return (
     <>
@@ -41,12 +53,20 @@ export function Overview({ a, recs, onSeeAll }: { a: Analysis; recs: Recommendat
         <StatTile label="Posts" value={full(t.posts)} delta={delta(t.posts, p?.posts)} />
         <StatTile label="Engagement rate" value={pct(t.engRate)} delta={p ? t.engRate / p.engRate - 1 : undefined} hint="likes + comments + shares + saves ÷ views" />
         <StatTile label="Shares" value={compact(t.shares)} delta={delta(t.shares, p?.shares)} />
-        {t.followersGained > 0 ? (
-          <StatTile label="Followers gained" value={compact(t.followersGained)} delta={delta(t.followersGained, p?.followersGained)} hint="from posts whose data includes it" />
+        {folTotal > 0 ? (
+          <div className="tile">
+            <div className="tile-label">Followers (synced accounts)</div>
+            <div className="tile-value">{compact(folTotal)}</div>
+            <div className={`tile-delta ${folChange === undefined ? 'muted' : folChange >= 0 ? 'up' : 'down'}`}>
+              {folChange === undefined ? 'Weekly change starts after next sync' : `${folChange >= 0 ? '▲ +' : '▼ '}${folChange} this week`}
+            </div>
+          </div>
         ) : (
-          <StatTile label="Followers gained" value="–" hint="Not in the synced data. Follower totals are in the Monday email." />
+          <StatTile label="Followers" value="–" hint="Shown once accounts are synced." />
         )}
       </div>
+
+      <Scoreboard a={a} followers={fol} />
 
       <div className="grid split">
         <section className="card">
@@ -70,6 +90,74 @@ export function Overview({ a, recs, onSeeAll }: { a: Analysis; recs: Recommendat
           </div>
         </section>
       </div>
+    </>
+  );
+}
+
+function Scoreboard({ a, followers }: { a: Analysis; followers: FollowerInfo[] }) {
+  const cards = a.byPlatform.map((pl) => {
+    const ps = a.posts.filter((x) => x.platform === pl.platform);
+    const best = [...ps].sort((x, y) => y.views - x.views)[0];
+    const fol = followers.filter((f) => f.platform === pl.platform);
+    return { ...pl, typical: median(ps.map((x) => x.views)), best, fol };
+  });
+  return (
+    <div className="scoreboard">
+      {cards.map((c) => (
+        <section key={c.platform} className="score card" style={{ borderTopColor: platformColor(c.platform as Platform) }}>
+          <h2 className="score-title">
+            <span className="dot" style={{ background: platformColor(c.platform as Platform) }} /> {PLATFORM_LABEL[c.platform as Platform]}
+          </h2>
+          <dl className="score-grid">
+            {c.fol.map((f) => (
+              <div key={f.accountId} className="score-item wide">
+                <dt>{c.fol.length > 1 ? f.name : c.platform === 'youtube' ? 'Subscribers' : 'Followers'}</dt>
+                <dd>
+                  {compact(f.followers)}
+                  {f.change !== undefined && <span className={`score-change ${f.change >= 0 ? 'up' : 'down'}`}>{f.change >= 0 ? `▲ +${f.change}` : `▼ ${f.change}`}</span>}
+                </dd>
+              </div>
+            ))}
+            <div className="score-item">
+              <dt>Views</dt>
+              <dd>{compact(c.views)}</dd>
+            </div>
+            <div className="score-item">
+              <dt>Posts</dt>
+              <dd>{c.posts}</dd>
+            </div>
+            <div className="score-item">
+              <dt>Typical post</dt>
+              <dd>{compact(c.typical)}</dd>
+            </div>
+            <div className="score-item">
+              <dt>Engagement</dt>
+              <dd>{pct(c.engRate)}</dd>
+            </div>
+          </dl>
+          {c.best && (
+            <div className="score-best">
+              <div className="eyebrow">Most viewed</div>
+              <PostLink p={c.best} />
+              <div className="muted" style={{ fontSize: 13 }}>
+                <span className="big-num">{compact(c.best.views)}</span> views · {shortDate(c.best.publishedAt)}
+              </div>
+            </div>
+          )}
+        </section>
+      ))}
+    </div>
+  );
+}
+
+export function Overview(props: GlanceProps) {
+  const { a } = props;
+  if (!a.posts.length) return <Empty>No posts in this range. Try a wider date range or import data.</Empty>;
+  const maxAcc = Math.max(...a.byAccount.map((x) => x.views));
+  const top = [...a.posts].sort((x, y) => y.views - x.views).slice(0, 8);
+  return (
+    <>
+      <AtAGlance {...props} />
 
       <section className="card" style={{ marginTop: 16 }}>
         <div className="card-head">
