@@ -1,0 +1,43 @@
+{
+ "tt-cdyoung": {
+  "capturedOn": "2026-11-08",
+  "period": "2026-09-09/2026-11-07",
+  "postViews": 54200,
+  "profileViews": 237,
+  "likes": 2000,
+  "comments": 67,
+  "shares": 32,
+  "viewers": 40300,
+  "newViewers": 36000,
+  "followers": 498,
+  "netFollowers": 52,
+  "followerGender": {
+   "male": 0.73,
+   "female": 0.27
+  },
+  "traffic": {
+   "forYou": 0.953,
+   "search": 0.024,
+   "profile": 0.022,
+   "following": 0.001
+  },
+  "searchQueries": [
+   "kids say no to stranger",
+   "how to have master defense",
+   "our legacy black belt",
+   "hip toss throw tutorial",
+   "lessons on respect for students",
+   "judo slap mat",
+   "group fitness challenge ideas",
+   "what to do before opening a karate dojo",
+   "how to join a karate dojo"
+  ],
+  "last7": {
+   "postViews": 4300,
+   "profileViews": 25,
+   "likes": 235,
+   "comments": 6,
+   "shares": 1
+  }
+ }
+}

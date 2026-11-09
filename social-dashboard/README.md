@@ -101,3 +101,10 @@ instagram_manage_insights, business_management`). The token is saved as a networ
 * `sync/meta-config.json` maps each Page / Instagram id to a dashboard account; it's filled on
   the first run (`npx tsx sync/meta.ts --accounts` previews the mapping).
 * Personal Facebook profiles have no API access; keep importing those as CSV.
+
+### TikTok (from screenshots)
+
+TikTok has no simple read-only key, so its numbers come from TikTok Studio screenshots that CD sends to
+Claude. They're saved in `public/data/tiktok.json` (posts), `tiktok-accounts.json` (followers) and
+`tiktok-overview.json` (60-day account totals, traffic sources, search queries). The dashboard and the
+weekly report load them like the synced files.

@@ -61,7 +61,7 @@ export function useStore() {
   // Pull in data synced on a schedule (public/data/*.json), if this build has it.
   useEffect(() => {
     if (!loaded) return;
-    const files = ['data/youtube.json', 'data/meta.json'];
+    const files = ['data/youtube.json', 'data/meta.json', 'data/tiktok.json'];
     Promise.all(
       files.map((f) =>
         fetch(f, { cache: 'no-store' })
@@ -74,14 +74,15 @@ export function useStore() {
     });
     // Follower history: Meta accounts and the YouTube channel.
     Promise.all(
-      ['data/meta-accounts.json', 'data/youtube-channel.json'].map((f) =>
+      ['data/meta-accounts.json', 'data/youtube-channel.json', 'data/tiktok-accounts.json'].map((f) =>
         fetch(f, { cache: 'no-store' })
           .then((r) => (r.ok ? r.json() : []))
           .catch(() => []),
       ),
-    ).then(([meta, yt]) => {
+    ).then(([meta, yt, tt]) => {
       const snaps: Omit<FollowerInfo, 'change'>[] = [
         ...(Array.isArray(meta) ? meta : []),
+        ...(Array.isArray(tt) ? tt : []),
         ...(Array.isArray(yt) ? yt : []).map((y: { date: string; subscribers: number }) => ({
           date: y.date,
           accountId: 'yt-engage',
