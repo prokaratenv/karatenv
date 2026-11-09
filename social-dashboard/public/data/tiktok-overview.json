@@ -39,5 +39,21 @@
    "comments": 6,
    "shares": 1
   }
+ },
+ "tt-engage": {
+  "capturedOn": "2026-11-08",
+  "period": "2026-09-09/2026-11-07",
+  "viewers": 1400,
+  "newViewers": 1300,
+  "viewersChange": 1.343,
+  "followers": 420,
+  "netFollowers": 0,
+  "followerGender": {
+   "male": 0.66,
+   "female": 0.34
+  },
+  "notes": [
+   "Oct 1 video flagged: not eligible for recommendation in the For You feed (appeal available)"
+  ]
  }
 }
