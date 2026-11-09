@@ -30,6 +30,18 @@ export function jaccard(a: Set<string>, b: Set<string>): number {
 }
 
 export function buildClusters<P extends Post>(posts: P[], threshold = 0.6): Cluster<P>[] {
+  // Exact matches from Opus Clip's records come first; title matching handles everything else.
+  const exact: Cluster<P>[] = [];
+  const byClip = new Map<string, P[]>();
+  for (const p of posts) if (p.opusClipId) byClip.set(p.opusClipId, [...(byClip.get(p.opusClipId) ?? []), p]);
+  for (const [key, ps] of byClip) {
+    const first = [...ps].sort((a, b) => Date.parse(a.publishedAt) - Date.parse(b.publishedAt))[0];
+    exact.push({ key: `opus:${key}`, title: first.title, posts: ps, firstPublished: first.publishedAt, totalViews: ps.reduce((n, p) => n + p.views, 0) });
+  }
+  return [...exact, ...buildTitleClusters(posts.filter((p) => !p.opusClipId), threshold)].sort((a, b) => b.totalViews - a.totalViews);
+}
+
+function buildTitleClusters<P extends Post>(posts: P[], threshold: number): Cluster<P>[] {
   const sorted = [...posts].sort((a, b) => Date.parse(a.publishedAt) - Date.parse(b.publishedAt));
   const clusters: { c: Cluster<P>; tokens: Set<string>; t: number; accounts: Set<string> }[] = [];
   let lo = 0;

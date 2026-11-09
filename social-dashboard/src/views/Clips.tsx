@@ -5,13 +5,44 @@ import { compact, lift, pct, shortDate } from '../lib/format';
 import { BarList, Empty } from '../components/charts';
 import { TipRow } from '../components/Tooltip';
 
-export function Clips({ a }: { a: Analysis }) {
+export function Clips({ a, backlog = [] }: { a: Analysis; backlog?: { clipId: string; score: number; title: string; durationSec?: number }[] }) {
   const [limit, setLimit] = useState(30);
   if (!a.clusters.length) {
     return <Empty>No clips found on more than one account yet. When Opus Clip posts the same clip to several platforms, it shows up here.</Empty>;
   }
   return (
     <>
+      {backlog.length > 0 && (
+        <section className="card" style={{ marginBottom: 16 }}>
+          <div className="card-head">
+            <h2>Ready to post: Opus Clip's best unposted clips</h2>
+            <p>Clips Opus made and scored highly that never went out. Open them in Opus Clip to schedule.</p>
+          </div>
+          <div className="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Clip</th>
+                  <th className="num">Opus score</th>
+                  <th className="num">Length</th>
+                </tr>
+              </thead>
+              <tbody>
+                {backlog.map((c) => (
+                  <tr key={c.clipId}>
+                    <td className="title-cell">{c.title}</td>
+                    <td className="num">{c.score}</td>
+                    <td className="num">{c.durationSec ? `${c.durationSec}s` : '–'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="muted" style={{ fontSize: 13, marginTop: 8 }}>
+            So far Opus's score has barely predicted your real results, so pick by topic and length first (see Home).
+          </p>
+        </section>
+      )}
       <section className="card" style={{ marginBottom: 16 }}>
         <div className="card-head">
           <h2>Which platform gets the most out of the same clip?</h2>

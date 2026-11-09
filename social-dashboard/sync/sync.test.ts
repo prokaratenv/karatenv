@@ -95,3 +95,29 @@ describe('followerChanges', () => {
     expect(r.find((x) => x.accountId === 'fb-engage')?.change).toBeUndefined();
   });
 });
+
+import { mergeOpus } from './opus-merge';
+
+describe('mergeOpus', () => {
+  it('adds a week of posts, keeps old clips, and builds the backlog', () => {
+    const existing = { updated: '2026-11-09', window: { start: '2026-10-10', end: '2026-11-09' }, clips: [{ clipId: 'old', projectId: 'P0', publishedAt: '2026-10-10T07:00:00Z', posts: { youtube: 'abc123def' } }] };
+    const raw = {
+      posts: [
+        { clip_id: 'new', project_id: 'P1', publish_at: '2026-11-10T08:00:00Z', status: 'posted', platform: 'YOUTUBE', post_url: 'https://www.youtube.com/watch?v=XYZxyz12345' },
+        { clip_id: 'new', project_id: 'P1', publish_at: '2026-11-10T08:00:01Z', status: 'posted', platform: 'INSTAGRAM_BUSINESS', post_url: 'https://www.instagram.com/reel/DfABC/' },
+        { clip_id: 'new', project_id: 'P1', publish_at: '2026-11-10T08:00:01Z', status: 'posted', platform: 'LINKEDIN', post_url: 'https://www.linkedin.com/feed/update/1' },
+        { clip_id: 'later', project_id: 'P1', publish_at: '2026-11-20T08:00:00Z', status: 'scheduled', platform: 'YOUTUBE' },
+      ],
+      clips: [
+        { clip_id: 'new', project_id: 'P1', score: 88, title: 'New clip', duration_sec: 22 },
+        { clip_id: 'unposted', project_id: 'P1', score: 93, title: 'Great unposted clip', duration_sec: 30 },
+        { clip_id: 'weak', project_id: 'P1', score: 60, title: 'Weak' },
+      ],
+    };
+    const m = mergeOpus(existing, raw, '2026-11-16');
+    expect(m.clips.map((c) => c.clipId)).toEqual(['old', 'new']);
+    expect(m.clips[1]).toMatchObject({ score: 88, title: 'New clip', posts: { youtube: 'XYZxyz12345', instagram: 'DfABC' }, linkedinPosts: 1 });
+    expect(m.backlog?.map((b) => b.clipId)).toEqual(['unposted']);
+    expect(m.window).toEqual({ start: '2026-10-10', end: '2026-11-16' });
+  });
+});

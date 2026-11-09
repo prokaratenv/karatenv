@@ -172,7 +172,7 @@ export default function App() {
             {tab === 'Suggestions' && <Suggestions a={analysis} recs={recs} apiKey={store.settings.anthropicApiKey} />}
             {tab === 'Insights' && <Insights a={analysis} />}
             {tab === 'Content' && <Content a={analysis} topics={store.settings.topics} />}
-            {tab === 'Clips' && <Clips a={analysis} />}
+            {tab === 'Clips' && <Clips a={analysis} backlog={store.opusBacklog} />}
             {tab === 'Import' && <ImportView store={store} />}
             {tab === 'Settings' && <SettingsView store={store} />}
           </main>

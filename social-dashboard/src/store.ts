@@ -5,6 +5,7 @@ import { DEFAULT_ACCOUNTS } from './platforms';
 import { DEFAULT_TOPICS } from './analysis/topics';
 import { mergePosts } from './import/parse';
 import { generateSample } from './data/sample';
+import { applyOpus, type OpusData } from './import/opus';
 
 const KEY = 'engage-social-dashboard-v1';
 
@@ -27,6 +28,7 @@ export function useStore() {
   const [loaded, setLoaded] = useState(false);
   const [persistError, setPersistError] = useState<string>();
   const [followers, setFollowers] = useState<FollowerInfo[]>([]);
+  const [opusBacklog, setOpusBacklog] = useState<NonNullable<OpusData['backlog']>>([]);
   const first = useRef(true);
   const ref = useRef(state);
   ref.current = state;
@@ -62,15 +64,15 @@ export function useStore() {
   useEffect(() => {
     if (!loaded) return;
     const files = ['data/youtube.json', 'data/meta.json', 'data/tiktok.json'];
-    Promise.all(
-      files.map((f) =>
-        fetch(f, { cache: 'no-store' })
-          .then((r) => (r.ok ? r.json() : []))
-          .catch(() => []),
-      ),
-    ).then((lists: unknown[]) => {
-      const synced = lists.flatMap((l) => (Array.isArray(l) ? (l as Post[]) : []));
-      if (synced.length) addPosts(synced);
+    const getJson = (f: string) =>
+      fetch(f, { cache: 'no-store' })
+        .then((r) => (r.ok ? r.json() : undefined))
+        .catch(() => undefined);
+    Promise.all([...files.map(getJson), getJson('data/opus.json')]).then((results: unknown[]) => {
+      const opus = results.pop() as OpusData | undefined;
+      const synced = results.flatMap((l) => (Array.isArray(l) ? (l as Post[]) : []));
+      if (opus?.backlog) setOpusBacklog(opus.backlog);
+      if (synced.length) addPosts(applyOpus(synced, opus));
     });
     // Follower history: Meta accounts and the YouTube channel.
     Promise.all(
@@ -122,7 +124,7 @@ export function useStore() {
   const setSettings = useCallback((settings: Settings) => setState((s) => ({ ...s, settings })), []);
   const replaceAll = useCallback((next: Stored) => setState({ ...initial(), ...next }), []);
 
-  return { ...state, followers, loaded, persistError, addPosts, removeSource, loadDemo, setAccounts, setSettings, replaceAll };
+  return { ...state, followers, opusBacklog, loaded, persistError, addPosts, removeSource, loadDemo, setAccounts, setSettings, replaceAll };
 }
 
 export type Store = ReturnType<typeof useStore>;

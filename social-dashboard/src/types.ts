@@ -41,6 +41,10 @@ export interface Post {
   viaOpus?: boolean;
   /** Opus Clip's predicted virality score (0-100), when known. */
   viralityScore?: number;
+  /** The Opus Clip clip this post came from: the same id on every platform it went to. */
+  opusClipId?: string;
+  /** True when Opus Clip's records cover this post's date, so "not via Opus" is known rather than assumed. */
+  opusChecked?: boolean;
   hashtags: string[];
   importedAt: string;
   source: string;

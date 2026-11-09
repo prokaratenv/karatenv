@@ -86,3 +86,30 @@ describe('mergePosts', () => {
     expect(posts[0].viaOpus).toBe(true);
   });
 });
+
+import { applyOpus, platformPostId } from './opus';
+import type { Post } from '../types';
+
+describe('Opus Clip matching', () => {
+  const base = { accountId: 'x', title: 't', caption: '', format: 'short' as const, views: 1, likes: 0, comments: 0, shares: 0, saves: 0, hashtags: [], importedAt: '', source: '' };
+  const yt: Post = { ...base, id: 'yt', platform: 'youtube', externalId: 'pFlae05HlLo', url: 'https://www.youtube.com/shorts/pFlae05HlLo', publishedAt: '2026-11-02T09:00:00Z' };
+  const ig: Post = { ...base, id: 'ig', platform: 'instagram', url: 'https://www.instagram.com/reel/DfO7cFuFEh5/', publishedAt: '2026-11-02T09:00:00Z' };
+  const fb: Post = { ...base, id: 'fb', platform: 'facebook', url: 'https://www.facebook.com/reel/1989217005772663/', publishedAt: '2026-11-02T09:00:00Z' };
+  const hand: Post = { ...base, id: 'hand', platform: 'facebook', url: 'https://www.facebook.com/123/posts/456', publishedAt: '2026-11-03T09:00:00Z' };
+  const old: Post = { ...hand, id: 'old', publishedAt: '2026-01-01T00:00:00Z' };
+  const opus = {
+    updated: '2026-11-09',
+    window: { start: '2026-10-10', end: '2026-11-09' },
+    clips: [{ clipId: 'TgB', projectId: 'P1', publishedAt: '2026-11-02T08:56:00Z', score: 74, posts: { youtube: 'pFlae05HlLo', instagram: 'DfO7cFuFEh5', facebook: '1989217005772663' } }],
+  };
+  it('reads platform post ids', () => {
+    expect([platformPostId(yt), platformPostId(ig), platformPostId(fb)]).toEqual(['pFlae05HlLo', 'DfO7cFuFEh5', '1989217005772663']);
+  });
+  it('tags Opus posts and marks known hand-made posts inside the window only', () => {
+    const [a, b, c, d, e] = applyOpus([yt, ig, fb, hand, old], opus);
+    for (const p of [a, b, c]) expect(p).toMatchObject({ viaOpus: true, opusClipId: 'TgB', viralityScore: 74, opusChecked: true });
+    expect(d).toMatchObject({ opusChecked: true });
+    expect(d.viaOpus).toBeUndefined();
+    expect(e.opusChecked).toBeUndefined();
+  });
+});

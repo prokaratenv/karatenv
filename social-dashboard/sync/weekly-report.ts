@@ -16,6 +16,7 @@ import { compact, lift, pct } from '../src/lib/format';
 import type { ChannelSnapshot } from './youtube';
 import type { FollowerSnapshot } from './meta';
 import { PLATFORM_LABEL } from '../src/platforms';
+import { applyOpus, type OpusData } from '../src/import/opus';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const DAY = 86_400_000;
@@ -183,7 +184,8 @@ if (isMain) {
   const dashboardUrl = i > 0 ? process.argv[i + 1] : 'https://claude.ai/artifact/CxTSLnZ9V1cXZEebotPqos';
   const dataDir = resolve(here, '../public/data');
   const load = <T,>(f: string, fallback: T): T => (existsSync(resolve(dataDir, f)) ? JSON.parse(readFileSync(resolve(dataDir, f), 'utf8')) : fallback);
-  const posts: Post[] = [...load<Post[]>('youtube.json', []), ...load<Post[]>('meta.json', []), ...load<Post[]>('tiktok.json', [])];
+  const opus = load<OpusData | undefined>('opus.json', undefined);
+  const posts: Post[] = applyOpus([...load<Post[]>('youtube.json', []), ...load<Post[]>('meta.json', []), ...load<Post[]>('tiktok.json', [])], opus);
   const followerSnaps = [...load<FollowerSnapshot[]>('meta-accounts.json', []), ...load<FollowerSnapshot[]>('tiktok-accounts.json', [])];
   const history: ChannelSnapshot[] = existsSync(resolve(dataDir, 'youtube-channel.json'))
     ? JSON.parse(readFileSync(resolve(dataDir, 'youtube-channel.json'), 'utf8'))

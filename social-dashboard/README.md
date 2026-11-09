@@ -108,3 +108,12 @@ TikTok has no simple read-only key, so its numbers come from TikTok Studio scree
 Claude. They're saved in `public/data/tiktok.json` (posts), `tiktok-accounts.json` (followers) and
 `tiktok-overview.json` (60-day account totals, traffic sources, search queries). The dashboard and the
 weekly report load them like the synced files.
+
+### Opus Clip (connector)
+
+The OpusClip connector in Claude reports which clip went to which post on each platform, plus Opus's
+score for each clip. It has no view or like numbers. Each Monday the weekly run pulls the week's posts
+(`opusclip_list_scheduled_posts`) and the posted projects' clips (`opusclip_list_clips`), writes them to a
+JSON file and runs `npx tsx sync/opus-merge.ts <file>`, which updates `public/data/opus.json`. The dashboard
+and report use it to tag Opus posts exactly, group the same clip across platforms, compare Opus posts with
+hand-made ones, and list high-scoring clips that were never posted.

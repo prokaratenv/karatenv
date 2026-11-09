@@ -364,8 +364,9 @@ export function analyze(allPosts: Post[], accounts: Account[], filters: Filters,
     .map(([platform, t]) => ({ platform, ...t })).sort((a, b) => b.wins / b.appearances - a.wins / a.appearances);
 
   // Opus Clip vs everything else.
-  const opusPosts = mature.filter((p) => p.viaOpus);
-  const native = mature.filter((p) => !p.viaOpus);
+  const opusPool = mature.some((p) => p.opusChecked) ? mature.filter((p) => p.opusChecked) : mature;
+  const opusPosts = opusPool.filter((p) => p.viaOpus);
+  const native = opusPool.filter((p) => !p.viaOpus);
   const scored = mature.filter((p) => p.viralityScore !== undefined);
   const opus =
     opusPosts.length || scored.length
