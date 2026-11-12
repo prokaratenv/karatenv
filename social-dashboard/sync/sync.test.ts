@@ -121,3 +121,15 @@ describe('mergeOpus', () => {
     expect(m.window).toEqual({ start: '2026-10-10', end: '2026-11-16' });
   });
 });
+
+import { parseGbpEmail } from './local-merge';
+
+describe('parseGbpEmail', () => {
+  it('reads the monthly Business Profile performance email', () => {
+    const text = `Your business performance for October 2026: 153 interactions\n\nSee how Engage Lifestyle Martial Arts at 70 E Horizon Ridge Pkwy\n\n7\n\ncalls\n\n-46%\n\n103\n\npeople asked for directions\n-16%\n\n42\n\nwebsite visits from profile\n\n-4%\n\n599\n\nprofile views\n\n+5%\n\n38\n\nsearches\n\nNo change\n\nTop search terms\n\n1\n\ndojo\n\n22\n\n2\n\nengage\n\n<15\n\nAre your hours accurate?`;
+    const g = parseGbpEmail(text);
+    expect(g).toMatchObject({ month: '2026-10', profile: 'Engage Lifestyle Martial Arts', interactions: 153, calls: 7, directions: 103, websiteVisits: 42, profileViews: 599, searches: 38 });
+    expect(g.change).toMatchObject({ calls: -0.46, directions: -0.16, profileViews: 0.05, searches: 0 });
+    expect(g.topSearchTerms).toEqual([{ term: 'dojo', count: '22' }, { term: 'engage', count: '<15' }]);
+  });
+});

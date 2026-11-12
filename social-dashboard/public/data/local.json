@@ -1,0 +1,54 @@
+{
+ "gbp": [
+  {
+   "month": "2026-10",
+   "profile": "Engage Lifestyle Martial Arts (Henderson)",
+   "interactions": 153,
+   "change": {
+    "calls": -0.46,
+    "chatClicks": 0,
+    "directions": -0.16,
+    "websiteVisits": -0.04,
+    "profileViews": 0.05,
+    "searches": 0
+   },
+   "topSearchTerms": [
+    {
+     "term": "dojo",
+     "count": "22"
+    },
+    {
+     "term": "engage martial arts",
+     "count": "16"
+    },
+    {
+     "term": "engage",
+     "count": "<15"
+    }
+   ],
+   "calls": 7,
+   "chatClicks": 1,
+   "directions": 103,
+   "websiteVisits": 42,
+   "profileViews": 599,
+   "searches": 38
+  }
+ ],
+ "website": [
+  {
+   "period": "2026-10-06/2026-11-02",
+   "clicks": 53,
+   "impressions": 3150,
+   "ctr": 0.017,
+   "avgPosition": 4.9,
+   "indexedPages": 35,
+   "prev": {
+    "clicks": 23,
+    "impressions": 1250,
+    "avgPosition": 6.9,
+    "indexedPages": 19
+   },
+   "source": "Monthly SEO & AEO report (Nov 2)"
+  }
+ ]
+}

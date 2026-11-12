@@ -117,3 +117,10 @@ score for each clip. It has no view or like numbers. Each Monday the weekly run 
 JSON file and runs `npx tsx sync/opus-merge.ts <file>`, which updates `public/data/opus.json`. The dashboard
 and report use it to tag Opus posts exactly, group the same clip across platforms, compare Opus posts with
 hand-made ones, and list high-scoring clips that were never posted.
+
+### Website & local (Google Business Profile + Search Console)
+
+`public/data/local.json` holds monthly numbers. Google Business Profile: parsed from Google's monthly
+"your performance report for <Month>" email (`npx tsx sync/local-merge.ts gbp-email <plaintext-file> [name]`).
+Website: Search Console figures from the Monthly SEO & AEO report (`npx tsx sync/local-merge.ts website '<json>'`).
+Shown on Home as "Website & local".

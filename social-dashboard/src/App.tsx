@@ -166,6 +166,7 @@ export default function App() {
                 followers={store.followers}
                 topics={store.settings.topics}
                 rangeDays={filters.rangeDays}
+                local={store.local}
                 onSeeAll={() => go('Suggestions')}
               />
             )}
