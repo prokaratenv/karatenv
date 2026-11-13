@@ -6,6 +6,8 @@ export interface OpusClipRecord {
   projectId: string;
   publishedAt: string;
   posts: Partial<Record<'youtube' | 'instagram' | 'facebook' | 'tiktok', string>>;
+  /** The same clip posted again later (Opus re-posts): extra post ids per platform. */
+  reposts?: string[];
   linkedinPosts?: number;
   score?: number;
   title?: string;
@@ -46,6 +48,7 @@ export function applyOpus(posts: Post[], opus: OpusData | undefined): Post[] {
   const index = new Map<string, OpusClipRecord>();
   for (const c of opus.clips) {
     for (const [platform, id] of Object.entries(c.posts)) if (id) index.set(`${platform}:${id}`, c);
+    for (const ref of c.reposts ?? []) index.set(ref, c); // "platform:id"
   }
   const covered = new Set<Platform>();
   for (const c of opus.clips) for (const k of Object.keys(c.posts)) covered.add(k as Platform);

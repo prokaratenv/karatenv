@@ -1,8 +1,8 @@
 {
- "updated": "2026-11-09",
+ "updated": "2026-11-13",
  "window": {
   "start": "2026-10-10",
-  "end": "2026-11-09"
+  "end": "2026-11-13"
  },
  "accounts": {
   "tiktok": "CD Young (@cdyoung)",
@@ -232,7 +232,10 @@
     "facebook": "1099165902887752",
     "tiktok": "7701990300599831822"
    },
-   "linkedinPosts": 2
+   "linkedinPosts": 2,
+   "score": 87,
+   "title": "Reduce Punch Power by Stepping Back",
+   "durationSec": 27
   },
   {
    "clipId": "MEuZE343GH",
@@ -363,7 +366,43 @@
    "linkedinPosts": 0,
    "score": 84,
    "title": "Stop Guessing: Master These Martial Arts Hand Techniques",
-   "durationSec": 50
+   "durationSec": 50,
+   "reposts": [
+    "youtube:iO-h0TihvQI",
+    "facebook:1443276463999920",
+    "instagram:DfmLrHMjVOi",
+    "tiktok:7706846564647554317"
+   ]
+  },
+  {
+   "clipId": "i3tnA2F5k5",
+   "projectId": "P3102804cil8",
+   "publishedAt": "2026-11-10T09:25:14.577Z",
+   "posts": {
+    "tiktok": "7706471110224694541",
+    "instagram": "DfjlE0wjSP9",
+    "facebook": "1903754537280046",
+    "youtube": "DRN2JHS4BJU"
+   },
+   "linkedinPosts": 0,
+   "score": 71,
+   "title": "Master the Jab-Cross-Hook Combo—and Block Like a Pro",
+   "durationSec": 16
+  },
+  {
+   "clipId": "vjfKOx41E1",
+   "projectId": "P3111109IK56",
+   "publishedAt": "2026-11-12T09:41:45.654Z",
+   "posts": {
+    "youtube": "ufr1UBus8HI",
+    "instagram": "DfownyfDZr3",
+    "tiktok": "7707217572827122975",
+    "facebook": "1604798727508008"
+   },
+   "linkedinPosts": 2,
+   "score": 78,
+   "title": "Stay Focused After Every Combo—Don’t Drop Your Guard",
+   "durationSec": 75
   }
  ],
  "backlog": [
@@ -373,6 +412,13 @@
    "score": 94,
    "title": "Stop Waiting to Be Called Out—Give Your Best",
    "durationSec": 98
+  },
+  {
+   "clipId": "MmUi5QTkTy",
+   "projectId": "P3111109IK56",
+   "score": 87,
+   "title": "Train With INTENTION: Stay Ready When It Counts",
+   "durationSec": 152
   },
   {
    "clipId": "h3WjGC8hEP",
@@ -394,6 +440,20 @@
    "score": 84,
    "title": "Want to Learn Faster? Take Responsibility for Your Effort",
    "durationSec": 17
+  },
+  {
+   "clipId": "x8aJbltahA",
+   "projectId": "P3102804cil8",
+   "score": 84,
+   "title": "Master the Invincible Jab-Cross Blocking Drill",
+   "durationSec": 26
+  },
+  {
+   "clipId": "ZfouJYy80c",
+   "projectId": "P3111109IK56",
+   "score": 84,
+   "title": "Train Like Kobe: Lock In, Practice With Purpose",
+   "durationSec": 73
   },
   {
    "clipId": "D5gfYdXbHK",

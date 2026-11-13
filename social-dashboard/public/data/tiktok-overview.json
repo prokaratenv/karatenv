@@ -33,12 +33,32 @@
    "how to join a karate dojo"
   ],
   "last7": {
-   "postViews": 4300,
-   "profileViews": 25,
-   "likes": 235,
+   "capturedOn": "2026-11-13",
+   "period": "2026-11-05/2026-11-11",
+   "postViews": 4000,
+   "postViewsChange": -0.048,
+   "profileViews": 24,
+   "profileViewsChange": -0.226,
+   "likes": 164,
+   "likesChange": -0.333,
    "comments": 6,
-   "shares": 1
-  }
+   "shares": 0,
+   "traffic": {
+    "forYou": 0.892,
+    "profile": 0.065,
+    "search": 0.041,
+    "following": 0.002
+   },
+   "searchQueries": [
+    "being late at martial arts",
+    "martial skills",
+    "attention guy at park karate",
+    "going to dojo",
+    "class rules dont run"
+   ]
+  },
+  "totalLikes": 15000,
+  "following": 423
  },
  "tt-engage": {
   "capturedOn": "2026-11-08",

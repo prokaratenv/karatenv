@@ -54,7 +54,7 @@ export function postRef(p: RawPost): { key: 'youtube' | 'instagram' | 'facebook'
 }
 
 export function mergeOpus(existing: OpusData | undefined, raw: { posts: RawPost[]; clips: RawClip[] }, today: string): OpusData {
-  const clips = new Map<string, OpusClipRecord>((existing?.clips ?? []).map((c) => [c.clipId, { ...c, posts: { ...c.posts } }]));
+  const clips = new Map<string, OpusClipRecord>((existing?.clips ?? []).map((c) => [c.clipId, { ...c, posts: { ...c.posts }, reposts: c.reposts ? [...c.reposts] : undefined }]));
   const meta = new Map(raw.clips.map((c) => [c.clip_id, c]));
   for (const p of raw.posts.filter((x) => x.status === 'posted')) {
     const ref = postRef(p);
@@ -62,7 +62,12 @@ export function mergeOpus(existing: OpusData | undefined, raw: { posts: RawPost[
     const rec = clips.get(p.clip_id) ?? { clipId: p.clip_id, projectId: p.project_id, publishedAt: p.publish_at, posts: {}, linkedinPosts: 0 };
     if (Date.parse(p.publish_at) < Date.parse(rec.publishedAt)) rec.publishedAt = p.publish_at;
     if (ref.key === 'linkedin') rec.linkedinPosts = (rec.linkedinPosts ?? 0) + 1;
-    else rec.posts[ref.key] = ref.id;
+    else if (!rec.posts[ref.key] || rec.posts[ref.key] === ref.id) rec.posts[ref.key] = ref.id;
+    else {
+      // Same clip posted again: keep the first post and remember the repeat, so both count as Opus posts.
+      const tag = `${ref.key}:${ref.id}`;
+      if (!(rec.reposts ?? []).includes(tag)) rec.reposts = [...(rec.reposts ?? []), tag];
+    }
     clips.set(p.clip_id, rec);
   }
   for (const rec of clips.values()) {

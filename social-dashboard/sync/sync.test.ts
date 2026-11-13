@@ -97,6 +97,7 @@ describe('followerChanges', () => {
 });
 
 import { mergeOpus } from './opus-merge';
+import { applyOpus } from '../src/import/opus';
 
 describe('mergeOpus', () => {
   it('adds a week of posts, keeps old clips, and builds the backlog', () => {
@@ -119,6 +120,17 @@ describe('mergeOpus', () => {
     expect(m.clips[1]).toMatchObject({ score: 88, title: 'New clip', posts: { youtube: 'XYZxyz12345', instagram: 'DfABC' }, linkedinPosts: 1 });
     expect(m.backlog?.map((b) => b.clipId)).toEqual(['unposted']);
     expect(m.window).toEqual({ start: '2026-10-10', end: '2026-11-16' });
+  });
+
+  it('keeps both posts when Opus posts the same clip again', () => {
+    const tt = (id: string, at: string) => ({ clip_id: 'c', project_id: 'P', publish_at: at, status: 'posted', platform: 'TIKTOK_BUSINESS', post_url: `https://www.tiktok.com/@cdyoung/video/${id}` });
+    const m = mergeOpus(undefined, { posts: [tt('111', '2026-11-09T10:22:00Z'), tt('222', '2026-11-11T09:40:00Z')], clips: [] }, '2026-11-13');
+    expect(m.clips[0].posts.tiktok).toBe('111');
+    expect(m.clips[0].reposts).toEqual(['tiktok:222']);
+    const again = mergeOpus(m, { posts: [tt('222', '2026-11-11T09:40:00Z')], clips: [] }, '2026-11-14');
+    expect(again.clips[0].reposts).toEqual(['tiktok:222']);
+    const tagged = applyOpus([{ id: 'x', platform: 'tiktok', url: 'https://www.tiktok.com/@cdyoung/video/222', publishedAt: '2026-11-11T09:40:00Z' } as any], m);
+    expect(tagged[0]).toMatchObject({ viaOpus: true, opusClipId: 'c' });
   });
 });
 
