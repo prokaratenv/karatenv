@@ -42,9 +42,12 @@ export function useStore() {
           // Add default topics introduced after this browser first saved its settings.
           const seen = new Set(s.settings?.seenDefaultTopics ?? s.settings?.topics?.map((t) => t.id) ?? []);
           const added = DEFAULT_TOPICS.filter((t) => !seen.has(t.id) && !s.settings.topics.some((x) => x.id === t.id));
+          // Accounts added to the defaults since this browser saved (e.g. the LinkedIn company page).
+          const accounts = s.accounts ? [...s.accounts, ...DEFAULT_ACCOUNTS.filter((d) => !s.accounts.some((a) => a.id === d.id))] : DEFAULT_ACCOUNTS;
           setState({
             ...initial(),
             ...s,
+            accounts,
             settings: {
               ...initial().settings,
               ...s.settings,
@@ -65,7 +68,7 @@ export function useStore() {
   // Pull in data synced on a schedule (public/data/*.json), if this build has it.
   useEffect(() => {
     if (!loaded) return;
-    const files = ['data/youtube.json', 'data/meta.json', 'data/tiktok.json'];
+    const files = ['data/youtube.json', 'data/meta.json', 'data/tiktok.json', 'data/linkedin.json'];
     const getJson = (f: string) =>
       fetch(f, { cache: 'no-store' })
         .then((r) => (r.ok ? r.json() : undefined))
@@ -79,15 +82,16 @@ export function useStore() {
     });
     // Follower history: Meta accounts and the YouTube channel.
     Promise.all(
-      ['data/meta-accounts.json', 'data/youtube-channel.json', 'data/tiktok-accounts.json'].map((f) =>
+      ['data/meta-accounts.json', 'data/youtube-channel.json', 'data/tiktok-accounts.json', 'data/linkedin-accounts.json'].map((f) =>
         fetch(f, { cache: 'no-store' })
           .then((r) => (r.ok ? r.json() : []))
           .catch(() => []),
       ),
-    ).then(([meta, yt, tt]) => {
+    ).then(([meta, yt, tt, li]) => {
       const snaps: Omit<FollowerInfo, 'change'>[] = [
         ...(Array.isArray(meta) ? meta : []),
         ...(Array.isArray(tt) ? tt : []),
+        ...(Array.isArray(li) ? li : []),
         ...(Array.isArray(yt) ? yt : []).map((y: { date: string; subscribers: number }) => ({
           date: y.date,
           accountId: 'yt-engage',

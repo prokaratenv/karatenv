@@ -145,3 +145,24 @@ describe('parseGbpEmail', () => {
     expect(g.topSearchTerms).toEqual([{ term: 'dojo', count: '22' }, { term: 'engage', count: '<15' }]);
   });
 });
+
+import { mergeTikTok } from './tiktok-windsor';
+import { cleanLinkedInText, mergeLinkedIn } from './linkedin-windsor';
+
+describe('Windsor imports', () => {
+  it('TikTok: keeps shares and saves, replaces the screenshot twin, keeps older posts', () => {
+    const shot = { id: 'tt-cdyoung:shot-9', accountId: 'tt-cdyoung', platform: 'tiktok', title: 'x', caption: 'x', publishedAt: '2026-11-08T21:43:00.000Z', format: 'short', views: 197, likes: 9, comments: 1, shares: 0, saves: 0, hashtags: [], importedAt: '', source: 'TikTok screenshots' } as any;
+    const old = { ...shot, id: 'tt-cdyoung:shot-1', publishedAt: '2026-09-06T07:45:00.000Z' };
+    const out = mergeTikTok([shot, old], [
+      { video_id: '7705919346375265566', video_create_datetime: '2026-11-08T21:43:00', video_caption: 'BLACK BELT TESTING #BlackBeltTesting @Engage Lifestyle Martial Arts', video_duration: 18.6, video_views_count: 197, video_likes: 9, video_comments: 1, video_shares: 1, video_favorites: 1 },
+    ], 'tt-cdyoung', 'cdyoung', '2026-11-14T00:00:00Z');
+    expect(out.map((p) => p.id)).toEqual(['tt-cdyoung:shot-1', 'tt-cdyoung:7705919346375265566']);
+    expect(out[1]).toMatchObject({ shares: 1, saves: 1, publishedAt: '2026-11-08T21:43:00.000Z', url: 'https://www.tiktok.com/@cdyoung/video/7705919346375265566', hashtags: ['BlackBeltTesting'], title: 'BLACK BELT TESTING' });
+  });
+
+  it('LinkedIn: cleans hashtags, impressions count as views, reshares kept', () => {
+    expect(cleanLinkedInText('Save this. {hashtag|\\#|EngageLifestyle} \\(ages 5\\)')).toBe('Save this. #EngageLifestyle (ages 5)');
+    const [p] = mergeLinkedIn([], [{ share_id: '7520197981891973120', ugc_post_id: '7520197981891973120', share_created_time: '2026-10-25', share_post_type: 'multiImage', share_impression_count: 13, share_unique_impressions_count: 1, share_like_count: 1, share_count: 1, share_text: 'Ask these 5 questions first. {hashtag|\\#|HendersonNV}' }], 'li-engage', '2026-11-14T00:00:00Z');
+    expect(p).toMatchObject({ id: 'li-engage:7520197981891973120', views: 13, impressions: 13, shares: 1, format: 'carousel', hashtags: ['HendersonNV'], url: 'https://www.linkedin.com/feed/update/urn:li:ugcPost:7520197981891973120' });
+  });
+});

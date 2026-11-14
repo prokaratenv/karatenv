@@ -30,6 +30,7 @@ export const DEFAULT_ACCOUNTS: Account[] = [
   { id: 'fb-cdyoung', platform: 'facebook', name: 'CD Young', kind: 'personal' },
   { id: 'tt-engage', platform: 'tiktok', name: 'Engage Lifestyle Martial Arts', kind: 'business' },
   { id: 'tt-cdyoung', platform: 'tiktok', name: 'CD Young', kind: 'personal' },
+  { id: 'li-engage', platform: 'linkedin', name: 'Engage Lifestyle Martial Arts', kind: 'business' },
   { id: 'li-cdyoung', platform: 'linkedin', name: 'CD Young', kind: 'personal' },
 ];
 

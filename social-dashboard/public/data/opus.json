@@ -1,8 +1,8 @@
 {
- "updated": "2026-11-13",
+ "updated": "2026-11-14",
  "window": {
   "start": "2026-10-10",
-  "end": "2026-11-13"
+  "end": "2026-11-14"
  },
  "accounts": {
   "tiktok": "CD Young (@cdyoung)",
@@ -402,7 +402,30 @@
    "linkedinPosts": 2,
    "score": 78,
    "title": "Stay Focused After Every Combo—Don’t Drop Your Guard",
-   "durationSec": 75
+   "durationSec": 75,
+   "reposts": [
+    "linkedin:7526580011672322048",
+    "linkedin:7526580014545539072"
+   ]
+  },
+  {
+   "clipId": "MmUi5QTkTy",
+   "projectId": "P3111109IK56",
+   "publishedAt": "2026-11-14T08:10:45.363Z",
+   "posts": {
+    "instagram": "DftvvVPnDPg",
+    "youtube": "sphXYPAHB4Q",
+    "facebook": "1142325548607138",
+    "tiktok": "7707936404478709005"
+   },
+   "linkedinPosts": 2,
+   "reposts": [
+    "linkedin:7527281940769689600",
+    "linkedin:7527281918279729152"
+   ],
+   "score": 87,
+   "title": "Train With INTENTION: Stay Ready When It Counts",
+   "durationSec": 152
   }
  ],
  "backlog": [
@@ -412,13 +435,6 @@
    "score": 94,
    "title": "Stop Waiting to Be Called Out—Give Your Best",
    "durationSec": 98
-  },
-  {
-   "clipId": "MmUi5QTkTy",
-   "projectId": "P3111109IK56",
-   "score": 87,
-   "title": "Train With INTENTION: Stay Ready When It Counts",
-   "durationSec": 152
   },
   {
    "clipId": "h3WjGC8hEP",

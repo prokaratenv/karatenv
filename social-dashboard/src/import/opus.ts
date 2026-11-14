@@ -33,6 +33,8 @@ export function platformPostId(p: Post): string | undefined {
       return url.match(/\/(?:reel|videos)\/(\d+)/)?.[1];
     case 'tiktok':
       return url.match(/\/video\/(\d+)/)?.[1];
+    case 'linkedin':
+      return p.externalId ?? url.match(/(\d{15,})/)?.[1];
     default:
       return undefined;
   }
