@@ -10,6 +10,9 @@ export const MATURE_AFTER_DAYS = 2;
 /** Minimum sample size before we call something a pattern. */
 export const MIN_N = 4;
 
+/** Fewest views for a post to count as a breakout or a best performer. */
+export const BREAKOUT_MIN_VIEWS = 200;
+
 export interface EnrichedPost extends Post {
   account?: Account;
   engagements: number;
@@ -380,7 +383,8 @@ export function analyze(allPosts: Post[], accounts: Account[], filters: Filters,
         }
       : undefined;
 
-  const breakouts = mature.filter((p) => p.lift >= 3).sort((a, b) => b.lift - a.lift);
+  // A breakout needs real reach too: on a tiny account (LinkedIn page, ~3 impressions a post) 60 views is "20×" but not a signal.
+  const breakouts = mature.filter((p) => p.lift >= 3 && p.views >= BREAKOUT_MIN_VIEWS).sort((a, b) => b.lift - a.lift);
 
   // Cadence: does posting more in a week go with more total views?
   const weekly2 = weekly.filter((w) => w.posts > 0);

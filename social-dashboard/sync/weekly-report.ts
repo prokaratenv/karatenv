@@ -8,7 +8,7 @@ import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { Post } from '../src/types';
-import { analyze } from '../src/analysis/analyze';
+import { analyze, BREAKOUT_MIN_VIEWS } from '../src/analysis/analyze';
 import { recommend, type Recommendation } from '../src/analysis/recommendations';
 import { DEFAULT_ACCOUNTS } from '../src/platforms';
 import { DEFAULT_TOPICS } from '../src/analysis/topics';
@@ -73,7 +73,7 @@ export function buildWeeklyReport(
     const t = Date.parse(p.publishedAt);
     return t > weekAgo - 7 * DAY && t <= weekAgo;
   });
-  const last30 = enriched.filter((p) => p.mature && Date.parse(p.publishedAt) > asOf - 30 * DAY).sort((x, y) => y.lift - x.lift);
+  const last30 = enriched.filter((p) => p.mature && p.views >= BREAKOUT_MIN_VIEWS && Date.parse(p.publishedAt) > asOf - 30 * DAY).sort((x, y) => y.lift - x.lift);
   const delta = channelDelta(history, asOf);
   const latest = history[history.length - 1];
   const followers = followerChanges(followerSnaps, asOf);
