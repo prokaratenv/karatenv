@@ -115,7 +115,7 @@ if (isMain) {
   const name = raw.name ?? acc.find((a) => a.accountId === raw.account)?.name ?? raw.handle;
   for (const d of raw.daily ?? []) {
     const f = num(d.total_followers_count);
-    if (f === undefined) continue;
+    if (f === undefined || f <= 0 || !d.date) continue; // Windsor sometimes reports 0 for a day it hasn't counted
     const i = acc.findIndex((a) => a.accountId === raw.account && a.date === d.date);
     const row = { date: d.date, accountId: raw.account, platform: 'tiktok', name, followers: f };
     if (i >= 0) acc[i] = row;

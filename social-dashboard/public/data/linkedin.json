@@ -907,32 +907,6 @@
   "source": "Windsor.ai"
  },
  {
-  "id": "li-engage:7527281940769689600",
-  "accountId": "li-engage",
-  "platform": "linkedin",
-  "externalId": "7527281940769689600",
-  "title": "Readiness is built in the moments after a move, not just in the move itself.",
-  "caption": "Readiness is built in the moments after a move, not just in the move itself. #SelfDefense #Training",
-  "url": "https://www.linkedin.com/feed/update/urn:li:ugcPost:7527281940769689600",
-  "publishedAt": "2026-11-14T12:00:00.000Z",
-  "format": "video",
-  "views": 4,
-  "impressions": 4,
-  "reach": 3,
-  "likes": 0,
-  "comments": 0,
-  "shares": 0,
-  "saves": 0,
-  "watchTimeHours": 0.003678888888888889,
-  "avgViewDurationSec": 4.414666666666666,
-  "hashtags": [
-   "SelfDefense",
-   "Training"
-  ],
-  "importedAt": "2026-11-14T23:53:42.284Z",
-  "source": "Windsor.ai"
- },
- {
   "id": "li-engage:7527461512047824897",
   "accountId": "li-engage",
   "platform": "linkedin",
@@ -954,6 +928,84 @@
    "engageteam"
   ],
   "importedAt": "2026-11-14T23:53:42.284Z",
+  "source": "Windsor.ai"
+ },
+ {
+  "id": "li-engage:7527281940769689600",
+  "accountId": "li-engage",
+  "platform": "linkedin",
+  "externalId": "7527281940769689600",
+  "title": "Readiness is built in the moments after a move, not just in the move itself.",
+  "caption": "Readiness is built in the moments after a move, not just in the move itself. #SelfDefense #Training",
+  "url": "https://www.linkedin.com/feed/update/urn:li:ugcPost:7527281940769689600",
+  "publishedAt": "2026-11-14T12:00:00.000Z",
+  "format": "video",
+  "views": 5,
+  "impressions": 5,
+  "reach": 4,
+  "likes": 0,
+  "comments": 0,
+  "shares": 0,
+  "saves": 0,
+  "watchTimeHours": 0.00504,
+  "avgViewDurationSec": 4.536,
+  "hashtags": [
+   "SelfDefense",
+   "Training"
+  ],
+  "importedAt": "2026-11-16T14:42:40.608Z",
+  "source": "Windsor.ai"
+ },
+ {
+  "id": "li-engage:7527650508375969792",
+  "accountId": "li-engage",
+  "platform": "linkedin",
+  "externalId": "7527650508375969792",
+  "title": "Progress in martial arts comes from more than practicing technique.",
+  "caption": "Progress in martial arts comes from more than practicing technique. It takes openness to feedback, discipline in keeping the hands up, and awareness of how to protect yourself. #MartialArts #TrainingMindset",
+  "url": "https://www.linkedin.com/feed/update/urn:li:ugcPost:7527650508375969792",
+  "publishedAt": "2026-11-15T12:00:00.000Z",
+  "format": "video",
+  "views": 3,
+  "impressions": 3,
+  "reach": 2,
+  "likes": 0,
+  "comments": 0,
+  "shares": 0,
+  "saves": 0,
+  "watchTimeHours": 0.0031241666666666666,
+  "avgViewDurationSec": 3.749,
+  "hashtags": [
+   "MartialArts",
+   "TrainingMindset"
+  ],
+  "importedAt": "2026-11-16T14:42:40.608Z",
+  "source": "Windsor.ai"
+ },
+ {
+  "id": "li-engage:7528013719784542208",
+  "accountId": "li-engage",
+  "platform": "linkedin",
+  "externalId": "7528013719784542208",
+  "title": "Speed and precision can come from the feet, not just the hips.",
+  "caption": "Speed and precision can come from the feet, not just the hips. This switch roundhouse demonstration focuses on quick footwork to create the transition. #MartialArts #Footwork",
+  "url": "https://www.linkedin.com/feed/update/urn:li:ugcPost:7528013719784542208",
+  "publishedAt": "2026-11-16T12:00:00.000Z",
+  "format": "video",
+  "views": 4,
+  "impressions": 4,
+  "reach": 2,
+  "likes": 1,
+  "comments": 0,
+  "shares": 0,
+  "saves": 0,
+  "watchTimeHours": 0.0007680555555555556,
+  "avgViewDurationSec": 2.765,
+  "hashtags": [
+   "MartialArts",
+   "Footwork"
+  ],
+  "importedAt": "2026-11-16T14:42:40.608Z",
   "source": "Windsor.ai"
  }
 ]

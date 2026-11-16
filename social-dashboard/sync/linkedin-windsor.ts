@@ -99,7 +99,7 @@ if (isMain) {
     account: string;
     name: string;
     posts: WindsorShare[];
-    daily?: { date: string; organization_follower_count?: number | null }[];
+    daily?: { date: string | null; organization_follower_count?: number | null }[];
   };
   const now = new Date().toISOString();
   const postsFile = resolve(DATA, 'linkedin.json');
@@ -111,8 +111,8 @@ if (isMain) {
   const acc: { date: string; accountId: string; platform: string; name: string; followers: number }[] = existsSync(accFile) ? JSON.parse(readFileSync(accFile, 'utf8')) : [];
   for (const d of raw.daily ?? []) {
     const f = num(d.organization_follower_count);
-    if (f === undefined) continue;
-    const row = { date: d.date, accountId: raw.account, platform: 'linkedin', name: raw.name, followers: f };
+    if (f === undefined || f <= 0 || !d.date) continue;
+    const row = { date: d.date as string, accountId: raw.account, platform: 'linkedin', name: raw.name, followers: f };
     const i = acc.findIndex((a) => a.accountId === raw.account && a.date === d.date);
     if (i >= 0) acc[i] = row;
     else acc.push(row);

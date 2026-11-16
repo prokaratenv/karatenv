@@ -1,8 +1,8 @@
 {
- "updated": "2026-11-14",
+ "updated": "2026-11-16",
  "window": {
   "start": "2026-10-10",
-  "end": "2026-11-14"
+  "end": "2026-11-16"
  },
  "accounts": {
   "tiktok": "CD Young (@cdyoung)",
@@ -426,6 +426,43 @@
    "score": 87,
    "title": "Train With INTENTION: Stay Ready When It Counts",
    "durationSec": 152
+  },
+  {
+   "clipId": "qgK9qi3ksK",
+   "projectId": "P31112098rUg",
+   "publishedAt": "2026-11-15T08:35:31.515Z",
+   "posts": {
+    "youtube": "6QH91eW7BEs",
+    "instagram": "DfwXXXcibwW",
+    "tiktok": "7708313892736306446"
+   },
+   "linkedinPosts": 2,
+   "reposts": [
+    "linkedin:7527650508375969792",
+    "linkedin:7527650505985146880"
+   ],
+   "score": 99,
+   "title": "Keep Your Hands Up: The Boxing Habit That Protects You",
+   "durationSec": 49
+  },
+  {
+   "clipId": "kWpAt9XqM5",
+   "projectId": "P3111209A21r",
+   "publishedAt": "2026-11-16T08:38:49.719Z",
+   "posts": {
+    "youtube": "XLz4gjgZYw0",
+    "instagram": "Dfy8iUJlC0D",
+    "facebook": "28866058173094625",
+    "tiktok": "7708685785821678861"
+   },
+   "linkedinPosts": 2,
+   "reposts": [
+    "linkedin:7528013734670204929",
+    "linkedin:7528013719784542208"
+   ],
+   "score": 88,
+   "title": "Fix Your Switch Roundhouse With Faster Footwork",
+   "durationSec": 63
   }
  ],
  "backlog": [
@@ -435,6 +472,13 @@
    "score": 94,
    "title": "Stop Waiting to Be Called Out—Give Your Best",
    "durationSec": 98
+  },
+  {
+   "clipId": "CQWkWH4aB6",
+   "projectId": "P31112098rUg",
+   "score": 85,
+   "title": "Be a Great Training Partner: Speak Up and Push Your Limits",
+   "durationSec": 22
   },
   {
    "clipId": "h3WjGC8hEP",
