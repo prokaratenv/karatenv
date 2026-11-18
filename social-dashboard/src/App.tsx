@@ -13,6 +13,8 @@ import { Content } from './views/Content';
 import { Clips } from './views/Clips';
 import { ImportView } from './views/Import';
 import { SettingsView } from './views/Settings';
+import { RefreshButton } from './components/RefreshButton';
+import { HOSTED } from './env';
 
 const TABS = ['Home', 'Overview', 'Suggestions', 'Insights', 'Content', 'Clips', 'Import', 'Settings'] as const;
 
@@ -90,6 +92,11 @@ export default function App() {
     setFilters((f) => ({ ...f, platforms: f.platforms.includes(p) ? f.platforms.filter((x) => x !== p) : [...f.platforms, p], accountIds: [] }));
 
   const showFilters = !['Import', 'Settings'].includes(tab);
+  // When the synced files were last refreshed (newest import stamp), so a refresh is visible once it lands.
+  const lastSync = useMemo(() => {
+    const t = Math.max(0, ...store.posts.filter((p) => p.source !== DEMO_SOURCE).map((p) => Date.parse(p.importedAt) || 0));
+    return t ? new Date(t).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : '';
+  }, [store.posts]);
 
   return (
     <TooltipProvider>
@@ -100,8 +107,10 @@ export default function App() {
             <small>
               Engage Lifestyle Martial Arts · CD Young
               {store.posts.length > 0 && ` · data through ${new Date(analysis.asOf).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`}
+              {lastSync && ` · updated ${lastSync}`}
             </small>
           </div>
+          {HOSTED && <RefreshButton />}
         </header>
 
         {isDemo && (
