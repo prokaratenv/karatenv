@@ -907,30 +907,6 @@
   "source": "Windsor.ai"
  },
  {
-  "id": "li-engage:7527461512047824897",
-  "accountId": "li-engage",
-  "platform": "linkedin",
-  "externalId": "7527461512047824897",
-  "title": "Headgear. Gloves. Chest protector. The first time a kid suits up in full gear, they stand a little different.",
-  "caption": "Headgear. Gloves. Chest protector. The first time a kid suits up in full gear, they stand a little different. #EngageLifestyle #engageteam",
-  "url": "https://www.linkedin.com/feed/update/urn:li:share:7527461512047824897",
-  "publishedAt": "2026-11-14T12:00:00.000Z",
-  "format": "image",
-  "views": 1,
-  "impressions": 1,
-  "reach": 1,
-  "likes": 0,
-  "comments": 0,
-  "shares": 0,
-  "saves": 0,
-  "hashtags": [
-   "EngageLifestyle",
-   "engageteam"
-  ],
-  "importedAt": "2026-11-14T23:53:42.284Z",
-  "source": "Windsor.ai"
- },
- {
   "id": "li-engage:7527281940769689600",
   "accountId": "li-engage",
   "platform": "linkedin",
@@ -954,6 +930,30 @@
    "Training"
   ],
   "importedAt": "2026-11-16T14:42:40.608Z",
+  "source": "Windsor.ai"
+ },
+ {
+  "id": "li-engage:7527461512047824897",
+  "accountId": "li-engage",
+  "platform": "linkedin",
+  "externalId": "7527461512047824897",
+  "title": "Headgear. Gloves. Chest protector. The first time a kid suits up in full gear, they stand a little different.",
+  "caption": "Headgear. Gloves. Chest protector. The first time a kid suits up in full gear, they stand a little different. #EngageLifestyle #engageteam",
+  "url": "https://www.linkedin.com/feed/update/urn:li:share:7527461512047824897",
+  "publishedAt": "2026-11-14T12:00:00.000Z",
+  "format": "image",
+  "views": 4,
+  "impressions": 4,
+  "reach": 2,
+  "likes": 0,
+  "comments": 0,
+  "shares": 0,
+  "saves": 0,
+  "hashtags": [
+   "EngageLifestyle",
+   "engageteam"
+  ],
+  "importedAt": "2026-11-18T18:25:06.896Z",
   "source": "Windsor.ai"
  },
  {
@@ -992,20 +992,94 @@
   "url": "https://www.linkedin.com/feed/update/urn:li:ugcPost:7528013719784542208",
   "publishedAt": "2026-11-16T12:00:00.000Z",
   "format": "video",
-  "views": 4,
-  "impressions": 4,
-  "reach": 2,
+  "views": 5,
+  "impressions": 5,
+  "reach": 3,
   "likes": 1,
   "comments": 0,
   "shares": 0,
   "saves": 0,
-  "watchTimeHours": 0.0007680555555555556,
-  "avgViewDurationSec": 2.765,
+  "watchTimeHours": 0.003895833333333333,
+  "avgViewDurationSec": 7.0125,
   "hashtags": [
    "MartialArts",
    "Footwork"
   ],
-  "importedAt": "2026-11-16T14:42:40.608Z",
+  "importedAt": "2026-11-18T18:25:06.896Z",
+  "source": "Windsor.ai"
+ },
+ {
+  "id": "li-engage:7528246969614446592",
+  "accountId": "li-engage",
+  "platform": "linkedin",
+  "externalId": "7528246969614446592",
+  "title": "Parent tip: Let them help someone smaller.",
+  "caption": "Parent tip: Let them help someone smaller. Helping a younger kid builds leadership faster than any lecture about it. #EngageLifestyle #ParentTip",
+  "url": "https://www.linkedin.com/feed/update/urn:li:share:7528246969614446592",
+  "publishedAt": "2026-11-17T12:00:00.000Z",
+  "format": "image",
+  "views": 2,
+  "impressions": 2,
+  "reach": 2,
+  "likes": 0,
+  "comments": 0,
+  "shares": 0,
+  "saves": 0,
+  "hashtags": [
+   "EngageLifestyle",
+   "ParentTip"
+  ],
+  "importedAt": "2026-11-18T18:25:06.896Z",
+  "source": "Windsor.ai"
+ },
+ {
+  "id": "li-engage:7528366900054216704",
+  "accountId": "li-engage",
+  "platform": "linkedin",
+  "externalId": "7528366900054216704",
+  "title": "Training is most effective when focus and mutual support go hand in hand.",
+  "caption": "Training is most effective when focus and mutual support go hand in hand. #Teamwork #Training",
+  "url": "https://www.linkedin.com/feed/update/urn:li:ugcPost:7528366900054216704",
+  "publishedAt": "2026-11-17T12:00:00.000Z",
+  "format": "video",
+  "views": 1,
+  "impressions": 1,
+  "reach": 1,
+  "likes": 0,
+  "comments": 0,
+  "shares": 0,
+  "saves": 0,
+  "watchTimeHours": 0.0016933333333333334,
+  "avgViewDurationSec": 3.048,
+  "hashtags": [
+   "Teamwork",
+   "Training"
+  ],
+  "importedAt": "2026-11-18T18:25:06.896Z",
+  "source": "Windsor.ai"
+ },
+ {
+  "id": "li-engage:7528548477501583360",
+  "accountId": "li-engage",
+  "platform": "linkedin",
+  "externalId": "7528548477501583360",
+  "title": "\"My son has being going to Engage for almost a year and he loves it!\" An Engage Mom.",
+  "caption": "\"My son has being going to Engage for almost a year and he loves it!\" An Engage Mom. It started with her son. Then she stepped on the mat too. #EngageLifestyle #engagewins",
+  "url": "https://www.linkedin.com/feed/update/urn:li:share:7528548477501583360",
+  "publishedAt": "2026-11-17T12:00:00.000Z",
+  "format": "image",
+  "views": 1,
+  "impressions": 1,
+  "reach": 1,
+  "likes": 0,
+  "comments": 0,
+  "shares": 0,
+  "saves": 0,
+  "hashtags": [
+   "EngageLifestyle",
+   "engagewins"
+  ],
+  "importedAt": "2026-11-18T18:25:06.896Z",
   "source": "Windsor.ai"
  }
 ]

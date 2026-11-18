@@ -1,8 +1,8 @@
 {
- "updated": "2026-11-16",
+ "updated": "2026-11-18",
  "window": {
   "start": "2026-10-10",
-  "end": "2026-11-16"
+  "end": "2026-11-18"
  },
  "accounts": {
   "tiktok": "CD Young (@cdyoung)",
@@ -463,22 +463,60 @@
    "score": 88,
    "title": "Fix Your Switch Roundhouse With Faster Footwork",
    "durationSec": 63
+  },
+  {
+   "clipId": "CQWkWH4aB6",
+   "projectId": "P31112098rUg",
+   "publishedAt": "2026-11-17T08:02:14.733Z",
+   "posts": {
+    "facebook": "1323762236508548",
+    "youtube": "bXceo5MKSOA",
+    "instagram": "Df1dJKglKbQ",
+    "tiktok": "7709047414228864270"
+   },
+   "linkedinPosts": 2,
+   "reposts": [
+    "linkedin:7528366900054216704",
+    "linkedin:7528366899227893761"
+   ],
+   "score": 85,
+   "title": "Be a Great Training Partner: Speak Up and Push Your Limits",
+   "durationSec": 22
+  },
+  {
+   "clipId": "E2tq4Z8sMd",
+   "projectId": "P3061907wwcd",
+   "publishedAt": "2026-11-18T08:31:59.713Z",
+   "posts": {
+    "instagram": "Df4FWa3jaEK",
+    "facebook": "1800802457862489",
+    "youtube": "LgZNSizfWxY",
+    "tiktok": "7709426285532957965"
+   },
+   "linkedinPosts": 2,
+   "reposts": [
+    "linkedin:7528736826795278336",
+    "linkedin:7528736820185022464"
+   ],
+   "score": 85,
+   "title": "Black Belt Discipline: Master Your Motivation, Conquer Life",
+   "durationSec": 108
   }
  ],
  "backlog": [
+  {
+   "clipId": "1NOgajqfEH",
+   "projectId": "P3061907wwcd",
+   "score": 99,
+   "title": "Discipline Makes Life's Hardest Challenges Feel Easy",
+   "durationSec": 12
+  },
   {
    "clipId": "HkivPjHmZ6",
    "projectId": "P3110608Jwu2",
    "score": 94,
    "title": "Stop Waiting to Be Called Out—Give Your Best",
    "durationSec": 98
-  },
-  {
-   "clipId": "CQWkWH4aB6",
-   "projectId": "P31112098rUg",
-   "score": 85,
-   "title": "Be a Great Training Partner: Speak Up and Push Your Limits",
-   "durationSec": 22
   },
   {
    "clipId": "h3WjGC8hEP",
@@ -516,11 +554,25 @@
    "durationSec": 73
   },
   {
+   "clipId": "WZId0oivgk",
+   "projectId": "P3061907wwcd",
+   "score": 84,
+   "title": "Black Belt Truth: You MUST Find Your Own Discipline!",
+   "durationSec": 30
+  },
+  {
    "clipId": "D5gfYdXbHK",
    "projectId": "P3110203HB5c",
    "score": 81,
    "title": "Land the Right Punch: From Ribs to Head",
    "durationSec": 116
+  },
+  {
+   "clipId": "aYAjyOnSox",
+   "projectId": "P3061907wwcd",
+   "score": 80,
+   "title": "Red Belts: How to FACE Black Belt CHALLENGES!",
+   "durationSec": 33
   }
  ]
 }
