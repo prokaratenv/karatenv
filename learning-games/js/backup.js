@@ -71,11 +71,20 @@ BD.Backup = (function () {
       try { if (document.execCommand("copy")) { msg("Copied. Paste it somewhere safe."); return; } } catch (e) { /* ignore */ }
       msg("The code is selected. Copy it with your device's Copy button.");
     });
-    $("backupFile").addEventListener("click", function () {
+    $("backupFile").addEventListener("click", async function () {
+      const name = "brain-dojo-" + p.name.replace(/[^a-z0-9]+/gi, "-").toLowerCase() + "-" + BD.today() + ".json";
+      // Inside the shared Claude link, files go through Claude's save prompt.
+      let dl = null;
+      if (window.claude && typeof window.claude.use === "function") { try { dl = await window.claude.use("downloads"); } catch (e) { dl = null; } }
+      if (dl) {
+        try { await dl.save({ filename: name, data: json }); msg("Saved. Keep the file somewhere safe."); }
+        catch (e) { msg(e && e.code === "declined" ? "No file saved. You can still copy the save code." : "Saving a file isn't available here. Use Copy save code instead."); }
+        return;
+      }
       try {
         const a = document.createElement("a");
         a.href = URL.createObjectURL(new Blob([json], { type: "application/json" }));
-        a.download = "brain-dojo-" + p.name.replace(/[^a-z0-9]+/gi, "-").toLowerCase() + "-" + BD.today() + ".json";
+        a.download = name;
         document.body.appendChild(a); a.click(); a.remove();
         setTimeout(function () { URL.revokeObjectURL(a.href); }, 4000);
         msg("If no file appears, use Copy save code instead.");
