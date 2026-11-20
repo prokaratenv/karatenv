@@ -16,7 +16,7 @@ Free math, writing, reading, spelling and Spanish practice from Pre-K through 8t
 
 ## Spelling Bee and Spanish Dojo
 
-**Spelling Bee** (coach: Mrs. Master Young)
+**Spelling Bee** (coach: Master Mrs. Young)
 - The word is spoken aloud with a sentence clue, and the child types the spelling.
 - Pre-K to 1st grade get letter tiles to tap. Older grades can turn tiles on as a hint, for 5 XP.
 - A wrong answer shows which letters were right and wrong. Missed words come back.
@@ -39,9 +39,9 @@ Every game runs from **Pre-K through 8th grade**:
 
 The game uses the Engage brand (midnight navy, the green-teal-blue streak, gold for rewards, Montserrat and Cabin) and the cartoon cast from the Engage Higgsfield workspace:
 - **Zumi** is the host.
-- **Master CD** coaches Math Dojo, **Ms. Bridgette** coaches Fix-It Sentences and **Ms. Kyra** coaches Story Scrolls.
-- **Mrs. Master Young** gives Sensei's plan.
-- Kids choose a champion: Kimmy, Billy, Tommy, Mackenzie, Rylan, Zumi, or an instructor (Master CD, Mrs. Master Young, Ms. Bridgette, Ms. Kyra, Miss Lauryn). They can change it by tapping their character on the home screen. Every champion, instructors included, starts in a White Belt and wears whatever belt the student has earned at the current Dojo grade, so they earn their way up again.
+- **Master Young** coaches Math Dojo, **Ms. Bridgette** coaches Fix-It Sentences and **Ms. Kyra** coaches Story Scrolls.
+- **Master Mrs. Young** gives Sensei's plan.
+- Kids choose a champion: Kimmy, Billy, Tommy, Mackenzie, Rylan, Zumi, or an instructor (Master Young, Master Mrs. Young, Ms. Bridgette, Ms. Kyra, Miss Lauryn). They can change it by tapping their character on the home screen. Every champion, instructors included, starts in a White Belt and wears whatever belt the student has earned at the current Dojo grade, so they earn their way up again.
 
 - **Build your own champion:** in "Change champion", kids can design a character. They choose boy or girl, height, build, skin tone, hairstyle, hair color, eye color, face extras (freckles, glasses, rosy cheeks), smile, and uniform (black gi, white gi, or shorts with an Engage shirt). The belt it wears is always the belt they've earned.
 
