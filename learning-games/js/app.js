@@ -34,10 +34,10 @@ BD.UI = (function () {
       (next ? ' · ' + (next.xp - xp).toLocaleString() + ' XP to ' + next.name : ' · Highest rank!') + '</span>' +
       '<div class="xp-track"><div class="xp-fill" style="width:' + pct + '%; --belt:' + (next ? next.color : belt.color) + '"></div></div></div></div>';
   }
-  function gradePicker(id, selected) {
+  function gradePicker(id, selected, locked) {
     return '<div class="chips grade-chips" id="' + id + '" role="group" aria-label="Grade level">' +
       BD.GRADES.map(function (g) {
-        return '<button type="button" class="chip' + (g === selected ? " on" : "") + '" data-grade="' + g + '" aria-pressed="' + (g === selected) + '">Grade ' + g + '</button>';
+        return '<button type="button" class="chip' + (g === selected ? " on" : "") + '" data-grade="' + g + '" aria-pressed="' + (g === selected) + '"' + (locked && g !== selected ? " disabled" : "") + '>Grade ' + g + '</button>';
       }).join("") + '</div>';
   }
 
@@ -63,8 +63,15 @@ BD.UI = (function () {
     $("homeHello").textContent = "Ready to train, " + p.name + "?";
     $("homeBelt").innerHTML = beltBar(p.xp);
     $("homeToday").textContent = todays ? todays + (todays === 1 ? " round" : " rounds") + " completed today" : "No rounds yet today";
-    $("homeMathGrade").textContent = "Grade " + p.mathGrade;
-    $("homeSentGrade").innerHTML = gradePicker("sentGradePick", p.sentenceGrade);
+    const retry = p.retry || {};
+    if (retry.sentence) p.sentenceGrade = retry.sentence.grade;
+    $("homeMathGrade").textContent = "Grade " + (retry.math ? retry.math.grade : p.mathGrade);
+    $("homeSentGrade").innerHTML = gradePicker("sentGradePick", p.sentenceGrade, !!retry.sentence);
+    const notes = [];
+    if (retry.math) notes.push("<strong>Math Dojo:</strong> redo Grade " + retry.math.grade + " " + retry.math.ops.map(function (o) { return BD.MathGame.OPS[o].sym; }).join(" ") + " and score " + BD.MathGame.PASS + "% to unlock other levels.");
+    if (retry.sentence) notes.push("<strong>Fix-It Sentences:</strong> redo Grade " + retry.sentence.grade + " and fix " + BD.SentenceGame.PASS + "% to unlock other grades.");
+    $("homeRedo").innerHTML = notes.map(function (n) { return "<p>" + n + "</p>"; }).join("");
+    $("homeRedo").hidden = !notes.length;
     show("screen-home");
   }
 
@@ -81,6 +88,12 @@ BD.UI = (function () {
     $("resBelt").innerHTML = (o.belt.promoted
       ? '<div class="promo" style="--belt:' + o.belt.after.color + '"><span class="promo-eyebrow">Promotion</span><strong>You earned your ' + o.belt.after.name + ' Belt!</strong></div>'
       : "") + beltBar(p.xp);
+    $("resFailed").hidden = !o.failed;
+    $("resFailedText").textContent = o.failed || "";
+    $("resPassed").hidden = !o.passedRetry;
+    $("resPassed").textContent = o.passedRetry || "";
+    $("resLesson").hidden = !o.lesson;
+    $("resLessonBody").innerHTML = o.lesson || "";
     $("resListTitle").textContent = o.listTitle || "";
     $("resListTitle").hidden = !o.listTitle;
     $("resList").innerHTML = (o.list || []).map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("");
@@ -90,7 +103,7 @@ BD.UI = (function () {
     $("resSetup").hidden = !o.setup;
     show("screen-results");
     if (o.belt.promoted) { BD.Sound.belt(); BD.confetti(200); }
-    else { BD.Sound.win(); BD.confetti(80); }
+    else if (!o.failed) { BD.Sound.win(); BD.confetti(80); }
   }
 
   /* ---------- parent corner ---------- */
@@ -116,6 +129,10 @@ BD.UI = (function () {
       }).join("");
       return '<article class="report">' +
         '<header class="report-head">' + avatar(p, "lg") + '<div><h3>' + esc(p.name) + '</h3><p class="muted">' + belt.name + ' Belt · ' + p.xp.toLocaleString() + ' XP · practiced ' + p.days.length + (p.days.length === 1 ? " day" : " days") + '</p></div></header>' +
+        (p.retry && (p.retry.math || p.retry.sentence) ? '<div class="redo-note"><strong>Redo needed</strong><p>' +
+          [p.retry.math ? "Math Dojo Grade " + p.retry.math.grade + " (" + p.retry.math.ops.map(function (o) { return BD.MathGame.OPS[o].label.toLowerCase(); }).join(", ") + ")" : "",
+           p.retry.sentence ? "Fix-It Sentences Grade " + p.retry.sentence.grade : ""].filter(Boolean).join(" and ") +
+          '. Scored under ' + BD.MathGame.PASS + '%, so this level stays locked in until they pass it.</p><button type="button" class="btn btn-small" data-act="clearRedo">Unlock all levels</button></div>' : '') +
         '<h4 class="label">Accuracy by grade <span class="muted">(number answered underneath)</span></h4>' +
         '<div class="table-wrap"><table class="grid"><thead><tr><th></th>' + BD.GRADES.map(function (g) { return '<th>Gr ' + g + '</th>'; }).join("") + '</tr></thead><tbody>' + opRows + sentRow + '</tbody></table></div>' +
         '<h4 class="label">Tricky math facts</h4>' +
@@ -156,7 +173,7 @@ BD.UI = (function () {
     $("playSent").addEventListener("click", function () { BD.SentenceGame.start(); });
     $("homeSentGrade").addEventListener("click", function (e) {
       const b = e.target.closest("[data-grade]"); if (!b) return;
-      const p = BD.Store.current(); p.sentenceGrade = Number(b.dataset.grade); BD.Store.save(); BD.Sound.tap(); home();
+      const p = BD.Store.current(); if (p.retry && p.retry.sentence) return; p.sentenceGrade = Number(b.dataset.grade); BD.Store.save(); BD.Sound.tap(); home();
     });
     $("mathSetupBack").addEventListener("click", home);
     $("resAgain").addEventListener("click", function () { lastResult && lastResult.again(); });
@@ -165,8 +182,12 @@ BD.UI = (function () {
     $("resLevelBtn").addEventListener("click", function () { lastResult && lastResult.levelUp && lastResult.levelUp.action(); });
     $("parentBody").addEventListener("click", function (e) {
       const b = e.target.closest("[data-act]"); if (!b) return;
-      const box = b.closest(".report-actions"), id = box.dataset.id, confirm = box.querySelector(".confirm");
+      const box = b.closest(".report-actions") || b.closest(".report").querySelector(".report-actions"), id = box.dataset.id, confirm = box.querySelector(".confirm");
       const p = BD.Store.get(id);
+      if (b.dataset.act === "clearRedo") {
+        const pl = BD.Store.get(b.closest(".report").querySelector(".report-actions").dataset.id);
+        pl.retry = {}; BD.Store.save(); parent(); return;
+      }
       if (b.dataset.act === "reset" || b.dataset.act === "remove") {
         box.dataset.pending = b.dataset.act;
         confirm.querySelector(".confirm-text").textContent = b.dataset.act === "reset" ? "Erase all of " + p.name + "'s XP and stats?" : "Remove " + p.name + " and all progress?";
@@ -177,20 +198,35 @@ BD.UI = (function () {
         parent();
       }
     });
+    $("infoClose").addEventListener("click", closeSheet);
+    $("infoSheet").addEventListener("click", function (e) { if (e.target === $("infoSheet")) closeSheet(); });
+    document.addEventListener("keydown", function (e) { if (e.key === "Escape" && !$("infoSheet").hidden) closeSheet(); });
     BD.MathGame.bind();
     BD.SentenceGame.bind();
+    BD.Sensei.bind();
   }
+  /* A simple pop-up sheet for lessons and rule books. */
+  function sheet(title, html) {
+    $("infoTitle").textContent = title;
+    $("infoBody").innerHTML = html;
+    $("infoSheet").hidden = false;
+    document.body.classList.add("sheet-lock");
+    setTimeout(function () { $("infoClose").focus(); }, 50);
+  }
+  function closeSheet() { $("infoSheet").hidden = true; if ($("senseiSheet").hidden) document.body.classList.remove("sheet-lock"); }
+  function sheetOpen() { return !$("infoSheet").hidden || !$("senseiSheet").hidden; }
+
   function syncMute() {
     $("muteBtn").textContent = BD.Store.muted ? "Sound off" : "Sound on";
     $("muteBtn").setAttribute("aria-pressed", String(!BD.Store.muted));
   }
 
   function init() {
-    bind(); syncMute();
+    bind(); syncMute(); BD.Sensei.init();
     BD.Store.current() ? home() : players();
   }
 
-  return { show: show, esc: esc, home: home, players: players, results: results, gradePicker: gradePicker, init: init };
+  return { sheet: sheet, sheetOpen: sheetOpen, show: show, esc: esc, home: home, players: players, results: results, gradePicker: gradePicker, init: init };
 })();
 
 document.addEventListener("DOMContentLoaded", BD.UI.init);

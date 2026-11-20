@@ -2,7 +2,7 @@
 window.BD = window.BD || {};
 
 BD.SentenceGame = (function () {
-  const ROUND = 8, TRIES = 3, POINTS = [30, 20, 10], HINT_COST = 5;
+  const ROUND = 8, TRIES = 3, POINTS = [30, 20, 10], HINT_COST = 5, PASS = 70;
   const $ = function (id) { return document.getElementById(id); };
   let S = null;
 
@@ -43,6 +43,7 @@ BD.SentenceGame = (function () {
 
   function start() {
     const p = BD.Store.current();
+    if (p.retry && p.retry.sentence) p.sentenceGrade = p.retry.sentence.grade;
     S = { grade: p.sentenceGrade, items: pickRound(p, p.sentenceGrade), i: 0, xp: 0, solved: 0, firstTry: 0, results: [] };
     BD.UI.show("screen-sentence-play");
     load();
@@ -170,9 +171,22 @@ BD.SentenceGame = (function () {
       const it = BD.SENTENCES.find(function (s) { return s.id === x.id; });
       return answers(it)[0];
     });
-    const ready = S.firstTry >= Math.ceil(total * 0.75) && grade < 7;
+    const failed = acc < PASS;
+    p.retry = p.retry || {};
+    const wasRetry = !!p.retry.sentence;
+    if (failed) p.retry.sentence = { grade: grade }; else p.retry.sentence = null;
+    BD.Store.save();
+    const ready = !failed && S.firstTry >= Math.ceil(total * 0.75) && grade < 7;
+    const types = [];
+    S.results.forEach(function (x) {
+      const it = BD.SENTENCES.find(function (s) { return s.id === x.id; });
+      if (!x.won || x.tries > 1) it.fixes.forEach(function (f) { if (types.indexOf(f.type) === -1) types.push(f.type); });
+    });
     BD.UI.results({
-      title: acc === 100 ? "Outstanding!" : acc >= 75 ? "Sharp eyes!" : "Good training!",
+      title: failed ? "Let's train this again" : wasRetry ? "Level passed!" : acc === 100 ? "Outstanding!" : "Sharp eyes!",
+      failed: failed ? "You fixed " + acc + "%. You need " + PASS + "% to pass Grade " + grade + ". Read the rules below, then try a new set of sentences at this level." : null,
+      passedRetry: wasRetry && !failed ? "You passed with " + acc + "%. All grade levels are unlocked again." : null,
+      lesson: types.length ? rulesHTML(types) : "",
       subtitle: "Fix-It Sentences · Grade " + grade,
       stats: [["Fixed", S.solved + " / " + total], ["First try", S.firstTry], ["Accuracy", acc + "%"], ["XP earned", "+" + S.xp]],
       belt: belt,
@@ -180,9 +194,40 @@ BD.SentenceGame = (function () {
       list: missedItems,
       levelUp: ready ? { text: "You fixed " + S.firstTry + " of " + total + " on the first try. Ready for Grade " + (grade + 1) + "?", action: function () { p.sentenceGrade = grade + 1; BD.Store.save(); start(); } } : null,
       again: start,
-      againLabel: "New sentences",
+      againLabel: failed ? "Redo this level" : "New sentences",
       setup: null
     });
+  }
+
+  function rulesHTML(types) {
+    return types.map(function (k) {
+      const r = BD.Explain.RULES[k];
+      return '<div class="tip tip-' + k + '"><h3><span class="fix-tag fix-' + k + '">' + BD.FIX_TYPES[k].short + '</span> ' + r.title + '</h3><ul>' +
+        r.points.map(function (x) { return "<li>" + BD.UI.esc(x) + "</li>"; }).join("") + '</ul></div>';
+    }).join("");
+  }
+
+  function openRules() {
+    const item = S.items[S.i], types = [];
+    item.fixes.forEach(function (f) { if (types.indexOf(f.type) === -1) types.push(f.type); });
+    BD.UI.sheet("Rule book", rulesHTML(types) + '<details class="worked"><summary>See all the rules</summary>' +
+      rulesHTML(Object.keys(BD.Explain.RULES).filter(function (k) { return types.indexOf(k) === -1; })) + '</details>');
+  }
+
+  function senseiContext() {
+    const item = S.items[S.i];
+    return {
+      title: item.text,
+      grade: S.grade,
+      revealed: S.done,
+      chips: S.done ? ["Why was it wrong?", "Explain the rule again", "Give me another example"]
+                    : ["Give me a hint", "What does this kind of mistake mean?", "Is my sentence close?"],
+      facts: "Sentence-fixing exercise (grade " + S.grade + "). The sentence with mistakes: \"" + item.text + "\"\n" +
+        "Correct version: \"" + answers(item)[0] + "\"\n" +
+        "Mistakes to fix: " + item.fixes.map(function (f) { return BD.FIX_TYPES[f.type].label + " (" + f.explain + ")"; }).join("; ") + "\n" +
+        "Student's current attempt: \"" + $("sentInput").value + "\"\n" +
+        (S.done ? "This sentence is finished and the correct version has been shown." : "The student is still working on it.")
+    };
   }
 
   function reset() {
@@ -197,11 +242,13 @@ BD.SentenceGame = (function () {
     $("sentReset").addEventListener("click", reset);
     $("sentNext").addEventListener("click", next);
     $("sentQuit").addEventListener("click", quit);
+    $("sentRules").addEventListener("click", openRules);
+    $("sentAsk").addEventListener("click", function () { if (S) BD.Sensei.open(senseiContext()); });
     $("sentInput").addEventListener("input", autoSize);
     $("sentInput").addEventListener("keydown", function (e) {
       if (e.key === "Enter") { e.preventDefault(); if (S && !S.done) check(); else if (S) next(); }
     });
   }
 
-  return { start: start, bind: bind, compare: compare, norm: norm };
+  return { PASS: PASS, start: start, bind: bind, compare: compare, norm: norm };
 })();

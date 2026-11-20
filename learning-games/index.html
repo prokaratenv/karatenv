@@ -48,6 +48,7 @@
         <h1 id="homeHello">Ready to train?</h1>
         <p class="muted" id="homeToday"></p>
       </div>
+      <div class="redo-note" id="homeRedo" hidden></div>
       <div class="belt-panel" id="homeBelt"></div>
       <div class="game-grid">
         <article class="game-card game-math">
@@ -87,12 +88,22 @@
         <button type="button" class="btn btn-quiet btn-small" id="mathQuit">Quit</button>
         <span class="meter" id="mathProgress"></span>
         <span class="streak" id="mathStreak" aria-live="polite"></span>
+        <button type="button" class="btn btn-small sensei-btn" id="mathAsk">Ask Sensei</button>
         <span class="score" id="mathScore"></span>
       </div>
       <div class="flashcard" id="mathCard">
         <div class="problem" id="mathProblem"></div>
         <div class="answer empty" id="mathAnswer" aria-live="polite">?</div>
         <div class="card-feedback" id="mathFeedback" aria-live="assertive"></div>
+      </div>
+      <div class="explain-panel" id="mathExplain" hidden>
+        <h2 id="mathExplainTitle">How to solve it</h2>
+        <ol class="steps" id="mathSteps"></ol>
+        <p class="muted small">This card will come back in a few cards. Try it again then!</p>
+        <div class="explain-actions">
+          <button type="button" class="btn sensei-btn" id="mathExplainAsk">Still confused? Ask Sensei</button>
+          <button type="button" class="btn btn-primary" id="mathGotIt">Got it, next card</button>
+        </div>
       </div>
       <div class="keypad" id="mathKeypad"></div>
     </section>
@@ -103,6 +114,8 @@
         <button type="button" class="btn btn-quiet btn-small" id="sentQuit">Quit</button>
         <span class="meter" id="sentProgress"></span>
         <span class="tag" id="sentGradeTag"></span>
+        <button type="button" class="btn btn-small" id="sentRules">Rule book</button>
+        <button type="button" class="btn btn-small sensei-btn" id="sentAsk">Ask Sensei</button>
         <span class="score" id="sentScore"></span>
       </div>
       <div class="sent-card" id="sentCard">
@@ -129,12 +142,21 @@
         <p class="eyebrow" id="resSubtitle"></p>
         <h1 id="resTitle"></h1>
       </div>
+      <div class="redo-note big" id="resFailed" hidden>
+        <strong>Redo this level</strong>
+        <p id="resFailedText"></p>
+      </div>
+      <p class="passed-note" id="resPassed" hidden></p>
       <div class="stats" id="resStats"></div>
       <div class="belt-panel" id="resBelt"></div>
       <div class="level-up" id="resLevel" hidden>
         <p id="resLevelText"></p>
         <button type="button" class="btn btn-primary" id="resLevelBtn">Move up a grade</button>
       </div>
+      <section class="lesson" id="resLesson" hidden>
+        <h2>Sensei's lesson</h2>
+        <div id="resLessonBody"></div>
+      </section>
       <h2 class="label" id="resListTitle" hidden></h2>
       <ul class="res-list" id="resList"></ul>
       <div class="res-actions">
@@ -157,9 +179,33 @@
 </div>
 <canvas id="confetti" aria-hidden="true"></canvas>
 
+<div class="sheet-backdrop" id="infoSheet" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="infoTitle">
+    <div class="sheet-head"><h2 id="infoTitle"></h2><button type="button" class="btn btn-quiet btn-small" id="infoClose">Close</button></div>
+    <div class="sheet-body" id="infoBody"></div>
+  </div>
+</div>
+
+<div class="sheet-backdrop" id="senseiSheet" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="senseiTitle">
+    <div class="sheet-head"><h2 id="senseiTitle">Ask Sensei</h2><button type="button" class="btn btn-quiet btn-small" id="senseiClose">Close</button></div>
+    <p class="sheet-context" id="senseiContext"></p>
+    <div class="sensei-log" id="senseiLog" aria-live="polite"></div>
+    <div class="chips sensei-chips" id="senseiChips"></div>
+    <form class="sensei-form" id="senseiForm" autocomplete="off">
+      <label class="sr-only" for="senseiInput">Your question</label>
+      <input id="senseiInput" type="text" maxlength="300" placeholder="Type your question…">
+      <button type="submit" class="btn btn-primary" id="senseiSend">Ask</button>
+      <button type="button" class="btn btn-quiet" id="senseiStop" hidden>Stop</button>
+    </form>
+  </div>
+</div>
+
 <script src="data/sentence-bank.js"></script>
 <script src="js/storage.js"></script>
 <script src="js/effects.js"></script>
+<script src="js/explain.js"></script>
+<script src="js/sensei.js"></script>
 <script src="js/math-game.js"></script>
 <script src="js/sentence-game.js"></script>
 <script src="js/app.js"></script>
