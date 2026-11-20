@@ -1,6 +1,6 @@
 # Brain Dojo
 
-Free math, writing, reading, spelling and Spanish practice from Pre-K through 8th grade. Kids earn karate belts (White → Yellow → Orange → Green → Blue → Purple → Brown → Red → Black) for the work they do. You don't need an account, a subscription or the internet, and there are no ads.
+Free math, writing, reading, spelling and Spanish practice from Pre-K through 8th grade. Kids earn karate belts (White → Yellow → Orange → Blue → Green → Purple → Brown → Red → Black) for the work they do. You don't need an account, a subscription or the internet, and there are no ads.
 
 ## Belts, stripes and graduation
 
@@ -10,6 +10,8 @@ Free math, writing, reading, spelling and Spanish practice from Pre-K through 8t
 - **Practice:** each stripe has a **Practice** button set to the same level as its test. Practice earns up to **100 XP per stripe**. After that it's "maxed", but they can keep practicing.
 - **Graduation:** the 4th required stripe graduates them to the next belt automatically, with a celebration and a **+100 XP** bonus (400 practice + 100 graduation = 500 XP per belt). Earning all 4 stripes on the Black Belt masters the grade.
 - **Harder each belt:** White and Yellow tests mix in work from the grade below. Purple through Black lean harder, and Red and Black mix in the grade above. In Math, multiplication unlocks at Orange and division at Green.
+- **Hints by belt:** White through Purple can use hints, tiles, the rule book and Ask Sensei. Brown, Red and Black do the work on their own, so those are hidden in practice and free play at that grade (the banner says "no hints").
+- **Belt card:** tap the belt on the home screen to see its stripes, practice XP for each stripe, total Belt XP (out of 500), the next belt, the belt path and past graduations. Tabs along the top switch grades to see the belt for any grade, and **Train this grade** makes it the Dojo grade.
 - **Free play:** the game cards still work for free practice at any grade, and their XP also counts toward that grade's stripes (up to the cap).
 
 ## Spelling Bee and Spanish Dojo
@@ -39,7 +41,7 @@ The game uses the Engage brand (midnight navy, the green-teal-blue streak, gold 
 - **Zumi** is the host.
 - **Master CD** coaches Math Dojo, **Ms. Bridgette** coaches Fix-It Sentences and **Ms. Kyra** coaches Story Scrolls.
 - **Mrs. Master Young** gives Sensei's plan.
-- Kids choose a champion: Kimmy, Billy, Tommy, Mackenzie, Rylan, Zumi, or an instructor (Master CD, Mrs. Master Young, Ms. Bridgette, Ms. Kyra, Miss Lauryn). They can change it by tapping their character on the home screen.
+- Kids choose a champion: Kimmy, Billy, Tommy, Mackenzie, Rylan, Zumi, or an instructor (Master CD, Mrs. Master Young, Ms. Bridgette, Ms. Kyra, Miss Lauryn). They can change it by tapping their character on the home screen. Every champion, instructors included, starts in a White Belt and wears whatever belt the student has earned at the current Dojo grade, so they earn their way up again.
 
 - **Build your own champion:** in "Change champion", kids can design a character. They choose boy or girl, height, build, skin tone, hairstyle, hair color, eye color, face extras (freckles, glasses, rosy cheeks), smile, and uniform (black gi, white gi, or shorts with an Engage shirt). The belt it wears is always the belt they've earned.
 

@@ -162,7 +162,7 @@ BD.Reading = (function () {
     const grade = p.readingGrade;
     R = { grade: grade, focus: focus, passages: stripe ? beltPassages(p, grade, stripe.belt) : choose(p, grade, focus), pi: 0, qi: 0, xp: 0, results: [], stripe: stripe || null, test: !!(stripe && stripe.test) };
     BD.UI.show("screen-read-play");
-    BD.UI.testMode("screen-read-play", R.test ? "Comprehension stripe test" : stripe ? "Comprehension stripe practice · " + BD.BELTS[stripe.belt].name + " Belt" : "");
+    BD.UI.testMode("screen-read-play", R.test ? "Comprehension stripe test" : stripe ? "Comprehension stripe practice · " + BD.BELTS[stripe.belt].name + " Belt" : "", !BD.Rank.hintsAllowed(BD.Store.current(), R.grade));
     BD.Cast.say("readSay", "start");
     loadPassage();
     topUp(p, grade);

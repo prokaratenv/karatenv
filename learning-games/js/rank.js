@@ -121,8 +121,11 @@ BD.Rank = (function () {
     return out.slice(0, 2);
   }
 
+  /* White through Purple may use hints; Brown, Red and Black do it on their own. */
+  function hintsAllowed(p, grade) { return rec(p, grade).belt <= 5; }
+
   return {
-    PASS: PASS, PRACTICE_MAX: PRACTICE_MAX, GRAD_XP: GRAD_XP, SUBJECTS: SUBJECTS, REQUIRED: REQUIRED, BY_GAME: BY_GAME,
+    hintsAllowed: hintsAllowed, PASS: PASS, PRACTICE_MAX: PRACTICE_MAX, GRAD_XP: GRAD_XP, SUBJECTS: SUBJECTS, REQUIRED: REQUIRED, BY_GAME: BY_GAME,
     subject: subject, rec: rec, dojoGrade: dojoGrade, belt: belt, stripeCount: stripeCount, beltXP: beltXP,
     practice: practice, testDone: testDone, itemGrade: itemGrade, levelNote: levelNote, beltSVG: beltSVG, planItems: planItems
   };

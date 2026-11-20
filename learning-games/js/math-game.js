@@ -235,7 +235,7 @@ BD.MathGame = (function () {
     }
     buildKeypad();
     BD.UI.syncGradeSelect("mathGradeSel", "math");
-    BD.UI.testMode("screen-math-play", S.test ? "Math stripe test" : S.stripe ? "Math stripe practice · " + BD.BELTS[S.stripe.belt].name + " Belt" : "");
+    BD.UI.testMode("screen-math-play", S.test ? "Math stripe test" : S.stripe ? "Math stripe practice · " + BD.BELTS[S.stripe.belt].name + " Belt" : "", !BD.Rank.hintsAllowed(BD.Store.current(), S.grade));
     BD.UI.show("screen-math-play");
     BD.Cast.say("mathSay", "start");
     render();

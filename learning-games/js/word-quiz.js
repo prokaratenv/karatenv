@@ -134,7 +134,7 @@ BD.WordQuiz = (function () {
     const grade = p[g.field];
     W = { game: game, g: g, grade: grade, items: stripe ? g.beltRound(p, grade, stripe.belt) : g.round(p, grade), i: 0, xp: 0, correct: 0, firstTry: 0, answered: 0, streak: 0, best: 0, missed: [], stripe: stripe || null, test: !!(stripe && stripe.test) };
     const label = BD.Rank.subject(BD.Rank.BY_GAME[game]).label;
-    BD.UI.testMode("screen-word-play", W.test ? label + " stripe test" : stripe ? label + " stripe practice · " + BD.BELTS[stripe.belt].name + " Belt" : "");
+    BD.UI.testMode("screen-word-play", W.test ? label + " stripe test" : stripe ? label + " stripe practice · " + BD.BELTS[stripe.belt].name + " Belt" : "", !BD.Rank.hintsAllowed(BD.Store.current(), grade));
     $("wordCoachFace").src = BD.Cast.face(g.coach);
     $("wordCoachName").textContent = BD.Cast.name(g.coach);
     BD.UI.syncGradeSelect("wordGradeSel", game);
@@ -166,7 +166,8 @@ BD.WordQuiz = (function () {
       $("wordInput").value = ""; $("wordInput").readOnly = false;
       $("wordInput").placeholder = q.mode === "spell" ? "Type the word" : "Type the Spanish word";
       $("wordCheck").hidden = false; $("wordCheck").disabled = false;
-      showTiles(q.tilesFirst);
+      W.noHints = !BD.Rank.hintsAllowed(BD.Store.current(), W.grade);
+      showTiles(q.tilesFirst && !W.noHints);
       $("wordTilesBtn").hidden = q.mode !== "spell" || q.tilesFirst;
       setTimeout(function () { $("wordInput").focus(); }, 60);
     } else {

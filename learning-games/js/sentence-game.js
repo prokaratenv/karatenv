@@ -52,7 +52,7 @@ BD.SentenceGame = (function () {
     const items = stripe ? beltItems(stripe.grade, stripe.belt, 8) : BD.SentenceGen.round(p, p.sentenceGrade, ROUND, focus);
     S = { grade: p.sentenceGrade, items: items, focus: focus, i: 0, xp: 0, solved: 0, firstTry: 0, results: [], stripe: stripe || null, test: !!(stripe && stripe.test) };
     BD.UI.show("screen-sentence-play");
-    BD.UI.testMode("screen-sentence-play", S.test ? "Reading stripe test" : stripe ? "Reading stripe practice · " + BD.BELTS[stripe.belt].name + " Belt" : "");
+    BD.UI.testMode("screen-sentence-play", S.test ? "Reading stripe test" : stripe ? "Reading stripe practice · " + BD.BELTS[stripe.belt].name + " Belt" : "", !BD.Rank.hintsAllowed(BD.Store.current(), S.grade));
     BD.Cast.say("sentSay", "start");
     load();
     BD.SentenceGen.topUp(p, S.grade); // ask Claude for more sentences if the bank is running low
