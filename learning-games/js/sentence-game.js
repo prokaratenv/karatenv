@@ -47,7 +47,7 @@ BD.SentenceGame = (function () {
     S.tries = 0; S.hints = 0; S.done = false;
     $("sentProgress").textContent = "Sentence " + (S.i + 1) + " of " + S.items.length;
     $("sentScore").textContent = S.xp + " XP";
-    $("sentGradeTag").textContent = "Grade " + S.grade;
+    BD.UI.syncGradeSelect("sentGradeSel", "sentence");
     $("sentOriginal").textContent = item.text;
     const input = $("sentInput");
     input.value = item.text; input.readOnly = false;
@@ -233,14 +233,20 @@ BD.SentenceGame = (function () {
     $("sentInput").value = S.items[S.i].text; autoSize(); $("sentInput").focus();
   }
 
-  function quit() { S = null; BD.UI.home(); }
+  function stop() { S = null; }
+  function changeGrade(g) {
+    const focus = S && S.focus;
+    if (!BD.UI.setGrade("sentence", g)) { BD.UI.syncGradeSelect("sentGradeSel", "sentence"); return; }
+    start(focus);
+  }
 
   function bind() {
     $("sentCheck").addEventListener("click", check);
     $("sentHint").addEventListener("click", hint);
     $("sentReset").addEventListener("click", reset);
     $("sentNext").addEventListener("click", next);
-    $("sentQuit").addEventListener("click", quit);
+    $("sentQuit").addEventListener("click", BD.UI.back);
+    $("sentGradeSel").addEventListener("change", function (e) { changeGrade(Number(e.target.value)); });
     $("sentRules").addEventListener("click", openRules);
     $("sentAsk").addEventListener("click", function () { if (S) BD.Sensei.open(senseiContext()); });
     $("sentInput").addEventListener("input", autoSize);
@@ -249,5 +255,5 @@ BD.SentenceGame = (function () {
     });
   }
 
-  return { PASS: PASS, start: start, bind: bind, compare: compare, norm: norm };
+  return { stop: stop, PASS: PASS, start: start, bind: bind, compare: compare, norm: norm };
 })();

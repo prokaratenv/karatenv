@@ -63,6 +63,13 @@ Open the game from the shared Claude link while signed in to Claude. Each studen
 
 Each Claude account keeps its own private set of students, so the person sharing the link can't see the other family's data, and vice versa.
 
+## Grade levels and the Back button
+
+- **Each game has its own grade level.** A child can do Grade 3 math, Grade 5 sentences and Grade 4 reading. Set each one on its game card on the home screen.
+- **Change the grade inside a game:** the grade drop-down next to Back starts a fresh round at the new grade right away. Use it when a level is too hard (or too easy) right now.
+- **Lowering is always allowed**, even during a redo (it ends the redo for that game). Raising waits until the redo is passed, or until you unlock it in the Parent corner.
+- **Back** returns to the previous screen. Leaving a round in the middle doesn't award XP for it.
+
 ## Learning as they go
 
 - **Step-by-step help:** when a math card is answered wrong in Practice Kata, the game shows how to solve *that exact problem* (make-a-ten, borrowing, the nines trick, long division, negative-number sign rules and more). The card comes back a few cards later so they can try again.

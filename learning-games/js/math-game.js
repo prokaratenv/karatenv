@@ -126,7 +126,7 @@ BD.MathGame = (function () {
     const ops = p.mathOps && p.mathOps.length ? p.mathOps : ["add", "sub", "mul", "div"];
     $("mathSetupBody").innerHTML =
       (retry ? '<div class="redo-note"><strong>Redo this level</strong><p>Score ' + PASS + '% or better on Grade ' + grade + ' ' +
-        ops.map(function (o) { return OPS[o].label.toLowerCase(); }).join(", ") + ' to unlock the other levels. Read Sensei\'s tips first.</p>' +
+        ops.map(function (o) { return OPS[o].label.toLowerCase(); }).join(", ") + ' to unlock higher grades. Read Sensei\'s tips first. Too hard right now? Pick a lower grade below.</p>' +
         '<button type="button" class="btn btn-small" id="mathTipsBtn">Read the tips</button></div>' : '') +
       '<div class="setup-block"><h3 class="label">Grade level</h3>' + BD.UI.gradePicker("mathGradePick", grade, !!retry) +
       '<p class="muted" id="mathLevelAbout">' + LEVELS[grade].about + '</p></div>' +
@@ -145,8 +145,8 @@ BD.MathGame = (function () {
       BD.UI.sheet("Sensei's tips", lessonHTML(grade, ops, []));
     });
     $("mathGradePick").addEventListener("click", function (e) {
-      const b = e.target.closest("[data-grade]"); if (!b || retry) return;
-      p.mathGrade = Number(b.dataset.grade); BD.Store.save(); BD.Sound.tap(); openSetup();
+      const b = e.target.closest("[data-grade]"); if (!b || b.disabled) return;
+      if (BD.UI.setGrade("math", Number(b.dataset.grade))) { BD.Sound.tap(); openSetup(); }
     });
     $("mathOpsPick").addEventListener("click", function (e) {
       const b = e.target.closest("[data-op]"); if (!b || retry) return;
@@ -167,6 +167,7 @@ BD.MathGame = (function () {
   function start(mode, focusOps) {
     const p = BD.Store.current();
     if (p.retry && p.retry.math) { p.mathGrade = p.retry.math.grade; focusOps = p.retry.math.ops; }
+    if (S && S.timer) clearInterval(S.timer);
     S = {
       mode: mode, grade: p.mathGrade, ops: (focusOps && focusOps.length ? focusOps : p.mathOps).slice(), queue: [], i: 0,
       input: "", locked: false, correct: 0, answered: 0, streak: 0, bestStreak: 0,
@@ -182,6 +183,7 @@ BD.MathGame = (function () {
       S.timer = setInterval(tick, 200);
     }
     buildKeypad();
+    BD.UI.syncGradeSelect("mathGradeSel", "math");
     BD.UI.show("screen-math-play");
     render();
   }
@@ -313,10 +315,17 @@ BD.MathGame = (function () {
     render();
   }
 
-  function quit() {
+  /* Leave the round without finishing it (Back button or grade change). */
+  function stop() {
     if (!S) return;
     clearInterval(S.timer); S = null;
-    BD.UI.home();
+  }
+  function changeGrade(g) {
+    if (!S) return;
+    const mode = S.mode, ops = S.ops;
+    if (!BD.UI.setGrade("math", g)) { BD.UI.syncGradeSelect("mathGradeSel", "math"); return; }
+    stop();
+    start(mode, ops);
   }
 
   function finish() {
@@ -399,11 +408,12 @@ BD.MathGame = (function () {
     $("mathKeypad").addEventListener("click", function (e) {
       const b = e.target.closest("[data-key]"); if (b) press(b.dataset.key);
     });
-    $("mathQuit").addEventListener("click", quit);
+    $("mathQuit").addEventListener("click", BD.UI.back);
+    $("mathGradeSel").addEventListener("change", function (e) { changeGrade(Number(e.target.value)); });
     $("mathGotIt").addEventListener("click", advance);
     $("mathAsk").addEventListener("click", function () { if (S && !S.done) BD.Sensei.open(senseiContext()); });
     $("mathExplainAsk").addEventListener("click", function () { if (S && !S.done) BD.Sensei.open(senseiContext()); });
   }
 
-  return { start: start, openSetup: openSetup, bind: bind, makeProblem: makeProblem, LEVELS: LEVELS, OPS: OPS, show: show, PASS: PASS };
+  return { stop: stop, start: start, openSetup: openSetup, bind: bind, makeProblem: makeProblem, LEVELS: LEVELS, OPS: OPS, show: show, PASS: PASS };
 })();

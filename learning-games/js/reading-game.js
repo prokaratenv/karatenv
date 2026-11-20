@@ -160,7 +160,7 @@ BD.Reading = (function () {
     const ps = passage();
     $("readTitle").textContent = ps.title;
     $("readText").textContent = ps.text;
-    $("readGradeTag").textContent = "Grade " + R.grade;
+    BD.UI.syncGradeSelect("readGradeSel", "reading");
     loadQuestion();
   }
 
@@ -320,16 +320,22 @@ BD.Reading = (function () {
     return items;
   }
 
-  function quit() { R = null; BD.UI.home(); }
+  function stop() { R = null; }
+  function changeGrade(g) {
+    const focus = R && R.focus;
+    if (!BD.UI.setGrade("reading", g)) { BD.UI.syncGradeSelect("readGradeSel", "reading"); return; }
+    start(focus);
+  }
 
   function bind() {
     $("readCheck").addEventListener("click", check);
     $("readHint").addEventListener("click", hint);
     $("readNext").addEventListener("click", next);
-    $("readQuit").addEventListener("click", quit);
+    $("readQuit").addEventListener("click", BD.UI.back);
+    $("readGradeSel").addEventListener("change", function (e) { changeGrade(Number(e.target.value)); });
     $("readTips").addEventListener("click", function () { BD.UI.sheet("Reading tips", tipsHTML(Object.keys(BD.READ_TYPES))); });
     $("readAsk").addEventListener("click", function () { if (R) BD.Sensei.open(senseiContext()); });
   }
 
-  return { start: start, bind: bind, applyRemoteBank: applyRemoteBank, planItems: planItems, keywordCheck: keywordCheck, validPassage: validPassage, PASS: PASS, bankItems: bankItems };
+  return { stop: stop, start: start, bind: bind, applyRemoteBank: applyRemoteBank, planItems: planItems, keywordCheck: keywordCheck, validPassage: validPassage, PASS: PASS, bankItems: bankItems };
 })();

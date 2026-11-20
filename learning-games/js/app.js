@@ -7,8 +7,15 @@ BD.UI = (function () {
     return String(s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; });
   };
 
-  let currentScreen = null;
+  let currentScreen = null, goingBack = false;
+  const trail = [];   // screens visited, for the Back button
+  const PLAY = ["screen-math-play", "screen-sentence-play", "screen-read-play"];
   function show(id) {
+    if (!goingBack && currentScreen && currentScreen !== id) {
+      trail.push(currentScreen);
+      if (trail.length > 30) trail.shift();
+    }
+    if (id === "screen-players" || id === "screen-home") trail.length = 0; // home is the top
     currentScreen = id;
     if (id !== "screen-results") BD.confetti.stop();
     document.querySelectorAll(".screen").forEach(function (s) { s.hidden = s.id !== id; });
@@ -36,10 +43,60 @@ BD.UI = (function () {
       (next ? ' · ' + (next.xp - xp).toLocaleString() + ' XP to ' + next.name : ' · Highest rank!') + '</span>' +
       '<div class="xp-track"><div class="xp-fill" style="width:' + pct + '%; --belt:' + (next ? next.color : belt.color) + '"></div></div></div></div>';
   }
+  /* ---------- Back button ---------- */
+  function stopGames() {
+    if (BD.MathGame.stop) BD.MathGame.stop();
+    if (BD.SentenceGame.stop) BD.SentenceGame.stop();
+    if (BD.Reading.stop) BD.Reading.stop();
+  }
+  function back() {
+    BD.Sound.tap();
+    stopGames();
+    let target = null;
+    while (trail.length) {
+      const t = trail.pop();
+      if (t !== currentScreen && PLAY.indexOf(t) === -1) { target = t; break; }
+    }
+    goingBack = true;
+    try {
+      if (target === "screen-math-setup") BD.MathGame.openSetup();
+      else if (target === "screen-parent") parent();
+      else if (target === "screen-players") players();
+      else if (target === "screen-results" && lastResult) results(lastResult, true);
+      else if (BD.Store.current()) home();
+      else players();
+    } finally { goingBack = false; }
+  }
+
+  /* ---------- grade levels (each game has its own) ---------- */
+  const GRADE_FIELD = { math: "mathGrade", sentence: "sentenceGrade", reading: "readingGrade" };
+  /* Change one game's grade. Going DOWN is always allowed, even during a redo
+     (it ends the redo). Going UP waits until the redo is passed. */
+  function setGrade(game, g) {
+    const p = BD.Store.current(); if (!p) return false;
+    p.retry = p.retry || {};
+    const r = p.retry[game];
+    if (r && g > r.grade) return false;
+    if (r && g < r.grade) p.retry[game] = null;
+    p[GRADE_FIELD[game]] = g;
+    BD.Store.save(p);
+    return true;
+  }
+  /* The grade drop-down shown inside each game. */
+  function syncGradeSelect(selId, game) {
+    const p = BD.Store.current(), sel = $(selId);
+    const r = p.retry && p.retry[game];
+    const cur = p[GRADE_FIELD[game]];
+    sel.innerHTML = BD.GRADES.map(function (g) {
+      return '<option value="' + g + '"' + (r && g > r.grade ? " disabled" : "") + '>Grade ' + g + (r && g > r.grade ? " (locked)" : "") + '</option>';
+    }).join("");
+    sel.value = String(cur);
+  }
+
   function gradePicker(id, selected, locked) {
     return '<div class="chips grade-chips" id="' + id + '" role="group" aria-label="Grade level">' +
       BD.GRADES.map(function (g) {
-        return '<button type="button" class="chip' + (g === selected ? " on" : "") + '" data-grade="' + g + '" aria-pressed="' + (g === selected) + '"' + (locked && g !== selected ? " disabled" : "") + '>Grade ' + g + '</button>';
+        return '<button type="button" class="chip' + (g === selected ? " on" : "") + '" data-grade="' + g + '" aria-pressed="' + (g === selected) + '"' + (locked && g > selected ? " disabled" : "") + '>Grade ' + g + '</button>';
       }).join("") + '</div>';
   }
 
@@ -67,7 +124,8 @@ BD.UI = (function () {
     $("homeToday").textContent = todays ? todays + (todays === 1 ? " round" : " rounds") + " completed today" : "No rounds yet today";
     const retry = p.retry || {};
     if (retry.sentence) p.sentenceGrade = retry.sentence.grade;
-    $("homeMathGrade").textContent = "Grade " + (retry.math ? retry.math.grade : p.mathGrade);
+    if (retry.math) p.mathGrade = retry.math.grade;
+    $("homeMathGrade").innerHTML = gradePicker("mathHomePick", p.mathGrade, !!retry.math);
     $("homeSentGrade").innerHTML = gradePicker("sentGradePick", p.sentenceGrade, !!retry.sentence);
     if (retry.reading) p.readingGrade = retry.reading.grade;
     $("homeReadGrade").innerHTML = gradePicker("readGradePick", p.readingGrade, !!retry.reading);
@@ -112,7 +170,7 @@ BD.UI = (function () {
 
   /* ---------- results ---------- */
   let lastResult = null;
-  function results(o) {
+  function results(o, quiet) {
     lastResult = o;
     $("resTitle").textContent = o.title;
     $("resSubtitle").textContent = o.subtitle;
@@ -139,7 +197,8 @@ BD.UI = (function () {
     $("resAgain").textContent = o.againLabel || "Play again";
     $("resSetup").hidden = !o.setup;
     show("screen-results");
-    if (o.belt.promoted) { BD.Sound.belt(); BD.confetti(200); }
+    if (quiet) { /* returning with Back: no fanfare */ }
+    else if (o.belt.promoted) { BD.Sound.belt(); BD.confetti(200); }
     else if (!o.failed) { BD.Sound.win(); BD.confetti(80); }
   }
 
@@ -220,22 +279,20 @@ BD.UI = (function () {
       BD.Store.muted = !BD.Store.muted; syncMute();
     });
     $("parentBtn").addEventListener("click", parent);
-    $("parentBack").addEventListener("click", function () { BD.Store.current() ? home() : players(); });
+    $("parentBack").addEventListener("click", back);
+    [["homeMathGrade", "math"], ["homeSentGrade", "sentence"], ["homeReadGrade", "reading"]].forEach(function (pair) {
+      $(pair[0]).addEventListener("click", function (e) {
+        const b = e.target.closest("[data-grade]"); if (!b || b.disabled) return;
+        if (setGrade(pair[1], Number(b.dataset.grade))) { BD.Sound.tap(); home(); }
+      });
+    });
     $("playMath").addEventListener("click", function () { BD.MathGame.openSetup(); });
     $("playSent").addEventListener("click", function () { BD.SentenceGame.start(); });
     $("playRead").addEventListener("click", function () { BD.Reading.start(); });
-    $("homeReadGrade").addEventListener("click", function (e) {
-      const b = e.target.closest("[data-grade]"); if (!b) return;
-      const p = BD.Store.current(); if (p.retry && p.retry.reading) return; p.readingGrade = Number(b.dataset.grade); BD.Store.save(p); BD.Sound.tap(); home();
-    });
     $("homePlanList").addEventListener("click", function (e) {
       const b = e.target.closest("[data-plan]"); if (b && planItems[Number(b.dataset.plan)]) runPlan(planItems[Number(b.dataset.plan)]);
     });
-    $("homeSentGrade").addEventListener("click", function (e) {
-      const b = e.target.closest("[data-grade]"); if (!b) return;
-      const p = BD.Store.current(); if (p.retry && p.retry.sentence) return; p.sentenceGrade = Number(b.dataset.grade); BD.Store.save(); BD.Sound.tap(); home();
-    });
-    $("mathSetupBack").addEventListener("click", home);
+    $("mathSetupBack").addEventListener("click", back);
     $("resAgain").addEventListener("click", function () { lastResult && lastResult.again(); });
     $("resSetup").addEventListener("click", function () { lastResult && lastResult.setup && lastResult.setup(); });
     $("resHome").addEventListener("click", home);
@@ -289,7 +346,7 @@ BD.UI = (function () {
     BD.Store.current() ? home() : players();
   }
 
-  return { refresh: refresh, sheet: sheet, sheetOpen: sheetOpen, show: show, esc: esc, home: home, players: players, results: results, gradePicker: gradePicker, init: init };
+  return { back: back, setGrade: setGrade, syncGradeSelect: syncGradeSelect, refresh: refresh, sheet: sheet, sheetOpen: sheetOpen, show: show, esc: esc, home: home, players: players, results: results, gradePicker: gradePicker, init: init };
 })();
 
 document.addEventListener("DOMContentLoaded", BD.UI.init);
