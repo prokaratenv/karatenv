@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Brain Dojo</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Free math flashcards and sentence-fixing practice for grades 3 to 7, with karate belts to earn.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800&display=swap">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <button type="button" class="brand" id="brandHome" aria-label="Brain Dojo home">
+      <span class="brand-mark" aria-hidden="true"></span>Brain Dojo
+    </button>
+    <div class="topbar-actions">
+      <button type="button" class="player-chip" id="playerChip" hidden title="Switch student"></button>
+      <button type="button" class="btn btn-quiet btn-small" id="muteBtn" aria-pressed="true">Sound on</button>
+      <button type="button" class="btn btn-quiet btn-small" id="parentBtn">Parents</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- Choose player -->
+    <section class="screen" id="screen-players" hidden>
+      <div class="hero">
+        <p class="eyebrow">Math and writing practice, grades 3–7</p>
+        <h1>Who's training today?</h1>
+      </div>
+      <div class="player-list" id="playerList"></div>
+      <form class="add-player" id="addPlayerForm" autocomplete="off">
+        <h2 class="label">Add a student</h2>
+        <div class="add-row">
+          <label class="field"><span>Name</span><input id="newName" type="text" maxlength="20" placeholder="First name" required></label>
+          <label class="field"><span>Starting grade</span><select id="newGrade"></select></label>
+          <button type="submit" class="btn btn-primary" id="addPlayerBtn">Add student</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Dojo home -->
+    <section class="screen" id="screen-home" hidden>
+      <div class="hero">
+        <h1 id="homeHello">Ready to train?</h1>
+        <p class="muted" id="homeToday"></p>
+      </div>
+      <div class="belt-panel" id="homeBelt"></div>
+      <div class="game-grid">
+        <article class="game-card game-math">
+          <div class="game-art" aria-hidden="true"><span>7×8</span><span>48÷6</span><span>36+9</span></div>
+          <div class="game-body">
+            <p class="eyebrow" id="homeMathGrade">Grade 3</p>
+            <h2>Math Dojo</h2>
+            <p>Flashcards for adding, subtracting, multiplying and dividing. Build streaks, beat the clock, earn XP.</p>
+            <button type="button" class="btn btn-primary btn-big" id="playMath">Play Math Dojo</button>
+          </div>
+        </article>
+        <article class="game-card game-sent">
+          <div class="game-art sent-art" aria-hidden="true"><span><s>the</s> The</span><span>dog<b>.</b></span></div>
+          <div class="game-body">
+            <p class="eyebrow">Grade level</p>
+            <div id="homeSentGrade"></div>
+            <h2>Fix-It Sentences</h2>
+            <p>Each sentence has mistakes in capitals, punctuation, spelling or grammar. Find them and fix them.</p>
+            <button type="button" class="btn btn-primary btn-big" id="playSent">Play Fix-It Sentences</button>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- Math setup -->
+    <section class="screen" id="screen-math-setup" hidden>
+      <div class="screen-head">
+        <button type="button" class="btn btn-quiet btn-small" id="mathSetupBack">Back</button>
+        <h1>Math Dojo</h1>
+      </div>
+      <div id="mathSetupBody"></div>
+    </section>
+
+    <!-- Math play -->
+    <section class="screen play" id="screen-math-play" hidden>
+      <div class="playbar">
+        <button type="button" class="btn btn-quiet btn-small" id="mathQuit">Quit</button>
+        <span class="meter" id="mathProgress"></span>
+        <span class="streak" id="mathStreak" aria-live="polite"></span>
+        <span class="score" id="mathScore"></span>
+      </div>
+      <div class="flashcard" id="mathCard">
+        <div class="problem" id="mathProblem"></div>
+        <div class="answer empty" id="mathAnswer" aria-live="polite">?</div>
+        <div class="card-feedback" id="mathFeedback" aria-live="assertive"></div>
+      </div>
+      <div class="keypad" id="mathKeypad"></div>
+    </section>
+
+    <!-- Sentence play -->
+    <section class="screen play" id="screen-sentence-play" hidden>
+      <div class="playbar">
+        <button type="button" class="btn btn-quiet btn-small" id="sentQuit">Quit</button>
+        <span class="meter" id="sentProgress"></span>
+        <span class="tag" id="sentGradeTag"></span>
+        <span class="score" id="sentScore"></span>
+      </div>
+      <div class="sent-card" id="sentCard">
+        <p class="label">Fix this sentence</p>
+        <p class="sent-original" id="sentOriginal"></p>
+        <div class="mistakes" id="sentMistakes"></div>
+        <label class="sr-only" for="sentInput">Your corrected sentence</label>
+        <textarea id="sentInput" class="sent-input" rows="2" spellcheck="false" autocorrect="off" autocapitalize="off" autocomplete="off"></textarea>
+        <div class="sent-actions">
+          <button type="button" class="btn btn-quiet" id="sentReset">Start over</button>
+          <button type="button" class="btn btn-quiet" id="sentHint">Hint <small>(−5 XP)</small></button>
+          <span class="tries" id="sentTries"></span>
+          <button type="button" class="btn btn-primary" id="sentCheck">Check</button>
+          <button type="button" class="btn btn-primary" id="sentNext" hidden>Next sentence</button>
+        </div>
+        <ul class="hints" id="sentHints"></ul>
+        <div class="sent-feedback" id="sentFeedback" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <!-- Results -->
+    <section class="screen" id="screen-results" hidden>
+      <div class="hero">
+        <p class="eyebrow" id="resSubtitle"></p>
+        <h1 id="resTitle"></h1>
+      </div>
+      <div class="stats" id="resStats"></div>
+      <div class="belt-panel" id="resBelt"></div>
+      <div class="level-up" id="resLevel" hidden>
+        <p id="resLevelText"></p>
+        <button type="button" class="btn btn-primary" id="resLevelBtn">Move up a grade</button>
+      </div>
+      <h2 class="label" id="resListTitle" hidden></h2>
+      <ul class="res-list" id="resList"></ul>
+      <div class="res-actions">
+        <button type="button" class="btn btn-primary btn-big" id="resAgain">Play again</button>
+        <button type="button" class="btn btn-quiet" id="resSetup">Change skills</button>
+        <button type="button" class="btn btn-quiet" id="resHome">Dojo home</button>
+      </div>
+    </section>
+
+    <!-- Parent corner -->
+    <section class="screen" id="screen-parent" hidden>
+      <div class="screen-head">
+        <button type="button" class="btn btn-quiet btn-small" id="parentBack">Back</button>
+        <h1>Parent corner</h1>
+      </div>
+      <p class="muted">Progress is saved on this device only. Nothing is sent anywhere.</p>
+      <div id="parentBody"></div>
+    </section>
+  </main>
+</div>
+<canvas id="confetti" aria-hidden="true"></canvas>
+
+<script src="data/sentence-bank.js"></script>
+<script src="js/storage.js"></script>
+<script src="js/effects.js"></script>
+<script src="js/math-game.js"></script>
+<script src="js/sentence-game.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
