@@ -292,7 +292,7 @@ BD.Reading = (function () {
     p.retry = p.retry || {};
     const wasRetry = !!p.retry.reading;
     p.retry.reading = failed ? { grade: grade } : null;
-    const belt = BD.Rank.practice(p, "reading", grade, R.xp);
+    const belt = BD.Rank.practice(p, "reading", grade, R.xp - (R.banked || 0)); R.banked = R.xp;
     BD.Store.recordSession(p, { game: "reading", grade: grade, correct: full, total: R.results.length, xp: R.xp, score: acc });
     const weakTypes = [];
     R.results.forEach(function (x) { if (x.best < 2 && weakTypes.indexOf(x.type) === -1) weakTypes.push(x.type); });
@@ -346,7 +346,8 @@ BD.Reading = (function () {
     return items;
   }
 
-  function stop() { R = null; BD.Speech.stop(); }
+  function stop() { if (R) BD.Rank.bank(R, "reading"); R = null; BD.Speech.stop(); }
+  function bankNow() { if (R) BD.Rank.bank(R, "reading"); }
   function changeGrade(g) {
     const focus = R && R.focus;
     if (!BD.UI.setGrade("reading", g)) { BD.UI.syncGradeSelect("readGradeSel", "reading"); return; }
@@ -369,5 +370,5 @@ BD.Reading = (function () {
 
   function peek() { return R && R.passages[R.pi] && R.passages[R.pi].questions[R.qi]; }
 
-  return { peek: peek, stop: stop, start: start, bind: bind, applyRemoteBank: applyRemoteBank, planItems: planItems, keywordCheck: keywordCheck, validPassage: validPassage, PASS: PASS, bankItems: bankItems };
+  return { bankNow: bankNow, peek: peek, stop: stop, start: start, bind: bind, applyRemoteBank: applyRemoteBank, planItems: planItems, keywordCheck: keywordCheck, validPassage: validPassage, PASS: PASS, bankItems: bankItems };
 })();

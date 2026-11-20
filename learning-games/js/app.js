@@ -220,6 +220,15 @@ BD.UI = (function () {
     setTimeout(function () { BD.confetti(180); }, 900);
   }
 
+  /* Leaving the app mid-round (switching apps, locking the phone, closing
+     the tab): bank the XP earned so far and push the save right away. */
+  function saveEverything() {
+    [BD.MathGame, BD.SentenceGame, BD.Reading, BD.WordQuiz].forEach(function (g) { if (g && g.bankNow) try { g.bankNow(); } catch (e) { /* keep going */ } });
+    if (BD.Sync && BD.Sync.flushNow) BD.Sync.flushNow();
+  }
+  document.addEventListener("visibilitychange", function () { if (document.visibilityState === "hidden") saveEverything(); });
+  window.addEventListener("pagehide", saveEverything);
+
   /* ---------- Back button ---------- */
   function stopGames() {
     if (BD.MathGame.stop) BD.MathGame.stop();
@@ -460,6 +469,7 @@ BD.UI = (function () {
         '<h4 class="label">Recent rounds</h4>' +
         (recent ? '<div class="table-wrap"><table class="grid recent"><tbody>' + recent + '</tbody></table></div>' : '<p class="muted">No rounds yet.</p>') +
         '<div class="report-actions" data-id="' + p.id + '">' +
+        '<button type="button" class="btn btn-primary" data-act="backup">Back up progress</button>' +
         '<button type="button" class="btn btn-quiet" data-act="reset">Reset progress</button>' +
         '<button type="button" class="btn btn-quiet danger" data-act="remove">Remove student</button>' +
         '<span class="confirm" hidden><span class="confirm-text"></span> <button type="button" class="btn btn-small danger" data-act="yes">Yes</button> <button type="button" class="btn btn-small" data-act="no">Cancel</button></span>' +
@@ -529,6 +539,7 @@ BD.UI = (function () {
         const pl = BD.Store.get(b.closest(".report").querySelector(".report-actions").dataset.id);
         pl.retry = {}; BD.Store.save(pl); parent(); return;
       }
+      if (b.dataset.act === "backup") { BD.Backup.openBackup(p); return; }
       if (b.dataset.act === "reset" || b.dataset.act === "remove") {
         box.dataset.pending = b.dataset.act;
         confirm.querySelector(".confirm-text").textContent = b.dataset.act === "reset" ? "Erase all of " + p.name + "'s XP and stats?" : "Remove " + p.name + " and all progress?";
@@ -540,6 +551,7 @@ BD.UI = (function () {
       }
     });
     $("infoClose").addEventListener("click", closeSheet);
+    $("restoreBtn").addEventListener("click", function () { BD.Backup.openRestore(); });
     $("infoSheet").addEventListener("click", function (e) { if (e.target === $("infoSheet")) closeSheet(); });
     document.addEventListener("keydown", function (e) { if (e.key === "Escape" && !$("infoSheet").hidden) closeSheet(); });
     BD.MathGame.bind();

@@ -16,7 +16,7 @@ BD.WordQuiz = (function () {
 
   /* ---------- Spanish ---------- */
   const spanish = {
-    key: "spanish", title: "Spanish Dojo", coach: "lauryn", field: "spanishGrade",
+    key: "spanish", title: "Spanish Dojo", coach: "bridgette", field: "spanishGrade",
     topics: function (grade) { return BD.SPANISH.filter(function (t) { return t.g <= grade; }); },
     round: function (p, grade) {
       const topics = this.topics(grade);
@@ -165,7 +165,7 @@ BD.WordQuiz = (function () {
   }
 
   const spelling = {
-    key: "spelling", title: "Spelling Bee", coach: "michele", field: "spellingGrade",
+    key: "spelling", title: "Spelling Bee", coach: "lauryn", field: "spellingGrade",
     round: function (p, grade) {
       const list = BD.SPELLING[String(grade)] || [];
       const seen = (p.seenWords.spelling = p.seenWords.spelling || []);
@@ -464,7 +464,7 @@ BD.WordQuiz = (function () {
       W.items.forEach(function (q) { if (q.word && seen.indexOf(q.word) === -1) seen.push(q.word); });
       p.seenWords.spelling = seen.slice(-300);
     }
-    const belt = BD.Rank.practice(p, game, grade, W.xp);
+    const belt = BD.Rank.practice(p, game, grade, W.xp - (W.banked || 0)); W.banked = W.xp;
     BD.Store.recordSession(p, { game: game, grade: grade, correct: W.correct, total: W.answered, xp: W.xp });
     const missed = [];
     W.missed.forEach(function (q) { if (!missed.some(function (m) { return m.id === q.id; })) missed.push(q); });
@@ -510,7 +510,8 @@ BD.WordQuiz = (function () {
     return out;
   }
 
-  function stop() { W = null; BD.Speech.stop(); }
+  function stop() { if (W) BD.Rank.bank(W, W.game); W = null; BD.Speech.stop(); }
+  function bankNow() { if (W) BD.Rank.bank(W, W.game); }
 
   function bind() {
     $("wordChoices").addEventListener("click", function (e) {
@@ -540,5 +541,5 @@ BD.WordQuiz = (function () {
 
   function peek() { return W && W.items[W.i]; }
 
-  return { isQuiet: isQuiet, misspellings: misspellings, makeSpelling: makeSpelling, peek: peek, start: start, stop: stop, bind: bind, planItems: planItems, PASS: PASS, GAMES: GAMES, plain: plain };
+  return { bankNow: bankNow, isQuiet: isQuiet, misspellings: misspellings, makeSpelling: makeSpelling, peek: peek, start: start, stop: stop, bind: bind, planItems: planItems, PASS: PASS, GAMES: GAMES, plain: plain };
 })();

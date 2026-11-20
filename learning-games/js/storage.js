@@ -117,6 +117,17 @@ BD.Store = (function () {
     },
     save: save,
     upgrade: upgrade,
+    /* Bring in a student from a save code (replaces the copy on this device). */
+    importPlayer: function (data) {
+      const p = upgrade(JSON.parse(JSON.stringify(data)));
+      const existing = this.get(p.id);
+      if (existing) { Object.keys(existing).forEach(function (k) { delete existing[k]; }); Object.assign(existing, p); }
+      else state.players.push(p);
+      const live = this.get(p.id);
+      state.currentId = live.id;
+      save(live); emit();
+      return live;
+    },
     onChange: function (fn) { listeners.push(fn); },
 
     /* Called by BD.Sync with a student saved from another device. Updates

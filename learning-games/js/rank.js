@@ -14,10 +14,10 @@ BD.Rank = (function () {
   const PASS = 85, PRACTICE_MAX = 100, GRAD_XP = 100;
   const SUBJECTS = [
     { key: "math", label: "Math", game: "math", coach: "cd" },
-    { key: "reading", label: "Reading", game: "sentence", coach: "bridgette", note: "Fix-It Sentences" },
-    { key: "spelling", label: "Spelling", game: "spelling", coach: "michele", note: "Spelling Bee" },
+    { key: "reading", label: "Reading", game: "sentence", coach: "michele", note: "Fix-It Sentences" },
+    { key: "spelling", label: "Spelling", game: "spelling", coach: "lauryn", note: "Spelling Bee" },
     { key: "comprehension", label: "Comprehension", game: "reading", coach: "kyra", note: "Story Scrolls" },
-    { key: "spanish", label: "Spanish", game: "spanish", coach: "lauryn", note: "Spanish Dojo", optional: true }
+    { key: "spanish", label: "Spanish", game: "spanish", coach: "bridgette", note: "Spanish Dojo", optional: true }
   ];
   const REQUIRED = SUBJECTS.filter(function (s) { return !s.optional; }).map(function (s) { return s.key; });
   const BY_GAME = {}; SUBJECTS.forEach(function (s) { BY_GAME[s.game] = s.key; });
@@ -121,11 +121,24 @@ BD.Rank = (function () {
     return out.slice(0, 2);
   }
 
+  /* Bank the practice XP earned so far in a round that hasn't finished
+     (Back button, grade change, app closed or put in the background).
+     st is the game's round state: { xp, banked, grade, test }. */
+  function bank(st, gameKey) {
+    if (!st || st.test) return null;
+    const p = BD.Store.current(); if (!p) return null;
+    const amt = (st.xp || 0) - (st.banked || 0);
+    st.banked = st.xp || 0;
+    if (amt <= 0) return null;
+    const t = BD.today(); if (p.days && p.days.indexOf(t) === -1) p.days.push(t);
+    return practice(p, gameKey, st.grade, amt);
+  }
+
   /* White through Purple may use hints; Brown, Red and Black do it on their own. */
   function hintsAllowed(p, grade) { return rec(p, grade).belt <= 5; }
 
   return {
-    hintsAllowed: hintsAllowed, PASS: PASS, PRACTICE_MAX: PRACTICE_MAX, GRAD_XP: GRAD_XP, SUBJECTS: SUBJECTS, REQUIRED: REQUIRED, BY_GAME: BY_GAME,
+    bank: bank, hintsAllowed: hintsAllowed, PASS: PASS, PRACTICE_MAX: PRACTICE_MAX, GRAD_XP: GRAD_XP, SUBJECTS: SUBJECTS, REQUIRED: REQUIRED, BY_GAME: BY_GAME,
     subject: subject, rec: rec, dojoGrade: dojoGrade, belt: belt, stripeCount: stripeCount, beltXP: beltXP,
     practice: practice, testDone: testDone, itemGrade: itemGrade, levelNote: levelNote, beltSVG: beltSVG, planItems: planItems
   };

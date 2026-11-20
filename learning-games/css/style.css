@@ -730,3 +730,11 @@ button.rank-belt:hover .belt-svg { transform: scale(1.03); }
 .spell-word { letter-spacing: .04em; }
 .spell-blank { display: inline-block; min-width: 1.1em; margin: 0 .08em; padding: 0 .12em; border-bottom: .12em solid var(--gold-2); color: var(--gold-2); text-align: center; }
 .word-sub .spell-u { color: var(--ink); text-decoration: underline; text-decoration-color: var(--gold-2); text-decoration-thickness: 3px; text-underline-offset: 4px; font-weight: 900; }
+
+/* Backup and restore */
+.backup-code { width: 100%; min-height: 110px; border-radius: 12px; border: 2px solid var(--line); background: var(--night); color: var(--ink); padding: 10px; font: 600 .8rem/1.35 ui-monospace, Menlo, monospace; word-break: break-all; resize: vertical; }
+.backup-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.file-btn { cursor: pointer; }
+.restore-card { display: grid; gap: 10px; padding: 12px; border-radius: 14px; border: 1px solid var(--line); }
+.restore-bad { color: #FFB4A8; }
+.restore-line { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: center; text-align: center; margin: 14px 0 0; }

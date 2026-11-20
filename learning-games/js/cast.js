@@ -9,7 +9,7 @@ BD.Cast = (function () {
     michele: { name: "Master Mrs. Young", role: "Main Instructor" },
     bridgette: { name: "Ms. Bridgette", role: "Lead Instructor" },
     kyra: { name: "Ms. Kyra", role: "Instructor" },
-    lauryn: { name: "Miss Lauryn", role: "Studio Manager" },
+    lauryn: { name: "Ms. Lauryn", role: "Studio Manager" },
     kimmy: { name: "Kimmy", role: "White belt" },
     billy: { name: "Billy", role: "Blue belt" },
     tommy: { name: "Tommy", role: "Yellow belt" },
@@ -18,7 +18,7 @@ BD.Cast = (function () {
   };
   /* Kids, Zumi, and the instructors are all playable. */
   const FIGHTERS = ["kimmy", "billy", "tommy", "mackenzie", "rylan", "zumi", "cd", "michele", "bridgette", "kyra", "lauryn"];
-  const COACH = { math: "cd", sentence: "bridgette", reading: "kyra", plan: "michele", host: "zumi" };
+  const COACH = { math: "cd", sentence: "michele", reading: "kyra", plan: "michele", host: "zumi" };
 
   const LINES = {
     start: ["Bow in. Let's train!", "Eyes up, focus on. Let's go!", "Ready stance. Begin!", "Show me your best effort!"],

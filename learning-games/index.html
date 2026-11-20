@@ -56,6 +56,7 @@
           <button type="submit" class="btn btn-primary" id="addPlayerBtn">Join the dojo</button>
         </div>
       </form>
+      <p class="restore-line"><button type="button" class="btn btn-quiet btn-small" id="restoreBtn">Restore a student</button> <span class="muted small">Have a save code from another device? Bring your belts back.</span></p>
     </section>
 
     <!-- Dojo home -->
@@ -96,11 +97,11 @@
         </article>
         <article class="game-card game-sent">
           <div class="game-art sent-art" aria-hidden="true">
-            <img class="game-coach" src="img/bridgette.webp" alt="">
+            <img class="game-coach" src="img/michele.webp" alt="">
             <div class="art-chips"><span><s>the</s> The</span><span>dog<b>.</b></span></div>
           </div>
           <div class="game-body">
-            <p class="coach-tag">Coach: Ms. Bridgette</p>
+            <p class="coach-tag">Coach: Master Mrs. Young</p>
             <h2>Fix-It Sentences</h2>
             <p>Each sentence has mistakes in capitals, punctuation, spelling or grammar. Find them and fix them.</p>
             <p class="eyebrow">Sentence grade level</p>
@@ -124,13 +125,13 @@
         </article>
         <article class="game-card game-spell">
           <div class="game-art spell-art" aria-hidden="true">
-            <img class="game-coach" src="img/michele.webp" alt="">
+            <img class="game-coach" src="img/lauryn.webp" alt="">
             <div class="art-chips"><span>c-a-t</span><span>B-E-E</span><span>spell it!</span></div>
           </div>
           <div class="game-body">
-            <p class="coach-tag">Coach: Master Mrs. Young</p>
+            <p class="coach-tag">Coach: Ms. Lauryn</p>
             <h2>Spelling Bee</h2>
-            <p>Hear a word, see it in a sentence, and spell it. Letter tiles help the youngest champions.</p>
+            <p>Missing letters, spot the misspelling, fix it, unscramble and listen-and-spell. Quiet mode works without sound.</p>
             <p class="eyebrow">Spelling grade level</p>
             <div id="homeSpellGrade"></div>
             <button type="button" class="btn btn-primary btn-big" id="playSpell">Play Spelling Bee</button>
@@ -138,11 +139,11 @@
         </article>
         <article class="game-card game-spanish">
           <div class="game-art spanish-art" aria-hidden="true">
-            <img class="game-coach" src="img/lauryn.webp" alt="">
+            <img class="game-coach" src="img/bridgette.webp" alt="">
             <div class="art-chips"><span>¡Hola!</span><span>rojo</span><span>gracias</span></div>
           </div>
           <div class="game-body">
-            <p class="coach-tag">Coach: Miss Lauryn</p>
+            <p class="coach-tag">Coach: Ms. Bridgette</p>
             <h2>Spanish Dojo</h2>
             <p>Learn Spanish words, from colors and animals to everyday phrases. Tap Hear it to copy the sound.</p>
             <p class="eyebrow">Spanish grade level</p>
@@ -209,8 +210,8 @@
         <span class="score" id="sentScore"></span>
       </div>
       <div class="coach-row compact">
-        <img class="coach-face" src="img/face-bridgette.webp" alt="">
-        <div class="coach-say"><span class="coach-name">Ms. Bridgette</span><p id="sentSay">Find every mistake. You've got sharp eyes!</p></div>
+        <img class="coach-face" src="img/face-michele.webp" alt="">
+        <div class="coach-say"><span class="coach-name">Master Mrs. Young</span><p id="sentSay">Find every mistake. You've got sharp eyes!</p></div>
       </div>
       <div class="sent-card" id="sentCard">
         <p class="label">Fix this sentence</p>
@@ -382,7 +383,7 @@
         <button type="button" class="btn btn-quiet btn-small" id="parentBack">‹ Back</button>
         <h1>Parent corner</h1>
       </div>
-      <p class="muted parent-intro">Progress is kept in your Claude account when you open the game from the shared link and are signed in, so it follows you to any device. Otherwise it stays on this device.</p>
+      <p class="muted parent-intro">Progress saves automatically, even in the middle of a round. Signed in to Claude through the shared link, it's kept in your Claude account and follows you to any device. Otherwise it stays in this browser: tap <strong>Back up progress</strong> to get a save code that can move a student to another device or bring them back if the browser is cleared.</p>
       <div id="parentBody"></div>
     </section>
   </main>
@@ -458,6 +459,7 @@
 <script src="js/sensei.js"></script>
 <script src="js/math-game.js"></script>
 <script src="js/sentence-game.js"></script>
+<script src="js/backup.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>

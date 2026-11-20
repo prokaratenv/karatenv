@@ -143,6 +143,7 @@ BD.Sync = (function () {
     saveBank: function (docId, data) { if (!col) return; bankQueue.set(docId, data); schedule(); },
     status: function () { return status; },
     label: function () { return LABEL[status]; },
-    connected: function () { return ready; }
+    connected: function () { return ready; },
+    flushNow: function () { return flush(); }
   };
 })();

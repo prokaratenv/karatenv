@@ -187,7 +187,7 @@ BD.SentenceGame = (function () {
     const stripeAgain = S.stripe ? { grade: grade, belt: BD.Rank.rec(p, grade).belt, test: false } : null;
     if (S.solved === total) S.xp += 25;
     const levelShift = BD.Coach.adjustSentLevel(p, grade, S.firstTry, total);
-    const belt = BD.Rank.practice(p, "sentence", grade, S.xp);
+    const belt = BD.Rank.practice(p, "sentence", grade, S.xp - (S.banked || 0)); S.banked = S.xp;
     BD.Store.recordSession(p, { game: "sentence", grade: grade, correct: S.solved, firstTry: S.firstTry, total: total, xp: S.xp });
     const missedItems = S.results.filter(function (x) { return !x.won; }).map(function (x) {
       const it = S.items.find(function (s) { return s.id === x.id; });
@@ -257,7 +257,8 @@ BD.SentenceGame = (function () {
     $("sentInput").value = S.items[S.i].text; autoSize(); $("sentInput").focus();
   }
 
-  function stop() { S = null; }
+  function stop() { if (S) BD.Rank.bank(S, "sentence"); S = null; }
+  function bankNow() { if (S) BD.Rank.bank(S, "sentence"); }
   function changeGrade(g) {
     const focus = S && S.focus;
     if (!BD.UI.setGrade("sentence", g)) { BD.UI.syncGradeSelect("sentGradeSel", "sentence"); return; }
@@ -282,5 +283,5 @@ BD.SentenceGame = (function () {
   /* Read-only view of the current item (used by automated tests). */
   function peek() { return S && S.items[S.i]; }
 
-  return { peek: peek, stop: stop, PASS: PASS, start: start, bind: bind, compare: compare, norm: norm };
+  return { bankNow: bankNow, peek: peek, stop: stop, PASS: PASS, start: start, bind: bind, compare: compare, norm: norm };
 })();

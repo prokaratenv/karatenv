@@ -14,9 +14,15 @@ Free math, writing, reading, spelling and Spanish practice from Pre-K through 8t
 - **Belt card:** tap the belt on the home screen to see its stripes, practice XP for each stripe, total Belt XP (out of 500), the next belt, the belt path and past graduations. Tabs along the top switch grades to see the belt for any grade, and **Train this grade** makes it the Dojo grade.
 - **Free play:** the game cards still work for free practice at any grade, and their XP also counts toward that grade's stripes (up to the cap).
 
+## Saving progress
+
+- Progress saves automatically after every answer that earns XP. If a child taps Back, switches apps or closes the page in the middle of a round, the XP they've earned so far is kept.
+- **Signed in to Claude through the shared link:** each student is saved to that Claude account and shows up on any device signed in to the same account.
+- **Not signed in (for example, a student at home):** progress stays in that browser and never touches anyone's Claude account. In **Parents**, tap **Back up progress** to get a short save code (or a save file). On any device, tap **Restore a student** on the "Who's training today?" screen and paste the code to bring the student back. This is also the way to recover if a browser clears its storage.
+
 ## Spelling Bee and Spanish Dojo
 
-**Spelling Bee** (coach: Master Mrs. Young)
+**Spelling Bee** (coach: Ms. Lauryn)
 - Every round mixes six kinds of challenges, each with a sentence clue:
   - **Listen and spell:** hear the word, then type it.
   - **Missing letter:** a letter (or two, in older grades) is missing, as in `fr?end`. Pick the right one.
@@ -30,7 +36,7 @@ Free math, writing, reading, spelling and Spanish practice from Pre-K through 8t
 - A wrong typed answer shows which letters were right and wrong. Missed words come back a few turns later as a different kind of challenge.
 - The lists are in `data/spelling-bank.js`: 24 words per grade, from cat and dog up to onomatopoeia.
 
-**Spanish Dojo** (coach: Miss Lauryn)
+**Spanish Dojo** (coach: Ms. Bridgette)
 - Topics open as the grade goes up: greetings, colors, numbers and animals for the youngest; family, food, school, days, weather, clothes and months in the middle grades; places, action words, phrases, question words and "I" verbs for the oldest.
 - Kids choose the meaning, choose the Spanish word, and (from 4th grade) type it. Accents are optional when typing, with a gentle reminder.
 - **Hear it** speaks the Spanish word using the device's built-in voice. No login is needed.
@@ -47,9 +53,9 @@ Every game runs from **Pre-K through 8th grade**:
 
 The game uses the Engage brand (midnight navy, the green-teal-blue streak, gold for rewards, Montserrat and Cabin) and the cartoon cast from the Engage Higgsfield workspace:
 - **Zumi** is the host.
-- **Master Young** coaches Math Dojo, **Ms. Bridgette** coaches Fix-It Sentences and **Ms. Kyra** coaches Story Scrolls.
+- **Master Young** coaches Math Dojo, **Master Mrs. Young** coaches Fix-It Sentences and **Ms. Kyra** coaches Story Scrolls.
 - **Master Mrs. Young** gives Sensei's plan.
-- Kids choose a champion: Kimmy, Billy, Tommy, Mackenzie, Rylan, Zumi, or an instructor (Master Young, Master Mrs. Young, Ms. Bridgette, Ms. Kyra, Miss Lauryn). They can change it by tapping their character on the home screen. Every champion, instructors included, starts in a White Belt and wears whatever belt the student has earned at the current Dojo grade, so they earn their way up again.
+- Kids choose a champion: Kimmy, Billy, Tommy, Mackenzie, Rylan, Zumi, or an instructor (Master Young, Master Mrs. Young, Ms. Bridgette, Ms. Kyra, Ms. Lauryn). They can change it by tapping their character on the home screen. Every champion, instructors included, starts in a White Belt and wears whatever belt the student has earned at the current Dojo grade, so they earn their way up again.
 
 - **Build your own champion:** in "Change champion", kids can design a character. They choose boy or girl, height, build, skin tone, hairstyle, hair color, eye color, face extras (freckles, glasses, rosy cheeks), smile, and uniform (black gi, white gi, or shorts with an Engage shirt). The belt it wears is always the belt they've earned.
 
@@ -218,5 +224,6 @@ learning-games/
   js/cast.js             Engage characters, coach lines, fighters
   js/builder.js          build-your-own champion (drawn character)
   img/                   character art and Engage logo
+  js/backup.js           save codes: back up and restore a student
   js/app.js              home, results and parent screens
 ```

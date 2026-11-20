@@ -381,6 +381,7 @@ BD.MathGame = (function () {
   /* Leave the round without finishing it (Back button or grade change). */
   function stop() {
     if (!S) return;
+    BD.Rank.bank(S, "math");
     clearInterval(S.timer); S = null;
   }
   function changeGrade(g) {
@@ -409,7 +410,7 @@ BD.MathGame = (function () {
     }
     // Bonus for a strong round
     if (acc === 100 && S.answered >= 10) S.xp += 25;
-    const belt = BD.Rank.practice(p, "math", grade, S.xp);
+    const belt = BD.Rank.practice(p, "math", grade, S.xp - (S.banked || 0)); S.banked = S.xp;
     BD.Store.recordSession(p, {
       game: "math", mode: S.mode, grade: S.grade, ops: S.ops, correct: S.correct, total: S.answered, xp: S.xp
     });
@@ -485,5 +486,7 @@ BD.MathGame = (function () {
     $("mathExplainAsk").addEventListener("click", function () { if (S && !S.done) BD.Sensei.open(senseiContext()); });
   }
 
-  return { opsFor: opsFor, stop: stop, start: start, openSetup: openSetup, bind: bind, makeProblem: makeProblem, LEVELS: LEVELS, OPS: OPS, show: show, PASS: PASS };
+  function bankNow() { if (S && !S.done) BD.Rank.bank(S, "math"); }
+
+  return { bankNow: bankNow, opsFor: opsFor, stop: stop, start: start, openSetup: openSetup, bind: bind, makeProblem: makeProblem, LEVELS: LEVELS, OPS: OPS, show: show, PASS: PASS };
 })();
