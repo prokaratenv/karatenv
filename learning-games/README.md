@@ -65,6 +65,11 @@ When a round goes well (90% or better in math, or most sentences right on the fi
   - a focused round on their weakest skill
   - moving up a grade when they're ready
 
+## Share image and app icon
+
+- `img/share-card.jpg` (1200×630) is a "Brain Dojo by Engage" card to post alongside the link.
+- `img/app-icon.png`, `img/apple-touch-icon.png` and `img/favicon.png` are the app icon (used for "Add to Home Screen" when hosted on your own site).
+
 ## Sharing without a Claude login
 
 Share the Claude link as a **public link** (Share → anyone with the link). Anyone can then play without signing in:

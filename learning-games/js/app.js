@@ -17,6 +17,7 @@ BD.UI = (function () {
     }
     if (id === "screen-players" || id === "screen-home") trail.length = 0; // home is the top
     currentScreen = id;
+    document.body.classList.toggle("on-players", id === "screen-players");
     if (id !== "screen-results") BD.confetti.stop();
     document.querySelectorAll(".screen").forEach(function (s) { s.hidden = s.id !== id; });
     const p = BD.Store.current();
