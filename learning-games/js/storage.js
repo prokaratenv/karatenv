@@ -87,8 +87,9 @@ BD.Store = (function () {
     get: function (id) { return state.players.find(function (p) { return p.id === id; }); },
     current: current,
     setCurrent: function (id) { state.currentId = id; persist(); },
-    addPlayer: function (name, grade) {
+    addPlayer: function (name, grade, avatar) {
       const p = newPlayer(name, grade);
+      if (avatar) p.avatar = avatar;
       state.players.push(p); state.currentId = p.id; save(p);
       return p;
     },
@@ -101,7 +102,7 @@ BD.Store = (function () {
     resetPlayer: function (id) {
       const p = this.get(id); if (!p) return;
       const fresh = newPlayer(p.name, p.mathGrade);
-      fresh.id = p.id; fresh.color = p.color; fresh.sentenceGrade = p.sentenceGrade;
+      fresh.id = p.id; fresh.color = p.color; fresh.sentenceGrade = p.sentenceGrade; fresh.avatar = p.avatar;
       Object.keys(p).forEach(function (k) { delete p[k]; });
       Object.assign(p, fresh); save(p);
     },

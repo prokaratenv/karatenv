@@ -185,6 +185,7 @@ BD.MathGame = (function () {
     buildKeypad();
     BD.UI.syncGradeSelect("mathGradeSel", "math");
     BD.UI.show("screen-math-play");
+    BD.Cast.say("mathSay", "start");
     render();
   }
 
@@ -206,7 +207,7 @@ BD.MathGame = (function () {
     $("mathCard").className = "flashcard";
     if (S.mode === "practice") $("mathProgress").textContent = "Card " + (S.i + 1) + " of " + S.queue.length;
     else tick();
-    $("mathStreak").textContent = S.streak >= 3 ? S.streak + " in a row!" : "";
+    $("mathStreak").textContent = S.streak >= 3 ? "Combo ×" + S.streak : "";
     $("mathScore").textContent = S.xp + " XP";
     $("mathKeyMinus").hidden = S.grade < 7;
     $("mathAsk").hidden = S.mode === "clock";
@@ -250,6 +251,7 @@ BD.MathGame = (function () {
       S.xp += gain;
       if (tk) { tk.misses--; if (tk.misses <= 0) delete p.tricky[q.key]; }
       $("mathCard").className = "flashcard is-right";
+      BD.Cast.say("mathSay", S.streak >= 3 && S.streak % 3 === 0 ? "streak" : "right");
       $("mathFeedback").textContent = "+" + gain + (S.streak >= 3 ? "  streak!" : "");
       BD.Sound.right();
       setTimeout(advance, 380);
@@ -262,6 +264,7 @@ BD.MathGame = (function () {
         S.queue.splice(Math.min(S.i + 3, S.queue.length), 0, again);
       }
       $("mathCard").className = "flashcard is-wrong";
+      BD.Cast.say("mathSay", "wrong");
       $("mathFeedback").textContent = show(q) + " = " + num(q.answer);
       BD.Sound.wrong();
       S.lastWrong = S.input;

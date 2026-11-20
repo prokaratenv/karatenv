@@ -38,6 +38,7 @@ BD.SentenceGame = (function () {
     if (p.retry && p.retry.sentence) p.sentenceGrade = p.retry.sentence.grade;
     S = { grade: p.sentenceGrade, items: BD.SentenceGen.round(p, p.sentenceGrade, ROUND, focus), focus: focus, i: 0, xp: 0, solved: 0, firstTry: 0, results: [] };
     BD.UI.show("screen-sentence-play");
+    BD.Cast.say("sentSay", "start");
     load();
     BD.SentenceGen.topUp(p, S.grade); // ask Claude for more sentences if the bank is running low
   }
@@ -94,6 +95,7 @@ BD.SentenceGame = (function () {
     if (accepted.some(function (a) { return norm(a) === norm(typed) || loose(a) === loose(typed); })) return solved();
 
     S.tries++;
+    BD.Cast.say("sentSay", "wrong");
     // Find the accepted answer closest to what they typed.
     let best = null;
     accepted.forEach(function (a) { const c = compare(typed, a); if (!best || c.matched > best.matched) best = c; });
@@ -120,6 +122,7 @@ BD.SentenceGame = (function () {
     S.xp += gain; S.solved++;
     if (S.tries === 0) S.firstTry++;
     BD.Sound.right();
+    BD.Cast.say("sentSay", "right");
     reveal(true, gain);
   }
 

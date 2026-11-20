@@ -28,8 +28,19 @@ BD.UI = (function () {
     window.scrollTo(0, 0);
   }
 
+  function fighterOf(p) { return p.avatar || BD.Cast.defaultFighter(p); }
+  /* Round portrait of the student's chosen character, ringed in their belt color. */
   function avatar(p, size) {
-    return '<span class="avatar ' + (size || "") + '" style="--av:' + p.color + '">' + esc(p.name.charAt(0).toUpperCase()) + '</span>';
+    const belt = BD.beltFor(p.xp);
+    return '<span class="avatar ' + (size || "") + '" style="--av:' + p.color + ';--ring:' + belt.color + '"><img src="' + BD.Cast.face(fighterOf(p)) + '" alt=""></span>';
+  }
+  /* Character picker: kids choose a fighter from the Engage cast. */
+  let newFighter = "kimmy";
+  function fighterPicker(elId, selected, big) {
+    $(elId).innerHTML = BD.Cast.FIGHTERS.map(function (k) {
+      return '<button type="button" class="fighter-opt" role="radio" data-fighter="' + k + '" aria-checked="' + (k === selected) + '">' +
+        '<img src="' + (big ? BD.Cast.img(k) : BD.Cast.face(k)) + '" alt="">' + BD.Cast.name(k) + '</button>';
+    }).join("");
   }
   function beltSwatch(belt) {
     return '<span class="belt-swatch" style="--belt:' + belt.color + '" title="' + belt.name + ' belt"></span>';
@@ -110,6 +121,7 @@ BD.UI = (function () {
         '<span class="pc-belt">' + beltSwatch(belt) + belt.name + ' Belt</span></button>';
     }).join("") : '<p class="muted empty-note">No students yet. Add each child below so their belts and progress are saved separately.</p>';
     $("newGrade").innerHTML = BD.GRADES.map(function (g) { return '<option value="' + g + '">Grade ' + g + '</option>'; }).join("");
+    fighterPicker("newFighter", newFighter, false);
     show("screen-players");
   }
 
@@ -120,6 +132,8 @@ BD.UI = (function () {
     const today = BD.today();
     const todays = p.sessions.filter(function (s) { return s.date && s.date.slice(0, 10) === today; }).length;
     $("homeHello").textContent = "Ready to train, " + p.name + "?";
+    $("homeFighter").src = BD.Cast.img(fighterOf(p));
+    $("homeFighter").alt = BD.Cast.name(fighterOf(p));
     $("homeBelt").innerHTML = beltBar(p.xp);
     $("homeToday").textContent = todays ? todays + (todays === 1 ? " round" : " rounds") + " completed today" : "No rounds yet today";
     const retry = p.retry || {};
@@ -195,6 +209,7 @@ BD.UI = (function () {
     $("resLevel").hidden = !o.levelUp;
     if (o.levelUp) $("resLevelText").textContent = o.levelUp.text;
     $("resAgain").textContent = o.againLabel || "Play again";
+    $("resSay").textContent = "Zumi: " + (o.failed ? BD.Cast.line("retry") : BD.Cast.line(o.belt.promoted ? "win" : "right"));
     $("resSetup").hidden = !o.setup;
     show("screen-results");
     if (quiet) { /* returning with Back: no fanfare */ }
@@ -269,7 +284,7 @@ BD.UI = (function () {
       e.preventDefault();
       const name = $("newName").value.trim().slice(0, 20);
       if (!name) { $("newName").focus(); return; }
-      BD.Store.addPlayer(name, Number($("newGrade").value));
+      BD.Store.addPlayer(name, Number($("newGrade").value), newFighter);
       $("newName").value = "";
       home();
     });
@@ -322,6 +337,23 @@ BD.UI = (function () {
     BD.SentenceGame.bind();
     BD.Reading.bind();
     BD.Sensei.bind();
+    $("newFighter").addEventListener("click", function (e) {
+      const b = e.target.closest("[data-fighter]"); if (!b) return;
+      newFighter = b.dataset.fighter; BD.Sound.tap(); fighterPicker("newFighter", newFighter, false);
+    });
+    $("changeFighter").addEventListener("click", function () {
+      const p = BD.Store.current(); if (!p) return;
+      fighterPicker("fighterPick", fighterOf(p), true);
+      $("fighterSheet").hidden = false; document.body.classList.add("sheet-lock");
+    });
+    const closeFighter = function () { $("fighterSheet").hidden = true; document.body.classList.remove("sheet-lock"); };
+    $("fighterClose").addEventListener("click", closeFighter);
+    $("fighterSheet").addEventListener("click", function (e) { if (e.target === $("fighterSheet")) closeFighter(); });
+    $("fighterPick").addEventListener("click", function (e) {
+      const b = e.target.closest("[data-fighter]"); if (!b) return;
+      const p = BD.Store.current(); p.avatar = b.dataset.fighter; BD.Store.save(p);
+      BD.Sound.right(); closeFighter(); home();
+    });
   }
   /* A simple pop-up sheet for lessons and rule books. */
   function sheet(title, html) {

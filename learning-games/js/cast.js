@@ -1,0 +1,51 @@
+/* THE ENGAGE CAST — characters from the Engage Higgsfield workspace (cartoon set).
+   Instructors coach each game; kids pick a fighter for their profile. */
+window.BD = window.BD || {};
+
+BD.Cast = (function () {
+  const PEOPLE = {
+    zumi: { name: "Zumi", role: "Dojo mascot" },
+    cd: { name: "Master CD", role: "Master Instructor" },
+    michele: { name: "Ms. Michele", role: "Main Instructor" },
+    bridgette: { name: "Ms. Bridgette", role: "Lead Instructor" },
+    kyra: { name: "Ms. Kyra", role: "Instructor" },
+    kimmy: { name: "Kimmy", role: "White belt" },
+    billy: { name: "Billy", role: "Blue belt" },
+    tommy: { name: "Tommy", role: "Yellow belt" },
+    mackenzie: { name: "Mackenzie", role: "Purple belt" },
+    rylan: { name: "Rylan", role: "Red belt" }
+  };
+  const FIGHTERS = ["kimmy", "billy", "tommy", "mackenzie", "rylan", "zumi"];
+  const COACH = { math: "cd", sentence: "bridgette", reading: "kyra", plan: "michele", host: "zumi" };
+
+  const LINES = {
+    start: ["Bow in. Let's train!", "Eyes up, focus on. Let's go!", "Ready stance. Begin!", "Show me your best effort!"],
+    right: ["Hi-yah! Nice!", "Clean technique!", "That's how it's done!", "Strong!", "Yes! Keep it rolling!", "Sharp focus!"],
+    streak: ["You're on fire!", "Combo! Don't stop now!", "Black belt focus!", "Unstoppable!"],
+    wrong: ["Shake it off. Look at the steps.", "Good try. Let's learn it.", "Mistakes make us stronger.", "Breathe. You've got the next one."],
+    win: ["Outstanding in the line of discipline!", "That's black belt effort!", "Proud of you, champ!"],
+    retry: ["Every black belt was once a white belt. Let's train it again!", "Not yet means not yet. You'll get it!", "Reset, refocus, try again!"]
+  };
+  const pick = function (a) { return a[Math.floor(Math.random() * a.length)]; };
+
+  function img(key) { return "img/" + key + ".webp"; }
+  function face(key) { return "img/face-" + key + ".webp"; }
+  function name(key) { return (PEOPLE[key] || PEOPLE.zumi).name; }
+  function line(kind) { return pick(LINES[kind] || LINES.start); }
+
+  /* Default fighter for older profiles, so everyone has a character. */
+  function defaultFighter(p) {
+    let h = 0; String(p.id).split("").forEach(function (c) { h = (h * 31 + c.charCodeAt(0)) % 997; });
+    return FIGHTERS[h % 5];
+  }
+
+  /* Make a coach say something in a game's speech bubble. */
+  function say(elId, kind, text) {
+    const el = document.getElementById(elId);
+    if (!el) return;
+    el.textContent = text || line(kind);
+    el.classList.remove("pop"); void el.offsetWidth; el.classList.add("pop");
+  }
+
+  return { PEOPLE: PEOPLE, FIGHTERS: FIGHTERS, COACH: COACH, img: img, face: face, name: name, line: line, say: say, defaultFighter: defaultFighter };
+})();

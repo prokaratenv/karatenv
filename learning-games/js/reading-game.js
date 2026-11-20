@@ -149,6 +149,7 @@ BD.Reading = (function () {
     const grade = p.readingGrade;
     R = { grade: grade, focus: focus, passages: choose(p, grade, focus), pi: 0, qi: 0, xp: 0, results: [] };
     BD.UI.show("screen-read-play");
+    BD.Cast.say("readSay", "start");
     loadPassage();
     topUp(p, grade);
   }
@@ -241,6 +242,7 @@ BD.Reading = (function () {
       $("readInput").focus();
     }
     $("readFeedback").className = "read-feedback v" + res.score;
+    BD.Cast.say("readSay", res.score === 2 ? "right" : "wrong");
     $("readFeedback").innerHTML = html;
     R.usedHint = finished ? false : R.usedHint;
   }

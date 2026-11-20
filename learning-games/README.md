@@ -2,6 +2,16 @@
 
 Free math and writing practice for grades 3–7. Kids earn karate belts (White → Yellow → Orange → Green → Blue → Purple → Brown → Red → Black) for the work they do. You don't need an account, a subscription or the internet, and there are no ads.
 
+## Look and characters
+
+The game uses the Engage brand (midnight navy, the green-teal-blue streak, gold for rewards, Montserrat and Cabin) and the cartoon cast from the Engage Higgsfield workspace:
+- **Zumi** is the host.
+- **Master CD** coaches Math Dojo, **Ms. Bridgette** coaches Fix-It Sentences and **Ms. Kyra** coaches Story Scrolls.
+- **Ms. Michele** gives Sensei's plan.
+- Kids choose a fighter (Kimmy, Billy, Tommy, Mackenzie, Rylan or Zumi) and can change it by tapping their character on the home screen.
+
+The character images are in `img/` (cut-out WebP files, about 600 KB in total).
+
 ## The two games
 
 **Math Dojo** (flashcards)
@@ -146,5 +156,7 @@ learning-games/
   js/sync.js             saves progress to your Claude account
   js/sensei.js           Ask Sensei AI tutor
   js/effects.js          sounds and confetti
+  js/cast.js             Engage characters, coach lines, fighters
+  img/                   character art and Engage logo
   js/app.js              home, results and parent screens
 ```
