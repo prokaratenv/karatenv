@@ -16,7 +16,16 @@ BD.BELTS = [
   { name: "Red", xp: 5500, color: "#D63A2F" },
   { name: "Black", xp: 7500, color: "#17171C" }
 ];
-BD.GRADES = [3, 4, 5, 6, 7];
+BD.GRADES = [-1, 0, 1, 2, 3, 4, 5, 6, 7, 8]; // -1 = Pre-K, 0 = Kindergarten
+BD.MIN_GRADE = -1;
+BD.MAX_GRADE = 8;
+BD.gradeLabel = function (g) { g = Number(g); return g === -1 ? "Pre-K" : g === 0 ? "Kindergarten" : "Grade " + g; };
+BD.gradeShort = function (g) {
+  g = Number(g);
+  if (g === -1) return "Pre-K";
+  if (g === 0) return "K";
+  return g + (g === 1 ? "st" : g === 2 ? "nd" : g === 3 ? "rd" : "th");
+};
 BD.AVATAR_COLORS = ["#E2402F", "#2D6CDF", "#2FA866", "#7B4BC4", "#F08A24", "#0F9BA8"];
 
 BD.beltFor = function (xp) {
@@ -54,10 +63,13 @@ BD.Store = (function () {
     const d = {
       mathOps: ["add", "sub", "mul", "div"], mathStats: {}, sentenceStats: {}, tricky: {}, seenSentences: [],
       sessions: [], days: [], retry: {}, recent: {}, typeRecent: {}, sentLevel: {}, bestClock: {}, updatedAt: 0,
-      readRecent: {}, readStats: {}, seenPassages: []
+      readRecent: {}, readStats: {}, seenPassages: [],
+      wordStats: {}, wordMissed: {}, seenWords: {}
     };
     Object.keys(d).forEach(function (k) { if (p[k] === undefined || p[k] === null) p[k] = d[k]; });
-    if (!p.readingGrade) p.readingGrade = p.sentenceGrade || p.mathGrade || 3;
+    const has = function (v) { return v !== undefined && v !== null && v !== ""; };
+    const base = has(p.sentenceGrade) ? p.sentenceGrade : has(p.mathGrade) ? p.mathGrade : 3;
+    ["readingGrade", "spanishGrade", "spellingGrade"].forEach(function (k) { if (!has(p[k])) p[k] = base; });
     return p;
   }
   function newPlayer(name, grade) {
@@ -67,6 +79,9 @@ BD.Store = (function () {
       color: BD.AVATAR_COLORS[state.players.length % BD.AVATAR_COLORS.length],
       mathGrade: grade,
       sentenceGrade: grade,
+      readingGrade: grade,
+      spanishGrade: grade,
+      spellingGrade: grade,
       xp: 0
     });
   }

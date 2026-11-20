@@ -65,3 +65,32 @@ BD.confetti.stop = function () {
   const canvas = document.getElementById("confetti");
   if (canvas) canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height);
 };
+
+/* Text-to-speech using the device's built-in voices (no internet or login needed).
+   Used to read stories aloud, say Spanish words, and say spelling words. */
+BD.Speech = (function () {
+  const ok = typeof window !== "undefined" && "speechSynthesis" in window && typeof window.SpeechSynthesisUtterance === "function";
+  function voiceFor(lang) {
+    try {
+      const vs = window.speechSynthesis.getVoices();
+      return vs.find(function (v) { return v.lang && v.lang.toLowerCase() === lang.toLowerCase(); }) ||
+        vs.find(function (v) { return v.lang && v.lang.toLowerCase().indexOf(lang.slice(0, 2).toLowerCase()) === 0; }) || null;
+    } catch (e) { return null; }
+  }
+  function say(text, lang, rate) {
+    if (!ok || !text) return false;
+    try {
+      window.speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = lang || "en-US";
+      const v = voiceFor(u.lang); if (v) u.voice = v;
+      u.rate = rate || 0.9;
+      window.speechSynthesis.speak(u);
+      return true;
+    } catch (e) { return false; }
+  }
+  function stop() { if (ok) try { window.speechSynthesis.cancel(); } catch (e) { /* ignore */ } }
+  function speaking() { return ok && window.speechSynthesis.speaking; }
+  if (ok) try { window.speechSynthesis.getVoices(); } catch (e) { /* warm up voice list */ }
+  return { available: ok, say: say, stop: stop, speaking: speaking };
+})();

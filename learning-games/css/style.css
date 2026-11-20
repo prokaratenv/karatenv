@@ -339,6 +339,13 @@ p { margin: 0; }
   box-shadow: 0 0 40px -12px rgba(92, 191, 193, .55), var(--shadow);
 }
 .problem { font-family: var(--font-display); font-weight: 900; font-size: clamp(2.6rem, 12vw, 4.6rem); line-height: 1.05; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; text-shadow: 0 4px 0 rgba(0, 0, 0, .35); }
+.dots { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 10px; max-width: 360px; }
+.dots span { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; max-width: 150px; }
+.dots i { width: 22px; height: 22px; border-radius: 50%; background: var(--gold); box-shadow: 0 0 8px rgba(224, 186, 119, .5); }
+.dots i.b { background: var(--teal); box-shadow: 0 0 8px rgba(92, 191, 193, .5); }
+.dots i.gone { background: transparent; box-shadow: inset 0 0 0 3px var(--bad); position: relative; }
+.dots i.gone::after { content: ""; position: absolute; left: 3px; right: 3px; top: 50%; height: 3px; background: var(--bad); transform: rotate(-45deg); }
+.dots b { font-family: var(--font-display); font-size: 1.6rem; }
 .answer { min-width: 3ch; padding: 2px 18px; border-bottom: 4px solid var(--teal); font-family: var(--font-display); font-weight: 900; font-size: clamp(2.4rem, 11vw, 4rem); line-height: 1.1; font-variant-numeric: tabular-nums; color: var(--aqua); }
 .answer.empty { color: var(--line); }
 .card-feedback { min-height: 1.6em; font-family: var(--font-display); font-weight: 900; font-size: 1.2rem; }
@@ -408,6 +415,8 @@ p { margin: 0; }
   background: linear-gradient(180deg, #F7F2E4, #EFE6CF); color: #1A2236; border-top: 8px solid var(--gold-1);
 }
 .passage h2 { font-size: 1.35rem; color: #1A2C45; }
+.passage-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.listen-btn { background: #1A2C45; color: #F4F4F4; border-color: #1A2C45; }
 .passage p { font-size: 1.15rem; line-height: 1.75; max-width: 65ch; font-weight: 600; }
 .q-card { margin-top: 16px; padding: 18px; display: grid; gap: 12px; }
 .q-type { justify-self: start; padding: 3px 12px; border-radius: 999px; font-family: var(--font-display); font-weight: 800; font-size: .76rem; color: #08131F; background: var(--muted); }
@@ -430,6 +439,52 @@ p { margin: 0; }
 .xp-line { font-family: var(--font-display); font-weight: 900; background: var(--gold); -webkit-background-clip: text; background-clip: text; color: transparent; justify-self: start; }
 .model { border-left: 5px solid var(--gold-2); padding: 6px 12px; background: var(--night); border-radius: 8px; }
 .model p { margin-top: 2px; }
+
+/* ---------- Spanish + Spelling ---------- */
+.spell-art { background: radial-gradient(80% 90% at 30% 100%, rgba(224, 186, 119, .45), transparent 60%), linear-gradient(140deg, #7A5A1E, #0B1E3D 70%); }
+.spanish-art { background: radial-gradient(80% 90% at 30% 100%, rgba(255, 92, 110, .4), transparent 60%), linear-gradient(140deg, #8C2F3B, #0B1E3D 70%); }
+.word-card {
+  padding: 22px 20px; display: grid; gap: 12px; justify-items: center; text-align: center; border-radius: 24px;
+  background: linear-gradient(180deg, #172B4C, #0C1830) padding-box, var(--gold) border-box; border: 3px solid transparent; box-shadow: var(--shadow);
+}
+.word-prompt { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 14px; font-family: var(--font-display); font-weight: 900; font-size: clamp(2rem, 9vw, 3.4rem); line-height: 1.1; overflow-wrap: anywhere; }
+.word-prompt.small { font-size: clamp(1.15rem, 5vw, 1.6rem); font-style: italic; text-transform: uppercase; color: var(--gold-2); }
+.word-prompt .pic { font-size: 1.15em; }
+.big-swatch { display: inline-block; width: 56px; height: 56px; border-radius: 50%; background: var(--sw); box-shadow: inset 0 0 0 3px rgba(0, 0, 0, .25), 0 0 0 3px var(--ink); }
+.big-swatch.sm { width: 26px; height: 26px; box-shadow: inset 0 0 0 2px rgba(0, 0, 0, .25), 0 0 0 2px var(--ink); }
+.word-sub { color: var(--muted); font-weight: 700; font-size: 1.1rem; max-width: 40ch; }
+.word-choices { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; width: 100%; max-width: 520px; }
+.choice {
+  min-height: 62px; border-radius: 16px; border: 1px solid #335282; color: var(--ink); padding: 8px 10px;
+  background: linear-gradient(180deg, #24406A, #172B4C); font-family: var(--font-display); font-weight: 800; font-size: 1.05rem;
+  box-shadow: 0 5px 0 #0A1426; display: inline-flex; align-items: center; justify-content: center; gap: 10px; overflow-wrap: anywhere;
+}
+.choice:active { transform: translateY(4px); box-shadow: 0 1px 0 #0A1426; }
+.choice.is-right { background: linear-gradient(180deg, #2E7D3A, #17402E); border-color: var(--good); box-shadow: 0 0 20px rgba(101, 217, 74, .5); }
+.choice.is-wrong { background: linear-gradient(180deg, #7A2433, #4A1A26); border-color: var(--bad); }
+.choice:disabled { cursor: default; }
+.word-type { display: grid; gap: 10px; width: 100%; max-width: 520px; }
+.word-input {
+  width: 100%; min-height: 58px; border-radius: 14px; border: 2px solid var(--line); background: var(--night); color: var(--ink);
+  padding: 8px 14px; font-family: var(--font-display); font-weight: 800; font-size: 1.6rem; text-align: center; letter-spacing: .06em;
+}
+.word-input:focus { border-color: var(--gold-2); outline: none; box-shadow: 0 0 0 3px rgba(224, 186, 119, .25); }
+.tiles { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+.tile {
+  min-width: 48px; min-height: 52px; border-radius: 12px; border: 0; background: var(--gold); color: #1B1205;
+  font-family: var(--font-display); font-weight: 900; font-size: 1.5rem; box-shadow: 0 4px 0 var(--gold-1);
+}
+.tile:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--gold-1); }
+.tile-back { background: var(--surface-2); color: var(--muted); box-shadow: 0 4px 0 #0A1426; }
+.word-feedback:empty { display: none; }
+.word-feedback { width: 100%; max-width: 520px; border-radius: 14px; padding: 12px 16px; display: grid; gap: 6px; font-weight: 600; }
+.word-feedback.try-again { background: var(--bad-bg); border: 1px solid rgba(255, 92, 110, .35); }
+.word-feedback.solved { background: var(--good-bg); border: 1px solid rgba(101, 217, 74, .35); }
+.word-feedback.revealed { background: var(--mat); border: 1px solid var(--line); }
+.letters { font-family: var(--font-display); font-weight: 900; font-size: 1.6rem; letter-spacing: .14em; }
+.l-ok { color: var(--good); }
+.l-bad { color: var(--bad); text-decoration: underline; }
+#wordNext { min-width: 180px; }
 
 /* ---------- results ---------- */
 .results-hero .host-img { width: clamp(120px, 28vw, 190px); }

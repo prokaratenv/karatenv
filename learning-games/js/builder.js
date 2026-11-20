@@ -6,6 +6,7 @@ BD.Builder = (function () {
   const $ = function (id) { return document.getElementById(id); };
 
   const OPTIONS = {
+    look: { label: "Champion", type: "chips", values: [["boy", "Boy"], ["girl", "Girl"]] },
     height: { label: "Height", type: "chips", values: [["short", "Short"], ["mid", "Medium"], ["tall", "Tall"]] },
     build: { label: "Build", type: "chips", values: [["slim", "Slim"], ["regular", "Regular"], ["strong", "Strong"]] },
     skin: { label: "Skin tone", type: "swatch", values: ["#FFE0C4", "#F6CBA3", "#E5AE84", "#C98B5E", "#9B6640", "#6E4429"] },
@@ -16,7 +17,7 @@ BD.Builder = (function () {
     features: { label: "Face extras", type: "toggles", values: [["freckles", "Freckles"], ["glasses", "Glasses"], ["cheeks", "Rosy cheeks"]] },
     uniform: { label: "Uniform", type: "chips", values: [["black", "Black gi"], ["white", "White gi"], ["shirt", "Shorts + Engage shirt"]] }
   };
-  const DEFAULT = { height: "mid", build: "regular", skin: "#F6CBA3", hairStyle: "short", hair: "#8A5A32", eyes: "#6B3E1F", mouth: "smile", features: { freckles: false, glasses: false, cheeks: true }, uniform: "black" };
+  const DEFAULT = { look: "boy", height: "mid", build: "regular", skin: "#F6CBA3", hairStyle: "short", hair: "#8A5A32", eyes: "#6B3E1F", mouth: "smile", features: { freckles: false, glasses: false, cheeks: true }, uniform: "black" };
 
   function clean(cfg) {
     const c = Object.assign({}, DEFAULT, cfg || {});
@@ -119,25 +120,32 @@ BD.Builder = (function () {
     // face
     let face = "";
     face += '<path d="M72 66 q10 -6 20 0 M108 66 q10 -6 20 0" stroke="' + hairD + '" stroke-width="4" stroke-linecap="round" fill="none"/>';
+    const girl = c.look === "girl";
     [82, 118].forEach(function (ex) {
       face += '<ellipse cx="' + ex + '" cy="84" rx="9" ry="10.5" fill="#fff"/>';
       face += '<circle cx="' + ex + '" cy="85" r="6.5" fill="' + c.eyes + '"/><circle cx="' + ex + '" cy="85" r="3.2" fill="#14121A"/><circle cx="' + (ex + 2.4) + '" cy="82" r="2" fill="#fff"/>';
+      if (girl) { // eyelashes
+        const out = ex < 100 ? -1 : 1;
+        face += '<path d="M' + (ex - 9.5) + ' 82 Q' + ex + ' 70.5 ' + (ex + 9.5) + ' 82" stroke="#14121A" stroke-width="2.6" fill="none" stroke-linecap="round"/>';
+        face += '<path d="M' + (ex + out * 8) + ' 77 l' + (out * 5) + ' -4 M' + (ex + out * 9.5) + ' 81 l' + (out * 5.5) + ' -2" stroke="#14121A" stroke-width="2.2" stroke-linecap="round"/>';
+      }
     });
+    const lip = girl ? "#C2477A" : "#5A2A2E";
     face += '<path d="M97 96 q3 4 6 0" stroke="' + skinD + '" stroke-width="3" fill="none" stroke-linecap="round"/>';
     if (c.mouth === "grin") face += '<path d="M85 104 Q100 124 115 104 Z" fill="#7A2B33" stroke="' + ink + '" stroke-width="2" stroke-linejoin="round"/><path d="M88 105 H112 L110 109 H90 Z" fill="#fff"/>';
-    else if (c.mouth === "focus") face += '<path d="M89 108 Q100 110 112 104" stroke="#5A2A2E" stroke-width="3.5" fill="none" stroke-linecap="round"/>';
-    else face += '<path d="M87 104 Q100 115 113 104" stroke="#5A2A2E" stroke-width="3.5" fill="none" stroke-linecap="round"/>';
+    else if (c.mouth === "focus") face += '<path d="M89 108 Q100 110 112 104" stroke="' + lip + '" stroke-width="3.5" fill="none" stroke-linecap="round"/>';
+    else face += '<path d="M87 104 Q100 115 113 104" stroke="' + lip + '" stroke-width="3.5" fill="none" stroke-linecap="round"/>';
     if (c.features.cheeks) face += '<ellipse cx="70" cy="100" rx="8" ry="5" fill="#FF8A8A" opacity=".45"/><ellipse cx="130" cy="100" rx="8" ry="5" fill="#FF8A8A" opacity=".45"/>';
     if (c.features.freckles) [[74, 94], [79, 98], [70, 98], [126, 94], [121, 98], [130, 98]].forEach(function (p) { face += '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="1.6" fill="' + shade(skin, -0.38) + '"/>'; });
     if (c.features.glasses) face += '<g fill="rgba(255,255,255,.12)" stroke="#1B1B22" stroke-width="3.5"><circle cx="82" cy="84" r="13"/><circle cx="118" cy="84" r="13"/></g><path d="M95 83 h10 M69 82 l-14 -4 M131 82 l14 -4" stroke="#1B1B22" stroke-width="3.5" stroke-linecap="round"/>';
 
     const headGroup = back + ears + head + front + face;
     if (mode === "face") {
-      return '<svg viewBox="30 12 140 140" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Custom fighter">' +
+      return '<svg viewBox="30 12 140 140" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Custom champion">' +
         '<rect x="30" y="12" width="140" height="140" fill="#24406A"/>' +
         '<g>' + body.replace(/<image[^>]*>/g, "") + '</g>' + headGroup + '</svg>';
     }
-    return '<svg viewBox="0 0 200 320" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Custom fighter">' +
+    return '<svg viewBox="0 0 200 320" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Custom champion">' +
       '<g transform="translate(0 ' + oy + ')">' + body + headGroup + '</g></svg>';
   }
 
@@ -169,7 +177,7 @@ BD.Builder = (function () {
   function close() { $("builderSheet").hidden = true; document.body.classList.remove("sheet-lock"); }
   function random() {
     const pickV = function (o) { const v = o.values[Math.floor(Math.random() * o.values.length)]; return Array.isArray(v) ? v[0] : v; };
-    ["height", "build", "skin", "hairStyle", "hair", "eyes", "mouth", "uniform"].forEach(function (k) { cfg[k] = pickV(OPTIONS[k]); });
+    ["look", "height", "build", "skin", "hairStyle", "hair", "eyes", "mouth", "uniform"].forEach(function (k) { cfg[k] = pickV(OPTIONS[k]); });
     cfg.features = { freckles: Math.random() < 0.35, glasses: Math.random() < 0.25, cheeks: Math.random() < 0.6 };
     render();
   }
@@ -178,6 +186,9 @@ BD.Builder = (function () {
       const b = e.target.closest("[data-key]"); if (!b) return;
       if (b.dataset.key === "features") cfg.features[b.dataset.val] = !cfg.features[b.dataset.val];
       else cfg[b.dataset.key] = b.dataset.val;
+      // switching Boy/Girl suggests a matching hairstyle (they can still change it)
+      if (b.dataset.key === "look" && b.dataset.val === "girl" && ["buzz", "short", "spiky"].indexOf(cfg.hairStyle) !== -1) cfg.hairStyle = "long";
+      if (b.dataset.key === "look" && b.dataset.val === "boy" && ["long", "ponytail", "pigtails", "bun"].indexOf(cfg.hairStyle) !== -1) cfg.hairStyle = "short";
       BD.Sound.tap(); render();
     });
     $("builderRandom").addEventListener("click", random);

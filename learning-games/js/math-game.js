@@ -18,7 +18,29 @@ BD.MathGame = (function () {
 
   /* Each grade defines how to build addition and multiplication problems.
      Subtraction and division are built as the reverse, so answers are always whole. */
+  const ALL_OPS = ["add", "sub", "mul", "div"];
   const LEVELS = {
+    "-1": {
+      about: "Counting: adding and taking away with numbers up to 5. Dots help count.",
+      ops: ["add", "sub"], dots: true,
+      add: function () { const a = r(0, 4); return [a, r(0, 5 - a)]; }
+    },
+    0: {
+      about: "Adding and taking away within 10. Dots help count.",
+      ops: ["add", "sub"], dots: true,
+      add: function () { const a = r(0, 9); return [a, r(0, 10 - a)]; }
+    },
+    1: {
+      about: "Adding and subtracting within 20",
+      ops: ["add", "sub"],
+      add: function () { if (chance(0.5)) { const a = r(0, 10); return [a, r(0, 10 - a)]; } const b = r(2, 9); return [r(5, 20 - b), b]; }
+    },
+    2: {
+      about: "Adding and subtracting within 100; first times tables (×2, ×5, ×10) and sharing",
+      add: function () { return chance(0.35) ? [r(2, 18), r(2, 9)] : sumUnder(10, 80, 99); },
+      mul: function () { return [r(1, 10), [2, 5, 10][r(0, 2)]]; },
+      div: function () { const d = [2, 5, 10][r(0, 2)], q = r(1, 10); return [d * q, d]; }
+    },
     3: {
       about: "Facts to 10, two-digit adding and subtracting, times tables to 10×10",
       add: function () { return chance(0.6) ? [r(0, 10), r(0, 10)] : sumUnder(10, 89, 99); },
@@ -55,9 +77,15 @@ BD.MathGame = (function () {
     },
     7: {
       about: "Integers: positive and negative numbers with all four operations",
-      integers: true
+      integers: true, range: [50, 12]
+    },
+    8: {
+      about: "Bigger integers: negatives up to 100, × and ÷ with 2-digit numbers",
+      integers: true, range: [100, 20]
     }
   };
+  /* Which operations a grade offers (Pre-K to 1st grade: adding and subtracting only). */
+  function opsFor(grade) { return (LEVELS[grade] && LEVELS[grade].ops) || ALL_OPS; }
 
   function negPair(lo, hi, nonzeroB) {
     for (;;) {
@@ -71,9 +99,10 @@ BD.MathGame = (function () {
     let a, b;
     const L = LEVELS[grade];
     if (L.integers && chance(0.75)) {
-      if (op === "add" || op === "sub") { const p = negPair(-50, 50); a = p[0]; b = p[1]; }
-      else if (op === "mul") { const p = negPair(-12, 12); a = p[0]; b = p[1]; }
-      else { const p = negPair(-12, 12, true); a = p[0] * p[1]; b = p[1]; }
+      const big = L.range[0], small = L.range[1];
+      if (op === "add" || op === "sub") { const p = negPair(-big, big); a = p[0]; b = p[1]; }
+      else if (op === "mul") { const p = negPair(-small, small); a = p[0]; b = p[1]; }
+      else { const p = negPair(-small, small, true); a = p[0] * p[1]; b = p[1]; }
       return build(op, a, b, grade);
     }
     const lv = L.integers ? LEVELS[6] : L;
@@ -123,16 +152,18 @@ BD.MathGame = (function () {
     const retry = p.retry && p.retry.math;
     if (retry) { p.mathGrade = retry.grade; p.mathOps = retry.ops.slice(); }
     const grade = p.mathGrade;
-    const ops = p.mathOps && p.mathOps.length ? p.mathOps : ["add", "sub", "mul", "div"];
+    const allowed = opsFor(grade);
+    let ops = (p.mathOps && p.mathOps.length ? p.mathOps : ALL_OPS).filter(function (o) { return allowed.indexOf(o) !== -1; });
+    if (!ops.length) ops = allowed.slice();
     $("mathSetupBody").innerHTML =
-      (retry ? '<div class="redo-note"><strong>Redo this level</strong><p>Score ' + PASS + '% or better on Grade ' + grade + ' ' +
+      (retry ? '<div class="redo-note"><strong>Redo this level</strong><p>Score ' + PASS + '% or better on ' + BD.gradeLabel(grade) + ' ' +
         ops.map(function (o) { return OPS[o].label.toLowerCase(); }).join(", ") + ' to unlock higher grades. Read Sensei\'s tips first. Too hard right now? Pick a lower grade below.</p>' +
         '<button type="button" class="btn btn-small" id="mathTipsBtn">Read the tips</button></div>' : '') +
       '<div class="setup-block"><h3 class="label">Grade level</h3>' + BD.UI.gradePicker("mathGradePick", grade, !!retry) +
       '<p class="muted" id="mathLevelAbout">' + LEVELS[grade].about + '</p></div>' +
       '<div class="setup-block"><h3 class="label">Which skills?</h3><div class="chips" id="mathOpsPick">' +
       Object.keys(OPS).map(function (k) {
-        return '<button type="button" class="chip op-chip' + (ops.indexOf(k) !== -1 ? ' on' : '') + '" data-op="' + k + '" aria-pressed="' + (ops.indexOf(k) !== -1) + '"' + (retry ? ' disabled' : '') + '>' +
+        return '<button type="button" class="chip op-chip' + (ops.indexOf(k) !== -1 ? ' on' : '') + '" data-op="' + k + '" aria-pressed="' + (ops.indexOf(k) !== -1) + '"' + (retry || allowed.indexOf(k) === -1 ? ' disabled' : '') + (allowed.indexOf(k) === -1 ? ' title="Starts in 2nd grade"' : '') + '>' +
           '<span class="op-sym">' + OPS[k].sym + '</span>' + OPS[k].label + '</button>';
       }).join("") + '</div></div>' +
       '<div class="setup-block"><h3 class="label">Pick a challenge</h3><div class="mode-grid">' +
@@ -169,7 +200,11 @@ BD.MathGame = (function () {
     if (p.retry && p.retry.math) { p.mathGrade = p.retry.math.grade; focusOps = p.retry.math.ops; }
     if (S && S.timer) clearInterval(S.timer);
     S = {
-      mode: mode, grade: p.mathGrade, ops: (focusOps && focusOps.length ? focusOps : p.mathOps).slice(), queue: [], i: 0,
+      mode: mode, grade: p.mathGrade, ops: (function () {
+        const allowed = opsFor(p.mathGrade);
+        const want = (focusOps && focusOps.length ? focusOps : p.mathOps).filter(function (o) { return allowed.indexOf(o) !== -1; });
+        return want.length ? want : allowed.slice();
+      })(), queue: [], i: 0,
       input: "", locked: false, correct: 0, answered: 0, streak: 0, bestStreak: 0,
       xp: 0, missed: [], timer: null, endsAt: 0, xpBefore: p.xp
     };
@@ -201,6 +236,15 @@ BD.MathGame = (function () {
   function render() {
     const q = current();
     $("mathProblem").textContent = show(q) + " =";
+    // Pre-K and K: dots to count
+    const dots = LEVELS[S.grade].dots;
+    $("mathDots").hidden = !dots;
+    if (dots) {
+      const d = function (n, cls) { let h = ""; for (let i = 0; i < n; i++) h += '<i class="' + (cls || "") + '"></i>'; return h; };
+      $("mathDots").innerHTML = q.op === "add"
+        ? '<span>' + d(q.a) + '</span><b>+</b><span>' + d(q.b, "b") + '</span>'
+        : '<span>' + d(q.a - q.b) + d(q.b, "gone") + '</span>';
+    }
     $("mathAnswer").textContent = S.input || "?";
     $("mathAnswer").classList.toggle("empty", !S.input);
     $("mathFeedback").textContent = "";
@@ -209,7 +253,7 @@ BD.MathGame = (function () {
     else tick();
     $("mathStreak").textContent = S.streak >= 3 ? "Combo ×" + S.streak : "";
     $("mathScore").textContent = S.xp + " XP";
-    $("mathKeyMinus").hidden = S.grade < 7;
+    $("mathKeyMinus").hidden = S.grade < 7; // negative numbers start in grade 7
     $("mathAsk").hidden = S.mode === "clock";
   }
 
@@ -350,7 +394,7 @@ BD.MathGame = (function () {
     const uniqueMissed = [];
     S.missed.forEach(function (q) { if (!uniqueMissed.some(function (u) { return u.key === q.key; })) uniqueMissed.push(q); });
     const enough = S.mode === "practice" ? S.answered >= 15 : S.correct >= 15;
-    const ready = acc >= 90 && enough && S.grade < 7;
+    const ready = acc >= 90 && enough && S.grade < BD.MAX_GRADE;
     const failed = acc < PASS && S.answered >= 5;
     p.retry = p.retry || {};
     const wasRetry = !!p.retry.math;
@@ -363,15 +407,15 @@ BD.MathGame = (function () {
 
     BD.UI.results({
       title: failed ? "Let's train this again" : passedRetry ? "Level passed!" : S.mode === "clock" ? (record ? "New record!" : "Time!") : (acc >= 90 ? "Outstanding!" : "Strong work!"),
-      failed: failed ? "You got " + acc + "%. You need " + PASS + "% to pass Grade " + grade + ". Read Sensei's lesson below, then redo the level. You've got this!" : null,
+      failed: failed ? "You got " + acc + "%. You need " + PASS + "% to pass " + BD.gradeLabel(grade) + ". Read Sensei's lesson below, then redo the level. You've got this!" : null,
       passedRetry: passedRetry ? "You passed with " + acc + "%. All levels are unlocked again." : null,
       lesson: uniqueMissed.length || failed ? lessonHTML(grade, failed ? ops : missedOps, uniqueMissed) : "",
-      subtitle: "Math Dojo · Grade " + S.grade + " · " + S.ops.map(function (o) { return OPS[o].sym; }).join(" "),
+      subtitle: "Math Dojo · " + BD.gradeLabel(S.grade) + " · " + S.ops.map(function (o) { return OPS[o].sym; }).join(" "),
       stats: [["Correct", S.correct + (S.mode === "practice" ? " / " + S.answered : "")], ["Accuracy", acc + "%"], ["Best streak", S.bestStreak], ["XP earned", "+" + S.xp]],
       belt: belt,
       listTitle: uniqueMissed.length ? "Facts to practice" : "",
       list: uniqueMissed.slice(0, 12).map(function (q) { return show(q) + " = " + num(q.answer); }),
-      levelUp: ready && !failed ? { text: "You got " + acc + "% at Grade " + grade + ". Ready to try Grade " + (grade + 1) + "?", action: function () { p.mathGrade = grade + 1; BD.Store.save(); openSetup(); } } : null,
+      levelUp: ready && !failed ? { text: "You got " + acc + "% at " + BD.gradeLabel(grade) + ". Ready to try " + BD.gradeLabel((grade + 1)) + "?", action: function () { p.mathGrade = grade + 1; BD.Store.save(); openSetup(); } } : null,
       again: function () { start(mode, ops); },
       againLabel: failed ? "Redo this level" : "Go again",
       setup: failed ? null : openSetup
@@ -417,5 +461,5 @@ BD.MathGame = (function () {
     $("mathExplainAsk").addEventListener("click", function () { if (S && !S.done) BD.Sensei.open(senseiContext()); });
   }
 
-  return { stop: stop, start: start, openSetup: openSetup, bind: bind, makeProblem: makeProblem, LEVELS: LEVELS, OPS: OPS, show: show, PASS: PASS };
+  return { opsFor: opsFor, stop: stop, start: start, openSetup: openSetup, bind: bind, makeProblem: makeProblem, LEVELS: LEVELS, OPS: OPS, show: show, PASS: PASS };
 })();

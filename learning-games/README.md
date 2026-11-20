@@ -1,6 +1,27 @@
 # Brain Dojo
 
-Free math and writing practice for grades 3–7. Kids earn karate belts (White → Yellow → Orange → Green → Blue → Purple → Brown → Red → Black) for the work they do. You don't need an account, a subscription or the internet, and there are no ads.
+Free math, writing, reading, spelling and Spanish practice from Pre-K through 8th grade. Kids earn karate belts (White → Yellow → Orange → Green → Blue → Purple → Brown → Red → Black) for the work they do. You don't need an account, a subscription or the internet, and there are no ads.
+
+## Spelling Bee and Spanish Dojo
+
+**Spelling Bee** (coach: Mrs. Master Young)
+- The word is spoken aloud with a sentence clue, and the child types the spelling.
+- Pre-K to 1st grade get letter tiles to tap. Older grades can turn tiles on as a hint, for 5 XP.
+- A wrong answer shows which letters were right and wrong. Missed words come back.
+- The lists are in `data/spelling-bank.js`: 12 words per grade, from cat and dog up to onomatopoeia.
+
+**Spanish Dojo** (coach: Miss Lauryn)
+- Topics open as the grade goes up: greetings, colors, numbers and animals for the youngest; family, food, school, days, weather, clothes and months in the middle grades; places, action words, phrases, question words and "I" verbs for the oldest.
+- Kids choose the meaning, choose the Spanish word, and (from 4th grade) type it. Accents are optional when typing, with a gentle reminder.
+- **Hear it** speaks the Spanish word using the device's built-in voice. No login is needed.
+- Words are in `data/spanish-bank.js`.
+
+## Grades
+
+Every game runs from **Pre-K through 8th grade**:
+- **Pre-K and Kindergarten math** uses numbers up to 5 and 10, with dots to count. Multiplication and division start in 2nd grade, and negative numbers in 7th.
+- **Pre-K and Kindergarten sentences** are tiny ones, with only capital letters and end marks to fix.
+- **Pre-K to 1st grade stories** are short, and **Read it to me** reads them aloud.
 
 ## Look and characters
 
@@ -8,9 +29,9 @@ The game uses the Engage brand (midnight navy, the green-teal-blue streak, gold 
 - **Zumi** is the host.
 - **Master CD** coaches Math Dojo, **Ms. Bridgette** coaches Fix-It Sentences and **Ms. Kyra** coaches Story Scrolls.
 - **Mrs. Master Young** gives Sensei's plan.
-- Kids choose a fighter: Kimmy, Billy, Tommy, Mackenzie, Rylan, Zumi, or an instructor (Master CD, Mrs. Master Young, Ms. Bridgette, Ms. Kyra, Miss Lauryn). They can change it by tapping their character on the home screen.
+- Kids choose a champion: Kimmy, Billy, Tommy, Mackenzie, Rylan, Zumi, or an instructor (Master CD, Mrs. Master Young, Ms. Bridgette, Ms. Kyra, Miss Lauryn). They can change it by tapping their character on the home screen.
 
-- **Build your own fighter:** in "Change fighter", kids can design a character. They choose height, build, skin tone, hairstyle, hair color, eye color, face extras (freckles, glasses, rosy cheeks), smile, and uniform (black gi, white gi, or shorts with an Engage shirt). The belt it wears is always the belt they've earned.
+- **Build your own champion:** in "Change champion", kids can design a character. They choose boy or girl, height, build, skin tone, hairstyle, hair color, eye color, face extras (freckles, glasses, rosy cheeks), smile, and uniform (black gi, white gi, or shorts with an Engage shirt). The belt it wears is always the belt they've earned.
 
 The character images are in `img/` (cut-out WebP files, about 600 KB in total).
 
@@ -166,12 +187,15 @@ learning-games/
   js/coach.js            adapts practice to weak spots, Sensei's plan
   js/sentence-gen.js     endless sentence generator + growing bank
   js/reading-game.js     Story Scrolls (reading comprehension)
+  js/word-quiz.js        Spelling Bee and Spanish Dojo
+  data/spelling-bank.js  spelling words by grade (edit me!)
+  data/spanish-bank.js   Spanish topics and words (edit me!)
   data/reading-bank.js   reading passages (edit me!)
   js/sync.js             saves progress to your Claude account
   js/sensei.js           Ask Sensei AI tutor
   js/effects.js          sounds and confetti
   js/cast.js             Engage characters, coach lines, fighters
-  js/builder.js          build-your-own fighter (drawn character)
+  js/builder.js          build-your-own champion (drawn character)
   img/                   character art and Engage logo
   js/app.js              home, results and parent screens
 ```

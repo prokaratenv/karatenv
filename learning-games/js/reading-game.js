@@ -64,7 +64,7 @@ BD.Reading = (function () {
   let generating = false, lastTry = 0;
   function validPassage(x) {
     if (!x || typeof x.title !== "string" || typeof x.text !== "string" || !Array.isArray(x.questions)) return false;
-    if (x.text.length < 250 || x.text.length > 1400 || x.questions.length !== 3) return false;
+    if (x.text.length < 100 || x.text.length > 1600 || x.questions.length !== 3) return false;
     return x.questions.every(function (q) {
       return q && BD.READ_TYPES[q.type] && typeof q.q === "string" && typeof q.answer === "string" && typeof q.hint === "string" &&
         Array.isArray(q.keys) && q.keys.length >= 1 && q.keys.length <= 3 &&
@@ -81,14 +81,14 @@ BD.Reading = (function () {
     const w = weights(p, grade);
     const focus = Object.keys(w).sort(function (a, b) { return w[b] - w[a]; }).slice(0, 2).map(function (k) { return BD.READ_TYPES[k].label.toLowerCase(); });
     const titles = BD.PASSAGES.concat(bankItems(grade)).map(function (x) { return x.title; }).slice(-40).join("; ");
-    const ex = BD.PASSAGES.find(function (x) { return x.grade === grade; });
-    const words = { 3: "60-80", 4: "80-100", 5: "90-110", 6: "100-120", 7: "110-130" }[grade];
+    const ex = BD.PASSAGES.find(function (x) { return x.grade === grade; }) || BD.PASSAGES[0];
+    const words = { "-1": "25-40", 0: "30-50", 1: "40-60", 2: "50-70", 3: "60-80", 4: "80-100", 5: "90-110", 6: "100-120", 7: "110-130", 8: "120-150" }[grade];
     const prompt = [
-      "Write 3 NEW short reading passages for a homeschool reading-comprehension game, grade " + grade + ".",
+      "Write 3 NEW short reading passages for a homeschool reading-comprehension game, " + BD.gradeLabel(grade) + "." + (grade <= 0 ? " These are read aloud by a grown-up: very short, simple sentences and easy questions." : ""),
       "- Each passage: " + words + " words, one paragraph, original, accurate, kid-appropriate. Mix fiction (with a clear problem and feelings) and nonfiction (science, history, nature, sports, karate, US places).",
       "- Don't repeat these titles or topics: " + titles + ".",
       "- Each passage has exactly 3 questions. Types: main (main idea, summary or theme), detail (answer is stated in the text), infer (reading between the lines: why, how did they feel, what will happen), vocab (meaning of a word or phrase from context). Always include one main question. Lean toward: " + focus.join(" and ") + ".",
-      "- answer: a strong 1-2 sentence answer a grade " + grade + " student could write.",
+      "- answer: a strong 1-2 sentence answer a " + BD.gradeLabel(grade) + " student could write (or say).",
       "- hint: points to the part of the passage to reread, without giving the answer.",
       "- keys: 1 to 3 groups of short lowercase words or word stems. A correct answer contains at least one word from each group (example: [[\"bee\",\"pollinat\"],[\"food\",\"fruit\"]]).",
       "Reply with only a JSON array of objects shaped like this example:",
@@ -122,7 +122,7 @@ BD.Reading = (function () {
     const sampler = BD.Sensei && BD.Sensei.sampler();
     if (!sampler || typeof sampler.json !== "function") return Promise.reject({ code: "unavailable" });
     const prompt = [
-      "You are Sensei, a warm, encouraging reading tutor. Check a grade " + R.grade + " student's answer to a reading-comprehension question.",
+      "You are Sensei, a warm, encouraging reading tutor. Check a " + BD.gradeLabel(R.grade) + " student's answer to a reading-comprehension question.",
       "Passage title: " + passage.title,
       "Passage: " + passage.text,
       "Question (" + BD.READ_TYPES[q.type].label + "): " + q.q,
@@ -161,6 +161,9 @@ BD.Reading = (function () {
     const ps = passage();
     $("readTitle").textContent = ps.title;
     $("readText").textContent = ps.text;
+    BD.Speech.stop();
+    $("readListen").hidden = !BD.Speech.available;
+    if (R.grade <= 1) BD.Cast.say("readSay", null, "Read this story together with a grown-up, or tap Read it to me.");
     BD.UI.syncGradeSelect("readGradeSel", "reading");
     loadQuestion();
   }
@@ -272,17 +275,17 @@ BD.Reading = (function () {
     BD.Store.recordSession(p, { game: "reading", grade: grade, correct: full, total: R.results.length, xp: R.xp, score: acc });
     const weakTypes = [];
     R.results.forEach(function (x) { if (x.best < 2 && weakTypes.indexOf(x.type) === -1) weakTypes.push(x.type); });
-    const ready = !failed && acc >= 90 && grade < 7;
+    const ready = !failed && acc >= 90 && grade < BD.MAX_GRADE;
     BD.UI.results({
       title: failed ? "Let's train this again" : wasRetry ? "Level passed!" : acc >= 90 ? "Outstanding reading!" : "Strong reading!",
-      subtitle: "Story Scrolls · Grade " + grade + (R.focus ? " · Focus: " + BD.READ_TYPES[R.focus].label : ""),
-      failed: failed ? "You scored " + acc + "%. You need " + PASS + "% to pass Grade " + grade + ". Read the reading tips below, then try two new stories at this level." : null,
+      subtitle: "Story Scrolls · " + BD.gradeLabel(grade) + (R.focus ? " · Focus: " + BD.READ_TYPES[R.focus].label : ""),
+      failed: failed ? "You scored " + acc + "%. You need " + PASS + "% to pass " + BD.gradeLabel(grade) + ". Read the reading tips below, then try two new stories at this level." : null,
       passedRetry: wasRetry && !failed ? "You passed with " + acc + "%. All grade levels are unlocked again." : null,
       stats: [["Got it", full + " / " + R.results.length], ["Score", acc + "%"], ["Stories", R.passages.length], ["XP earned", "+" + R.xp]],
       belt: belt,
       lesson: weakTypes.length ? tipsHTML(weakTypes) : "",
       listTitle: "", list: [],
-      levelUp: ready ? { text: "You scored " + acc + "% at Grade " + grade + ". Ready for Grade " + (grade + 1) + " stories?", action: function () { p.readingGrade = grade + 1; BD.Store.save(p); start(); } } : null,
+      levelUp: ready ? { text: "You scored " + acc + "% at " + BD.gradeLabel(grade) + ". Ready for " + BD.gradeLabel((grade + 1)) + " stories?", action: function () { p.readingGrade = grade + 1; BD.Store.save(p); start(); } } : null,
       again: start,
       againLabel: failed ? "Redo this level" : "Two new stories",
       setup: null
@@ -311,18 +314,18 @@ BD.Reading = (function () {
   /* ---------- Sensei's plan items for reading ---------- */
   function planItems(p) {
     const items = [];
-    if (p.retry && p.retry.reading) return [{ kind: "readRetry", title: "Pass Grade " + p.retry.reading.grade + " Story Scrolls", sub: "Score 70% to unlock other grades." }];
+    if (p.retry && p.retry.reading) return [{ kind: "readRetry", title: "Pass " + BD.gradeLabel(p.retry.reading.grade) + " Story Scrolls", sub: "Score 70% to unlock other grades." }];
     const g = p.readingGrade;
     const rates = Object.keys(BD.READ_TYPES).map(function (t) { const a = (p.readRecent[g] || {})[t]; return { t: t, n: a ? a.length : 0, r: BD.Coach.rate(a) }; }).filter(function (x) { return x.n >= 3; });
     const weak = rates.filter(function (x) { return x.r < 0.7; }).sort(function (a, b) { return a.r - b.r; })[0];
-    if (weak) items.push({ kind: "readFocus", type: weak.t, title: "Practice " + BD.READ_TYPES[weak.t].label.toLowerCase() + " questions", sub: "Grade " + g + " stories · " + Math.round(weak.r * 100) + "% lately." });
-    else if (g < 7 && rates.length >= 3 && rates.every(function (x) { return x.r >= 0.85 && x.n >= 5; }))
-      items.push({ kind: "readUp", grade: g + 1, title: "Ready for Grade " + (g + 1) + " stories", sub: "You're understanding almost everything at Grade " + g + "." });
+    if (weak) items.push({ kind: "readFocus", type: weak.t, title: "Practice " + BD.READ_TYPES[weak.t].label.toLowerCase() + " questions", sub: BD.gradeLabel(g) + " stories · " + Math.round(weak.r * 100) + "% lately." });
+    else if (g < BD.MAX_GRADE && rates.length >= 3 && rates.every(function (x) { return x.r >= 0.85 && x.n >= 5; }))
+      items.push({ kind: "readUp", grade: g + 1, title: "Ready for " + BD.gradeLabel((g + 1)) + " stories", sub: "You're understanding almost everything at " + BD.gradeLabel(g) + "." });
     else if (!p.sessions.some(function (x) { return x.game === "reading"; })) items.push({ kind: "readStart", title: "Try Story Scrolls", sub: "Read two short stories and answer in your own words." });
     return items;
   }
 
-  function stop() { R = null; }
+  function stop() { R = null; BD.Speech.stop(); }
   function changeGrade(g) {
     const focus = R && R.focus;
     if (!BD.UI.setGrade("reading", g)) { BD.UI.syncGradeSelect("readGradeSel", "reading"); return; }
@@ -335,6 +338,10 @@ BD.Reading = (function () {
     $("readNext").addEventListener("click", next);
     $("readQuit").addEventListener("click", BD.UI.back);
     $("readGradeSel").addEventListener("change", function (e) { changeGrade(Number(e.target.value)); });
+    $("readListen").addEventListener("click", function () {
+      if (BD.Speech.speaking()) { BD.Speech.stop(); return; }
+      if (R) BD.Speech.say(passage().title + ". " + passage().text + " " + question().q, "en-US", 0.88);
+    });
     $("readTips").addEventListener("click", function () { BD.UI.sheet("Reading tips", tipsHTML(Object.keys(BD.READ_TYPES))); });
     $("readAsk").addEventListener("click", function () { if (R) BD.Sensei.open(senseiContext()); });
   }

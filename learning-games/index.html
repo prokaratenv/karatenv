@@ -40,14 +40,14 @@
       <div class="host-hero">
         <img class="host-img" src="img/zumi.webp" alt="Zumi, the Engage mascot" width="396" height="760">
         <div class="host-text">
-          <p class="eyebrow">Math · Writing · Reading · Grades 3–7</p>
+          <p class="eyebrow">Math · Writing · Reading · Spelling · Spanish · Pre-K–8th</p>
           <h1>Who's training today?</h1>
           <p class="say">Hi, I'm Zumi! Pick your name to step onto the mat.</p>
         </div>
       </div>
       <div class="player-list" id="playerList"></div>
       <form class="add-player" id="addPlayerForm" autocomplete="off">
-        <h2 class="label">New student? Choose your fighter</h2>
+        <h2 class="label">New student? Choose your champion</h2>
         <div class="fighter-pick" id="newFighter" role="radiogroup" aria-label="Choose a character"></div>
         <div class="add-row">
           <label class="field"><span>Name</span><input id="newName" type="text" maxlength="20" placeholder="First name" required></label>
@@ -60,9 +60,9 @@
     <!-- Dojo home -->
     <section class="screen" id="screen-home" hidden>
       <div class="home-hero">
-        <button type="button" class="fighter-stage" id="changeFighter" title="Change your fighter">
+        <button type="button" class="fighter-stage" id="changeFighter" title="Change your champion">
           <span class="fighter-art" id="homeFighter"></span>
-          <span class="fighter-change">Change fighter</span>
+          <span class="fighter-change">Change champion</span>
         </button>
         <div class="home-hud">
           <h1 id="homeHello">Ready to train?</h1>
@@ -121,6 +121,34 @@
             <button type="button" class="btn btn-primary btn-big" id="playRead">Play Story Scrolls</button>
           </div>
         </article>
+        <article class="game-card game-spell">
+          <div class="game-art spell-art" aria-hidden="true">
+            <img class="game-coach" src="img/michele.webp" alt="">
+            <div class="art-chips"><span>c-a-t</span><span>B-E-E</span><span>spell it!</span></div>
+          </div>
+          <div class="game-body">
+            <p class="coach-tag">Coach: Mrs. Master Young</p>
+            <h2>Spelling Bee</h2>
+            <p>Hear a word, see it in a sentence, and spell it. Letter tiles help the youngest champions.</p>
+            <p class="eyebrow">Spelling grade level</p>
+            <div id="homeSpellGrade"></div>
+            <button type="button" class="btn btn-primary btn-big" id="playSpell">Play Spelling Bee</button>
+          </div>
+        </article>
+        <article class="game-card game-spanish">
+          <div class="game-art spanish-art" aria-hidden="true">
+            <img class="game-coach" src="img/lauryn.webp" alt="">
+            <div class="art-chips"><span>¡Hola!</span><span>rojo</span><span>gracias</span></div>
+          </div>
+          <div class="game-body">
+            <p class="coach-tag">Coach: Miss Lauryn</p>
+            <h2>Spanish Dojo</h2>
+            <p>Learn Spanish words, from colors and animals to everyday phrases. Tap Hear it to copy the sound.</p>
+            <p class="eyebrow">Spanish grade level</p>
+            <div id="homeSpanishGrade"></div>
+            <button type="button" class="btn btn-primary btn-big" id="playSpanish">Play Spanish Dojo</button>
+          </div>
+        </article>
       </div>
     </section>
 
@@ -153,6 +181,7 @@
       </div>
       <div class="flashcard" id="mathCard">
         <div class="problem" id="mathProblem"></div>
+        <div class="dots" id="mathDots" hidden aria-hidden="true"></div>
         <div class="answer empty" id="mathAnswer" aria-live="polite">?</div>
         <div class="card-feedback" id="mathFeedback" aria-live="assertive"></div>
       </div>
@@ -215,7 +244,7 @@
         <div class="coach-say"><span class="coach-name">Ms. Kyra</span><p id="readSay">Read it once for fun, then again for clues.</p></div>
       </div>
       <article class="passage">
-        <h2 id="readTitle"></h2>
+        <div class="passage-head"><h2 id="readTitle"></h2><button type="button" class="btn btn-small listen-btn" id="readListen">Read it to me</button></div>
         <p id="readText"></p>
       </article>
       <div class="q-card">
@@ -230,6 +259,40 @@
           <button type="button" class="btn btn-primary" id="readNext" hidden>Next question</button>
         </div>
         <div class="read-feedback" id="readFeedback" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <!-- Word games (Spanish + Spelling) -->
+    <section class="screen play" id="screen-word-play" hidden>
+      <div class="playbar">
+        <button type="button" class="btn btn-quiet btn-small" id="wordQuit">‹ Back</button>
+        <label class="grade-select"><span class="sr-only">Grade level for this game</span><select id="wordGradeSel"></select></label>
+        <span class="meter" id="wordProgress"></span>
+        <span class="streak" id="wordStreak" aria-live="polite"></span>
+        <button type="button" class="btn btn-small sensei-btn" id="wordAsk">Ask Sensei</button>
+        <span class="score" id="wordScore"></span>
+      </div>
+      <div class="coach-row compact">
+        <img class="coach-face" id="wordCoachFace" src="img/face-lauryn.webp" alt="">
+        <div class="coach-say"><span class="coach-name" id="wordCoachName"></span><p id="wordSay"></p></div>
+      </div>
+      <div class="word-card" id="wordCard">
+        <p class="label" id="wordTopic"></p>
+        <div class="word-prompt" id="wordPrompt"></div>
+        <p class="word-sub" id="wordSub"></p>
+        <button type="button" class="btn btn-small listen-btn" id="wordListen">Hear it</button>
+        <div class="word-choices" id="wordChoices"></div>
+        <div class="word-type" id="wordType">
+          <div class="tiles" id="wordTiles"></div>
+          <label class="sr-only" for="wordInput">Your answer</label>
+          <input id="wordInput" class="word-input" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">
+          <div class="sent-actions">
+            <button type="button" class="btn btn-quiet" id="wordTilesBtn">Letter tiles <small>(−5 XP)</small></button>
+            <button type="button" class="btn btn-primary" id="wordCheck">Check</button>
+          </div>
+        </div>
+        <div class="word-feedback" id="wordFeedback" aria-live="polite"></div>
+        <button type="button" class="btn btn-primary" id="wordNext" hidden>Next</button>
       </div>
     </section>
 
@@ -294,21 +357,21 @@
 
 <div class="sheet-backdrop" id="fighterSheet" hidden>
   <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="fighterTitle">
-    <div class="sheet-head"><h2 id="fighterTitle">Choose your fighter</h2><button type="button" class="btn btn-quiet btn-small" id="fighterClose">Close</button></div>
+    <div class="sheet-head"><h2 id="fighterTitle">Choose your champion</h2><button type="button" class="btn btn-quiet btn-small" id="fighterClose">Close</button></div>
     <div class="fighter-pick big" id="fighterPick" role="radiogroup" aria-label="Choose a character"></div>
   </div>
 </div>
 
 <div class="sheet-backdrop" id="builderSheet" hidden>
   <div class="sheet builder" role="dialog" aria-modal="true" aria-labelledby="builderTitle">
-    <div class="sheet-head"><h2 id="builderTitle">Build your fighter</h2><button type="button" class="btn btn-quiet btn-small" id="builderClose">Close</button></div>
+    <div class="sheet-head"><h2 id="builderTitle">Build your champion</h2><button type="button" class="btn btn-quiet btn-small" id="builderClose">Close</button></div>
     <div class="builder-grid">
       <div class="builder-preview" id="builderPreview"></div>
       <div class="builder-opts" id="builderOpts"></div>
     </div>
     <div class="builder-actions">
       <button type="button" class="btn btn-quiet" id="builderRandom">Surprise me</button>
-      <button type="button" class="btn btn-primary" id="builderSave">Save my fighter</button>
+      <button type="button" class="btn btn-primary" id="builderSave">Save my champion</button>
     </div>
   </div>
 </div>
@@ -333,6 +396,8 @@
 
 <script src="data/sentence-bank.js"></script>
 <script src="data/reading-bank.js"></script>
+<script src="data/spanish-bank.js"></script>
+<script src="data/spelling-bank.js"></script>
 <script src="js/storage.js"></script>
 <script src="js/cast.js"></script>
 <script src="js/builder.js"></script>
@@ -341,6 +406,7 @@
 <script src="js/coach.js"></script>
 <script src="js/sentence-gen.js"></script>
 <script src="js/reading-game.js"></script>
+<script src="js/word-quiz.js"></script>
 <script src="js/sync.js"></script>
 <script src="js/sensei.js"></script>
 <script src="js/math-game.js"></script>

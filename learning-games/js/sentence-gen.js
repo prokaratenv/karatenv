@@ -51,6 +51,24 @@ BD.SentenceGen = (function () {
 
   /* ---------- correct sentences (grade = the lowest grade that uses it) ---------- */
   const T = [
+    // Pre-K and K: tiny sentences (capital letter + end mark)
+    [-1, function () { return "The " + pick(["cat", "dog", "pig", "cow", "duck", "fish"]) + " is " + pick(["big", "red", "fun", "sad", "hot", "wet"]) + "."; }],
+    [-1, function () { return "I see a " + pick(["cat", "dog", "bug", "hat", "sun", "bus"]) + "."; }],
+    [-1, function () { return "We like to " + pick(["run", "hop", "play", "sing", "jump", "read"]) + "."; }],
+    [-1, function () { return "My " + pick(["mom", "dad", "cat", "dog"]) + " is " + pick(["nice", "fun", "big", "kind"]) + "."; }],
+    [-1, function () { return "Can you " + pick(["see", "hop", "run", "sit"]) + "?"; }],
+    [0, function () { return "I can " + pick(["run", "jump", "kick", "swim", "read"]) + " fast."; }],
+    [0, function () { return "The " + pick(["sun", "moon", "ball", "frog"]) + " is up high."; }],
+    [0, function () { return "Do you like " + pick(["cake", "milk", "apples", "pizza"]) + "?"; }],
+    // 1st and 2nd grade
+    [1, function () { return pick(W.name) + " has a " + pick(["red", "big", "new", "blue"]) + " " + pick(["ball", "kite", "bike", "hat"]) + "."; }],
+    [1, function () { return "I like to play with " + pick(W.name) + "."; }],
+    [1, function () { return "Where is my " + pick(["hat", "book", "cup", "shoe"]) + "?"; }],
+    [1, function () { return "My " + pick(W.pet) + " likes to " + pick(["run", "sleep", "eat", "play"]) + " in the " + pick(["yard", "sun", "house"]) + "."; }],
+    [2, function () { return pick(W.name) + " and I went to the " + pick(W.spot) + " on " + pick(W.day) + "."; }],
+    [2, function () { return "The " + pick(W.animals) + " are " + pick(W.doing) + " by the " + pick(W.habitat) + "."; }],
+    [2, function () { return "We ate " + pick(["lunch", "dinner", "breakfast"]) + " with our " + pick(W.rel) + "."; }],
+    [2, function () { return "Can you help me find my " + pick(W.thing) + "?"; }],
     [3, function () { return pick(W.name) + " and I " + pick(W.act) + " at the " + pick(W.spot) + " on " + pick(W.day) + "."; }],
     [3, function () { return "My " + pick(W.rel) + " has a " + pick(W.adj) + " " + pick(W.pet) + " named " + pick(W.petName) + "."; }],
     [3, function () { return "Can we go to the " + pick(W.spot) + " after " + pick(W.meal) + "?"; }],
@@ -89,7 +107,14 @@ BD.SentenceGen = (function () {
     [7, function () { return "I wanted to go to the " + pick(W.spot) + "; however, I had too much homework."; }],
     [7, function () { const h = pick(W.hobby); return pick(W.name) + " likes " + h[0] + ", " + h[1] + ", and " + h[2] + "."; }],
     [7, function () { return "If I had studied, I would have passed the " + pick(W.subject) + " test."; }],
-    [7, function () { return "The effects of the " + pick(W.event) + " surprised everyone in " + pick(W.place)[0] + "."; }]
+    [7, function () { return "The effects of the " + pick(W.event) + " surprised everyone in " + pick(W.place)[0] + "."; }],
+    // 8th grade
+    [8, function () { return "Although the " + pick(W.event) + " was delayed, the team stayed focused and prepared."; }],
+    [8, function () { return "Neither of the players has finished the " + pick(W.subject) + " assignment yet."; }],
+    [8, function () { return "The committee, which met on " + pick(W.day) + ", approved the new schedule."; }],
+    [8, function () { return pick(W.name) + " was more confident than I expected; however, she still practiced every day."; }],
+    [8, function () { return "Whoever finishes first should help the students who are still working."; }],
+    [8, function () { return "The effect of daily practice is clear: fewer mistakes and stronger habits."; }]
   ];
 
   /* ---------- planting mistakes ---------- */
@@ -122,7 +147,7 @@ BD.SentenceGen = (function () {
   ];
   const HOMO_EXPLAIN = { week: "A week is 7 days. Weak means not strong.", ate: "ate = had food. eight = 8.", for: "for is a little helper word. four = 4.", by: "by means next to or through. buy means to pay for.", new: "new = not old. knew = past of know.", our: "our = belongs to us. are is a verb (we are).", hear: "hear = with your ears. here = this place.",
     Whose: "Whose asks who owns something. Who's = who is.", affected: "affected is the verb (it changed something). effect is usually the noun.", effects: "effects are results (a noun). affect is usually the verb.", lying: "Something resting is lying. You lay something down." };
-  const MISSPELL = { because: "becuase", friend: "freind", said: "sed", people: "peeple", library: "libary", school: "scool", really: "realy", again: "agen", different: "diffrent", believe: "beleive", museum: "musuem", family: "famly", birthday: "berthday", before: "befor", until: "untill", every: "evry", together: "togather", letters: "leters", umbrella: "umbrela", homework: "homwork", dinner: "diner", beach: "beech", surprised: "suprised", science: "sience", tournament: "turnament", concert: "consert", carrots: "carots", apples: "aples", cheese: "chees", bunny: "buny", parrot: "parot", turtle: "turtel", water: "watter", bottle: "bottel", jacket: "jaket", pencil: "pensil", playground: "playgrownd", garden: "gardin", anywhere: "anywere", happy: "hapy", traffic: "trafic", earlier: "erlier", beautiful: "beutiful", imagined: "imajined", expected: "expeckted", everyone: "evryone", studied: "studyed", passed: "past", teaching: "teeching", sleeping: "sleping", kitten: "kitton", puppy: "pupy", friendly: "frendly", curious: "curius", birds: "berds", squirrels: "squirels", fireworks: "firewerks", ready: "redy", month: "munth", meeting: "meating", spelling: "speling", history: "histery", camping: "campping", notebook: "noteboke", breakfast: "brekfast", lunch: "lunsh", anything: "anythin" };
+  const MISSPELL = { because: "becuase", friend: "freind", said: "sed", people: "peeple", library: "libary", school: "scool", really: "realy", again: "agen", different: "diffrent", believe: "beleive", museum: "musuem", family: "famly", birthday: "berthday", before: "befor", until: "untill", every: "evry", together: "togather", letters: "leters", umbrella: "umbrela", homework: "homwork", dinner: "diner", beach: "beech", surprised: "suprised", science: "sience", tournament: "turnament", concert: "consert", carrots: "carots", apples: "aples", cheese: "chees", bunny: "buny", parrot: "parot", turtle: "turtel", water: "watter", bottle: "bottel", jacket: "jaket", pencil: "pensil", playground: "playgrownd", garden: "gardin", anywhere: "anywere", happy: "hapy", traffic: "trafic", earlier: "erlier", beautiful: "beutiful", imagined: "imajined", expected: "expeckted", everyone: "evryone", studied: "studyed", passed: "past", teaching: "teeching", sleeping: "sleping", kitten: "kitton", puppy: "pupy", friendly: "frendly", curious: "curius", birds: "berds", squirrels: "squirels", fireworks: "firewerks", ready: "redy", month: "munth", meeting: "meating", spelling: "speling", history: "histery", camping: "campping", notebook: "noteboke", breakfast: "brekfast", lunch: "lunsh", anything: "anythin", like: "lik", play: "pley", have: "hav", they: "thay", see: "se", jump: "jumpp", house: "hous", friend: "frend", little: "littel", where: "were" };
   const AGREE = { is: ["are", "Use is for one thing and are for more than one."], are: ["is", "Use are for more than one (or with you/we/they)."], was: ["were", "Use was for one thing and were for more than one (or with we/you/they)."], were: ["was", "Use were for more than one (or with we/you/they)."], has: ["have", "Use has with he, she, it or one person (each of them has)."], have: ["has", "Use have with I, you, we, they and after helper words like would."] };
   const PAST = { went: "goed", ran: "runned", saw: "seen", made: "maked", ate: "eated", brought: "bringed", built: "builded", found: "finded", took: "taked", won: "winned", wrote: "writed", rode: "rided", fed: "feeded", bought: "buyed", gave: "gived", flew: "flied", had: "haved" };
   const PAST_BASE = { went: "go", ran: "run", saw: "see", made: "make", ate: "eat", brought: "bring", built: "build", found: "find", took: "take", won: "win", wrote: "write", rode: "ride", fed: "feed", bought: "buy", gave: "give", flew: "fly", had: "have" };
@@ -236,19 +261,26 @@ BD.SentenceGen = (function () {
     ]
   };
 
-  const BASE_ERRORS = { 3: 2, 4: 2, 5: 3, 6: 3, 7: 4 };
+  const BASE_ERRORS = { "-1": 1, 0: 1, 1: 2, 2: 2, 3: 2, 4: 2, 5: 3, 6: 3, 7: 4, 8: 4 };
+  /* The youngest grades only see the simplest kinds of mistakes. */
+  const MIN_GRADE = { capFirst: -1, endMark: -1, capI: 0, capProper: 1, apostrophe: 2, comma: 3, misspell: 1, homophone: 3, agreement: 2, pastTense: 2, pronoun: 3 };
+  function injectors(type, grade) { return INJECT[type].filter(function (f) { return (MIN_GRADE[f.name] === undefined ? -1 : MIN_GRADE[f.name]) <= grade; }); }
 
   /* Build one fresh sentence with mistakes, aimed at the student's weak spots. */
   function make(grade, weights, extra) {
     const pool = T.filter(function (x) { return x[0] <= grade && x[0] >= grade - 2; });
     const want = Math.max(1, Math.min(5, BASE_ERRORS[grade] + (extra || 0)));
+    // only aim at mistake types this grade can have
+    const w = {};
+    Object.keys(weights).forEach(function (k) { if (injectors(k, grade).length) w[k] = weights[k]; });
+    weights = Object.keys(w).length ? w : { cap: 1, punct: 1 };
     for (let attempt = 0; attempt < 6; attempt++) {
       const answer = pick(pool)[1]();
       const t = tokenize(answer), used = new Set(), fixes = [];
       const limit = Math.max(1, Math.min(want, Math.floor(t.length / 2.5))); // keep short sentences readable
       for (let n = 0; n < 40 && fixes.length < limit; n++) {
         const type = weighted(weights);
-        const fn = pick(INJECT[type]);
+        const fn = pick(injectors(type, grade));
         const before = join(t);
         const f = fn(t, used, grade);
         if (f && join(t) !== before) fixes.push({ type: type, hint: f.hint, explain: f.explain });
@@ -315,15 +347,16 @@ BD.SentenceGen = (function () {
     const w = BD.Coach.typeWeights(p, grade);
     const focus = Object.keys(w).sort(function (a, b) { return w[b] - w[a]; }).slice(0, 2).map(function (k) { return BD.FIX_TYPES[k].label; });
     const n = Math.max(1, Math.min(5, BASE_ERRORS[grade] + BD.Coach.sentLevel(p, grade)));
-    const examples = BD.SENTENCES.filter(function (s) { return s.grade === grade; }).slice(0, 2).map(function (s) { return JSON.stringify({ text: s.text, answer: Array.isArray(s.answer) ? s.answer[0] : s.answer, fixes: s.fixes }); }).join("\n");
+    const nearest = BD.SENTENCES.some(function (s) { return s.grade === grade; }) ? grade : (grade < 3 ? 3 : 7);
+    const examples = BD.SENTENCES.filter(function (s) { return s.grade === nearest; }).slice(0, 2).map(function (s) { return JSON.stringify({ text: s.text, answer: Array.isArray(s.answer) ? s.answer[0] : s.answer, fixes: s.fixes }); }).join("\n");
     const prompt = [
-      "Write 8 NEW sentence-correction exercises for a homeschool student in grade " + grade + ".",
+      "Write 8 NEW sentence-correction exercises for a homeschool student in " + BD.gradeLabel(grade) + "." + (grade <= 0 ? " Keep sentences 3 to 6 short, simple words; only capital letters and end marks." : ""),
       "Each one is a sentence (8 to 18 words) with mistakes planted in it, plus the corrected sentence.",
       "Rules:",
       "- Plant " + n + " mistakes per sentence (one fewer or one more is fine). Each mistake changes ONE word or ONE punctuation mark. Never add or remove whole words; the text and answer must have the same number of words.",
       "- Mistake types: cap (capitalization), punct (end marks, commas, apostrophes, quotation marks), spell (misspelling or wrong sound-alike word), grammar (verb agreement, verb tense, pronoun case).",
       "- Focus most on: " + focus.join(" and ") + ".",
-      "- Use grade " + grade + " vocabulary and rules. Topics: animals, sports, karate, family, science, history, holidays, places in the USA. Use real US cities and states.",
+      "- Use " + BD.gradeLabel(grade) + " vocabulary and rules. Topics: animals, sports, karate, family, science, history, holidays, places in the USA. Use real US cities and states.",
       "- The corrected answer must be the one clear, standard correction. Avoid sentences where a comma is optional.",
       "- hint: a gentle nudge that doesn't say the fix. explain: the rule in one short kid-friendly sentence.",
       "Reply with only a JSON array of objects shaped like these examples:",

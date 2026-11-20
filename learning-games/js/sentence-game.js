@@ -177,7 +177,7 @@ BD.SentenceGame = (function () {
     const wasRetry = !!p.retry.sentence;
     if (failed) p.retry.sentence = { grade: grade }; else p.retry.sentence = null;
     BD.Store.save();
-    const ready = !failed && S.firstTry >= Math.ceil(total * 0.75) && grade < 7;
+    const ready = !failed && S.firstTry >= Math.ceil(total * 0.75) && grade < BD.MAX_GRADE;
     const types = [];
     S.results.forEach(function (x) {
       const it = S.items.find(function (s) { return s.id === x.id; });
@@ -185,16 +185,16 @@ BD.SentenceGame = (function () {
     });
     BD.UI.results({
       title: failed ? "Let's train this again" : wasRetry ? "Level passed!" : acc === 100 ? "Outstanding!" : "Sharp eyes!",
-      failed: failed ? "You fixed " + acc + "%. You need " + PASS + "% to pass Grade " + grade + ". Read the rules below, then try a new set of sentences at this level." : null,
+      failed: failed ? "You fixed " + acc + "%. You need " + PASS + "% to pass " + BD.gradeLabel(grade) + ". Read the rules below, then try a new set of sentences at this level." : null,
       passedRetry: wasRetry && !failed ? "You passed with " + acc + "%. All grade levels are unlocked again." : null,
       lesson: types.length ? rulesHTML(types) : "",
-      subtitle: "Fix-It Sentences · Grade " + grade + (S.focus ? " · Focus: " + BD.FIX_TYPES[S.focus].label : ""),
+      subtitle: "Fix-It Sentences · " + BD.gradeLabel(grade) + (S.focus ? " · Focus: " + BD.FIX_TYPES[S.focus].label : ""),
       coachNote: levelShift > 0 ? "Great eyes! Sensei is adding an extra mistake to your next sentences." : levelShift < 0 ? "Sensei will use fewer mistakes per sentence for a bit while you build up." : "",
       stats: [["Fixed", S.solved + " / " + total], ["First try", S.firstTry], ["Accuracy", acc + "%"], ["XP earned", "+" + S.xp]],
       belt: belt,
       listTitle: missedItems.length ? "Sentences to read again" : "",
       list: missedItems,
-      levelUp: ready ? { text: "You fixed " + S.firstTry + " of " + total + " on the first try. Ready for Grade " + (grade + 1) + "?", action: function () { p.sentenceGrade = grade + 1; BD.Store.save(); start(); } } : null,
+      levelUp: ready ? { text: "You fixed " + S.firstTry + " of " + total + " on the first try. Ready for " + BD.gradeLabel((grade + 1)) + "?", action: function () { p.sentenceGrade = grade + 1; BD.Store.save(); start(); } } : null,
       again: start,
       againLabel: failed ? "Redo this level" : "New sentences",
       setup: null

@@ -157,3 +157,77 @@ BD.READ_TYPES = {
     "Ask how the character is feeling when it's a phrase like \"stomach twisted.\""
   ] }
 };
+
+/* ---------- Pre-K, Kindergarten, 1st, 2nd and 8th grade ---------- */
+BD.PASSAGES.push(
+  { id: "rpk-01", grade: -1, title: "Zumi's Red Ball",
+    text: "Zumi has a red ball. He kicks the ball. The ball rolls to the tree. Zumi runs to get it. Zumi is happy.",
+    questions: [
+      { type: "main", q: "What is this story about?", answer: "Zumi plays with his red ball.", hint: "Who is in the story, and what does he play with?", keys: [["zumi", "he"], ["ball", "kick", "play"]] },
+      { type: "detail", q: "What color is the ball?", answer: "Red.", hint: "Look at the first sentence.", keys: [["red"]] },
+      { type: "infer", q: "How does Zumi feel?", answer: "Happy.", hint: "Look at the last sentence.", keys: [["happy", "glad", "good", "fun"]] }
+    ] },
+  { id: "rpk-02", grade: -1, title: "The Little Duck",
+    text: "A little duck sat by the pond. The duck was hungry. Mom gave the duck some bread. The duck said quack, quack!",
+    questions: [
+      { type: "main", q: "Who is the story about?", answer: "A little duck.", hint: "Look at the first sentence.", keys: [["duck"]] },
+      { type: "detail", q: "What did the duck eat?", answer: "Bread.", hint: "What did Mom give the duck?", keys: [["bread"]] },
+      { type: "infer", q: "Why did the duck say quack, quack?", answer: "It was happy to get food.", hint: "What happened right before?", keys: [["happy", "thank", "food", "bread", "full", "hungry"]] }
+    ] },
+  { id: "rk-01", grade: 0, title: "Kimmy Gets a Belt",
+    text: "Kimmy went to the dojo. She bowed to her teacher. She tried her best kicks. At the end of class, Kimmy got a new yellow belt. She smiled a big smile.",
+    questions: [
+      { type: "main", q: "What happened to Kimmy at the dojo?", answer: "She worked hard and got a new yellow belt.", hint: "What did she get at the end of class?", keys: [["belt", "yellow"]] },
+      { type: "detail", q: "What did Kimmy do first?", answer: "She bowed to her teacher.", hint: "Look at the second sentence.", keys: [["bow"]] },
+      { type: "infer", q: "How did Kimmy feel about her new belt?", answer: "Proud and happy.", hint: "What did she do at the end?", keys: [["happy", "proud", "excited", "glad", "smile"]] }
+    ] },
+  { id: "rk-02", grade: 0, title: "Rain Day",
+    text: "It is raining. Billy puts on his boots. He jumps in a big puddle. Splash! Now Billy is wet, but he is laughing.",
+    questions: [
+      { type: "main", q: "What does Billy do on the rainy day?", answer: "He jumps in a puddle.", hint: "What makes the splash?", keys: [["puddle", "jump", "splash"]] },
+      { type: "detail", q: "What does Billy put on?", answer: "His boots.", hint: "Look at the second sentence.", keys: [["boot"]] },
+      { type: "infer", q: "Does Billy mind getting wet? How do you know?", answer: "No, because he is laughing.", hint: "Look at the very end.", keys: [["laugh", "happy", "fun", "doesn't mind", "does not mind", "likes it", "enjoy"]] }
+    ] },
+  { id: "r1-01", grade: 1, title: "The Lost Mitten",
+    text: "Tommy had two blue mittens. On the way home from school, one mitten fell in the snow. Tommy's hand got cold. He walked back and looked and looked. At last he saw a blue spot in the snow. It was his mitten!",
+    questions: [
+      { type: "main", q: "What is the story about?", answer: "Tommy loses a mitten in the snow and finds it.", hint: "What did Tommy lose, and did he find it?", keys: [["mitten"], ["lost", "fell", "found", "find", "look"]] },
+      { type: "detail", q: "What color were the mittens?", answer: "Blue.", hint: "Look at the first sentence.", keys: [["blue"]] },
+      { type: "infer", q: "Why did Tommy go back to look?", answer: "His hand was cold and he wanted his mitten.", hint: "What happened to his hand?", keys: [["cold", "hand", "want", "need"]] }
+    ] },
+  { id: "r1-02", grade: 1, title: "Seeds Grow",
+    text: "A seed is very small. When you plant it in dirt and give it water and sun, it starts to grow. First a tiny root grows down. Then a green stem pushes up. Soon there are leaves. One day it might grow a flower!",
+    questions: [
+      { type: "main", q: "What is this mostly about?", answer: "How a seed grows into a plant.", hint: "What happens to the seed?", keys: [["seed", "plant"], ["grow"]] },
+      { type: "detail", q: "What does a seed need to grow?", answer: "Dirt, water and sun.", hint: "Look at the second sentence.", keys: [["water", "sun", "dirt", "soil"]] },
+      { type: "detail", q: "What grows first?", answer: "A tiny root.", hint: "Find the word 'First.'", keys: [["root"]] }
+    ] },
+  { id: "r2-01", grade: 2, title: "The Big Race",
+    text: "Mackenzie and Rylan raced across the field at recess. Rylan was faster at first, but he tripped on a rock. Mackenzie stopped running. She helped Rylan get up and brushed off his knees. They walked to the finish line together, laughing the whole way.",
+    questions: [
+      { type: "main", q: "What happened in the race?", answer: "Rylan tripped, and Mackenzie stopped to help him, so they finished together.", hint: "What happened to Rylan, and what did Mackenzie do?", keys: [["trip", "fell", "help"], ["together", "finish", "stop"]] },
+      { type: "detail", q: "Why did Rylan trip?", answer: "He tripped on a rock.", hint: "Look at the second sentence.", keys: [["rock"]] },
+      { type: "infer", q: "What kind of friend is Mackenzie?", answer: "Kind and caring, because she stopped to help.", hint: "What did she choose to do instead of winning?", keys: [["kind", "nice", "caring", "good", "help", "friend"]] }
+    ] },
+  { id: "r2-02", grade: 2, title: "Penguins",
+    text: "Penguins are birds, but they cannot fly. Instead, they are great swimmers. Their wings work like flippers to push them through the cold ocean. Penguins have thick feathers and a layer of fat that keep them warm. Many penguins live near the South Pole.",
+    questions: [
+      { type: "main", q: "What is this paragraph mostly about?", answer: "Penguins are birds that swim instead of fly and stay warm in the cold.", hint: "What is every sentence about?", keys: [["penguin"]] },
+      { type: "detail", q: "How do penguins stay warm?", answer: "Thick feathers and a layer of fat.", hint: "Look for the word 'warm.'", keys: [["feather", "fat"]] },
+      { type: "vocab", q: "The wings work like 'flippers.' What are flippers used for?", answer: "Swimming, pushing through the water.", hint: "What do penguins use them to do?", keys: [["swim", "water", "push", "paddle"]] }
+    ] },
+  { id: "r8-01", grade: 8, title: "The Science of Sleep",
+    text: "Teenagers often get blamed for staying up late, but biology plays a role. During adolescence, the body releases melatonin, the hormone that signals sleepiness, about two hours later than it did in childhood. As a result, many teens are not tired until 11 p.m. or later, yet early school start times still require them to wake at dawn. Researchers have linked this chronic sleep loss to lower grades, weaker immune systems and more car accidents. Some school districts that moved their start times later reported better attendance and test scores.",
+    questions: [
+      { type: "main", q: "What is the author's central claim?", answer: "Teens stay up late partly because of biology, and early school start times cause harmful sleep loss.", hint: "What causes the problem, and why does it matter?", keys: [["biolog", "melatonin", "hormone", "body"], ["sleep", "school", "start", "early"]] },
+      { type: "detail", q: "What evidence does the author give that later start times help?", answer: "Districts that started later reported better attendance and test scores.", hint: "Reread the last sentence.", keys: [["attendance", "test", "score", "grade"]] },
+      { type: "infer", q: "Why does the author begin by saying teens 'get blamed'?", answer: "To challenge the idea that it's just a bad habit and show it's partly biological.", hint: "What does the next part of the sentence argue against?", keys: [["biolog", "not their fault", "fault", "habit", "lazy", "body", "not choice"]] }
+    ] },
+  { id: "r8-02", grade: 8, title: "The Decision",
+    text: "Theo had trained for the regional tournament for six months, and the morning of the final match he could barely eat. In the second round, his opponent landed awkwardly and grabbed his ankle. The referee hadn't seen it, and Theo knew a few quick points would win the match. Instead, he stepped back and raised his hand to stop the bout. The medics confirmed a sprain. Theo lost the match by forfeit rules he hadn't fully understood, but as he walked off the mat, his instructor bowed to him first.",
+    questions: [
+      { type: "main", q: "What is the theme of this story?", answer: "Integrity and respect matter more than winning.", hint: "What did Theo value more than the win?", keys: [["respect", "integrity", "honor", "right", "kind", "sportsmanship", "character", "care"], ["win", "more than", "matter"]] },
+      { type: "detail", q: "What did Theo do when his opponent got hurt?", answer: "He stopped the match by stepping back and raising his hand.", hint: "Find the word 'Instead.'", keys: [["stop", "raise", "hand", "step"]] },
+      { type: "infer", q: "Why did the instructor bow to Theo first?", answer: "To show respect for the choice he made, which showed true martial-arts character.", hint: "Normally the student bows first. What does it mean when the teacher does?", keys: [["respect", "proud", "honor", "right choice", "character"]] }
+    ] }
+);

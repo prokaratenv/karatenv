@@ -59,29 +59,30 @@ BD.Coach = (function () {
   function plan(p) {
     const items = [], OPS = BD.MathGame.OPS;
     const retry = p.retry || {};
-    if (retry.math) items.push({ kind: "mathRetry", title: "Pass Grade " + retry.math.grade + " " + retry.math.ops.map(function (o) { return OPS[o].label.toLowerCase(); }).join(", "), sub: "Score 70% to unlock other levels." });
-    if (retry.sentence) items.push({ kind: "sentRetry", title: "Pass Grade " + retry.sentence.grade + " Fix-It Sentences", sub: "Fix 70% to unlock other grades." });
+    if (retry.math) items.push({ kind: "mathRetry", title: "Pass " + BD.gradeLabel(retry.math.grade) + " " + retry.math.ops.map(function (o) { return OPS[o].label.toLowerCase(); }).join(", "), sub: "Score 70% to unlock other levels." });
+    if (retry.sentence) items.push({ kind: "sentRetry", title: "Pass " + BD.gradeLabel(retry.sentence.grade) + " Fix-It Sentences", sub: "Fix 70% to unlock other grades." });
 
     // Math: weakest skill, or ready to move up
     if (!retry.math) {
       const g = p.mathGrade;
       const rates = Object.keys(OPS).map(function (op) { const a = p.recent[g + "-" + op]; return { op: op, n: a ? a.length : 0, r: rate(a) }; }).filter(function (x) { return x.n >= 8; });
       const weak = rates.filter(function (x) { return x.r < 0.85; }).sort(function (a, b) { return a.r - b.r; })[0];
-      if (weak) items.push({ kind: "mathFocus", op: weak.op, title: "Strengthen " + OPS[weak.op].label.toLowerCase(), sub: "Grade " + g + " · " + Math.round(weak.r * 100) + "% lately. A focused round helps!" });
-      else if (g < 7 && rates.length >= 2 && rates.every(function (x) { return x.r >= 0.9 && x.n >= 12; }))
-        items.push({ kind: "mathUp", grade: g + 1, title: "Ready for Grade " + (g + 1) + " math", sub: "You're scoring 90%+ on Grade " + g + "." });
-      else if (!p.sessions.some(function (x) { return x.game === "math"; })) items.push({ kind: "mathStart", title: "Warm up with Practice Kata", sub: "Grade " + g + " math, all four skills." });
+      if (weak) items.push({ kind: "mathFocus", op: weak.op, title: "Strengthen " + OPS[weak.op].label.toLowerCase(), sub: BD.gradeLabel(g) + " · " + Math.round(weak.r * 100) + "% lately. A focused round helps!" });
+      else if (g < BD.MAX_GRADE && rates.length >= 2 && rates.every(function (x) { return x.r >= 0.9 && x.n >= 12; }))
+        items.push({ kind: "mathUp", grade: g + 1, title: "Ready for " + BD.gradeLabel((g + 1)) + " math", sub: "You're scoring 90%+ on " + BD.gradeLabel(g) + "." });
+      else if (!p.sessions.some(function (x) { return x.game === "math"; })) items.push({ kind: "mathStart", title: "Warm up with Practice Kata", sub: BD.gradeLabel(g) + " math, all four skills." });
     }
     // Sentences: weakest kind of mistake, or ready to move up
     if (!retry.sentence) {
       const g = p.sentenceGrade;
       const rates = Object.keys(BD.FIX_TYPES).map(function (t) { const a = (p.typeRecent[g] || {})[t]; return { t: t, n: a ? a.length : 0, r: rate(a) }; }).filter(function (x) { return x.n >= 5; });
       const weak = rates.filter(function (x) { return x.r < 0.75; }).sort(function (a, b) { return a.r - b.r; })[0];
-      if (weak) items.push({ kind: "sentFocus", type: weak.t, title: "Practice " + BD.FIX_TYPES[weak.t].label.toLowerCase(), sub: "Grade " + g + " sentences · " + Math.round(weak.r * 100) + "% on the first try lately." });
-      else if (g < 7 && rates.length >= 3 && rates.every(function (x) { return x.r >= 0.85 && x.n >= 8; }) && sentLevel(p, g) >= 1)
-        items.push({ kind: "sentUp", grade: g + 1, title: "Ready for Grade " + (g + 1) + " sentences", sub: "You're catching almost every mistake at Grade " + g + "." });
+      if (weak) items.push({ kind: "sentFocus", type: weak.t, title: "Practice " + BD.FIX_TYPES[weak.t].label.toLowerCase(), sub: BD.gradeLabel(g) + " sentences · " + Math.round(weak.r * 100) + "% on the first try lately." });
+      else if (g < BD.MAX_GRADE && rates.length >= 3 && rates.every(function (x) { return x.r >= 0.85 && x.n >= 8; }) && sentLevel(p, g) >= 1)
+        items.push({ kind: "sentUp", grade: g + 1, title: "Ready for " + BD.gradeLabel((g + 1)) + " sentences", sub: "You're catching almost every mistake at " + BD.gradeLabel(g) + "." });
     }
     if (BD.Reading) items.push.apply(items, BD.Reading.planItems(p));
+    if (BD.WordQuiz) items.unshift.apply(items, BD.WordQuiz.planItems(p));
     // redo items first, then one suggestion per game
     return items.slice(0, 4);
   }
