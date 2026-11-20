@@ -2,6 +2,16 @@
 
 Free math, writing, reading, spelling and Spanish practice from Pre-K through 8th grade. Kids earn karate belts (White → Yellow → Orange → Green → Blue → Purple → Brown → Red → Black) for the work they do. You don't need an account, a subscription or the internet, and there are no ads.
 
+## Belts, stripes and graduation
+
+- **Belts, per grade:** White → Yellow → Orange → Blue → Green → Purple → Brown → Red → Black. Every grade (Pre-K to 8th) has its own belt path. Choose the **Dojo grade** on the home screen to see the belt and stripes for that grade.
+- **Stripes:** each belt needs 4 stripes: **Math** (Math Dojo), **Reading** (Fix-It Sentences), **Spelling** (Spelling Bee) and **Comprehension** (Story Scrolls). **Spanish** is an optional bonus stripe, shown in gold on the knot.
+- **Stripe tests:** take one any time from the belt panel. There are no hints, and a score of **85%** or better earns the stripe (it appears as a white stripe on the belt, two per tail). They can retake a test as often as they need.
+- **Practice:** each stripe has a **Practice** button set to the same level as its test. Practice earns up to **100 XP per stripe**. After that it's "maxed", but they can keep practicing.
+- **Graduation:** the 4th required stripe graduates them to the next belt automatically, with a celebration and a **+100 XP** bonus (400 practice + 100 graduation = 500 XP per belt). Earning all 4 stripes on the Black Belt masters the grade.
+- **Harder each belt:** White and Yellow tests mix in work from the grade below. Purple through Black lean harder, and Red and Black mix in the grade above. In Math, multiplication unlocks at Orange and division at Green.
+- **Free play:** the game cards still work for free practice at any grade, and their XP also counts toward that grade's stripes (up to the cap).
+
 ## Spelling Bee and Spanish Dojo
 
 **Spelling Bee** (coach: Mrs. Master Young)
@@ -184,6 +194,7 @@ learning-games/
   js/math-game.js        Math Dojo
   js/sentence-game.js    Fix-It Sentences
   js/explain.js          step-by-step math help, tips, rule book
+  js/rank.js             belts, stripes, stripe tests, graduation
   js/coach.js            adapts practice to weak spots, Sensei's plan
   js/sentence-gen.js     endless sentence generator + growing bank
   js/reading-game.js     Story Scrolls (reading comprehension)

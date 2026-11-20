@@ -97,14 +97,44 @@ BD.WordQuiz = (function () {
     };
   }
 
+  /* Belt rounds: words drawn from the grades around the belt grade (harder as belts go up). */
+  spelling.beltRound = function (p, grade, beltIndex) {
+    const out = [], used = new Set();
+    let guard = 0;
+    while (out.length < ROUND && guard++ < 200) {
+      const g = BD.Rank.itemGrade(grade, beltIndex), list = BD.SPELLING[String(g)] || BD.SPELLING[String(grade)];
+      const x = list[r(list.length)];
+      if (used.has(x[0])) continue;
+      used.add(x[0]); out.push(makeSpelling(x, grade));
+    }
+    return out;
+  };
+  spanish.beltRound = function (p, grade, beltIndex) {
+    const out = [], used = new Set();
+    let guard = 0;
+    while (out.length < ROUND && guard++ < 300) {
+      const topics = this.topics(BD.Rank.itemGrade(grade, beltIndex));
+      const pool = topics.length ? topics : this.topics(grade);
+      const t = pool[r(pool.length)], w = t.words[r(t.words.length)];
+      if (used.has(t.topic + ":" + w[0])) continue;
+      used.add(t.topic + ":" + w[0]);
+      out.push(makeSpanish(t, w[0], grade + (beltIndex >= 6 ? 2 : beltIndex >= 3 ? 1 : 0)));
+    }
+    return out;
+  };
+
   const GAMES = { spanish: spanish, spelling: spelling };
 
   /* ---------- play ---------- */
-  function start(game) {
+  /* stripe = { grade, belt, test } when started from the belt panel. */
+  function start(game, stripe) {
     const g = GAMES[game], p = BD.Store.current();
-    if (p.retry && p.retry[game]) p[g.field] = p.retry[game].grade;
+    if (stripe) p[g.field] = stripe.grade;
+    else if (p.retry && p.retry[game]) p[g.field] = p.retry[game].grade;
     const grade = p[g.field];
-    W = { game: game, g: g, grade: grade, items: g.round(p, grade), i: 0, xp: 0, correct: 0, firstTry: 0, answered: 0, streak: 0, best: 0, missed: [] };
+    W = { game: game, g: g, grade: grade, items: stripe ? g.beltRound(p, grade, stripe.belt) : g.round(p, grade), i: 0, xp: 0, correct: 0, firstTry: 0, answered: 0, streak: 0, best: 0, missed: [], stripe: stripe || null, test: !!(stripe && stripe.test) };
+    const label = BD.Rank.subject(BD.Rank.BY_GAME[game]).label;
+    BD.UI.testMode("screen-word-play", W.test ? label + " stripe test" : stripe ? label + " stripe practice · " + BD.BELTS[stripe.belt].name + " Belt" : "");
     $("wordCoachFace").src = BD.Cast.face(g.coach);
     $("wordCoachName").textContent = BD.Cast.name(g.coach);
     BD.UI.syncGradeSelect("wordGradeSel", game);
@@ -169,7 +199,7 @@ BD.WordQuiz = (function () {
     const verdict = judge(value);
     W.tries++;
     const typed = !q.choices;
-    if (verdict === "wrong" && typed && W.tries < 2) {
+    if (verdict === "wrong" && typed && W.tries < 2 && !W.test) {
       BD.Sound.wrong(); BD.Cast.say("wordSay", "wrong");
       $("wordFeedback").className = "word-feedback try-again";
       $("wordFeedback").innerHTML = "<p>Not quite. Try once more!</p>" + (q.mode === "spell" ? letterDiff(value, q.answer) : "");
@@ -195,7 +225,7 @@ BD.WordQuiz = (function () {
     } else {
       W.streak = 0; st.w++; W.missed.push(q);
       bucket[missKey] = { grade: W.grade, misses: Math.min(3, ((bucket[missKey] && bucket[missKey].misses) || 0) + 2), topic: q.topic, es: q.es, word: q.word };
-      if (!q.retry) W.items.splice(Math.min(W.i + 3, W.items.length), 0, Object.assign({}, q, { retry: true }));
+      if (!q.retry && !W.test) W.items.splice(Math.min(W.i + 3, W.items.length), 0, Object.assign({}, q, { retry: true }));
       BD.Sound.wrong(); BD.Cast.say("wordSay", "wrong");
       $("wordFeedback").className = "word-feedback revealed";
       $("wordFeedback").innerHTML = '<p>The answer is <strong>' + BD.UI.esc(q.answer) + '</strong>.</p><p>' + BD.UI.esc(q.explain) + '</p>' +
@@ -238,6 +268,13 @@ BD.WordQuiz = (function () {
     const p = BD.Store.current(), game = W.game, grade = W.grade, g = W.g;
     BD.Speech.stop();
     const acc = W.answered ? Math.round(100 * W.correct / W.answered) : 0;
+    if (W.test) {
+      const review = [];
+      W.missed.forEach(function (q) { if (review.indexOf(q.explain) === -1) review.push(q.explain); });
+      BD.UI.stripeResult({ subject: BD.Rank.BY_GAME[game], grade: grade, pct: acc, score: W.correct + " / " + W.answered, review: review, again: function () { start(game, { grade: grade, belt: BD.Rank.rec(p, grade).belt, test: true }); } });
+      return;
+    }
+    const stripeAgain = W.stripe ? { grade: grade, belt: BD.Rank.rec(p, grade).belt, test: false } : null;
     if (acc === 100 && W.answered >= 8) W.xp += 25;
     const failed = acc < PASS;
     p.retry = p.retry || {};
@@ -248,7 +285,7 @@ BD.WordQuiz = (function () {
       W.items.forEach(function (q) { if (q.word && seen.indexOf(q.word) === -1) seen.push(q.word); });
       p.seenWords.spelling = seen.slice(-300);
     }
-    const belt = BD.Store.addXP(p, W.xp);
+    const belt = BD.Rank.practice(p, game, grade, W.xp);
     BD.Store.recordSession(p, { game: game, grade: grade, correct: W.correct, total: W.answered, xp: W.xp });
     const missed = [];
     W.missed.forEach(function (q) { if (!missed.some(function (m) { return m.id === q.id; })) missed.push(q); });
@@ -264,7 +301,7 @@ BD.WordQuiz = (function () {
         (game === "spelling" ? '<p class="muted small">Tip: say the word slowly, clap each part, then write it three times.</p>' : '<p class="muted small">Tip: say each word out loud. Tap Hear it to copy the sound.</p>') + '</div>' : "",
       listTitle: "", list: [],
       levelUp: ready ? { text: "You got " + acc + "% at " + BD.gradeLabel(grade) + ". Ready for " + BD.gradeLabel(grade + 1) + "?", action: function () { p[g.field] = grade + 1; BD.Store.save(p); start(game); } } : null,
-      again: function () { start(game); },
+      again: function () { start(game, stripeAgain); },
       againLabel: failed ? "Redo this level" : "Play again",
       setup: null
     });
@@ -320,5 +357,7 @@ BD.WordQuiz = (function () {
     $("wordAsk").addEventListener("click", function () { if (W) BD.Sensei.open(senseiContext()); });
   }
 
-  return { start: start, stop: stop, bind: bind, planItems: planItems, PASS: PASS, GAMES: GAMES, plain: plain };
+  function peek() { return W && W.items[W.i]; }
+
+  return { peek: peek, start: start, stop: stop, bind: bind, planItems: planItems, PASS: PASS, GAMES: GAMES, plain: plain };
 })();

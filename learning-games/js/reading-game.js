@@ -142,13 +142,27 @@ BD.Reading = (function () {
   }
 
   /* ---------- playing ---------- */
-  function start(focus) {
+  /* Belt passages: lower belts can draw from the grade below, higher belts from the grade above. */
+  function beltPassages(p, grade, beltIndex) {
+    const out = [];
+    for (let i = 0; i < PASSAGES_PER_ROUND; i++) {
+      const g = BD.Rank.itemGrade(grade, beltIndex);
+      const pool = choose(p, g, null).concat(choose(p, grade, null)).filter(function (x) { return out.indexOf(x) === -1; });
+      if (pool.length) out.push(pool[0]);
+    }
+    return out;
+  }
+
+  /* stripe = { grade, belt, test } when started from the belt panel. */
+  function start(focus, stripe) {
     const p = BD.Store.current();
     if (typeof focus !== "string") focus = null;
-    if (p.retry && p.retry.reading) p.readingGrade = p.retry.reading.grade;
+    if (stripe) p.readingGrade = stripe.grade;
+    else if (p.retry && p.retry.reading) p.readingGrade = p.retry.reading.grade;
     const grade = p.readingGrade;
-    R = { grade: grade, focus: focus, passages: choose(p, grade, focus), pi: 0, qi: 0, xp: 0, results: [] };
+    R = { grade: grade, focus: focus, passages: stripe ? beltPassages(p, grade, stripe.belt) : choose(p, grade, focus), pi: 0, qi: 0, xp: 0, results: [], stripe: stripe || null, test: !!(stripe && stripe.test) };
     BD.UI.show("screen-read-play");
+    BD.UI.testMode("screen-read-play", R.test ? "Comprehension stripe test" : stripe ? "Comprehension stripe practice · " + BD.BELTS[stripe.belt].name + " Belt" : "");
     BD.Cast.say("readSay", "start");
     loadPassage();
     topUp(p, grade);
@@ -218,7 +232,7 @@ BD.Reading = (function () {
   function showResult(res, answer) {
     const q = question();
     const label = res.score === 2 ? "Got it!" : res.score === 1 ? "Partly there" : "Not yet";
-    const finished = res.score === 2 || R.tries >= TRIES;
+    const finished = res.score === 2 || R.tries >= (R.test ? 1 : TRIES);
     let html = '<p class="verdict v' + res.score + '">' + label + '</p><p>' + BD.UI.esc(res.feedback) + '</p>';
     if (finished) {
       R.done = true;
@@ -266,12 +280,19 @@ BD.Reading = (function () {
     const pts = R.results.reduce(function (a, x) { return a + x.best; }, 0);
     const acc = Math.round(100 * pts / max);
     const full = R.results.filter(function (x) { return x.best === 2; }).length;
+    if (R.test) {
+      p.seenPassages = R.passages.map(function (x) { return x.id; }).concat(p.seenPassages).slice(0, 200);
+      const review = R.results.filter(function (x) { return x.best < 2; }).map(function (x) { return x.q + " → " + x.answer; });
+      BD.UI.stripeResult({ subject: "comprehension", grade: grade, pct: acc, score: pts + " / " + max + " points", review: review, again: function () { start(null, { grade: grade, belt: BD.Rank.rec(p, grade).belt, test: true }); } });
+      return;
+    }
+    const stripeAgain = R.stripe ? { grade: grade, belt: BD.Rank.rec(p, grade).belt, test: false } : null;
     if (acc === 100) R.xp += 25;
     const failed = acc < PASS;
     p.retry = p.retry || {};
     const wasRetry = !!p.retry.reading;
     p.retry.reading = failed ? { grade: grade } : null;
-    const belt = BD.Store.addXP(p, R.xp);
+    const belt = BD.Rank.practice(p, "reading", grade, R.xp);
     BD.Store.recordSession(p, { game: "reading", grade: grade, correct: full, total: R.results.length, xp: R.xp, score: acc });
     const weakTypes = [];
     R.results.forEach(function (x) { if (x.best < 2 && weakTypes.indexOf(x.type) === -1) weakTypes.push(x.type); });
@@ -286,7 +307,7 @@ BD.Reading = (function () {
       lesson: weakTypes.length ? tipsHTML(weakTypes) : "",
       listTitle: "", list: [],
       levelUp: ready ? { text: "You scored " + acc + "% at " + BD.gradeLabel(grade) + ". Ready for " + BD.gradeLabel((grade + 1)) + " stories?", action: function () { p.readingGrade = grade + 1; BD.Store.save(p); start(); } } : null,
-      again: start,
+      again: function () { start(null, stripeAgain); },
       againLabel: failed ? "Redo this level" : "Two new stories",
       setup: null
     });
@@ -346,5 +367,7 @@ BD.Reading = (function () {
     $("readAsk").addEventListener("click", function () { if (R) BD.Sensei.open(senseiContext()); });
   }
 
-  return { stop: stop, start: start, bind: bind, applyRemoteBank: applyRemoteBank, planItems: planItems, keywordCheck: keywordCheck, validPassage: validPassage, PASS: PASS, bankItems: bankItems };
+  function peek() { return R && R.passages[R.pi] && R.passages[R.pi].questions[R.qi]; }
+
+  return { peek: peek, stop: stop, start: start, bind: bind, applyRemoteBank: applyRemoteBank, planItems: planItems, keywordCheck: keywordCheck, validPassage: validPassage, PASS: PASS, bankItems: bankItems };
 })();

@@ -6,15 +6,15 @@
 window.BD = window.BD || {};
 
 BD.BELTS = [
-  { name: "White", xp: 0, color: "#FFFFFF" },
-  { name: "Yellow", xp: 200, color: "#F5C518" },
-  { name: "Orange", xp: 500, color: "#F08A24" },
-  { name: "Green", xp: 1000, color: "#2FA866" },
-  { name: "Blue", xp: 1800, color: "#2D6CDF" },
-  { name: "Purple", xp: 2800, color: "#7B4BC4" },
-  { name: "Brown", xp: 4000, color: "#8A5A3B" },
-  { name: "Red", xp: 5500, color: "#D63A2F" },
-  { name: "Black", xp: 7500, color: "#17171C" }
+  { name: "White", color: "#FFFFFF" },
+  { name: "Yellow", color: "#F5C518" },
+  { name: "Orange", color: "#F08A24" },
+  { name: "Blue", color: "#2D6CDF" },
+  { name: "Green", color: "#2FA866" },
+  { name: "Purple", color: "#7B4BC4" },
+  { name: "Brown", color: "#8A5A3B" },
+  { name: "Red", color: "#D63A2F" },
+  { name: "Black", color: "#17171C" }
 ];
 BD.GRADES = [-1, 0, 1, 2, 3, 4, 5, 6, 7, 8]; // -1 = Pre-K, 0 = Kindergarten
 BD.MIN_GRADE = -1;
@@ -28,14 +28,8 @@ BD.gradeShort = function (g) {
 };
 BD.AVATAR_COLORS = ["#E2402F", "#2D6CDF", "#2FA866", "#7B4BC4", "#F08A24", "#0F9BA8"];
 
-BD.beltFor = function (xp) {
-  let belt = BD.BELTS[0];
-  for (const b of BD.BELTS) if (xp >= b.xp) belt = b;
-  return belt;
-};
-BD.nextBelt = function (xp) {
-  return BD.BELTS.find(function (b) { return b.xp > xp; }) || null;
-};
+/* The student's belt at the grade they're training (see js/rank.js). */
+BD.beltOf = function (p) { return BD.Rank ? BD.Rank.belt(p) : BD.BELTS[0]; };
 BD.today = function () {
   const d = new Date();
   return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
@@ -146,14 +140,6 @@ BD.Store = (function () {
       persist(); emit();
     },
 
-    /* Add XP and report whether a new belt was earned. */
-    addXP: function (p, amount) {
-      const before = BD.beltFor(p.xp);
-      p.xp += Math.max(0, Math.round(amount));
-      const after = BD.beltFor(p.xp);
-      save(p);
-      return { before: before, after: after, promoted: after.name !== before.name };
-    },
     recordSession: function (p, s) {
       s.date = new Date().toISOString();
       p.sessions.unshift(s);

@@ -23,7 +23,7 @@ BD.UI = (function () {
     const p = BD.Store.current();
     $("playerChip").hidden = !p || id === "screen-players";
     if (p) {
-      const belt = BD.beltFor(p.xp);
+      const belt = BD.beltOf(p);
       $("playerChip").innerHTML = avatar(p, "sm") + '<span>' + esc(p.name) + '</span>' + beltSwatch(belt);
     }
     window.scrollTo(0, 0);
@@ -32,16 +32,16 @@ BD.UI = (function () {
   function fighterOf(p) { return p.avatar || BD.Cast.defaultFighter(p); }
   /* The student's character: a cast member, or the fighter they built. */
   function fighterArt(p, mode) {
-    if (fighterOf(p) === "custom") return BD.Builder.svg(p.custom, BD.beltFor(p.xp).color, mode);
+    if (fighterOf(p) === "custom") return BD.Builder.svg(p.custom, BD.beltOf(p).color, mode);
     return '<img src="' + (mode === "face" ? BD.Cast.face(fighterOf(p)) : BD.Cast.img(fighterOf(p))) + '" alt="' + esc(BD.Cast.name(fighterOf(p))) + '">';
   }
   /* Round portrait of the student's chosen character, ringed in their belt color. */
   function avatar(p, size) {
-    const belt = BD.beltFor(p.xp);
+    const belt = BD.beltOf(p);
     return '<span class="avatar ' + (size || "") + '" style="--av:' + p.color + ';--ring:' + belt.color + '">' + fighterArt(p, "face") + '</span>';
   }
   function openBuilder(p) {
-    BD.Builder.open(p.custom, BD.beltFor(p.xp).color, function (cfg) {
+    BD.Builder.open(p.custom, BD.beltOf(p).color, function (cfg) {
       p.custom = cfg; p.avatar = "custom"; BD.Store.save(p); home();
     });
   }
@@ -55,7 +55,7 @@ BD.UI = (function () {
     const kids = BD.Cast.FIGHTERS.slice(0, 6), teachers = BD.Cast.FIGHTERS.slice(6);
     const me = BD.Store.current();
     const customCfg = big && me && me.custom ? me.custom : BD.Builder.DEFAULT;
-    const beltCol = big && me ? BD.beltFor(me.xp).color : "#FFFFFF";
+    const beltCol = big && me ? BD.beltOf(me).color : "#FFFFFF";
     const build = '<button type="button" class="fighter-opt build-opt" role="radio" data-fighter="custom" aria-checked="' + (selected === "custom") + '">' +
       '<span class="build-art">' + BD.Builder.svg(customCfg, beltCol, big ? "full" : "face") + '</span>' + (big && me && me.custom ? "My champion" : "Build your own") + '</button>';
     $(elId).innerHTML = '<p class="fighter-group">Create</p>' + build +
@@ -66,15 +66,106 @@ BD.UI = (function () {
   function beltSwatch(belt) {
     return '<span class="belt-swatch" style="--belt:' + belt.color + '" title="' + belt.name + ' belt"></span>';
   }
-  function beltBar(xp) {
-    const belt = BD.beltFor(xp), next = BD.nextBelt(xp);
-    const pct = next ? Math.round(100 * (xp - belt.xp) / (next.xp - belt.xp)) : 100;
-    return '<div class="belt-row">' +
-      '<div class="belt" style="--belt:' + belt.color + '"><span class="belt-knot"></span></div>' +
-      '<div class="belt-text"><strong>' + belt.name + ' Belt</strong><span>' + xp.toLocaleString() + ' XP' +
-      (next ? ' · ' + (next.xp - xp).toLocaleString() + ' XP to ' + next.name : ' · Highest rank!') + '</span>' +
-      '<div class="xp-track"><div class="xp-fill" style="width:' + pct + '%; --belt:' + (next ? next.color : belt.color) + '"></div></div></div></div>';
+  /* ---------- belt rank panel ---------- */
+  function rankPanel(p) {
+    const g = BD.Rank.dojoGrade(p), r = BD.Rank.rec(p, g), belt = BD.BELTS[r.belt];
+    const count = BD.Rank.stripeCount(r), xp = BD.Rank.beltXP(r);
+    const rows = BD.Rank.SUBJECTS.map(function (sj) {
+      const got = !!r.stripes[sj.key], x = Math.min(BD.Rank.PRACTICE_MAX, r.xp[sj.key] || 0);
+      return '<div class="stripe-row' + (got ? " earned" : "") + (sj.optional ? " optional" : "") + '">' +
+        '<span class="stripe-chip" aria-hidden="true"></span>' +
+        '<div class="sr-main"><strong>' + sj.label + (sj.optional ? ' <em>bonus</em>' : '') + '</strong>' +
+        '<span class="sr-sub">' + (got ? "Stripe earned" : x + " / 100 practice XP") + (sj.note ? " · " + sj.note : "") + '</span>' +
+        '<span class="mini-track"><i style="width:' + x + '%"></i></span></div>' +
+        '<div class="sr-actions"><button type="button" class="btn btn-small" data-stripe-practice="' + sj.key + '">Practice</button>' +
+        '<button type="button" class="btn btn-small btn-primary" data-stripe-test="' + sj.key + '">' + (got ? "Retest" : "Stripe test") + '</button></div></div>';
+    }).join("");
+    return '<div class="rank-card">' +
+      '<div class="rank-top"><label class="grade-select"><span class="eyebrow">Dojo grade</span><select id="dojoGradeSel">' +
+      BD.GRADES.map(function (x) { return '<option value="' + x + '"' + (x === g ? " selected" : "") + '>' + BD.gradeLabel(x) + '</option>'; }).join("") +
+      '</select></label><span class="rank-xp">Belt XP <strong>' + xp + '</strong> / 500</span></div>' +
+      '<div class="rank-belt">' + BD.Rank.beltSVG(r.belt, r.stripes) + '</div>' +
+      '<h2 class="rank-name">' + BD.gradeLabel(g) + ' · ' + belt.name + ' Belt</h2>' +
+      (r.mastered ? '<p class="rank-note mastered">Grade mastered! You earned every belt in ' + BD.gradeLabel(g) + '.' + (g < BD.MAX_GRADE ? ' <button type="button" class="btn btn-small btn-primary" id="rankNextGrade">Start ' + BD.gradeLabel(g + 1) + '</button>' : '') + '</p>'
+        : '<p class="rank-note">' + count + ' of 4 stripes · score ' + BD.Rank.PASS + '% on a stripe test to earn it · ' + BD.Rank.levelNote(r.belt) + '</p>') +
+      '<div class="xp-track"><div class="xp-fill" style="width:' + Math.round(100 * xp / 500) + '%"></div></div>' +
+      '<div class="stripe-list">' + rows + '</div></div>';
   }
+
+  /* Start practice or a stripe test for a subject at the dojo grade. */
+  function launchStripe(key, test) {
+    const p = BD.Store.current(), g = BD.Rank.dojoGrade(p), r = BD.Rank.rec(p, g);
+    const stripe = { grade: g, belt: r.belt, test: !!test };
+    if (key === "math") BD.MathGame.start("practice", null, stripe);
+    else if (key === "reading") BD.SentenceGame.start(null, stripe);
+    else if (key === "comprehension") BD.Reading.start(null, stripe);
+    else BD.WordQuiz.start(key, stripe);
+  }
+  function confirmTest(key) {
+    const p = BD.Store.current(), g = BD.Rank.dojoGrade(p), r = BD.Rank.rec(p, g), sj = BD.Rank.subject(key);
+    const what = { math: "20 problems", reading: "8 sentences to fix", spelling: "10 words to spell", comprehension: "2 stories with 6 questions", spanish: "10 Spanish words" }[key];
+    sheet(sj.label + " stripe test",
+      '<p><strong>' + BD.gradeLabel(g) + ' · ' + BD.BELTS[r.belt].name + ' Belt.</strong> ' + what + '. No hints. Score <strong>' + BD.Rank.PASS + '%</strong> or better to earn your ' + sj.label + ' stripe.</p>' +
+      '<p class="muted">Practice XP: ' + Math.min(100, r.xp[key] || 0) + ' / 100. You can take the test any time, and try again as often as you need.</p>' +
+      '<div class="res-actions"><button type="button" class="btn btn-primary btn-big" id="testGo">Start the test</button><button type="button" class="btn btn-quiet" id="testPractice">Practice first</button></div>');
+    $("testGo").onclick = function () { closeSheet(); launchStripe(key, true); };
+    $("testPractice").onclick = function () { closeSheet(); launchStripe(key, false); };
+  }
+
+  /* Banner + hidden helpers while a stripe test or belt practice runs. */
+  function testMode(screenId, label) {
+    const scr = $(screenId);
+    let b = scr.querySelector(".mode-banner");
+    if (!b) { b = document.createElement("p"); b.className = "mode-banner"; scr.insertBefore(b, scr.firstChild); }
+    b.textContent = label || ""; b.hidden = !label;
+    scr.classList.toggle("testing", /stripe test/i.test(label || ""));
+  }
+
+  /* After a stripe test. */
+  let lastStripe = null;
+  function stripeResult(o) {
+    const p = BD.Store.current();
+    const res = BD.Rank.testDone(p, o.subject, o.grade, o.pct);
+    lastStripe = o;
+    const sj = BD.Rank.subject(o.subject);
+    BD.Store.recordSession(p, { game: "test-" + o.subject, grade: o.grade, correct: o.pct, total: 100, xp: res.graduated ? BD.Rank.GRAD_XP : 0 });
+    $("stripeSub").textContent = sj.label + " stripe test · " + BD.gradeLabel(o.grade);
+    $("stripeTitle").textContent = res.passed ? (res.already ? "Stripe kept strong!" : sj.label + " stripe earned!") : "Not yet. Keep training!";
+    $("stripeScore").textContent = o.score + " · " + o.pct + "%" + (res.passed ? "" : " (need " + BD.Rank.PASS + "%)");
+    const r = BD.Rank.rec(p, o.grade);
+    const shownBelt = res.graduated ? res.beltBefore : r.belt;
+    const shownStripes = res.graduated ? BD.Rank.REQUIRED.reduce(function (a, k) { a[k] = true; return a; }, {}) : r.stripes;
+    $("stripeBelt").innerHTML = BD.Rank.beltSVG(shownBelt, shownStripes, { newStripe: res.passed && !res.already ? o.subject : null });
+    $("stripeSay").textContent = "Zumi: " + (res.passed ? BD.Cast.line("win") : BD.Cast.line("retry"));
+    $("stripeReview").hidden = !o.review || !o.review.length;
+    $("stripeReviewList").innerHTML = (o.review || []).slice(0, 12).map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("");
+    $("stripeRetry").hidden = res.passed;
+    $("stripeHome").textContent = res.graduated ? "Graduate!" : "Back to my belt";
+    $("stripeHome").onclick = function () { if (res.graduated) graduation(res); else home(); };
+    $("stripePractice").onclick = function () { launchStripe(o.subject, false); };
+    $("stripeRetry").onclick = function () { o.again(); };
+    show("screen-stripe");
+    if (res.passed) { BD.Sound.win(); BD.confetti(res.graduated ? 160 : 90); } else BD.Sound.wrong();
+  }
+
+  /* Graduation celebration. */
+  function graduation(res) {
+    const p = BD.Store.current(), gr = res.graduated;
+    $("gradChamp").innerHTML = fighterArt(p, "full");
+    $("gradLine").innerHTML = gr.mastered
+      ? esc(p.name) + " earned all 4 stripes on the <strong>Black Belt</strong>. " + BD.gradeLabel(gr.grade) + " mastered!"
+      : esc(p.name) + " graduated from <strong>" + gr.from.name + "</strong> to <strong>" + gr.to.name + " Belt</strong> in " + BD.gradeLabel(gr.grade) + "!";
+    $("gradBelt").innerHTML = BD.Rank.beltSVG(BD.BELTS.indexOf(gr.to), gr.mastered ? BD.Rank.REQUIRED.reduce(function (a, k) { a[k] = true; return a; }, {}) : {});
+    $("gradBelt").style.setProperty("--belt", gr.to.color);
+    $("gradSay").textContent = "Zumi: " + BD.Cast.line("win") + " Bow in to your new belt!";
+    $("gradXP").textContent = "+" + BD.Rank.GRAD_XP + " XP graduation bonus";
+    $("gradNextGrade").hidden = !(gr.mastered && gr.grade < BD.MAX_GRADE);
+    $("gradNextGrade").onclick = function () { p.dojoGrade = gr.grade + 1; BD.Store.save(p); home(); };
+    show("screen-grad");
+    BD.Sound.belt(); BD.confetti(260);
+    setTimeout(function () { BD.confetti(180); }, 900);
+  }
+
   /* ---------- Back button ---------- */
   function stopGames() {
     if (BD.MathGame.stop) BD.MathGame.stop();
@@ -137,12 +228,13 @@ BD.UI = (function () {
   function players() {
     const list = BD.Store.players();
     $("playerList").innerHTML = list.length ? list.map(function (p) {
-      const belt = BD.beltFor(p.xp);
+      const belt = BD.beltOf(p);
       return '<button type="button" class="player-card" data-id="' + p.id + '">' + avatar(p, "lg") +
         '<span class="pc-name">' + esc(p.name) + '</span>' +
-        '<span class="pc-belt">' + beltSwatch(belt) + belt.name + ' Belt</span></button>';
+        '<span class="pc-belt">' + beltSwatch(belt) + BD.gradeShort(BD.Rank.dojoGrade(p)) + ' · ' + belt.name + ' Belt</span></button>';
     }).join("") : '<p class="muted empty-note">No students yet. Add each child below so their belts and progress are saved separately.</p>';
     $("newGrade").innerHTML = BD.GRADES.map(function (g) { return '<option value="' + g + '">' + BD.gradeLabel(g) + '</option>'; }).join("");
+    $("newGrade").value = "3";
     fighterPicker("newFighter", newFighter, false);
     show("screen-players");
   }
@@ -155,7 +247,7 @@ BD.UI = (function () {
     const todays = p.sessions.filter(function (s) { return s.date && s.date.slice(0, 10) === today; }).length;
     $("homeHello").textContent = "Ready to train, " + p.name + "?";
     $("homeFighter").innerHTML = fighterArt(p, "full");
-    $("homeBelt").innerHTML = beltBar(p.xp);
+    $("homeBelt").innerHTML = rankPanel(p);
     $("homeToday").textContent = todays ? todays + (todays === 1 ? " round" : " rounds") + " completed today" : "No rounds yet today";
     const retry = p.retry || {};
     if (retry.sentence) p.sentenceGrade = retry.sentence.grade;
@@ -198,6 +290,8 @@ BD.UI = (function () {
     else if (it.kind === "readFocus") BD.Reading.start(it.type);
     else if (it.kind === "readUp") { p.readingGrade = it.grade; BD.Store.save(p); home(); }
     else if (it.kind === "spanishRetry" || it.kind === "spellingRetry") BD.WordQuiz.start(it.game);
+    else if (it.kind === "stripeTest") confirmTest(it.subject);
+    else if (it.kind === "stripePractice") launchStripe(it.subject, false);
   }
 
   /* Re-draw when progress arrives from another device. */
@@ -218,9 +312,16 @@ BD.UI = (function () {
       return '<div class="stat"><span class="stat-val">' + esc(s[1]) + '</span><span class="stat-label">' + esc(s[0]) + '</span></div>';
     }).join("");
     const p = BD.Store.current();
-    $("resBelt").innerHTML = (o.belt.promoted
-      ? '<div class="promo" style="--belt:' + o.belt.after.color + '"><span class="promo-eyebrow">Promotion</span><strong>You earned your ' + o.belt.after.name + ' Belt!</strong></div>'
-      : "") + beltBar(p.xp);
+    const rk = o.belt || {};
+    const sjr = BD.Rank.subject(rk.subject) || { label: "" };
+    $("resBelt").innerHTML = rk.subject ? '<div class="belt-row stripe-xp">' +
+      '<div class="belt-text"><strong>' + sjr.label + ' stripe practice</strong>' +
+      '<span>' + (rk.gained ? "+" + rk.gained + " XP · " : "") + rk.now + " / 100 XP on your " + BD.gradeLabel(rk.grade) + " " + rk.belt.name + " Belt" +
+      (rk.earned > rk.gained ? " (practice is maxed, so extra XP doesn't add up)" : "") + '</span>' +
+      '<div class="xp-track"><div class="xp-fill" style="width:' + rk.now + '%"></div></div>' +
+      (rk.hasStripe ? '<span class="muted">You already have this stripe.</span>' : '<button type="button" class="btn btn-small btn-primary" id="resStripeTest">' + (rk.maxed ? "Practice maxed! Take the " : "Ready? Take the ") + sjr.label + ' stripe test</button>') +
+      '</div></div>' : "";
+    if ($("resStripeTest")) $("resStripeTest").onclick = function () { p.dojoGrade = rk.grade; BD.Store.save(p); confirmTest(rk.subject); };
     $("resFailed").hidden = !o.failed;
     $("resFailedText").textContent = o.failed || "";
     $("resPassed").hidden = !o.passedRetry;
@@ -235,11 +336,10 @@ BD.UI = (function () {
     $("resLevel").hidden = !o.levelUp;
     if (o.levelUp) $("resLevelText").textContent = o.levelUp.text;
     $("resAgain").textContent = o.againLabel || "Play again";
-    $("resSay").textContent = "Zumi: " + (o.failed ? BD.Cast.line("retry") : BD.Cast.line(o.belt.promoted ? "win" : "right"));
+    $("resSay").textContent = "Zumi: " + (o.failed ? BD.Cast.line("retry") : BD.Cast.line("right"));
     $("resSetup").hidden = !o.setup;
     show("screen-results");
     if (quiet) { /* returning with Back: no fanfare */ }
-    else if (o.belt.promoted) { BD.Sound.belt(); BD.confetti(200); }
     else if (!o.failed) { BD.Sound.win(); BD.confetti(80); }
   }
 
@@ -256,7 +356,7 @@ BD.UI = (function () {
     const list = BD.Store.players();
     if (!list.length) { $("parentBody").innerHTML = '<p class="muted">No students yet.</p>'; show("screen-parent"); return; }
     $("parentBody").innerHTML = list.map(function (p) {
-      const belt = BD.beltFor(p.xp);
+      const belt = BD.beltOf(p);
       const opRows = Object.keys(BD.MathGame.OPS).map(function (op) {
         return '<tr><th scope="row">' + BD.MathGame.OPS[op].sym + " " + BD.MathGame.OPS[op].label + '</th>' + BD.GRADES.map(function (g) {
           const s = p.mathStats[g + "-" + op]; return '<td>' + (s ? pct(s.r, s.w) + '<small>' + (s.r + s.w) + '</small>' : "–") + '</td>';
@@ -294,6 +394,10 @@ BD.UI = (function () {
         '<header class="report-head">' + avatar(p, "lg") + '<div><h3>' + esc(p.name) + '</h3><p class="muted">' + belt.name + ' Belt · ' + p.xp.toLocaleString() + ' XP · practiced ' + p.days.length + (p.days.length === 1 ? " day" : " days") + '</p></div></header>' +
         (redoList(p).length ? '<div class="redo-note"><strong>Redo needed</strong><p>' + redoList(p).join(", ") +
           '. Scored under ' + BD.MathGame.PASS + '%, so this level stays locked in until they pass it.</p><button type="button" class="btn btn-small" data-act="clearRedo">Unlock all levels</button></div>' : '') +
+        '<h4 class="label">Belts by grade</h4><p class="belt-summary">' + Object.keys(p.rank || {}).map(Number).sort(function (a, b) { return a - b; }).map(function (g) {
+          const r = BD.Rank.rec(p, g);
+          return '<span>' + beltSwatch(BD.BELTS[r.belt]) + ' <strong>' + BD.gradeShort(g) + '</strong> ' + BD.BELTS[r.belt].name + (r.mastered ? " (mastered)" : " · " + BD.Rank.stripeCount(r) + "/4 stripes") + (r.stripes.spanish ? " + Spanish" : "") + '</span>';
+        }).join("") + '</p>' +
         '<h4 class="label">Accuracy by grade <span class="muted">(number answered underneath)</span></h4>' +
         '<div class="table-wrap"><table class="grid"><thead><tr><th></th>' + BD.GRADES.map(function (g) { return '<th>' + BD.gradeShort(g) + '</th>'; }).join("") + '</tr></thead><tbody>' + opRows + sentRow + typeRow + typeRows + readRow + wordRows + '</tbody></table></div>' +
         (plan.length ? '<h4 class="label">What Sensei is working on next</h4><ul class="plan-text">' + plan.map(function (it) { return '<li><strong>' + esc(it.title) + '.</strong> ' + esc(it.sub) + '</li>'; }).join("") + '</ul>' : '') +
@@ -340,6 +444,17 @@ BD.UI = (function () {
     });
     $("playMath").addEventListener("click", function () { BD.MathGame.openSetup(); });
     $("playSent").addEventListener("click", function () { BD.SentenceGame.start(); });
+    $("homeBelt").addEventListener("click", function (e) {
+      const pr = e.target.closest("[data-stripe-practice]"), te = e.target.closest("[data-stripe-test]");
+      if (pr) launchStripe(pr.dataset.stripePractice, false);
+      else if (te) confirmTest(te.dataset.stripeTest);
+      else if (e.target.id === "rankNextGrade") { const p = BD.Store.current(); p.dojoGrade = BD.Rank.dojoGrade(p) + 1; BD.Store.save(p); home(); }
+    });
+    $("homeBelt").addEventListener("change", function (e) {
+      if (e.target.id !== "dojoGradeSel") return;
+      const p = BD.Store.current(); p.dojoGrade = Number(e.target.value); BD.Store.save(p); BD.Sound.tap(); home();
+    });
+    $("gradContinue").addEventListener("click", home);
     $("playRead").addEventListener("click", function () { BD.Reading.start(); });
     $("playSpell").addEventListener("click", function () { BD.WordQuiz.start("spelling"); });
     $("playSpanish").addEventListener("click", function () { BD.WordQuiz.start("spanish"); });
@@ -422,7 +537,7 @@ BD.UI = (function () {
     BD.Store.current() ? home() : players();
   }
 
-  return { back: back, setGrade: setGrade, syncGradeSelect: syncGradeSelect, refresh: refresh, sheet: sheet, sheetOpen: sheetOpen, show: show, esc: esc, home: home, players: players, results: results, gradePicker: gradePicker, init: init };
+  return { testMode: testMode, stripeResult: stripeResult, back: back, setGrade: setGrade, syncGradeSelect: syncGradeSelect, refresh: refresh, sheet: sheet, sheetOpen: sheetOpen, show: show, esc: esc, home: home, players: players, results: results, gradePicker: gradePicker, init: init };
 })();
 
 document.addEventListener("DOMContentLoaded", BD.UI.init);

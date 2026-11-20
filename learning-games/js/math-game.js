@@ -141,7 +141,10 @@ BD.MathGame = (function () {
     const recent = S.queue.slice(-5).map(function (q) { return q.key; });
     let p;
     for (let tries = 0; tries < 12; tries++) {
-      p = makeProblem(BD.Coach.pickOp(BD.Store.current(), S.grade, S.ops), S.grade);
+      const op = BD.Coach.pickOp(BD.Store.current(), S.grade, S.ops);
+      let g = S.grade;
+      if (S.stripe) { g = BD.Rank.itemGrade(S.grade, S.stripe.belt); if (opsFor(g).indexOf(op) === -1) g = S.grade; }
+      p = makeProblem(op, g);
       if (recent.indexOf(p.key) === -1) break;
     }
     return p;
@@ -195,12 +198,23 @@ BD.MathGame = (function () {
 
   function bestFor(p, grade) { return (p.bestClock && p.bestClock[grade]) || 0; }
 
-  function start(mode, focusOps) {
+  /* Belt tests and belt practice: more operations unlock as the belts go up. */
+  function beltOps(grade, beltIndex) {
+    const want = beltIndex <= 1 ? ["add", "sub"] : beltIndex <= 3 ? ["add", "sub", "mul"] : ALL_OPS;
+    const ok = opsFor(grade).filter(function (o) { return want.indexOf(o) !== -1; });
+    return ok.length ? ok : opsFor(grade);
+  }
+
+  /* stripe = { grade, belt, test } when started from the belt panel. */
+  function start(mode, focusOps, stripe) {
     const p = BD.Store.current();
-    if (p.retry && p.retry.math) { p.mathGrade = p.retry.math.grade; focusOps = p.retry.math.ops; }
+    if (stripe) { p.mathGrade = stripe.grade; focusOps = beltOps(stripe.grade, stripe.belt); }
+    else if (p.retry && p.retry.math) { p.mathGrade = p.retry.math.grade; focusOps = p.retry.math.ops; }
     if (S && S.timer) clearInterval(S.timer);
     S = {
+      stripe: stripe || null, test: !!(stripe && stripe.test),
       mode: mode, grade: p.mathGrade, ops: (function () {
+        if (stripe) return focusOps;
         const allowed = opsFor(p.mathGrade);
         const want = (focusOps && focusOps.length ? focusOps : p.mathOps).filter(function (o) { return allowed.indexOf(o) !== -1; });
         return want.length ? want : allowed.slice();
@@ -208,7 +222,9 @@ BD.MathGame = (function () {
       input: "", locked: false, correct: 0, answered: 0, streak: 0, bestStreak: 0,
       xp: 0, missed: [], timer: null, endsAt: 0, xpBefore: p.xp
     };
-    if (mode === "practice") {
+    if (S.test) {
+      for (let n = 0; n < 20; n++) S.queue.push(freshProblem());
+    } else if (mode === "practice") {
       const tricky = trickyFor(p, S.grade, S.ops).slice(0, 4).map(function (t) { return build(t.op, t.a, t.b, t.grade); });
       for (let n = 0; n < PRACTICE_CARDS - tricky.length; n++) S.queue.push(freshProblem());
       tricky.forEach(function (t) { S.queue.splice(r(2, S.queue.length), 0, t); });
@@ -219,6 +235,7 @@ BD.MathGame = (function () {
     }
     buildKeypad();
     BD.UI.syncGradeSelect("mathGradeSel", "math");
+    BD.UI.testMode("screen-math-play", S.test ? "Math stripe test" : S.stripe ? "Math stripe practice · " + BD.BELTS[S.stripe.belt].name + " Belt" : "");
     BD.UI.show("screen-math-play");
     BD.Cast.say("mathSay", "start");
     render();
@@ -249,12 +266,12 @@ BD.MathGame = (function () {
     $("mathAnswer").classList.toggle("empty", !S.input);
     $("mathFeedback").textContent = "";
     $("mathCard").className = "flashcard";
-    if (S.mode === "practice") $("mathProgress").textContent = "Card " + (S.i + 1) + " of " + S.queue.length;
+    if (S.mode === "practice") $("mathProgress").textContent = (S.test ? "Test " : "Card ") + (S.i + 1) + " of " + S.queue.length;
     else tick();
     $("mathStreak").textContent = S.streak >= 3 ? "Combo ×" + S.streak : "";
     $("mathScore").textContent = S.xp + " XP";
     $("mathKeyMinus").hidden = S.grade < 7; // negative numbers start in grade 7
-    $("mathAsk").hidden = S.mode === "clock";
+    $("mathAsk").hidden = S.mode === "clock" || S.test;
   }
 
   function buildKeypad() {
@@ -303,7 +320,7 @@ BD.MathGame = (function () {
       S.streak = 0; st.w++;
       S.missed.push(q);
       p.tricky[q.key] = { op: q.op, a: q.a, b: q.b, grade: q.grade, misses: Math.min(3, (tk ? tk.misses : 0) + 2) };
-      if (S.mode === "practice" && !q.retry) {
+      if (S.mode === "practice" && !q.retry && !S.test) {
         const again = Object.assign({}, q, { retry: true });
         S.queue.splice(Math.min(S.i + 3, S.queue.length), 0, again);
       }
@@ -312,7 +329,7 @@ BD.MathGame = (function () {
       $("mathFeedback").textContent = show(q) + " = " + num(q.answer);
       BD.Sound.wrong();
       S.lastWrong = S.input;
-      if (S.mode === "practice") showExplain(q);
+      if (S.mode === "practice" && !S.test) showExplain(q);
       else setTimeout(advance, 1600);
     }
     BD.Store.save();
@@ -379,6 +396,12 @@ BD.MathGame = (function () {
     S.done = true; clearInterval(S.timer);
     const p = BD.Store.current(), mode = S.mode, grade = S.grade;
     const acc = S.answered ? Math.round(100 * S.correct / S.answered) : 0;
+    if (S.test) {
+      const review = [];
+      S.missed.forEach(function (q) { const t = show(q) + " = " + num(q.answer); if (review.indexOf(t) === -1) review.push(t); });
+      BD.UI.stripeResult({ subject: "math", grade: grade, pct: acc, score: S.correct + " / " + S.answered, review: review, again: function () { start("practice", null, { grade: grade, belt: BD.Rank.rec(p, grade).belt, test: true }); } });
+      return;
+    }
     let record = false;
     if (S.mode === "clock") {
       p.bestClock = p.bestClock || {};
@@ -386,7 +409,7 @@ BD.MathGame = (function () {
     }
     // Bonus for a strong round
     if (acc === 100 && S.answered >= 10) S.xp += 25;
-    const belt = BD.Store.addXP(p, S.xp);
+    const belt = BD.Rank.practice(p, "math", grade, S.xp);
     BD.Store.recordSession(p, {
       game: "math", mode: S.mode, grade: S.grade, ops: S.ops, correct: S.correct, total: S.answered, xp: S.xp
     });
@@ -403,6 +426,7 @@ BD.MathGame = (function () {
     if (passedRetry) p.retry.math = null;
     BD.Store.save();
     const ops = S.ops;
+    const stripeAgain = S.stripe ? { grade: grade, belt: BD.Rank.rec(p, grade).belt, test: false } : null;
     const missedOps = ops.filter(function (o) { return uniqueMissed.some(function (q) { return q.op === o; }); });
 
     BD.UI.results({
@@ -416,7 +440,7 @@ BD.MathGame = (function () {
       listTitle: uniqueMissed.length ? "Facts to practice" : "",
       list: uniqueMissed.slice(0, 12).map(function (q) { return show(q) + " = " + num(q.answer); }),
       levelUp: ready && !failed ? { text: "You got " + acc + "% at " + BD.gradeLabel(grade) + ". Ready to try " + BD.gradeLabel((grade + 1)) + "?", action: function () { p.mathGrade = grade + 1; BD.Store.save(); openSetup(); } } : null,
-      again: function () { start(mode, ops); },
+      again: function () { start(mode, stripeAgain ? null : ops, stripeAgain); },
       againLabel: failed ? "Redo this level" : "Go again",
       setup: failed ? null : openSetup
     });

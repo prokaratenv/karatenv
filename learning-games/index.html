@@ -203,7 +203,7 @@
         <button type="button" class="btn btn-quiet btn-small" id="sentQuit">‹ Back</button>
         <label class="grade-select"><span class="sr-only">Grade level for this game</span><select id="sentGradeSel"></select></label>
         <span class="meter" id="sentProgress"></span>
-        <button type="button" class="btn btn-small" id="sentRules">Rule book</button>
+        <button type="button" class="btn btn-small" id="sentRules" data-test-hide>Rule book</button>
         <button type="button" class="btn btn-small sensei-btn" id="sentAsk">Ask Sensei</button>
         <span class="score" id="sentScore"></span>
       </div>
@@ -218,8 +218,8 @@
         <label class="sr-only" for="sentInput">Your corrected sentence</label>
         <textarea id="sentInput" class="sent-input" rows="2" spellcheck="false" autocorrect="off" autocapitalize="off" autocomplete="off"></textarea>
         <div class="sent-actions">
-          <button type="button" class="btn btn-quiet" id="sentReset">Start over</button>
-          <button type="button" class="btn btn-quiet" id="sentHint">Hint <small>(−5 XP)</small></button>
+          <button type="button" class="btn btn-quiet" id="sentReset" data-test-hide>Start over</button>
+          <button type="button" class="btn btn-quiet" id="sentHint" data-test-hide>Hint <small>(−5 XP)</small></button>
           <span class="tries" id="sentTries"></span>
           <button type="button" class="btn btn-primary" id="sentCheck">Check</button>
           <button type="button" class="btn btn-primary" id="sentNext" hidden>Next sentence</button>
@@ -235,7 +235,7 @@
         <button type="button" class="btn btn-quiet btn-small" id="readQuit">‹ Back</button>
         <label class="grade-select"><span class="sr-only">Grade level for this game</span><select id="readGradeSel"></select></label>
         <span class="meter" id="readProgress"></span>
-        <button type="button" class="btn btn-small" id="readTips">Reading tips</button>
+        <button type="button" class="btn btn-small" id="readTips" data-test-hide>Reading tips</button>
         <button type="button" class="btn btn-small sensei-btn" id="readAsk">Ask Sensei</button>
         <span class="score" id="readScore"></span>
       </div>
@@ -253,7 +253,7 @@
         <label class="sr-only" for="readInput">Your answer</label>
         <textarea id="readInput" class="read-input" rows="3" placeholder="Answer in your own words…"></textarea>
         <div class="sent-actions">
-          <button type="button" class="btn btn-quiet" id="readHint">Hint <small>(−5 XP)</small></button>
+          <button type="button" class="btn btn-quiet" id="readHint" data-test-hide>Hint <small>(−5 XP)</small></button>
           <span class="tries" id="readTries"></span>
           <button type="button" class="btn btn-primary" id="readCheck">Check my answer</button>
           <button type="button" class="btn btn-primary" id="readNext" hidden>Next question</button>
@@ -287,12 +287,52 @@
           <label class="sr-only" for="wordInput">Your answer</label>
           <input id="wordInput" class="word-input" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">
           <div class="sent-actions">
-            <button type="button" class="btn btn-quiet" id="wordTilesBtn">Letter tiles <small>(−5 XP)</small></button>
+            <button type="button" class="btn btn-quiet" id="wordTilesBtn" data-test-hide>Letter tiles <small>(−5 XP)</small></button>
             <button type="button" class="btn btn-primary" id="wordCheck">Check</button>
           </div>
         </div>
         <div class="word-feedback" id="wordFeedback" aria-live="polite"></div>
         <button type="button" class="btn btn-primary" id="wordNext" hidden>Next</button>
+      </div>
+    </section>
+
+    <!-- Stripe test result -->
+    <section class="screen" id="screen-stripe" hidden>
+      <div class="stripe-hero">
+        <p class="eyebrow" id="stripeSub"></p>
+        <h1 id="stripeTitle"></h1>
+        <p class="stripe-score" id="stripeScore"></p>
+        <div class="stripe-belt" id="stripeBelt"></div>
+        <p class="say" id="stripeSay"></p>
+      </div>
+      <section class="lesson" id="stripeReview" hidden>
+        <h2>Review these</h2>
+        <ul class="plan-text" id="stripeReviewList"></ul>
+      </section>
+      <div class="res-actions">
+        <button type="button" class="btn btn-primary btn-big" id="stripeHome">Back to my belt</button>
+        <button type="button" class="btn btn-quiet" id="stripePractice">Practice more</button>
+        <button type="button" class="btn btn-quiet" id="stripeRetry">Retake the test</button>
+      </div>
+    </section>
+
+    <!-- Graduation -->
+    <section class="screen" id="screen-grad" hidden>
+      <div class="grad-stage">
+        <p class="eyebrow grad-eyebrow">Brain Dojo graduation</p>
+        <h1 class="grad-title">Graduation!</h1>
+        <div class="grad-cast">
+          <img class="grad-zumi" src="img/zumi.webp" alt="Zumi">
+          <span class="fighter-art grad-champ" id="gradChamp"></span>
+        </div>
+        <p class="grad-line" id="gradLine"></p>
+        <div class="stripe-belt grad-belt" id="gradBelt"></div>
+        <p class="grad-xp" id="gradXP">+100 XP</p>
+        <p class="say" id="gradSay"></p>
+      </div>
+      <div class="res-actions grad-actions">
+        <button type="button" class="btn btn-primary btn-big" id="gradContinue">Continue</button>
+        <button type="button" class="btn btn-quiet" id="gradNextGrade" hidden>Start the next grade</button>
       </div>
     </section>
 
@@ -400,6 +440,7 @@
 <script src="data/spelling-bank.js"></script>
 <script src="js/storage.js"></script>
 <script src="js/cast.js"></script>
+<script src="js/rank.js"></script>
 <script src="js/builder.js"></script>
 <script src="js/effects.js"></script>
 <script src="js/explain.js"></script>

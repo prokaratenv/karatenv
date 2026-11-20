@@ -32,12 +32,27 @@ BD.SentenceGame = (function () {
     return { words: a, ok: ok, matched: L[0][0], missing: n - L[0][0] - ok.filter(function (x) { return !x; }).length };
   }
 
-  function start(focus) {
+  /* Belt items: more mistakes per sentence as the belts go up, mixing in the grades around it. */
+  function beltItems(grade, beltIndex, n) {
+    const extra = beltIndex <= 2 ? -1 : beltIndex <= 5 ? 0 : 1, out = [];
+    let guard = 0;
+    while (out.length < n && guard++ < 60) {
+      const it = BD.SentenceGen.make(BD.Rank.itemGrade(grade, beltIndex), { cap: 1, punct: 1, spell: 1, grammar: 1 }, extra);
+      if (it) out.push(it);
+    }
+    return out;
+  }
+
+  /* stripe = { grade, belt, test } when started from the belt panel. */
+  function start(focus, stripe) {
     const p = BD.Store.current();
     if (typeof focus !== "string") focus = null;
-    if (p.retry && p.retry.sentence) p.sentenceGrade = p.retry.sentence.grade;
-    S = { grade: p.sentenceGrade, items: BD.SentenceGen.round(p, p.sentenceGrade, ROUND, focus), focus: focus, i: 0, xp: 0, solved: 0, firstTry: 0, results: [] };
+    if (stripe) p.sentenceGrade = stripe.grade;
+    else if (p.retry && p.retry.sentence) p.sentenceGrade = p.retry.sentence.grade;
+    const items = stripe ? beltItems(stripe.grade, stripe.belt, 8) : BD.SentenceGen.round(p, p.sentenceGrade, ROUND, focus);
+    S = { grade: p.sentenceGrade, items: items, focus: focus, i: 0, xp: 0, solved: 0, firstTry: 0, results: [], stripe: stripe || null, test: !!(stripe && stripe.test) };
     BD.UI.show("screen-sentence-play");
+    BD.UI.testMode("screen-sentence-play", S.test ? "Reading stripe test" : stripe ? "Reading stripe practice · " + BD.BELTS[stripe.belt].name + " Belt" : "");
     BD.Cast.say("sentSay", "start");
     load();
     BD.SentenceGen.topUp(p, S.grade); // ask Claude for more sentences if the bank is running low
@@ -164,9 +179,15 @@ BD.SentenceGame = (function () {
     const p = BD.Store.current(), grade = S.grade;
     const total = S.items.length;
     const acc = Math.round(100 * S.solved / total);
+    if (S.test) {
+      const review = S.results.filter(function (x) { return !x.won; }).map(function (x) { const it = S.items.find(function (s) { return s.id === x.id; }); return answers(it)[0]; });
+      BD.UI.stripeResult({ subject: "reading", grade: grade, pct: acc, score: S.solved + " / " + total, review: review, again: function () { start(null, { grade: grade, belt: BD.Rank.rec(p, grade).belt, test: true }); } });
+      return;
+    }
+    const stripeAgain = S.stripe ? { grade: grade, belt: BD.Rank.rec(p, grade).belt, test: false } : null;
     if (S.solved === total) S.xp += 25;
     const levelShift = BD.Coach.adjustSentLevel(p, grade, S.firstTry, total);
-    const belt = BD.Store.addXP(p, S.xp);
+    const belt = BD.Rank.practice(p, "sentence", grade, S.xp);
     BD.Store.recordSession(p, { game: "sentence", grade: grade, correct: S.solved, firstTry: S.firstTry, total: total, xp: S.xp });
     const missedItems = S.results.filter(function (x) { return !x.won; }).map(function (x) {
       const it = S.items.find(function (s) { return s.id === x.id; });
@@ -195,7 +216,7 @@ BD.SentenceGame = (function () {
       listTitle: missedItems.length ? "Sentences to read again" : "",
       list: missedItems,
       levelUp: ready ? { text: "You fixed " + S.firstTry + " of " + total + " on the first try. Ready for " + BD.gradeLabel((grade + 1)) + "?", action: function () { p.sentenceGrade = grade + 1; BD.Store.save(); start(); } } : null,
-      again: start,
+      again: function () { start(null, stripeAgain); },
       againLabel: failed ? "Redo this level" : "New sentences",
       setup: null
     });
@@ -258,5 +279,8 @@ BD.SentenceGame = (function () {
     });
   }
 
-  return { stop: stop, PASS: PASS, start: start, bind: bind, compare: compare, norm: norm };
+  /* Read-only view of the current item (used by automated tests). */
+  function peek() { return S && S.items[S.i]; }
+
+  return { peek: peek, stop: stop, PASS: PASS, start: start, bind: bind, compare: compare, norm: norm };
 })();

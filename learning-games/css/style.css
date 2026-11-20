@@ -486,6 +486,71 @@ p { margin: 0; }
 .l-bad { color: var(--bad); text-decoration: underline; }
 #wordNext { min-width: 180px; }
 
+/* ---------- belt rank, stripes, graduation ---------- */
+.rank-card {
+  display: grid; gap: 10px; padding: 18px; border-radius: 22px; box-shadow: var(--shadow);
+  background: radial-gradient(90% 70% at 50% 0%, rgba(224, 186, 119, .14), transparent 60%), linear-gradient(180deg, var(--surface-2), var(--mat)); border: 1px solid var(--line);
+}
+.rank-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.rank-top .grade-select { display: grid; gap: 4px; }
+.rank-xp { font-family: var(--font-display); font-weight: 800; color: var(--muted); font-size: .85rem; }
+.rank-xp strong { color: var(--gold-3); font-size: 1.1rem; }
+.rank-belt, .stripe-belt { display: grid; place-items: center; }
+.belt-svg { width: min(360px, 100%); height: auto; filter: drop-shadow(0 8px 12px rgba(0, 0, 0, .5)); }
+.rank-name { text-align: center; font-size: clamp(1.25rem, 5vw, 1.7rem); }
+.rank-note { text-align: center; color: var(--muted); font-weight: 600; }
+.rank-note.mastered { color: var(--gold-3); font-weight: 800; }
+.stripe-list { display: grid; gap: 8px; margin-top: 4px; }
+.stripe-row {
+  display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; padding: 10px 12px; border-radius: 14px;
+  background: rgba(9, 2, 3, .35); border: 1px solid var(--line);
+}
+.stripe-row.optional { border-style: dashed; border-color: var(--gold-1); }
+.stripe-chip { width: 26px; height: 10px; border-radius: 2px; background: rgba(255, 255, 255, .12); border: 1px dashed rgba(255, 255, 255, .35); }
+.stripe-row.earned .stripe-chip { background: #fff; border: 1px solid #5A5A66; box-shadow: 0 0 10px rgba(255, 255, 255, .5); }
+.stripe-row.optional.earned .stripe-chip { background: var(--gold-2); }
+.sr-main { display: grid; gap: 3px; min-width: 0; }
+.sr-main strong { font-family: var(--font-display); font-weight: 900; font-style: italic; text-transform: uppercase; }
+.sr-main em { font-style: normal; font-size: .7rem; color: var(--gold-2); letter-spacing: .08em; }
+.sr-sub { color: var(--muted); font-size: .82rem; font-weight: 600; }
+.mini-track { display: block; height: 6px; border-radius: 999px; background: #0A1426; overflow: hidden; }
+.mini-track i { display: block; height: 100%; background: var(--gold); }
+.stripe-row.earned .mini-track i { background: var(--streak); }
+.sr-actions { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+.sr-actions .btn { min-height: 36px; padding: 5px 10px; font-size: .75rem; }
+@media (max-width: 480px) {
+  .stripe-row { grid-template-columns: auto 1fr; }
+  .sr-actions { grid-column: 1 / -1; justify-content: stretch; }
+  .sr-actions .btn { flex: 1; }
+}
+.mode-banner {
+  margin: 0 0 10px; padding: 8px 14px; border-radius: 12px; text-align: center; font-family: var(--font-display); font-weight: 900;
+  font-style: italic; text-transform: uppercase; letter-spacing: .04em; background: var(--gold); color: #1B1205;
+}
+.testing .grade-select, .testing .sensei-btn, .testing [data-test-hide] { display: none !important; }
+.stripe-xp .btn { justify-self: start; margin-top: 8px; }
+.stripe-hero { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; justify-items: center; text-align: center; padding: 10px 0 16px; }
+.stripe-score { font-family: var(--font-display); font-weight: 900; font-size: 1.4rem; color: var(--gold-3); }
+.stripe-new { animation: stripeIn 1s ease .3s both; }
+@keyframes stripeIn { 0% { opacity: 0; transform: translateY(-14px) scale(1.6); } 70% { opacity: 1; transform: scale(1.15); } 100% { transform: none; } }
+.belt-summary { display: flex; flex-wrap: wrap; gap: 8px 14px; margin: 0; }
+.belt-summary span { display: inline-flex; align-items: center; gap: 6px; }
+.grad-stage {
+  position: relative; display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; justify-items: center; text-align: center; padding: 26px 14px 20px; border-radius: 26px; overflow: hidden;
+  background: radial-gradient(70% 55% at 50% 100%, rgba(224, 186, 119, .4), transparent 70%), radial-gradient(90% 60% at 50% 0%, #2A4C7E, #0B1426 75%);
+  border: 2px solid transparent; background-clip: padding-box; box-shadow: 0 0 60px rgba(224, 186, 119, .35);
+}
+.grad-eyebrow { color: var(--gold-2); }
+.grad-title { font-size: clamp(2.1rem, 10vw, 5rem); max-width: 100%; overflow-wrap: anywhere; background: var(--gold); -webkit-background-clip: text; background-clip: text; color: transparent; animation: pop .7s ease; }
+.grad-cast { display: flex; align-items: flex-end; justify-content: center; gap: 4px; }
+.grad-zumi { width: clamp(100px, 26vw, 150px); filter: drop-shadow(0 12px 16px rgba(0, 0, 0, .6)); animation: bob 2.4s ease-in-out infinite; }
+.grad-champ { width: clamp(110px, 30vw, 170px); }
+.grad-line { font-size: 1.15rem; font-weight: 700; max-width: 34ch; overflow-wrap: anywhere; }
+.grad-stage .say { max-width: 100%; justify-self: center; }
+.grad-belt .belt-svg { width: min(420px, 100%); animation: pop .8s ease .2s both; }
+.grad-xp { font-family: var(--font-display); font-weight: 900; font-size: 1.5rem; background: var(--gold); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.grad-actions { justify-content: center; }
+
 /* ---------- results ---------- */
 .results-hero .host-img { width: clamp(120px, 28vw, 190px); }
 .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-top: 12px; }
