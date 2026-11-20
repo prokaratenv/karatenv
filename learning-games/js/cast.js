@@ -9,13 +9,15 @@ BD.Cast = (function () {
     michele: { name: "Ms. Michele", role: "Main Instructor" },
     bridgette: { name: "Ms. Bridgette", role: "Lead Instructor" },
     kyra: { name: "Ms. Kyra", role: "Instructor" },
+    lauryn: { name: "Miss Lauryn", role: "Studio Manager" },
     kimmy: { name: "Kimmy", role: "White belt" },
     billy: { name: "Billy", role: "Blue belt" },
     tommy: { name: "Tommy", role: "Yellow belt" },
     mackenzie: { name: "Mackenzie", role: "Purple belt" },
     rylan: { name: "Rylan", role: "Red belt" }
   };
-  const FIGHTERS = ["kimmy", "billy", "tommy", "mackenzie", "rylan", "zumi"];
+  /* Kids, Zumi, and the instructors are all playable. */
+  const FIGHTERS = ["kimmy", "billy", "tommy", "mackenzie", "rylan", "zumi", "cd", "michele", "bridgette", "kyra", "lauryn"];
   const COACH = { math: "cd", sentence: "bridgette", reading: "kyra", plan: "michele", host: "zumi" };
 
   const LINES = {

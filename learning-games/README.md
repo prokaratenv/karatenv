@@ -8,7 +8,7 @@ The game uses the Engage brand (midnight navy, the green-teal-blue streak, gold 
 - **Zumi** is the host.
 - **Master CD** coaches Math Dojo, **Ms. Bridgette** coaches Fix-It Sentences and **Ms. Kyra** coaches Story Scrolls.
 - **Ms. Michele** gives Sensei's plan.
-- Kids choose a fighter (Kimmy, Billy, Tommy, Mackenzie, Rylan or Zumi) and can change it by tapping their character on the home screen.
+- Kids choose a fighter: Kimmy, Billy, Tommy, Mackenzie, Rylan, Zumi, or an instructor (Master CD, Ms. Michele, Ms. Bridgette, Ms. Kyra, Miss Lauryn). They can change it by tapping their character on the home screen.
 
 The character images are in `img/` (cut-out WebP files, about 600 KB in total).
 
@@ -62,6 +62,13 @@ When a round goes well (90% or better in math, or most sentences right on the fi
   - a level they need to redo
   - a focused round on their weakest skill
   - moving up a grade when they're ready
+
+## Sharing without a Claude login
+
+Share the Claude link as a **public link** (Share → anyone with the link). Anyone can then play without signing in:
+- Progress saves on their own device.
+- The math, sentence and reading games, belts, lessons, step-by-step help and the endless sentence generator all work.
+- Signing in adds three extras: Ask Sensei, Sensei's written feedback on reading answers (otherwise a built-in checker gives hints), and new Claude-written sentences and stories.
 
 ## Same progress on every device
 

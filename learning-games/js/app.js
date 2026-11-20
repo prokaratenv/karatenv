@@ -37,10 +37,13 @@ BD.UI = (function () {
   /* Character picker: kids choose a fighter from the Engage cast. */
   let newFighter = "kimmy";
   function fighterPicker(elId, selected, big) {
-    $(elId).innerHTML = BD.Cast.FIGHTERS.map(function (k) {
+    const opt = function (k) {
       return '<button type="button" class="fighter-opt" role="radio" data-fighter="' + k + '" aria-checked="' + (k === selected) + '">' +
         '<img src="' + (big ? BD.Cast.img(k) : BD.Cast.face(k)) + '" alt="">' + BD.Cast.name(k) + '</button>';
-    }).join("");
+    };
+    const kids = BD.Cast.FIGHTERS.slice(0, 6), teachers = BD.Cast.FIGHTERS.slice(6);
+    $(elId).innerHTML = '<p class="fighter-group">Students</p>' + kids.map(opt).join("") +
+      '<p class="fighter-group">Instructors</p>' + teachers.map(opt).join("");
   }
   function beltSwatch(belt) {
     return '<span class="belt-swatch" style="--belt:' + belt.color + '" title="' + belt.name + ' belt"></span>';

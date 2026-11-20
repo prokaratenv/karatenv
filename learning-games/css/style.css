@@ -224,8 +224,10 @@ p { margin: 0; }
 }
 .fighter-opt img { width: 64px; height: 64px; border-radius: 50%; object-fit: cover; background: radial-gradient(circle at 50% 30%, #2F5A92, var(--midnight)); }
 .fighter-opt[aria-checked="true"] { border-color: var(--green); box-shadow: 0 0 0 2px var(--green), 0 0 18px rgba(101, 217, 74, .45); }
-.fighter-pick.big { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); }
-.fighter-pick.big .fighter-opt img { width: auto; height: 150px; border-radius: 0; background: none; object-fit: contain; }
+.fighter-group { grid-column: 1 / -1; margin: 4px 0 -2px; font-family: var(--font-display); font-weight: 800; font-size: .7rem; letter-spacing: .14em; text-transform: uppercase; color: var(--gold-2); }
+.fighter-pick.big { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); }
+.fighter-pick.big .fighter-opt img { width: auto; height: 124px; border-radius: 0; background: none; object-fit: contain; }
+.fighter-pick.big .fighter-opt { font-size: .7rem; }
 
 /* ---------- home ---------- */
 .game-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); gap: 18px; margin-top: 8px; }
