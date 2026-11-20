@@ -62,7 +62,8 @@ BD.Sync = (function () {
     // Students saved from other devices
     Object.keys(remote).forEach(function (k) {
       if (k.indexOf("player-") === 0 && remote[k].player) BD.Store.applyRemote(remote[k].player);
-      if (k.indexOf("bank-") === 0 && BD.SentenceGen) BD.SentenceGen.applyRemoteBank(k, remote[k]);
+      if (k.indexOf("bank-read-") === 0 && BD.Reading) BD.Reading.applyRemoteBank(k, remote[k]);
+      else if (k.indexOf("bank-") === 0 && BD.SentenceGen) BD.SentenceGen.applyRemoteBank(k, remote[k]);
     });
     // Students on this device: upload new ones, drop ones deleted elsewhere
     localPlayers.forEach(function (p) {
@@ -84,6 +85,8 @@ BD.Sync = (function () {
           const pid = id.slice(7);
           if (ch.type === "removed") BD.Store.applyRemoteRemoval(pid);
           else if (!queue.has(pid)) { const d = ch.doc.data(); if (d && d.player) BD.Store.applyRemote(d.player); }
+        } else if (id.indexOf("bank-read-") === 0 && ch.type !== "removed" && BD.Reading) {
+          BD.Reading.applyRemoteBank(id, ch.doc.data());
         } else if (id.indexOf("bank-") === 0 && ch.type !== "removed" && BD.SentenceGen) {
           BD.SentenceGen.applyRemoteBank(id, ch.doc.data());
         }

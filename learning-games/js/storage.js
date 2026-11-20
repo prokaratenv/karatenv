@@ -53,9 +53,11 @@ BD.Store = (function () {
   function upgrade(p) {
     const d = {
       mathOps: ["add", "sub", "mul", "div"], mathStats: {}, sentenceStats: {}, tricky: {}, seenSentences: [],
-      sessions: [], days: [], retry: {}, recent: {}, typeRecent: {}, sentLevel: {}, bestClock: {}, updatedAt: 0
+      sessions: [], days: [], retry: {}, recent: {}, typeRecent: {}, sentLevel: {}, bestClock: {}, updatedAt: 0,
+      readRecent: {}, readStats: {}, seenPassages: []
     };
     Object.keys(d).forEach(function (k) { if (p[k] === undefined || p[k] === null) p[k] = d[k]; });
+    if (!p.readingGrade) p.readingGrade = p.sentenceGrade || p.mathGrade || 3;
     return p;
   }
   function newPlayer(name, grade) {

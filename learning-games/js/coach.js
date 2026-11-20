@@ -81,7 +81,9 @@ BD.Coach = (function () {
       else if (g < 7 && rates.length >= 3 && rates.every(function (x) { return x.r >= 0.85 && x.n >= 8; }) && sentLevel(p, g) >= 1)
         items.push({ kind: "sentUp", grade: g + 1, title: "Ready for Grade " + (g + 1) + " sentences", sub: "You're catching almost every mistake at Grade " + g + "." });
     }
-    return items.slice(0, 3);
+    if (BD.Reading) items.push.apply(items, BD.Reading.planItems(p));
+    // redo items first, then one suggestion per game
+    return items.slice(0, 4);
   }
 
   return {

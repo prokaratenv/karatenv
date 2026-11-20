@@ -29,6 +29,14 @@ Free math and writing practice for grades 3–7. Kids earn karate belts (White �
 
 When a round goes well (90% or better in math, or most sentences right on the first try), the results screen offers to **move up a grade**.
 
+**Story Scrolls** (reading comprehension)
+- Each round is two short passages (stories and nonfiction), with three questions each. Question types: the main idea or theme, a detail from the text, reading between the lines, and word meaning.
+- Your child types the answer **in their own words**.
+- **Sensei reads the answer** and replies with specific feedback: "Got it!", "Partly there" or "Not yet", plus what they did well and where to reread, without giving the answer away. They get a second try, then see a strong sample answer.
+- Without Claude, a built-in checker looks for the key ideas and gives a hint instead.
+- **Reading tips** explains how to tackle each kind of question. **Ask Sensei** works here too.
+- It follows the same rules as the other games: grades 3–7, the 70% redo rule, extra practice on the question types they miss, and new passages written by Claude when the bank runs low. There are 15 built-in passages in `data/reading-bank.js`, and you can add your own there.
+
 ## It never runs out, and it adapts
 
 - **Math** problems are made fresh every time, so there's no end.
@@ -126,6 +134,8 @@ learning-games/
   js/explain.js          step-by-step math help, tips, rule book
   js/coach.js            adapts practice to weak spots, Sensei's plan
   js/sentence-gen.js     endless sentence generator + growing bank
+  js/reading-game.js     Story Scrolls (reading comprehension)
+  data/reading-bank.js   reading passages (edit me!)
   js/sync.js             saves progress to your Claude account
   js/sensei.js           Ask Sensei AI tutor
   js/effects.js          sounds and confetti

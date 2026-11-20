@@ -74,6 +74,16 @@
             <button type="button" class="btn btn-primary btn-big" id="playSent">Play Fix-It Sentences</button>
           </div>
         </article>
+        <article class="game-card game-read">
+          <div class="game-art read-art" aria-hidden="true"><span>Who?</span><span>Why?</span><span>Main idea</span></div>
+          <div class="game-body">
+            <p class="eyebrow">Grade level</p>
+            <div id="homeReadGrade"></div>
+            <h2>Story Scrolls</h2>
+            <p>Read two short stories, then answer questions in your own words. Sensei reads each answer and tells you how you did.</p>
+            <button type="button" class="btn btn-primary btn-big" id="playRead">Play Story Scrolls</button>
+          </div>
+        </article>
       </div>
     </section>
 
@@ -137,6 +147,35 @@
         </div>
         <ul class="hints" id="sentHints"></ul>
         <div class="sent-feedback" id="sentFeedback" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <!-- Reading play -->
+    <section class="screen play" id="screen-read-play" hidden>
+      <div class="playbar">
+        <button type="button" class="btn btn-quiet btn-small" id="readQuit">Quit</button>
+        <span class="meter" id="readProgress"></span>
+        <span class="tag" id="readGradeTag"></span>
+        <button type="button" class="btn btn-small" id="readTips">Reading tips</button>
+        <button type="button" class="btn btn-small sensei-btn" id="readAsk">Ask Sensei</button>
+        <span class="score" id="readScore"></span>
+      </div>
+      <article class="passage">
+        <h2 id="readTitle"></h2>
+        <p id="readText"></p>
+      </article>
+      <div class="q-card">
+        <span class="q-type" id="readQType"></span>
+        <p class="q-text" id="readQuestion"></p>
+        <label class="sr-only" for="readInput">Your answer</label>
+        <textarea id="readInput" class="read-input" rows="3" placeholder="Answer in your own words…"></textarea>
+        <div class="sent-actions">
+          <button type="button" class="btn btn-quiet" id="readHint">Hint <small>(−5 XP)</small></button>
+          <span class="tries" id="readTries"></span>
+          <button type="button" class="btn btn-primary" id="readCheck">Check my answer</button>
+          <button type="button" class="btn btn-primary" id="readNext" hidden>Next question</button>
+        </div>
+        <div class="read-feedback" id="readFeedback" aria-live="polite"></div>
       </div>
     </section>
 
@@ -208,11 +247,13 @@
 </div>
 
 <script src="data/sentence-bank.js"></script>
+<script src="data/reading-bank.js"></script>
 <script src="js/storage.js"></script>
 <script src="js/effects.js"></script>
 <script src="js/explain.js"></script>
 <script src="js/coach.js"></script>
 <script src="js/sentence-gen.js"></script>
+<script src="js/reading-game.js"></script>
 <script src="js/sync.js"></script>
 <script src="js/sensei.js"></script>
 <script src="js/math-game.js"></script>
