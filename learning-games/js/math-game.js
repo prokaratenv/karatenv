@@ -230,9 +230,8 @@ BD.MathGame = (function () {
     BD.Sound.tap();
     $("mathAnswer").textContent = S.input ? S.input.replace("-", "−") : "?";
     $("mathAnswer").classList.toggle("empty", !S.input);
-    // Below grade 7, check automatically once enough digits are typed.
-    const q = current();
-    if (S.grade < 7 && S.input.length >= String(q.answer).length) submit();
+    // The answer is only checked when Check (or Enter) is pressed, so kids
+    // can work it out and fix typos first.
   }
 
   function submit() {
