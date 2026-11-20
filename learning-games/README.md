@@ -10,6 +10,8 @@ The game uses the Engage brand (midnight navy, the green-teal-blue streak, gold 
 - **Ms. Michele** gives Sensei's plan.
 - Kids choose a fighter: Kimmy, Billy, Tommy, Mackenzie, Rylan, Zumi, or an instructor (Master CD, Ms. Michele, Ms. Bridgette, Ms. Kyra, Miss Lauryn). They can change it by tapping their character on the home screen.
 
+- **Build your own fighter:** in "Change fighter", kids can design a character. They choose height, build, skin tone, hairstyle, hair color, eye color, face extras (freckles, glasses, rosy cheeks), smile, and uniform (black gi, white gi, or shorts with an Engage shirt). The belt it wears is always the belt they've earned.
+
 The character images are in `img/` (cut-out WebP files, about 600 KB in total).
 
 ## The two games
@@ -164,6 +166,7 @@ learning-games/
   js/sensei.js           Ask Sensei AI tutor
   js/effects.js          sounds and confetti
   js/cast.js             Engage characters, coach lines, fighters
+  js/builder.js          build-your-own fighter (drawn character)
   img/                   character art and Engage logo
   js/app.js              home, results and parent screens
 ```

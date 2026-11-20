@@ -29,10 +29,20 @@ BD.UI = (function () {
   }
 
   function fighterOf(p) { return p.avatar || BD.Cast.defaultFighter(p); }
+  /* The student's character: a cast member, or the fighter they built. */
+  function fighterArt(p, mode) {
+    if (fighterOf(p) === "custom") return BD.Builder.svg(p.custom, BD.beltFor(p.xp).color, mode);
+    return '<img src="' + (mode === "face" ? BD.Cast.face(fighterOf(p)) : BD.Cast.img(fighterOf(p))) + '" alt="' + esc(BD.Cast.name(fighterOf(p))) + '">';
+  }
   /* Round portrait of the student's chosen character, ringed in their belt color. */
   function avatar(p, size) {
     const belt = BD.beltFor(p.xp);
-    return '<span class="avatar ' + (size || "") + '" style="--av:' + p.color + ';--ring:' + belt.color + '"><img src="' + BD.Cast.face(fighterOf(p)) + '" alt=""></span>';
+    return '<span class="avatar ' + (size || "") + '" style="--av:' + p.color + ';--ring:' + belt.color + '">' + fighterArt(p, "face") + '</span>';
+  }
+  function openBuilder(p) {
+    BD.Builder.open(p.custom, BD.beltFor(p.xp).color, function (cfg) {
+      p.custom = cfg; p.avatar = "custom"; BD.Store.save(p); home();
+    });
   }
   /* Character picker: kids choose a fighter from the Engage cast. */
   let newFighter = "kimmy";
@@ -42,7 +52,14 @@ BD.UI = (function () {
         '<img src="' + (big ? BD.Cast.img(k) : BD.Cast.face(k)) + '" alt="">' + BD.Cast.name(k) + '</button>';
     };
     const kids = BD.Cast.FIGHTERS.slice(0, 6), teachers = BD.Cast.FIGHTERS.slice(6);
-    $(elId).innerHTML = '<p class="fighter-group">Students</p>' + kids.map(opt).join("") +
+    const me = BD.Store.current();
+    const customCfg = big && me && me.custom ? me.custom : BD.Builder.DEFAULT;
+    const beltCol = big && me ? BD.beltFor(me.xp).color : "#FFFFFF";
+    const build = '<button type="button" class="fighter-opt build-opt" role="radio" data-fighter="custom" aria-checked="' + (selected === "custom") + '">' +
+      '<span class="build-art">' + BD.Builder.svg(customCfg, beltCol, big ? "full" : "face") + '</span>' + (big && me && me.custom ? "My fighter" : "Build your own") + '</button>';
+    $(elId).innerHTML = '<p class="fighter-group">Create</p>' + build +
+      (big && me && me.custom ? '<button type="button" class="fighter-opt edit-opt" data-edit="1"><span class="build-art edit-icon">✎</span>Edit my fighter</button>' : '') +
+      '<p class="fighter-group">Students</p>' + kids.map(opt).join("") +
       '<p class="fighter-group">Instructors</p>' + teachers.map(opt).join("");
   }
   function beltSwatch(belt) {
@@ -135,8 +152,7 @@ BD.UI = (function () {
     const today = BD.today();
     const todays = p.sessions.filter(function (s) { return s.date && s.date.slice(0, 10) === today; }).length;
     $("homeHello").textContent = "Ready to train, " + p.name + "?";
-    $("homeFighter").src = BD.Cast.img(fighterOf(p));
-    $("homeFighter").alt = BD.Cast.name(fighterOf(p));
+    $("homeFighter").innerHTML = fighterArt(p, "full");
     $("homeBelt").innerHTML = beltBar(p.xp);
     $("homeToday").textContent = todays ? todays + (todays === 1 ? " round" : " rounds") + " completed today" : "No rounds yet today";
     const retry = p.retry || {};
@@ -287,7 +303,8 @@ BD.UI = (function () {
       e.preventDefault();
       const name = $("newName").value.trim().slice(0, 20);
       if (!name) { $("newName").focus(); return; }
-      BD.Store.addPlayer(name, Number($("newGrade").value), newFighter);
+      const np = BD.Store.addPlayer(name, Number($("newGrade").value), newFighter === "custom" ? null : newFighter);
+      if (newFighter === "custom") { home(); openBuilder(np); return; }
       $("newName").value = "";
       home();
     });
@@ -353,10 +370,14 @@ BD.UI = (function () {
     $("fighterClose").addEventListener("click", closeFighter);
     $("fighterSheet").addEventListener("click", function (e) { if (e.target === $("fighterSheet")) closeFighter(); });
     $("fighterPick").addEventListener("click", function (e) {
+      const p = BD.Store.current();
+      if (e.target.closest("[data-edit]")) { closeFighter(); openBuilder(p); return; }
       const b = e.target.closest("[data-fighter]"); if (!b) return;
-      const p = BD.Store.current(); p.avatar = b.dataset.fighter; BD.Store.save(p);
+      if (b.dataset.fighter === "custom" && !p.custom) { closeFighter(); openBuilder(p); return; }
+      p.avatar = b.dataset.fighter; BD.Store.save(p);
       BD.Sound.right(); closeFighter(); home();
     });
+    BD.Builder.bind();
   }
   /* A simple pop-up sheet for lessons and rule books. */
   function sheet(title, html) {

@@ -53,7 +53,7 @@
     <section class="screen" id="screen-home" hidden>
       <div class="home-hero">
         <button type="button" class="fighter-stage" id="changeFighter" title="Change your fighter">
-          <img id="homeFighter" src="img/zumi.webp" alt="">
+          <span class="fighter-art" id="homeFighter"></span>
           <span class="fighter-change">Change fighter</span>
         </button>
         <div class="home-hud">
@@ -291,6 +291,20 @@
   </div>
 </div>
 
+<div class="sheet-backdrop" id="builderSheet" hidden>
+  <div class="sheet builder" role="dialog" aria-modal="true" aria-labelledby="builderTitle">
+    <div class="sheet-head"><h2 id="builderTitle">Build your fighter</h2><button type="button" class="btn btn-quiet btn-small" id="builderClose">Close</button></div>
+    <div class="builder-grid">
+      <div class="builder-preview" id="builderPreview"></div>
+      <div class="builder-opts" id="builderOpts"></div>
+    </div>
+    <div class="builder-actions">
+      <button type="button" class="btn btn-quiet" id="builderRandom">Surprise me</button>
+      <button type="button" class="btn btn-primary" id="builderSave">Save my fighter</button>
+    </div>
+  </div>
+</div>
+
 <div class="sheet-backdrop" id="senseiSheet" hidden>
   <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="senseiTitle">
     <div class="sheet-head">
@@ -313,6 +327,7 @@
 <script src="data/reading-bank.js"></script>
 <script src="js/storage.js"></script>
 <script src="js/cast.js"></script>
+<script src="js/builder.js"></script>
 <script src="js/effects.js"></script>
 <script src="js/explain.js"></script>
 <script src="js/coach.js"></script>
