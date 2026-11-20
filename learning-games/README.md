@@ -29,6 +29,32 @@ Free math and writing practice for grades 3â€“7. Kids earn karate belts (White â
 
 When a round goes well (90% or better in math, or most sentences right on the first try), the results screen offers to **move up a grade**.
 
+## It never runs out, and it adapts
+
+- **Math** problems are made fresh every time, so there's no end.
+- **Sentences** come from three places:
+  1. the hand-written bank in `data/sentence-bank.js`
+  2. a built-in generator that builds new correct sentences from thousands of combinations of names, places, days, animals and activities, then plants mistakes on purpose (works offline, forever)
+  3. new sentences Claude writes when the game is opened through the shared Claude link. Each sentence is checked before it's used, and the good ones are added to your account's sentence bank, which keeps growing.
+- **The game adapts to each child:**
+  - Math operations they miss come up more often.
+  - Sentence mistakes are aimed at the kinds they miss most (capitals, punctuation, spelling or grammar).
+  - When they catch almost everything on the first try, sentences get an extra mistake. When they struggle, they get one fewer.
+- **Sensei's plan** on the home screen always suggests the next best step:
+  - a level they need to redo
+  - a focused round on their weakest skill
+  - moving up a grade when they're ready
+
+## Same progress on every device
+
+Open the game from the shared Claude link while signed in to Claude. Each student's belts, XP, stats and the sentence bank are then saved to that Claude account, and they show up on any phone, tablet or computer signed in to the same account. The dot at the bottom of the screen shows the status:
+
+- **Synced to your account**: everything is saved to the account.
+- **Saved on this device**: opened from a file or signed out.
+- **Needs Contributor access**: the person who shared the link needs to give that account Contributor (or Editor) access so it can save.
+
+Each Claude account keeps its own private set of students, so the person sharing the link can't see the other family's data, and vice versa.
+
 ## Learning as they go
 
 - **Step-by-step help:** when a math card is answered wrong in Practice Kata, the game shows how to solve *that exact problem* (make-a-ten, borrowing, the nines trick, long division, negative-number sign rules and more). The card comes back a few cards later so they can try again.
@@ -98,6 +124,9 @@ learning-games/
   js/math-game.js        Math Dojo
   js/sentence-game.js    Fix-It Sentences
   js/explain.js          step-by-step math help, tips, rule book
+  js/coach.js            adapts practice to weak spots, Sensei's plan
+  js/sentence-gen.js     endless sentence generator + growing bank
+  js/sync.js             saves progress to your Claude account
   js/sensei.js           Ask Sensei AI tutor
   js/effects.js          sounds and confetti
   js/app.js              home, results and parent screens

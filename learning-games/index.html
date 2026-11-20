@@ -50,6 +50,10 @@
       </div>
       <div class="redo-note" id="homeRedo" hidden></div>
       <div class="belt-panel" id="homeBelt"></div>
+      <section class="plan" id="homePlan" hidden>
+        <h2 class="label">Sensei's plan for you</h2>
+        <div class="plan-list" id="homePlanList"></div>
+      </section>
       <div class="game-grid">
         <article class="game-card game-math">
           <div class="game-art" aria-hidden="true"><span>7×8</span><span>48÷6</span><span>36+9</span></div>
@@ -147,6 +151,7 @@
         <p id="resFailedText"></p>
       </div>
       <p class="passed-note" id="resPassed" hidden></p>
+      <p class="coach-note" id="resCoach" hidden></p>
       <div class="stats" id="resStats"></div>
       <div class="belt-panel" id="resBelt"></div>
       <div class="level-up" id="resLevel" hidden>
@@ -172,10 +177,11 @@
         <button type="button" class="btn btn-quiet btn-small" id="parentBack">Back</button>
         <h1>Parent corner</h1>
       </div>
-      <p class="muted">Progress is saved on this device only. Nothing is sent anywhere.</p>
+      <p class="muted parent-intro">Progress is kept in your Claude account when you open the game from the shared link and are signed in, so it follows you to any device. Otherwise it stays on this device.</p>
       <div id="parentBody"></div>
     </section>
   </main>
+  <footer class="footer"><span class="sync-status" id="syncStatus" data-state="local">Saved on this device</span></footer>
 </div>
 <canvas id="confetti" aria-hidden="true"></canvas>
 
@@ -205,6 +211,9 @@
 <script src="js/storage.js"></script>
 <script src="js/effects.js"></script>
 <script src="js/explain.js"></script>
+<script src="js/coach.js"></script>
+<script src="js/sentence-gen.js"></script>
+<script src="js/sync.js"></script>
 <script src="js/sensei.js"></script>
 <script src="js/math-game.js"></script>
 <script src="js/sentence-game.js"></script>

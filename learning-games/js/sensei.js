@@ -131,5 +131,5 @@ BD.Sensei = (function () {
     document.addEventListener("keydown", function (e) { if (e.key === "Escape" && !$("senseiSheet").hidden) close(); });
   }
 
-  return { init: init, bind: bind, open: open, close: close, available: function () { return !!sample; } };
+  return { init: init, bind: bind, open: open, close: close, available: function () { return !!sample; }, sampler: function () { return sample; } };
 })();

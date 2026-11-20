@@ -32,21 +32,14 @@ BD.SentenceGame = (function () {
     return { words: a, ok: ok, matched: L[0][0], missing: n - L[0][0] - ok.filter(function (x) { return !x; }).length };
   }
 
-  function pickRound(p, grade) {
-    const pool = BD.SENTENCES.filter(function (s) { return s.grade === grade; });
-    const fresh = pool.filter(function (s) { return p.seenSentences.indexOf(s.id) === -1; });
-    const shuffle = function (arr) { return arr.map(function (x) { return [Math.random(), x]; }).sort(function (x, y) { return x[0] - y[0]; }).map(function (x) { return x[1]; }); };
-    let pick = shuffle(fresh).slice(0, ROUND);
-    if (pick.length < ROUND) pick = pick.concat(shuffle(pool.filter(function (s) { return pick.indexOf(s) === -1; })).slice(0, ROUND - pick.length));
-    return pick;
-  }
-
-  function start() {
+  function start(focus) {
     const p = BD.Store.current();
+    if (typeof focus !== "string") focus = null;
     if (p.retry && p.retry.sentence) p.sentenceGrade = p.retry.sentence.grade;
-    S = { grade: p.sentenceGrade, items: pickRound(p, p.sentenceGrade), i: 0, xp: 0, solved: 0, firstTry: 0, results: [] };
+    S = { grade: p.sentenceGrade, items: BD.SentenceGen.round(p, p.sentenceGrade, ROUND, focus), focus: focus, i: 0, xp: 0, solved: 0, firstTry: 0, results: [] };
     BD.UI.show("screen-sentence-play");
     load();
+    BD.SentenceGen.topUp(p, S.grade); // ask Claude for more sentences if the bank is running low
   }
 
   function load() {
@@ -96,7 +89,9 @@ BD.SentenceGame = (function () {
     const item = S.items[S.i];
     const typed = $("sentInput").value;
     const accepted = answers(item);
-    if (accepted.some(function (a) { return norm(a) === norm(typed); })) return solved();
+    // The comma before "and"/"or" in a list is optional, so accept it either way.
+    const loose = function (x) { return norm(x).replace(/,( (?:and|or) )/g, "$1"); };
+    if (accepted.some(function (a) { return norm(a) === norm(typed) || loose(a) === loose(typed); })) return solved();
 
     S.tries++;
     // Find the accepted answer closest to what they typed.
@@ -134,7 +129,9 @@ BD.SentenceGame = (function () {
     S.results.push({ id: item.id, won: won, tries: S.tries + (won ? 1 : 0) });
     const st = p.sentenceStats[S.grade] || (p.sentenceStats[S.grade] = { r: 0, w: 0, firstTry: 0 });
     if (won) { st.r++; if (S.tries === 0) st.firstTry++; } else st.w++;
-    p.seenSentences = [item.id].concat(p.seenSentences.filter(function (x) { return x !== item.id; })).slice(0, 40);
+    const clean = won && S.tries === 0 && S.hints === 0;
+    item.fixes.forEach(function (f) { BD.Coach.recordType(p, S.grade, f.type, clean); });
+    if (item.source !== "gen") p.seenSentences = [item.id].concat(p.seenSentences.filter(function (x) { return x !== item.id; })).slice(0, 400);
     BD.Store.save();
 
     $("sentInput").readOnly = true;
@@ -165,10 +162,11 @@ BD.SentenceGame = (function () {
     const total = S.items.length;
     const acc = Math.round(100 * S.solved / total);
     if (S.solved === total) S.xp += 25;
+    const levelShift = BD.Coach.adjustSentLevel(p, grade, S.firstTry, total);
     const belt = BD.Store.addXP(p, S.xp);
     BD.Store.recordSession(p, { game: "sentence", grade: grade, correct: S.solved, firstTry: S.firstTry, total: total, xp: S.xp });
     const missedItems = S.results.filter(function (x) { return !x.won; }).map(function (x) {
-      const it = BD.SENTENCES.find(function (s) { return s.id === x.id; });
+      const it = S.items.find(function (s) { return s.id === x.id; });
       return answers(it)[0];
     });
     const failed = acc < PASS;
@@ -179,7 +177,7 @@ BD.SentenceGame = (function () {
     const ready = !failed && S.firstTry >= Math.ceil(total * 0.75) && grade < 7;
     const types = [];
     S.results.forEach(function (x) {
-      const it = BD.SENTENCES.find(function (s) { return s.id === x.id; });
+      const it = S.items.find(function (s) { return s.id === x.id; });
       if (!x.won || x.tries > 1) it.fixes.forEach(function (f) { if (types.indexOf(f.type) === -1) types.push(f.type); });
     });
     BD.UI.results({
@@ -187,7 +185,8 @@ BD.SentenceGame = (function () {
       failed: failed ? "You fixed " + acc + "%. You need " + PASS + "% to pass Grade " + grade + ". Read the rules below, then try a new set of sentences at this level." : null,
       passedRetry: wasRetry && !failed ? "You passed with " + acc + "%. All grade levels are unlocked again." : null,
       lesson: types.length ? rulesHTML(types) : "",
-      subtitle: "Fix-It Sentences · Grade " + grade,
+      subtitle: "Fix-It Sentences · Grade " + grade + (S.focus ? " · Focus: " + BD.FIX_TYPES[S.focus].label : ""),
+      coachNote: levelShift > 0 ? "Great eyes! Sensei is adding an extra mistake to your next sentences." : levelShift < 0 ? "Sensei will use fewer mistakes per sentence for a bit while you build up." : "",
       stats: [["Fixed", S.solved + " / " + total], ["First try", S.firstTry], ["Accuracy", acc + "%"], ["XP earned", "+" + S.xp]],
       belt: belt,
       listTitle: missedItems.length ? "Sentences to read again" : "",

@@ -112,7 +112,7 @@ BD.MathGame = (function () {
     const recent = S.queue.slice(-5).map(function (q) { return q.key; });
     let p;
     for (let tries = 0; tries < 12; tries++) {
-      p = makeProblem(S.ops[r(0, S.ops.length - 1)], S.grade);
+      p = makeProblem(BD.Coach.pickOp(BD.Store.current(), S.grade, S.ops), S.grade);
       if (recent.indexOf(p.key) === -1) break;
     }
     return p;
@@ -164,10 +164,11 @@ BD.MathGame = (function () {
 
   function bestFor(p, grade) { return (p.bestClock && p.bestClock[grade]) || 0; }
 
-  function start(mode) {
+  function start(mode, focusOps) {
     const p = BD.Store.current();
+    if (p.retry && p.retry.math) { p.mathGrade = p.retry.math.grade; focusOps = p.retry.math.ops; }
     S = {
-      mode: mode, grade: p.mathGrade, ops: p.mathOps.slice(), queue: [], i: 0,
+      mode: mode, grade: p.mathGrade, ops: (focusOps && focusOps.length ? focusOps : p.mathOps).slice(), queue: [], i: 0,
       input: "", locked: false, correct: 0, answered: 0, streak: 0, bestStreak: 0,
       xp: 0, missed: [], timer: null, endsAt: 0, xpBefore: p.xp
     };
@@ -240,6 +241,7 @@ BD.MathGame = (function () {
     const statKey = q.grade + "-" + q.op;
     const st = p.mathStats[statKey] || (p.mathStats[statKey] = { r: 0, w: 0 });
     const tk = p.tricky[q.key];
+    BD.Coach.recordMath(p, q.grade, q.op, right);
 
     if (right) {
       S.correct++; S.streak++; S.bestStreak = Math.max(S.bestStreak, S.streak); st.r++;
@@ -359,7 +361,7 @@ BD.MathGame = (function () {
       listTitle: uniqueMissed.length ? "Facts to practice" : "",
       list: uniqueMissed.slice(0, 12).map(function (q) { return show(q) + " = " + num(q.answer); }),
       levelUp: ready && !failed ? { text: "You got " + acc + "% at Grade " + grade + ". Ready to try Grade " + (grade + 1) + "?", action: function () { p.mathGrade = grade + 1; BD.Store.save(); openSetup(); } } : null,
-      again: function () { start(mode); },
+      again: function () { start(mode, ops); },
       againLabel: failed ? "Redo this level" : "Go again",
       setup: failed ? null : openSetup
     });
@@ -403,5 +405,5 @@ BD.MathGame = (function () {
     $("mathExplainAsk").addEventListener("click", function () { if (S && !S.done) BD.Sensei.open(senseiContext()); });
   }
 
-  return { openSetup: openSetup, bind: bind, makeProblem: makeProblem, LEVELS: LEVELS, OPS: OPS, show: show, PASS: PASS };
+  return { start: start, openSetup: openSetup, bind: bind, makeProblem: makeProblem, LEVELS: LEVELS, OPS: OPS, show: show, PASS: PASS };
 })();

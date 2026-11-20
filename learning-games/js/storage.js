@@ -1,5 +1,8 @@
-/* Player profiles, belts and progress. Everything is saved in this browser
-   (localStorage) — no accounts, no internet, no payments. */
+/* Player profiles, belts and progress.
+   Progress is always saved in this browser (works offline). When the game
+   is opened through the shared Claude link and you're signed in, BD.Sync
+   also saves each student to your Claude account so it follows you to
+   any phone, tablet or computer. */
 window.BD = window.BD || {};
 
 BD.BELTS = [
@@ -32,66 +35,105 @@ BD.today = function () {
 BD.Store = (function () {
   const KEY = "brainDojo.v1";
   let state = load();
+  const listeners = [];
 
   function blank() { return { players: [], currentId: null, muted: false }; }
   function load() {
     try {
       const raw = localStorage.getItem(KEY);
-      return raw ? Object.assign(blank(), JSON.parse(raw)) : blank();
+      const s = raw ? Object.assign(blank(), JSON.parse(raw)) : blank();
+      s.players.forEach(upgrade);
+      return s;
     } catch (e) { return blank(); }
   }
-  function save() {
+  function persist() {
     try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { /* storage blocked: play still works */ }
   }
+  /* Fill in fields added in later versions so older saves keep working. */
+  function upgrade(p) {
+    const d = {
+      mathOps: ["add", "sub", "mul", "div"], mathStats: {}, sentenceStats: {}, tricky: {}, seenSentences: [],
+      sessions: [], days: [], retry: {}, recent: {}, typeRecent: {}, sentLevel: {}, bestClock: {}, updatedAt: 0
+    };
+    Object.keys(d).forEach(function (k) { if (p[k] === undefined || p[k] === null) p[k] = d[k]; });
+    return p;
+  }
   function newPlayer(name, grade) {
-    return {
+    return upgrade({
       id: "p" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
       name: name,
       color: BD.AVATAR_COLORS[state.players.length % BD.AVATAR_COLORS.length],
       mathGrade: grade,
       sentenceGrade: grade,
-      mathOps: ["add", "sub", "mul", "div"],
-      xp: 0,
-      mathStats: {},      // "4-mul": { r: right, w: wrong }
-      sentenceStats: {},  // "4": { r: solved, w: missed, firstTry: n }
-      tricky: {},         // "7×8": { op, a, b, grade, misses }
-      seenSentences: [],
-      sessions: [],       // most recent first
-      days: []            // dates practiced
-    };
+      xp: 0
+    });
+  }
+  function emit() { listeners.forEach(function (fn) { try { fn(); } catch (e) { /* keep going */ } }); }
+  function current() { return state.players.find(function (p) { return p.id === state.currentId; }) || null; }
+
+  /* Save a student (default: the one playing). */
+  function save(p) {
+    p = p || current();
+    if (p) { p.updatedAt = Date.now(); if (BD.Sync) BD.Sync.queue(p); }
+    persist();
   }
 
   return {
     get muted() { return state.muted; },
-    set muted(v) { state.muted = v; save(); },
+    set muted(v) { state.muted = v; persist(); },
     players: function () { return state.players; },
     get: function (id) { return state.players.find(function (p) { return p.id === id; }); },
-    current: function () { return this.get(state.currentId) || null; },
-    setCurrent: function (id) { state.currentId = id; save(); },
+    current: current,
+    setCurrent: function (id) { state.currentId = id; persist(); },
     addPlayer: function (name, grade) {
       const p = newPlayer(name, grade);
-      state.players.push(p); state.currentId = p.id; save();
+      state.players.push(p); state.currentId = p.id; save(p);
       return p;
     },
     removePlayer: function (id) {
       state.players = state.players.filter(function (p) { return p.id !== id; });
       if (state.currentId === id) state.currentId = null;
-      save();
+      persist();
+      if (BD.Sync) BD.Sync.remove(id);
     },
     resetPlayer: function (id) {
       const p = this.get(id); if (!p) return;
       const fresh = newPlayer(p.name, p.mathGrade);
       fresh.id = p.id; fresh.color = p.color; fresh.sentenceGrade = p.sentenceGrade;
-      Object.assign(p, fresh); save();
+      Object.keys(p).forEach(function (k) { delete p[k]; });
+      Object.assign(p, fresh); save(p);
     },
     save: save,
+    upgrade: upgrade,
+    onChange: function (fn) { listeners.push(fn); },
+
+    /* Called by BD.Sync with a student saved from another device. Updates
+       in place so a game in progress keeps working. */
+    applyRemote: function (data) {
+      const existing = this.get(data.id);
+      if (existing) {
+        if ((data.updatedAt || 0) <= (existing.updatedAt || 0)) return false;
+        Object.keys(existing).forEach(function (k) { delete existing[k]; });
+        Object.assign(existing, upgrade(JSON.parse(JSON.stringify(data))));
+      } else {
+        state.players.push(upgrade(JSON.parse(JSON.stringify(data))));
+      }
+      persist(); emit();
+      return true;
+    },
+    applyRemoteRemoval: function (id) {
+      if (!this.get(id)) return;
+      state.players = state.players.filter(function (p) { return p.id !== id; });
+      if (state.currentId === id) state.currentId = null;
+      persist(); emit();
+    },
 
     /* Add XP and report whether a new belt was earned. */
     addXP: function (p, amount) {
       const before = BD.beltFor(p.xp);
       p.xp += Math.max(0, Math.round(amount));
       const after = BD.beltFor(p.xp);
-      save();
+      save(p);
       return { before: before, after: after, promoted: after.name !== before.name };
     },
     recordSession: function (p, s) {
@@ -100,7 +142,8 @@ BD.Store = (function () {
       p.sessions = p.sessions.slice(0, 60);
       const t = BD.today();
       if (p.days.indexOf(t) === -1) p.days.push(t);
-      save();
+      p.days = p.days.slice(-400);
+      save(p);
     }
   };
 })();

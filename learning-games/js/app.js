@@ -7,7 +7,9 @@ BD.UI = (function () {
     return String(s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; });
   };
 
+  let currentScreen = null;
   function show(id) {
+    currentScreen = id;
     if (id !== "screen-results") BD.confetti.stop();
     document.querySelectorAll(".screen").forEach(function (s) { s.hidden = s.id !== id; });
     const p = BD.Store.current();
@@ -71,8 +73,36 @@ BD.UI = (function () {
     if (retry.math) notes.push("<strong>Math Dojo:</strong> redo Grade " + retry.math.grade + " " + retry.math.ops.map(function (o) { return BD.MathGame.OPS[o].sym; }).join(" ") + " and score " + BD.MathGame.PASS + "% to unlock other levels.");
     if (retry.sentence) notes.push("<strong>Fix-It Sentences:</strong> redo Grade " + retry.sentence.grade + " and fix " + BD.SentenceGame.PASS + "% to unlock other grades.");
     $("homeRedo").innerHTML = notes.map(function (n) { return "<p>" + n + "</p>"; }).join("");
-    $("homeRedo").hidden = !notes.length;
+    $("homeRedo").hidden = true; // redo items are shown in Sensei's plan instead
+    renderPlan(p);
     show("screen-home");
+  }
+
+  /* ---------- Sensei's plan ---------- */
+  let planItems = [];
+  function renderPlan(p) {
+    planItems = BD.Coach.plan(p);
+    $("homePlan").hidden = !planItems.length;
+    $("homePlanList").innerHTML = planItems.map(function (it, i) {
+      return '<button type="button" class="plan-item plan-' + it.kind + '" data-plan="' + i + '"><strong>' + esc(it.title) + '</strong><span>' + esc(it.sub) + '</span></button>';
+    }).join("");
+  }
+  function runPlan(it) {
+    const p = BD.Store.current();
+    if (it.kind === "mathRetry" || it.kind === "mathStart") BD.MathGame.openSetup();
+    else if (it.kind === "mathFocus") BD.MathGame.start("practice", [it.op]);
+    else if (it.kind === "mathUp") { p.mathGrade = it.grade; BD.Store.save(p); BD.MathGame.openSetup(); }
+    else if (it.kind === "sentRetry") BD.SentenceGame.start();
+    else if (it.kind === "sentFocus") BD.SentenceGame.start(it.type);
+    else if (it.kind === "sentUp") { p.sentenceGrade = it.grade; BD.Store.save(p); home(); }
+  }
+
+  /* Re-draw when progress arrives from another device. */
+  function refresh() {
+    if (currentScreen === "screen-home") home();
+    else if (currentScreen === "screen-players") players();
+    else if (currentScreen === "screen-parent") parent();
+    else if (BD.Store.current() === null && currentScreen !== "screen-players") players();
   }
 
   /* ---------- results ---------- */
@@ -92,6 +122,8 @@ BD.UI = (function () {
     $("resFailedText").textContent = o.failed || "";
     $("resPassed").hidden = !o.passedRetry;
     $("resPassed").textContent = o.passedRetry || "";
+    $("resCoach").hidden = !o.coachNote;
+    $("resCoach").textContent = o.coachNote || "";
     $("resLesson").hidden = !o.lesson;
     $("resLessonBody").innerHTML = o.lesson || "";
     $("resListTitle").textContent = o.listTitle || "";
@@ -127,6 +159,13 @@ BD.UI = (function () {
         const what = s.game === "math" ? "Math · " + (s.mode === "clock" ? "Speed" : "Practice") + " · " + s.ops.map(function (o) { return BD.MathGame.OPS[o].sym; }).join("") : "Sentences";
         return '<tr><td>' + d.toLocaleDateString(undefined, { month: "short", day: "numeric" }) + '</td><td>' + what + '</td><td>Gr ' + s.grade + '</td><td>' + s.correct + "/" + s.total + '</td><td>+' + s.xp + '</td></tr>';
       }).join("");
+      const typeRow = '<tr><th scope="row">First-try rate by mistake type</th>' + BD.GRADES.map(function () { return "<td></td>"; }).join("") + '</tr>';
+      const typeRows = Object.keys(BD.FIX_TYPES).map(function (t) {
+        return '<tr><th scope="row" class="indent">' + BD.FIX_TYPES[t].label + '</th>' + BD.GRADES.map(function (g) {
+          const a = (p.typeRecent[g] || {})[t]; return '<td>' + (a && a.length ? Math.round(100 * BD.Coach.rate(a)) + "%<small>" + a.length + "</small>" : "–") + '</td>';
+        }).join("") + '</tr>';
+      }).join("");
+      const plan = BD.Coach.plan(p);
       return '<article class="report">' +
         '<header class="report-head">' + avatar(p, "lg") + '<div><h3>' + esc(p.name) + '</h3><p class="muted">' + belt.name + ' Belt · ' + p.xp.toLocaleString() + ' XP · practiced ' + p.days.length + (p.days.length === 1 ? " day" : " days") + '</p></div></header>' +
         (p.retry && (p.retry.math || p.retry.sentence) ? '<div class="redo-note"><strong>Redo needed</strong><p>' +
@@ -134,7 +173,8 @@ BD.UI = (function () {
            p.retry.sentence ? "Fix-It Sentences Grade " + p.retry.sentence.grade : ""].filter(Boolean).join(" and ") +
           '. Scored under ' + BD.MathGame.PASS + '%, so this level stays locked in until they pass it.</p><button type="button" class="btn btn-small" data-act="clearRedo">Unlock all levels</button></div>' : '') +
         '<h4 class="label">Accuracy by grade <span class="muted">(number answered underneath)</span></h4>' +
-        '<div class="table-wrap"><table class="grid"><thead><tr><th></th>' + BD.GRADES.map(function (g) { return '<th>Gr ' + g + '</th>'; }).join("") + '</tr></thead><tbody>' + opRows + sentRow + '</tbody></table></div>' +
+        '<div class="table-wrap"><table class="grid"><thead><tr><th></th>' + BD.GRADES.map(function (g) { return '<th>Gr ' + g + '</th>'; }).join("") + '</tr></thead><tbody>' + opRows + sentRow + typeRow + typeRows + '</tbody></table></div>' +
+        (plan.length ? '<h4 class="label">What Sensei is working on next</h4><ul class="plan-text">' + plan.map(function (it) { return '<li><strong>' + esc(it.title) + '.</strong> ' + esc(it.sub) + '</li>'; }).join("") + '</ul>' : '') +
         '<h4 class="label">Tricky math facts</h4>' +
         (tricky.length ? '<ul class="tricky">' + tricky.map(function (t) { return '<li>' + BD.MathGame.show(t) + '</li>'; }).join("") + '</ul><p class="muted small">These come back in practice rounds until they are answered correctly.</p>' : '<p class="muted">None right now.</p>') +
         '<h4 class="label">Recent rounds</h4>' +
@@ -171,6 +211,9 @@ BD.UI = (function () {
     $("parentBack").addEventListener("click", function () { BD.Store.current() ? home() : players(); });
     $("playMath").addEventListener("click", function () { BD.MathGame.openSetup(); });
     $("playSent").addEventListener("click", function () { BD.SentenceGame.start(); });
+    $("homePlanList").addEventListener("click", function (e) {
+      const b = e.target.closest("[data-plan]"); if (b && planItems[Number(b.dataset.plan)]) runPlan(planItems[Number(b.dataset.plan)]);
+    });
     $("homeSentGrade").addEventListener("click", function (e) {
       const b = e.target.closest("[data-grade]"); if (!b) return;
       const p = BD.Store.current(); if (p.retry && p.retry.sentence) return; p.sentenceGrade = Number(b.dataset.grade); BD.Store.save(); BD.Sound.tap(); home();
@@ -186,7 +229,7 @@ BD.UI = (function () {
       const p = BD.Store.get(id);
       if (b.dataset.act === "clearRedo") {
         const pl = BD.Store.get(b.closest(".report").querySelector(".report-actions").dataset.id);
-        pl.retry = {}; BD.Store.save(); parent(); return;
+        pl.retry = {}; BD.Store.save(pl); parent(); return;
       }
       if (b.dataset.act === "reset" || b.dataset.act === "remove") {
         box.dataset.pending = b.dataset.act;
@@ -223,10 +266,12 @@ BD.UI = (function () {
 
   function init() {
     bind(); syncMute(); BD.Sensei.init();
+    BD.Store.onChange(refresh);
+    BD.Sync.init();
     BD.Store.current() ? home() : players();
   }
 
-  return { sheet: sheet, sheetOpen: sheetOpen, show: show, esc: esc, home: home, players: players, results: results, gradePicker: gradePicker, init: init };
+  return { refresh: refresh, sheet: sheet, sheetOpen: sheetOpen, show: show, esc: esc, home: home, players: players, results: results, gradePicker: gradePicker, init: init };
 })();
 
 document.addEventListener("DOMContentLoaded", BD.UI.init);
