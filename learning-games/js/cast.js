@@ -6,7 +6,7 @@ BD.Cast = (function () {
   const PEOPLE = {
     zumi: { name: "Zumi", role: "Dojo mascot" },
     cd: { name: "Master CD", role: "Master Instructor" },
-    michele: { name: "Ms. Michele", role: "Main Instructor" },
+    michele: { name: "Mrs. Master Young", role: "Main Instructor" },
     bridgette: { name: "Ms. Bridgette", role: "Lead Instructor" },
     kyra: { name: "Ms. Kyra", role: "Instructor" },
     lauryn: { name: "Miss Lauryn", role: "Studio Manager" },

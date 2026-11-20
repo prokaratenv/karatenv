@@ -7,8 +7,8 @@ Free math and writing practice for grades 3â€“7. Kids earn karate belts (White â
 The game uses the Engage brand (midnight navy, the green-teal-blue streak, gold for rewards, Montserrat and Cabin) and the cartoon cast from the Engage Higgsfield workspace:
 - **Zumi** is the host.
 - **Master CD** coaches Math Dojo, **Ms. Bridgette** coaches Fix-It Sentences and **Ms. Kyra** coaches Story Scrolls.
-- **Ms. Michele** gives Sensei's plan.
-- Kids choose a fighter: Kimmy, Billy, Tommy, Mackenzie, Rylan, Zumi, or an instructor (Master CD, Ms. Michele, Ms. Bridgette, Ms. Kyra, Miss Lauryn). They can change it by tapping their character on the home screen.
+- **Mrs. Master Young** gives Sensei's plan.
+- Kids choose a fighter: Kimmy, Billy, Tommy, Mackenzie, Rylan, Zumi, or an instructor (Master CD, Mrs. Master Young, Ms. Bridgette, Ms. Kyra, Miss Lauryn). They can change it by tapping their character on the home screen.
 
 - **Build your own fighter:** in "Change fighter", kids can design a character. They choose height, build, skin tone, hairstyle, hair color, eye color, face extras (freckles, glasses, rosy cheeks), smile, and uniform (black gi, white gi, or shorts with an Engage shirt). The belt it wears is always the belt they've earned.
 
