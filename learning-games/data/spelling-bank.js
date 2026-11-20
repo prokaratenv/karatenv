@@ -58,3 +58,62 @@ BD.SPELLING = {
     ["onomatopoeia", "\"Buzz\" is an example of ___."], ["silhouette", "We saw his ___ against the sunset."], ["unanimous", "The vote was ___: everyone agreed."], ["vacuum", "Please ___ the living room."]
   ]
 };
+
+/* More words (added for the extra spelling challenge styles). */
+(function (more) {
+  Object.keys(more).forEach(function (g) {
+    const list = BD.SPELLING[g] = BD.SPELLING[g] || [];
+    more[g].forEach(function (x) { if (!list.some(function (y) { return y[0] === x[0]; })) list.push(x); });
+  });
+})({
+  "-1": [
+    ["box", "Put the toys in the ___."], ["sit", "Please ___ on the mat."], ["hop", "Bunnies ___ and play."], ["bug", "A tiny ___ is on the leaf."],
+    ["fan", "Turn on the ___ when it is hot."], ["hen", "The ___ lays an egg."], ["mat", "We bow on the ___."], ["pen", "I draw with a ___."],
+    ["top", "Spin the ___!"], ["web", "The spider made a ___."], ["zip", "___ up your coat."], ["leg", "I kick with my ___."]
+  ],
+  "0": [
+    ["she", "___ is my sister."], ["go", "Ready, set, ___!"], ["we", "___ love karate."], ["my", "This is ___ belt."],
+    ["up", "Look ___ at the sky."], ["is", "The sky ___ blue."], ["it", "Kick ___ high!"], ["at", "Look ___ me!"],
+    ["help", "Can you ___ me?"], ["stop", "Red means ___."], ["ball", "Throw the ___ to me."], ["tree", "A bird sat in the ___."]
+  ],
+  "1": [
+    ["what", "___ is your name?"], ["who", "___ is at the door?"], ["many", "How ___ apples do you have?"], ["sleep", "I ___ in my bed."],
+    ["happy", "A big smile means you are ___."], ["water", "Fish live in the ___."], ["after", "We play ___ school."], ["paper", "Write on the ___."],
+    ["night", "The moon comes out at ___."], ["block", "Raise your arm to ___ the punch."], ["thank", "Always ___ your teacher."], ["first", "Who is ___ in line?"]
+  ],
+  "2": [
+    ["around", "We ran ___ the track."], ["early", "I wake up ___ to train."], ["learn", "We come to school to ___."], ["balance", "Stand on one foot to practice ___."],
+    ["kitchen", "Mom cooks in the ___."], ["pretty", "The flowers are ___."], ["really", "I ___ like karate!"], ["minute", "Wait one ___, please."],
+    ["brother", "My little ___ is five."], ["sister", "My ___ has a yellow belt."], ["window", "Look out the ___."], ["upon", "Once ___ a time, there was a dragon."]
+  ],
+  "3": [
+    ["caught", "I ___ the ball with both hands."], ["neighbor", "Our ___ has a friendly dog."], ["eight", "A spider has ___ legs."], ["piece", "May I have a ___ of cake?"],
+    ["daughter", "Their ___ just earned a green belt."], ["remember", "Always ___ to bow."], ["special", "Today is a ___ day."], ["weight", "Lift the ___ slowly."],
+    ["heard", "I ___ a loud noise."], ["build", "Let's ___ a fort."], ["straight", "Stand up ___ and tall."], ["usually", "I ___ eat breakfast at seven."]
+  ],
+  "4": [
+    ["business", "Her ___ sells cupcakes."], ["height", "Measure your ___ on the wall."], ["exercise", "Daily ___ keeps you strong."], ["knowledge", "Reading gives you ___."],
+    ["neighborhood", "We walk around the ___."], ["guess", "Can you ___ my favorite color?"], ["receive", "You will ___ a new belt."], ["science", "We did an experiment in ___ class."],
+    ["vegetable", "A carrot is a ___."], ["weird", "That noise sounded ___."], ["breathe", "Remember to ___ while you stretch."], ["courage", "It takes ___ to try something new."]
+  ],
+  "5": [
+    ["achieve", "Work hard and you will ___ your goals."], ["argument", "They had an ___ about the rules."], ["villain", "The ___ lost in the end."], ["exhausted", "I was ___ after the tournament."],
+    ["guarantee", "Practice is the best ___ of success."], ["license", "My dad has a driver's ___."], ["mysterious", "A ___ box sat on the porch."], ["occurred", "The mistake ___ yesterday."],
+    ["recognize", "I didn't ___ you with your new haircut."], ["rhyme", "\"Cat\" and \"hat\" ___."], ["schedule", "Class is on the ___ for Monday."], ["tomorrow", "Our test is ___."]
+  ],
+  "6": [
+    ["beginning", "The ___ of the story was exciting."], ["cemetery", "Old trees grow by the ___."], ["deceive", "Never ___ your friends."], ["equipment", "Put away the sparring ___."],
+    ["fluorescent", "The ___ lights hummed."], ["harass", "Bullies should never ___ others."], ["humorous", "The movie was very ___."], ["independent", "She is an ___ thinker."],
+    ["lightning", "___ flashed across the sky."], ["miniature", "She built a ___ dojo."], ["possession", "My belt is my favorite ___."], ["referred", "The coach ___ me to a new class."]
+  ],
+  "7": [
+    ["accidentally", "I ___ dropped my water bottle."], ["bureau", "The travel ___ helped us plan."], ["committed", "She is ___ to her training."], ["correspondence", "Keep your ___ in a folder."],
+    ["fascinate", "Planets ___ me."], ["hypocrisy", "Saying one thing and doing another is ___."], ["irresistible", "The cookies were ___."], ["questionnaire", "Please fill out the ___."],
+    ["reminiscent", "The smell is ___ of my grandma's kitchen."], ["surveillance", "The bank uses ___ cameras."], ["threshold", "Pause at the ___ of the dojo and bow."], ["vengeance", "A true martial artist does not seek ___."]
+  ],
+  "8": [
+    ["acquiesce", "He chose to ___ to the group's decision."], ["bourgeois", "The novel described a ___ family."], ["connoisseur", "My uncle is a cheese ___."], ["idiosyncrasy", "Humming while she works is her ___."],
+    ["inoculate", "Doctors ___ people against disease."], ["mnemonic", "A ___ helps you remember facts."], ["pharaoh", "The ___ ruled ancient Egypt."], ["rendezvous", "We set a ___ point at the park."],
+    ["sacrilegious", "Some thought the joke was ___."], ["supersede", "The new rule will ___ the old one."], ["vicissitude", "Life's ___ teaches resilience."], ["sovereign", "The ___ ruled the kingdom wisely."]
+  ]
+});

@@ -17,10 +17,18 @@ Free math, writing, reading, spelling and Spanish practice from Pre-K through 8t
 ## Spelling Bee and Spanish Dojo
 
 **Spelling Bee** (coach: Master Mrs. Young)
-- The word is spoken aloud with a sentence clue, and the child types the spelling.
-- Pre-K to 1st grade get letter tiles to tap. Older grades can turn tiles on as a hint, for 5 XP.
-- A wrong answer shows which letters were right and wrong. Missed words come back.
-- The lists are in `data/spelling-bank.js`: 12 words per grade, from cat and dog up to onomatopoeia.
+- Every round mixes six kinds of challenges, each with a sentence clue:
+  - **Listen and spell:** hear the word, then type it.
+  - **Missing letter:** a letter (or two, in older grades) is missing, as in `fr?end`. Pick the right one.
+  - **Pick the right spelling:** choose the correct spelling out of four.
+  - **Spelling check:** a word in the sentence is underlined. Is it spelled correctly or misspelled?
+  - **Fix the spelling:** the underlined word is misspelled. Type it the right way.
+  - **Unscramble:** put the letter tiles in order (Pre-K to 4th grade).
+- The wrong spellings are believable ones ("beleive", "nesessary"), and they're never a real word, so "cat" never turns into "cut".
+- **No sound needed:** on a listening challenge, **Can't listen? Swap it** swaps in a silent challenge for the same word. **Quiet mode** turns off listening challenges for that student until it's turned off again. Listening challenges are also skipped automatically when the sound is off or the device can't speak.
+- Letter tiles: Pre-K to 1st grade see them right away on listening challenges. Older grades can turn them on as a hint, for 5 XP (not on Brown, Red or Black Belt).
+- A wrong typed answer shows which letters were right and wrong. Missed words come back a few turns later as a different kind of challenge.
+- The lists are in `data/spelling-bank.js`: 24 words per grade, from cat and dog up to onomatopoeia.
 
 **Spanish Dojo** (coach: Miss Lauryn)
 - Topics open as the grade goes up: greetings, colors, numbers and animals for the youngest; family, food, school, days, weather, clothes and months in the middle grades; places, action words, phrases, question words and "I" verbs for the oldest.

@@ -722,3 +722,11 @@ button.rank-belt:hover .belt-svg { transform: scale(1.03); }
   .game-coach { height: 220px; }
   .home-hero { gap: 8px; }
 }
+
+/* Spelling challenge styles */
+.word-audio { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+.word-audio:not(:has(> :not([hidden]))) { display: none; }
+#wordQuiet[aria-pressed="true"] { border-color: var(--gold-2); color: var(--gold-2); }
+.spell-word { letter-spacing: .04em; }
+.spell-blank { display: inline-block; min-width: 1.1em; margin: 0 .08em; padding: 0 .12em; border-bottom: .12em solid var(--gold-2); color: var(--gold-2); text-align: center; }
+.word-sub .spell-u { color: var(--ink); text-decoration: underline; text-decoration-color: var(--gold-2); text-decoration-thickness: 3px; text-underline-offset: 4px; font-weight: 900; }
