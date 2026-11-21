@@ -1,0 +1,606 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!-- Kids' app: keep it out of search engines and AI crawlers (link previews still work). -->
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+<meta name="googlebot" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<title>Brain Dojo by Engage</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Brain Dojo by Engage: math, writing, reading, spelling and Spanish practice for Pre-K to 8th grade. Earn your belts with Zumi and the Engage instructors.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Engage Lifestyle Martial Arts">
+<meta property="og:title" content="Brain Dojo by Engage">
+<meta property="og:description" content="Math, writing, reading, spelling and Spanish for Pre-K to 8th grade. Earn your belts, beat the bosses, and train with Zumi and the Engage instructors.">
+<meta property="og:image" content="img/share-card.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<!-- Add to Home Screen: opens full screen like an app -->
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0D1830">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="icon" type="image/png" href="img/favicon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="img/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-title" content="Brain Dojo">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cabin:wght@400;600;700&family=Montserrat:ital,wght@0,600;0,700;0,800;0,900;1,800;1,900&display=swap">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="bg-streaks" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+<div class="app">
+  <header class="topbar">
+    <button type="button" class="brand" id="brandHome" aria-label="Brain Dojo home">
+      <img class="brand-mark" src="img/engage-mark.webp" alt="" width="48" height="27">
+      <span class="brand-words"><small>Engage</small>Brain Dojo</span>
+    </button>
+    <div class="topbar-actions">
+      <button type="button" class="player-chip" id="playerChip" hidden title="Switch student"></button>
+      <button type="button" class="btn btn-quiet btn-small" id="muteBtn" aria-pressed="true">Sound on</button>
+      <button type="button" class="btn btn-quiet btn-small" id="parentBtn">Parents</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- Choose player -->
+    <section class="screen" id="screen-players" hidden>
+      <div class="title-card">
+        <img src="img/engage-mark.webp" alt="" width="120" height="68">
+        <div><p class="title-name">Brain Dojo</p><p class="title-by">by Engage</p></div>
+      </div>
+      <div class="host-hero">
+        <img class="host-img" src="img/zumi.webp" alt="Zumi, the Engage mascot" width="396" height="760">
+        <div class="host-text">
+          <p class="eyebrow">Math · Writing · Reading · Spelling · Spanish · Pre-K–8th</p>
+          <h1>Who's training today?</h1>
+          <p class="say" id="zumiSay">Hi, I'm Zumi! Pick your name to step onto the mat.</p>
+        </div>
+      </div>
+      <div class="welcome-cta" id="welcomeCta"></div>
+      <button type="button" class="lead-link family-link" id="welcomeFamily" hidden></button>
+      <p class="label switch-label" id="switchLabel" hidden>Someone else training?</p>
+      <div class="player-list" id="playerList"></div>
+      <form class="add-player" id="addPlayerForm" autocomplete="off" hidden>
+        <h2 class="label">New student? Choose your champion</h2>
+        <div class="fighter-pick" id="newFighter" role="radiogroup" aria-label="Choose a character"></div>
+        <div class="add-row">
+          <label class="field"><span>Name</span><input id="newName" type="text" maxlength="20" placeholder="First name" required></label>
+          <label class="field"><span>Starting grade</span><select id="newGrade"></select></label>
+          <button type="submit" class="btn btn-primary" id="addPlayerBtn">Join the dojo</button>
+        </div>
+      </form>
+      <p class="restore-line"><button type="button" class="btn btn-quiet btn-small" id="restoreBtn">Restore a student</button> <span class="muted small">Have a save code from another device? Bring your belts back.</span></p>
+      <button type="button" class="lead-link" id="welcomeLead" hidden>👪 <strong>Parents:</strong> unlock your free Parent Progress Report ›</button>
+    </section>
+
+    <!-- Dojo home -->
+    <section class="screen" id="screen-home" hidden>
+      <div class="home-hero">
+        <div class="stage-col">
+        <button type="button" class="fighter-stage" id="changeFighter" title="Change your champion">
+          <span class="fighter-art" id="homeFighter"></span>
+          <span class="fighter-change">Change champion</span>
+        </button>
+        <button type="button" class="gear-btn" id="gearBtn"><span id="homeGear"></span><span class="gear-label" id="gearLabel">Gear locker</span></button>
+        </div>
+        <div class="home-hud">
+          <h1 id="homeHello">Ready to train?</h1>
+          <p class="streak-line" id="homeStreak"></p>
+          <button type="button" class="btn btn-primary btn-big start-btn" id="startTraining">
+            <span class="start-main">Start training</span>
+            <span class="start-sub" id="startNext"></span>
+          </button>
+          <p class="muted" id="homeToday"></p>
+        </div>
+      </div>
+      <div class="quest-row">
+        <button type="button" class="quest-card" id="questCard"></button>
+        <button type="button" class="map-card" id="mapCard"></button>
+      </div>
+      <div class="fun-row">
+        <button type="button" class="boss-card" id="bossCard"></button>
+        <button type="button" class="duel-card" id="duelCard"><span class="duel-icon" aria-hidden="true">⚔️</span><span><strong>Partner Challenge</strong><span class="boss-sub">2 players · one screen</span></span></button>
+      </div>
+      <div class="belt-panel" id="homeBelt"></div>
+      <div class="redo-note" id="homeRedo" hidden></div>
+      <section class="plan" id="homePlan" hidden>
+        <div class="coach-row">
+          <img class="coach-face" src="img/face-michele.webp" alt="">
+          <div class="coach-say"><span class="coach-name">Master Mrs. Young · Sensei's plan for you</span></div>
+        </div>
+        <div class="plan-list" id="homePlanList"></div>
+      </section>
+      <button type="button" class="dojo-card" id="dojoCard" hidden></button>
+      <div class="game-grid">
+        <article class="game-card game-math">
+          <div class="game-art" aria-hidden="true">
+            <img class="game-coach" src="img/cd.webp" alt="">
+            <div class="art-chips"><span>7×8</span><span>48÷6</span><span>36+9</span></div>
+          </div>
+          <div class="game-body">
+            <p class="coach-tag">Coach: Master Young</p>
+            <h2>Math Dojo</h2>
+            <p>Flashcards for adding, subtracting, multiplying and dividing. Build combos, beat the clock, earn XP.</p>
+            <p class="eyebrow">Math grade level</p>
+            <div id="homeMathGrade"></div>
+            <button type="button" class="btn btn-primary btn-big" id="playMath">Play Math Dojo</button>
+          </div>
+        </article>
+        <article class="game-card game-sent">
+          <div class="game-art sent-art" aria-hidden="true">
+            <img class="game-coach" src="img/michele.webp" alt="">
+            <div class="art-chips"><span><s>the</s> The</span><span>dog<b>.</b></span></div>
+          </div>
+          <div class="game-body">
+            <p class="coach-tag">Coach: Master Mrs. Young</p>
+            <h2>Fix-It Sentences</h2>
+            <p>Each sentence has mistakes in capitals, punctuation, spelling or grammar. Find them and fix them.</p>
+            <p class="eyebrow">Sentence grade level</p>
+            <div id="homeSentGrade"></div>
+            <button type="button" class="btn btn-primary btn-big" id="playSent">Play Fix-It Sentences</button>
+          </div>
+        </article>
+        <article class="game-card game-read">
+          <div class="game-art read-art" aria-hidden="true">
+            <img class="game-coach" src="img/kyra.webp" alt="">
+            <div class="art-chips"><span>Who?</span><span>Why?</span><span>Main idea</span></div>
+          </div>
+          <div class="game-body">
+            <p class="coach-tag">Coach: Ms. Kyra</p>
+            <h2>Story Scrolls</h2>
+            <p>Read two short stories, then answer questions in your own words. Sensei reads each answer and tells you how you did.</p>
+            <p class="eyebrow">Reading grade level</p>
+            <div id="homeReadGrade"></div>
+            <button type="button" class="btn btn-primary btn-big" id="playRead">Play Story Scrolls</button>
+          </div>
+        </article>
+        <article class="game-card game-spell">
+          <div class="game-art spell-art" aria-hidden="true">
+            <img class="game-coach" src="img/lauryn.webp" alt="">
+            <div class="art-chips"><span>c-a-t</span><span>B-E-E</span><span>spell it!</span></div>
+          </div>
+          <div class="game-body">
+            <p class="coach-tag">Coach: Ms. Lauryn</p>
+            <h2>Spelling Bee</h2>
+            <p>Missing letters, spot the misspelling, fix it, unscramble and listen-and-spell. Quiet mode works without sound.</p>
+            <p class="eyebrow">Spelling grade level</p>
+            <div id="homeSpellGrade"></div>
+            <div class="school-cta" id="homeSchool" hidden></div>
+            <button type="button" class="btn btn-primary btn-big" id="playSpell">Play Spelling Bee</button>
+          </div>
+        </article>
+        <article class="game-card game-spanish">
+          <div class="game-art spanish-art" aria-hidden="true">
+            <img class="game-coach" src="img/bridgette.webp" alt="">
+            <div class="art-chips"><span>¡Hola!</span><span>rojo</span><span>gracias</span></div>
+          </div>
+          <div class="game-body">
+            <p class="coach-tag">Coach: Ms. Bridgette</p>
+            <h2>Spanish Dojo</h2>
+            <p>Learn Spanish words, from colors and animals to everyday phrases. Tap Hear it to copy the sound.</p>
+            <p class="eyebrow">Spanish grade level</p>
+            <div id="homeSpanishGrade"></div>
+            <button type="button" class="btn btn-primary btn-big" id="playSpanish">Play Spanish Dojo</button>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- Math setup -->
+    <section class="screen" id="screen-math-setup" hidden>
+      <div class="screen-head">
+        <button type="button" class="btn btn-quiet btn-small" id="mathSetupBack">‹ Back</button>
+        <h1>Math Dojo</h1>
+      </div>
+      <div class="coach-row">
+        <img class="coach-face" src="img/face-cd.webp" alt="">
+        <div class="coach-say"><span class="coach-name">Master Young</span><p>Choose your skills and your challenge. I'll be right here.</p></div>
+      </div>
+      <div id="mathSetupBody"></div>
+    </section>
+
+    <!-- Math play -->
+    <section class="screen play" id="screen-math-play" hidden>
+      <div class="playbar">
+        <button type="button" class="btn btn-quiet btn-small" id="mathQuit">‹ Back</button>
+        <label class="grade-select"><span class="sr-only">Grade level for this game</span><select id="mathGradeSel"></select></label>
+        <span class="meter" id="mathProgress"></span>
+        <span class="streak" id="mathStreak" aria-live="polite"></span>
+        <button type="button" class="btn btn-small sensei-btn" id="mathAsk">Ask Sensei</button>
+        <span class="score" id="mathScore"></span>
+      </div>
+      <div class="coach-row compact">
+        <img class="coach-face" src="img/face-cd.webp" alt="">
+        <div class="coach-say"><span class="coach-name">Master Young</span><p id="mathSay">Bow in. Let's train!</p></div>
+        <span class="mini-champ" data-mini></span>
+      </div>
+      <div class="flashcard" id="mathCard">
+        <button type="button" class="say-btn" id="mathRead" aria-label="Read it to me" title="Read it to me"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+        <div class="problem" id="mathProblem"></div>
+        <div class="dots" id="mathDots" hidden aria-hidden="true"></div>
+        <div class="answer empty" id="mathAnswer" aria-live="polite">?</div>
+        <div class="card-feedback" id="mathFeedback" aria-live="assertive"></div>
+      </div>
+      <div class="explain-panel" id="mathExplain" hidden>
+        <h2 id="mathExplainTitle">How to solve it</h2>
+        <ol class="steps" id="mathSteps"></ol>
+        <p class="muted small">This card will come back in a few cards. Try it again then!</p>
+        <div class="explain-actions">
+          <button type="button" class="btn sensei-btn" id="mathExplainAsk">Still confused? Ask Sensei</button>
+          <button type="button" class="btn btn-primary" id="mathGotIt">Got it, next card</button>
+        </div>
+      </div>
+      <button type="button" class="btn btn-quiet scratch-btn" id="mathScratch"><span aria-hidden="true">✏️</span> Scratch paper</button>
+      <div class="keypad" id="mathKeypad"></div>
+    </section>
+
+    <!-- Sentence play -->
+    <section class="screen play" id="screen-sentence-play" hidden>
+      <div class="playbar">
+        <button type="button" class="btn btn-quiet btn-small" id="sentQuit">‹ Back</button>
+        <label class="grade-select"><span class="sr-only">Grade level for this game</span><select id="sentGradeSel"></select></label>
+        <span class="meter" id="sentProgress"></span>
+        <button type="button" class="btn btn-small" id="sentRules" data-test-hide>Rule book</button>
+        <button type="button" class="btn btn-small sensei-btn" id="sentAsk">Ask Sensei</button>
+        <span class="score" id="sentScore"></span>
+      </div>
+      <div class="coach-row compact">
+        <img class="coach-face" src="img/face-michele.webp" alt="">
+        <div class="coach-say"><span class="coach-name">Master Mrs. Young</span><p id="sentSay">Find every mistake. You've got sharp eyes!</p></div>
+        <span class="mini-champ" data-mini></span>
+      </div>
+      <div class="sent-card" id="sentCard">
+        <button type="button" class="say-btn" id="sentRead" aria-label="Read it to me" title="Read it to me"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+        <p class="label">Fix this sentence</p>
+        <p class="sent-original" id="sentOriginal"></p>
+        <div class="mistakes" id="sentMistakes"></div>
+        <label class="sr-only" for="sentInput">Your corrected sentence</label>
+        <textarea id="sentInput" class="sent-input" rows="2" spellcheck="false" autocorrect="off" autocapitalize="off" autocomplete="off"></textarea>
+        <div class="sent-actions">
+          <button type="button" class="btn btn-quiet" id="sentReset" data-test-hide>Start over</button>
+          <button type="button" class="btn btn-quiet" id="sentHint" data-test-hide>Hint <small>(−5 XP)</small></button>
+          <span class="tries" id="sentTries"></span>
+          <button type="button" class="btn btn-primary" id="sentCheck">Check</button>
+          <button type="button" class="btn btn-primary" id="sentNext" hidden>Next sentence</button>
+        </div>
+        <ul class="hints" id="sentHints"></ul>
+        <div class="sent-feedback" id="sentFeedback" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <!-- Reading play -->
+    <section class="screen play" id="screen-read-play" hidden>
+      <div class="playbar">
+        <button type="button" class="btn btn-quiet btn-small" id="readQuit">‹ Back</button>
+        <label class="grade-select"><span class="sr-only">Grade level for this game</span><select id="readGradeSel"></select></label>
+        <span class="meter" id="readProgress"></span>
+        <button type="button" class="btn btn-small" id="readTips" data-test-hide>Reading tips</button>
+        <button type="button" class="btn btn-small sensei-btn" id="readAsk">Ask Sensei</button>
+        <span class="score" id="readScore"></span>
+      </div>
+      <div class="coach-row compact">
+        <img class="coach-face" src="img/face-kyra.webp" alt="">
+        <div class="coach-say"><span class="coach-name">Ms. Kyra</span><p id="readSay">Read it once for fun, then again for clues.</p></div>
+        <span class="mini-champ" data-mini></span>
+      </div>
+      <article class="passage">
+        <div class="passage-head"><h2 id="readTitle"></h2><button type="button" class="btn btn-small listen-btn" id="readListen">Read it to me</button></div>
+        <p id="readText"></p>
+      </article>
+      <div class="q-card">
+        <button type="button" class="say-btn" id="readQRead" aria-label="Read it to me" title="Read it to me"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+        <span class="q-type" id="readQType"></span>
+        <p class="q-text" id="readQuestion"></p>
+        <label class="sr-only" for="readInput">Your answer</label>
+        <textarea id="readInput" class="read-input" rows="3" placeholder="Answer in your own words…"></textarea>
+        <div class="sent-actions">
+          <button type="button" class="btn btn-quiet" id="readHint" data-test-hide>Hint <small>(−5 XP)</small></button>
+          <span class="tries" id="readTries"></span>
+          <button type="button" class="btn btn-primary" id="readCheck">Check my answer</button>
+          <button type="button" class="btn btn-primary" id="readNext" hidden>Next question</button>
+        </div>
+        <div class="read-feedback" id="readFeedback" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <!-- Word games (Spanish + Spelling) -->
+    <section class="screen play" id="screen-word-play" hidden>
+      <div class="playbar">
+        <button type="button" class="btn btn-quiet btn-small" id="wordQuit">‹ Back</button>
+        <label class="grade-select"><span class="sr-only">Grade level for this game</span><select id="wordGradeSel"></select></label>
+        <span class="meter" id="wordProgress"></span>
+        <span class="streak" id="wordStreak" aria-live="polite"></span>
+        <button type="button" class="btn btn-small sensei-btn" id="wordAsk">Ask Sensei</button>
+        <span class="score" id="wordScore"></span>
+      </div>
+      <div class="coach-row compact">
+        <img class="coach-face" id="wordCoachFace" src="img/face-lauryn.webp" alt="">
+        <div class="coach-say"><span class="coach-name" id="wordCoachName"></span><p id="wordSay"></p></div>
+        <span class="mini-champ" data-mini></span>
+      </div>
+      <div class="word-card" id="wordCard">
+        <button type="button" class="say-btn" id="wordRead" aria-label="Read it to me" title="Read it to me"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+        <p class="label" id="wordTopic"></p>
+        <div class="word-prompt" id="wordPrompt"></div>
+        <p class="word-sub" id="wordSub"></p>
+        <div class="word-audio">
+          <button type="button" class="btn btn-small listen-btn" id="wordListen">Hear it</button>
+          <button type="button" class="btn btn-small btn-quiet" id="wordSwap" hidden>Can't listen? Swap it</button>
+          <button type="button" class="btn btn-small btn-quiet" id="wordQuiet" aria-pressed="false" hidden>Quiet mode: off</button>
+        </div>
+        <div class="word-choices" id="wordChoices"></div>
+        <div class="word-type" id="wordType">
+          <div class="tiles" id="wordTiles"></div>
+          <label class="sr-only" for="wordInput">Your answer</label>
+          <input id="wordInput" class="word-input" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">
+          <div class="sent-actions">
+            <button type="button" class="btn btn-quiet" id="wordTilesBtn" data-test-hide>Letter tiles <small>(−5 XP)</small></button>
+            <button type="button" class="btn btn-primary" id="wordCheck">Check</button>
+          </div>
+        </div>
+        <div class="word-feedback" id="wordFeedback" aria-live="polite"></div>
+        <button type="button" class="btn btn-primary" id="wordNext" hidden>Next</button>
+      </div>
+    </section>
+
+    <!-- Boss battle -->
+    <section class="screen play" id="screen-boss" hidden>
+      <div class="playbar">
+        <button type="button" class="btn btn-quiet btn-small" id="bossQuit">‹ Back</button>
+        <span class="meter" id="bossTitle"></span>
+      </div>
+      <div class="boss-arena" id="bossArena">
+        <div class="ba-side ba-me">
+          <div class="ba-hearts" id="bossHearts" aria-label="Your hearts"></div>
+          <span class="mini-champ ba-champ" data-mini></span>
+        </div>
+        <div class="ba-pop-wrap"><span class="boss-pop" id="bossPop"></span></div>
+        <div class="ba-side ba-boss">
+          <p class="ba-name" id="bossName"></p>
+          <div class="ba-hp"><i id="bossHp"></i><span id="bossHpNum"></span></div>
+          <img class="ba-boss-img" id="bossImg" src="" alt="">
+        </div>
+        <p class="ba-say" id="bossSay"></p>
+      </div>
+      <div class="qq-card" id="bossQWrap">
+        <button type="button" class="say-btn" id="bossRead" aria-label="Read it to me" title="Read it to me"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+        <div id="bossQ"></div>
+      </div>
+      <div class="boss-morph" id="bossMorph" hidden>
+        <img class="bm-from" src="img/boss-8.webp" alt="">
+        <img class="bm-to" src="img/boss-9.webp" alt="">
+        <p class="bm-text">Iron Master Young is transforming…</p>
+        <p class="bm-name">FINAL BOSS MASTER YOUNG</p>
+      </div>
+      <div class="boss-over" id="bossOver" hidden>
+        <h2 id="bossOverTitle"></h2>
+        <p class="boss-quote" id="bossOverSay"></p>
+        <p class="boss-prize" id="bossOverPrize"></p>
+        <div class="res-actions"><button type="button" class="btn btn-primary btn-big" id="bossAgain">Rematch</button><button type="button" class="btn btn-quiet" id="bossHome">Back to my dojo</button></div>
+      </div>
+    </section>
+
+    <!-- Partner challenge -->
+    <section class="screen play" id="screen-duel" hidden>
+      <div class="duel-arena" id="duelArena">
+        <div class="duel-half p1" id="duelHalf1">
+          <div class="duel-head"><span class="duel-name" id="duelName1"></span><span class="duel-score" id="duelScore1"></span></div>
+          <div class="duel-bar"><i id="duelBar1"></i></div>
+          <div class="duel-q" id="duelQ1"></div>
+          <div class="duel-freeze">Frozen!</div>
+        </div>
+        <div class="duel-mid"><button type="button" class="btn btn-quiet btn-small" id="duelQuit">‹ Quit</button><span>⚔️ Partner Challenge</span></div>
+        <div class="duel-half p2" id="duelHalf2">
+          <div class="duel-head"><span class="duel-name" id="duelName2"></span><span class="duel-score" id="duelScore2"></span></div>
+          <div class="duel-bar"><i id="duelBar2"></i></div>
+          <div class="duel-q" id="duelQ2"></div>
+          <div class="duel-freeze">Frozen!</div>
+        </div>
+        <div class="duel-over" id="duelOver" hidden>
+          <h2 id="duelOverTitle"></h2>
+          <p id="duelOverSub"></p>
+          <div class="res-actions"><button type="button" class="btn btn-primary btn-big" id="duelAgain">Rematch</button><button type="button" class="btn btn-quiet" id="duelHome">Done</button></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Stripe test result -->
+    <section class="screen" id="screen-stripe" hidden>
+      <div class="stripe-hero">
+        <p class="eyebrow" id="stripeSub"></p>
+        <h1 id="stripeTitle"></h1>
+        <p class="stripe-score" id="stripeScore"></p>
+        <div class="stripe-belt" id="stripeBelt"></div>
+        <p class="say" id="stripeSay"></p>
+      </div>
+      <section class="lesson" id="stripeReview" hidden>
+        <h2>Review these</h2>
+        <ul class="plan-text" id="stripeReviewList"></ul>
+      </section>
+      <div class="res-actions">
+        <button type="button" class="btn btn-primary btn-big" id="stripeHome">Back to my belt</button>
+        <button type="button" class="btn btn-quiet" id="stripePractice">Practice more</button>
+        <button type="button" class="btn btn-quiet" id="stripeRetry">Retake the test</button>
+      </div>
+    </section>
+
+    <!-- Graduation -->
+    <section class="screen" id="screen-grad" hidden>
+      <div class="grad-stage">
+        <p class="eyebrow grad-eyebrow">Brain Dojo graduation</p>
+        <h1 class="grad-title">Graduation!</h1>
+        <div class="grad-cast">
+          <img class="grad-zumi" src="img/zumi.webp" alt="Zumi">
+          <span class="fighter-art grad-champ" id="gradChamp"></span>
+        </div>
+        <p class="grad-line" id="gradLine"></p>
+        <div class="stripe-belt grad-belt" id="gradBelt"></div>
+        <p class="grad-xp" id="gradXP">+100 XP</p>
+        <p class="say" id="gradSay"></p>
+      </div>
+      <div class="res-actions grad-actions">
+        <button type="button" class="btn btn-primary btn-big" id="gradCert">Get my certificate</button>
+        <button type="button" class="btn btn-quiet" id="gradContinue">Continue</button>
+        <button type="button" class="btn btn-quiet" id="gradNextGrade" hidden>Start the next grade</button>
+      </div>
+    </section>
+
+    <!-- Results -->
+    <section class="screen" id="screen-results" hidden>
+      <div class="host-hero results-hero">
+        <img class="host-img" id="resHost" src="img/zumi.webp" alt="" width="396" height="760">
+        <div class="host-text">
+          <p class="eyebrow" id="resSubtitle"></p>
+          <span class="mini-champ res-mini" data-mini></span>
+          <h1 id="resTitle"></h1>
+          <p class="say" id="resSay"></p>
+        </div>
+      </div>
+      <div class="redo-note big" id="resFailed" hidden>
+        <strong>Redo this level</strong>
+        <p id="resFailedText"></p>
+      </div>
+      <p class="passed-note" id="resPassed" hidden></p>
+      <p class="coach-note" id="resCoach" hidden></p>
+      <div class="stats" id="resStats"></div>
+      <div class="belt-panel" id="resBelt"></div>
+      <div class="level-up" id="resLevel" hidden>
+        <p id="resLevelText"></p>
+        <button type="button" class="btn btn-primary" id="resLevelBtn">Move up a grade</button>
+      </div>
+      <section class="lesson" id="resLesson" hidden>
+        <h2>Sensei's lesson</h2>
+        <div id="resLessonBody"></div>
+      </section>
+      <h2 class="label" id="resListTitle" hidden></h2>
+      <ul class="res-list" id="resList"></ul>
+      <div class="res-actions">
+        <button type="button" class="btn btn-primary btn-big" id="resAgain">Play again</button>
+        <button type="button" class="btn btn-quiet" id="resSetup">Change skills</button>
+        <button type="button" class="btn btn-quiet" id="resHome">Dojo home</button>
+      </div>
+    </section>
+
+    <!-- Parent corner -->
+    <section class="screen" id="screen-parent" hidden>
+      <div class="screen-head">
+        <button type="button" class="btn btn-quiet btn-small" id="parentBack">‹ Back</button>
+        <h1>Parent corner</h1>
+      </div>
+      <p class="muted parent-intro">A quick look at each child's week. Progress saves automatically. <button type="button" class="link-btn" id="parentHow">How saving, belts and badges work</button></p>
+      <div id="parentLead" hidden></div>
+      <div id="parentBody"></div>
+    </section>
+  </main>
+  <footer class="footer">
+    <img src="img/engage-logo.webp" alt="Engage Lifestyle Martial Arts" class="footer-logo" width="130" height="123">
+    <span class="sync-status" id="syncStatus" data-state="local">Saved on this device</span>
+  </footer>
+</div>
+<canvas id="confetti" aria-hidden="true"></canvas>
+
+<div class="scratch-sheet" id="scratchSheet" role="dialog" aria-modal="true" aria-label="Scratch paper" hidden>
+  <div class="scratch-head">
+    <p class="scratch-problem" id="scratchProblem"></p>
+    <p class="scratch-answer" id="scratchAnswer" aria-live="polite"></p>
+    <button type="button" class="btn btn-quiet btn-small" id="scratchClose">Done</button>
+  </div>
+  <canvas class="scratch-canvas" id="scratchCanvas" aria-label="Drawing area. Draw with your finger to work it out."></canvas>
+  <div class="scratch-tools" id="scratchTools" role="toolbar" aria-label="Pen tools">
+    <button type="button" class="sw" data-color="#1A2C6B" style="--c:#1A2C6B" aria-label="Blue pen"></button>
+    <button type="button" class="sw" data-color="#D63A2F" style="--c:#D63A2F" aria-label="Red pen"></button>
+    <button type="button" class="sw" data-color="#1E8A4C" style="--c:#1E8A4C" aria-label="Green pen"></button>
+    <button type="button" class="tool" id="scratchErase">Eraser</button>
+    <button type="button" class="tool" id="scratchUndo">Undo</button>
+    <button type="button" class="tool" id="scratchClear">Clear</button>
+  </div>
+  <div class="scratch-keys" id="scratchKeys"></div>
+</div>
+
+<div class="sheet-backdrop" id="infoSheet" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="infoTitle">
+    <div class="sheet-head"><h2 id="infoTitle"></h2><button type="button" class="btn btn-quiet btn-small" id="infoClose">Close</button></div>
+    <div class="sheet-body" id="infoBody"></div>
+  </div>
+</div>
+
+<div class="sheet-backdrop" id="fighterSheet" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="fighterTitle">
+    <div class="sheet-head"><h2 id="fighterTitle">Choose your champion</h2><button type="button" class="btn btn-quiet btn-small" id="fighterClose">Close</button></div>
+    <div class="fighter-pick big" id="fighterPick" role="radiogroup" aria-label="Choose a character"></div>
+  </div>
+</div>
+
+<div class="sheet-backdrop" id="builderSheet" hidden>
+  <div class="sheet builder" role="dialog" aria-modal="true" aria-labelledby="builderTitle">
+    <div class="sheet-head"><h2 id="builderTitle">Build your champion</h2><button type="button" class="btn btn-quiet btn-small" id="builderClose">Close</button></div>
+    <div class="builder-grid">
+      <div class="builder-preview" id="builderPreview"></div>
+      <div class="builder-opts" id="builderOpts"></div>
+    </div>
+    <div class="builder-actions">
+      <button type="button" class="btn btn-quiet" id="builderRandom">Surprise me</button>
+      <button type="button" class="btn btn-primary" id="builderSave">Save my champion</button>
+    </div>
+  </div>
+</div>
+
+<div class="sheet-backdrop" id="senseiSheet" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="senseiTitle">
+    <div class="sheet-head">
+      <div class="sensei-who"><img id="senseiFace" class="coach-face" src="img/face-zumi.webp" alt=""><h2 id="senseiTitle">Ask Sensei</h2></div>
+      <button type="button" class="btn btn-quiet btn-small" id="senseiClose">Close</button>
+    </div>
+    <p class="sheet-context" id="senseiContext"></p>
+    <div class="sensei-log" id="senseiLog" aria-live="polite"></div>
+    <div class="chips sensei-chips" id="senseiChips"></div>
+    <form class="sensei-form" id="senseiForm" autocomplete="off">
+      <label class="sr-only" for="senseiInput">Your question</label>
+      <input id="senseiInput" type="text" maxlength="300" placeholder="Type your question…">
+      <button type="submit" class="btn btn-primary" id="senseiSend">Ask</button>
+      <button type="button" class="btn btn-quiet" id="senseiStop" hidden>Stop</button>
+    </form>
+  </div>
+</div>
+
+<script src="data/sentence-bank.js"></script>
+<script src="data/reading-bank.js"></script>
+<script src="data/spanish-bank.js"></script>
+<script src="data/spelling-bank.js"></script>
+<script src="js/config.js"></script>
+<script src="js/storage.js"></script>
+<script src="js/cast.js"></script>
+<script src="js/masks.js"></script>
+<script src="js/rank.js"></script>
+<script src="js/builder.js"></script>
+<script src="js/effects.js"></script>
+<script src="js/explain.js"></script>
+<script src="js/coach.js"></script>
+<script src="js/sentence-gen.js"></script>
+<script src="js/reading-game.js"></script>
+<script src="js/word-quiz.js"></script>
+<script src="js/school.js"></script>
+<script src="js/sync.js"></script>
+<script src="js/sensei.js"></script>
+<script src="js/math-game.js"></script>
+<script src="js/sentence-game.js"></script>
+<script src="js/scratch.js"></script>
+<script src="js/quick.js"></script>
+<script src="js/boss.js"></script>
+<script src="js/duel.js"></script>
+<script src="js/badges.js"></script>
+<script src="js/mini.js"></script>
+<script src="js/backup.js"></script>
+<script src="js/certificate.js"></script>
+<script src="js/parent.js"></script>
+<script src="js/dojo.js"></script>
+<script src="js/quest.js"></script>
+<script src="js/leads.js"></script>
+<script src="js/family.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,577 @@
+/* WORD GAMES — Spanish Dojo and Spelling Bee share one quiz engine.
+   Spanish: pick or type the matching word, hear it spoken.
+   Spelling: six challenge styles (listen, missing letter, pick the spelling,
+   spot the misspelling, fix it, unscramble). Quiet mode skips listening.
+   Same rules as the other games: XP, streaks, missed words come back,
+   70% to pass, lessons, grade changes and Sensei. */
+window.BD = window.BD || {};
+
+BD.WordQuiz = (function () {
+  const ROUND = 10, PASS = 70;
+  const $ = function (id) { return document.getElementById(id); };
+  const r = function (n) { return Math.floor(Math.random() * n); };
+  const shuffle = function (a) { return a.map(function (x) { return [Math.random(), x]; }).sort(function (x, y) { return x[0] - y[0]; }).map(function (x) { return x[1]; }); };
+  const plain = function (s) { return String(s).normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[¿?¡!.,'"]/g, "").replace(/\s+/g, " ").trim(); };
+  let W = null;
+
+  /* ---------- Spanish ---------- */
+  const spanish = {
+    key: "spanish", title: "Spanish Dojo", coach: "bridgette", field: "spanishGrade",
+    topics: function (grade) { return BD.SPANISH.filter(function (t) { return t.g <= grade; }); },
+    round: function (p, grade) {
+      const topics = this.topics(grade);
+      const weighted = [];
+      topics.forEach(function (t) { const n = t.g >= grade - 1 ? 3 : 1; for (let i = 0; i < n; i++) weighted.push(t); });
+      const missed = Object.values((p.wordMissed.spanish || {})).filter(function (m) { return m.grade === grade; }).slice(0, 3);
+      const items = missed.map(function (m) { return makeSpanish(topics.find(function (t) { return t.topic === m.topic; }), m.es, grade); }).filter(Boolean);
+      const used = new Set(items.map(function (x) { return x.id; }));
+      let guard = 0;
+      while (items.length < ROUND && guard++ < 200) {
+        const t = weighted[r(weighted.length)], w = t.words[r(t.words.length)];
+        if (used.has(t.topic + ":" + w[0])) continue;
+        used.add(t.topic + ":" + w[0]);
+        items.push(makeSpanish(t, w[0], grade));
+      }
+      return shuffle(items);
+    }
+  };
+  function makeSpanish(topic, es, grade) {
+    if (!topic) return null;
+    const w = topic.words.find(function (x) { return x[0] === es; }); if (!w) return null;
+    const roll = Math.random();
+    const canType = grade >= 4 && !topic.phrase;
+    let mode;
+    if (canType && roll < (grade >= 6 ? 0.4 : 0.3)) mode = "type";
+    else mode = Math.random() < (grade <= 1 ? 0.6 : 0.5) ? "es2en" : "en2es";
+    const others = shuffle(topic.words.filter(function (x) { return x[0] !== es; })).slice(0, 3);
+    while (others.length < 3) { // borrow from other topics if this one is small
+      const t2 = BD.SPANISH[r(BD.SPANISH.length)], w2 = t2.words[r(t2.words.length)];
+      if (w2[0] !== es && !others.some(function (o) { return o[0] === w2[0] || o[1] === w2[1]; })) others.push(w2);
+    }
+    const opts = shuffle([w].concat(others));
+    const pic = w[2] && !topic.color ? w[2] : "";
+    const swatch = topic.color ? w[2] : "";
+    return {
+      id: topic.topic + ":" + es, topic: topic.topic, es: es, en: w[1], mode: mode, color: !!topic.color,
+      label: topic.topic,
+      prompt: mode === "es2en" ? es : w[1],
+      pic: mode === "es2en" ? "" : pic, swatch: mode === "es2en" ? "" : swatch,
+      sub: mode === "es2en" ? "What does this mean?" : mode === "en2es" ? "How do you say this in Spanish?" : "Type it in Spanish",
+      choices: mode === "type" ? null : opts.map(function (o) { return { value: mode === "es2en" ? o[1] : o[0], swatch: mode === "es2en" && topic.color ? o[2] : "" }; }),
+      answer: mode === "es2en" ? w[1] : es,
+      speakNow: mode === "es2en" ? { text: es, lang: "es-MX" } : null,
+      speakAfter: { text: es, lang: "es-MX" },
+      explain: es + " = " + w[1],
+      facts: "Spanish practice. The Spanish \"" + es + "\" means \"" + w[1] + "\" (topic: " + topic.topic + ")."
+    };
+  }
+
+  /* ---------- Spelling ---------- */
+  /* Challenge styles (only "listen" needs sound):
+     listen   – hear the word, type it
+     missing  – a letter (or two) is missing; pick it
+     pick     – choose the correct spelling out of 4
+     check    – is the underlined word spelled right?
+     fix      – the underlined word is misspelled; type it correctly
+     scramble – unscramble the letter tiles */
+  const STYLE_INFO = {
+    listen: "Listen and spell", missing: "Missing letter", pick: "Pick the right spelling",
+    check: "Spelling check", fix: "Fix the spelling", scramble: "Unscramble"
+  };
+  /* Quiet mode: no listening challenges. Also on when sound is off or the device can't talk. */
+  function isQuiet(p) { return !BD.Speech.available || !!(BD.Store && BD.Store.muted) || !!(p && p.quietMode); }
+
+  function styleWeights(grade, quiet) {
+    const w = { listen: quiet ? 0 : 2, missing: grade <= 1 ? 3 : 2, pick: 2, check: grade >= 0 ? 2 : 0, fix: grade >= 2 ? 2 : 0, scramble: grade <= 4 ? (grade <= 1 ? 2 : 1.5) : 0 };
+    return w;
+  }
+  /* Draws a mix of styles for a round, never the same style twice in a row. */
+  function styleBag(grade, quiet) {
+    const w = styleWeights(grade, quiet);
+    let last = null;
+    return function (avoid) {
+      const keys = Object.keys(w).filter(function (k) { return w[k] > 0 && k !== last && k !== avoid; });
+      let x = Math.random() * keys.reduce(function (t, k) { return t + w[k]; }, 0), pick = keys[keys.length - 1];
+      for (let i = 0; i < keys.length; i++) { x -= w[keys[i]]; if (x <= 0) { pick = keys[i]; break; } }
+      last = pick;
+      return pick;
+    };
+  }
+
+  /* Believable misspellings: sound-alike swaps first, then dropped, doubled or swapped letters. */
+  const SUBS = [["ph", "f"], ["ck", "k"], ["tion", "shun"], ["tion", "sion"], ["sion", "tion"], ["ough", "uff"], ["ough", "ow"], ["ight", "ite"], ["igh", "i"],
+    ["ea", "ee"], ["ee", "ea"], ["ai", "ay"], ["ay", "ai"], ["ie", "ei"], ["ei", "ie"], ["ou", "ow"], ["ow", "ou"], ["oo", "u"], ["wh", "w"], ["kn", "n"],
+    ["wr", "r"], ["gh", ""], ["ture", "cher"], ["le", "el"], ["er", "ur"], ["ir", "ur"], ["or", "er"], ["ar", "er"], ["ce", "se"], ["ci", "si"], ["ge", "je"],
+    ["qu", "kw"], ["ful", "full"], ["ly", "ley"], ["ent", "ant"], ["ant", "ent"], ["ence", "ance"], ["ance", "ence"], ["able", "ible"], ["ible", "able"],
+    ["ss", "s"], ["sc", "s"], ["mn", "m"], ["rh", "r"], ["que", "k"], ["y", "ie"], ["c", "k"], ["k", "c"], ["x", "ks"], ["s", "z"], ["ed", "t"], ["ar", "or"]];
+  const VOWELS = "aeiou";
+  /* Real words a misspelling must never turn into (so "cat" never becomes "cut"). */
+  const COMMON = new Set(("a an as at be by do go he if in is it me my no of on or so to up us we am id ox " +
+    "bat bad bag bed bet bit big bog bud bug bun bus but cab can cap cot cut cub cud dig dip dot dug fat fit fin fun fog fox gap gas get got gum gut ham hat hit him his hot hop hug hum hut " +
+    "jab jam jet jog jug kid kit lap led let lid lip lit log lot mad man map men met mix mob mop mud mug nap net nod not nut pan pat pet pin pit pod pot pun pup put rag ran rat red rib rid rim rip rod rot rub rug run sad sat set sip sit sob sun tab tag tan tap ten tin tip ton top tub tug van vet wag web wet wig win wit yes yet zip " +
+    "ate eat tea sea see saw was how who why are art arm ear era oar our out owl own one won now new few sew sow the then than them they their there these those this that thus what when where were wear ware here hear her hare " +
+    "bother brother other mother father later latter litter letter batter better bitter butter otter hotter cotter fried friend fiend bread bead bear beer bare bore boar dear deer door dare fair fare fear four for fore from form farm firm " +
+    "hole whole hold old bold cold told sold gold fold mold load lord word work world worm warm ward wars was wad wed weed wood would could should shout short shirt sort salt silt slit slot lost last list lust past post pest " +
+    "plan plane plain clan clean lean learn earn yearn early yearly pearl peal real reel rail roll role rule mile mole male meal mail tail tale tall toll tell till tile time tame team tear tore tire tier ware were wire " +
+    "write wrote rite right writ white whit wit with wish wash which witch watch match much such touch thought though through threw three thrown throne tough trough cough enough rough laugh " +
+    "lightening lighting liking lifting weight wait wade waste waist way weigh whey hey hay heir air err ere sight site cite night knight nit knit know now no knew new kneel kneed need knead " +
+    "peace piece pace pacer price prize pride bride ride rid red read reed lead led lid laid paid pail pale peel pole pool pull poll pile pill pine pain pane pin pen pan pun").split(" "));
+  function isRealWord(c) {
+    c = c.toLowerCase();
+    return COMMON.has(c) || Object.keys(BD.SPELLING).some(function (g) { return BD.SPELLING[g].some(function (x) { return x[0].toLowerCase() === c; }); });
+  }
+  function misspellings(word) {
+    const w = word.toLowerCase(), sound = [], other = [];
+    const add = function (arr, c) { if (c && c !== w && c.length >= 2 && arr.indexOf(c) === -1) arr.push(c); };
+    SUBS.forEach(function (s) { const i = w.indexOf(s[0], 1); if (i > 0) add(sound, w.slice(0, i) + s[1] + w.slice(i + s[0].length)); });
+    for (let i = 1; i < w.length; i++) {
+      if (w[i] === w[i - 1]) add(sound, w.slice(0, i) + w.slice(i + 1));                      // undouble
+      else if (VOWELS.indexOf(w[i]) === -1 && i < w.length - 1 && /[a-z]/.test(w[i])) add(other, w.slice(0, i) + w[i] + w.slice(i)); // double
+      if (VOWELS.indexOf(w[i]) > -1) VOWELS.split("").forEach(function (v) { if (v !== w[i]) add(other, w.slice(0, i) + v + w.slice(i + 1)); });
+      if (i < w.length - 1 && w[i] !== w[i + 1]) add(other, w.slice(0, i) + w[i + 1] + w[i] + w.slice(i + 2)); // swap two letters
+      if (w.length > 3 && i < w.length - 1) add(other, w.slice(0, i) + w.slice(i + 1));                     // drop a letter
+    }
+    if (w.slice(-1) === "e" && w.length > 3) add(sound, w.slice(0, -1)); else if (VOWELS.indexOf(w.slice(-1)) === -1) add(other, w + "e");
+    if (VOWELS.indexOf(w[0]) > -1) VOWELS.split("").forEach(function (v) { if (v !== w[0]) add(other, v + w.slice(1)); });
+    const keepCase = function (c) { return word[0] === word[0].toUpperCase() ? c[0].toUpperCase() + c.slice(1) : c; };
+    const all = shuffle(sound).concat(shuffle(other)).filter(function (c, i, arr) { return arr.indexOf(c) === i && !isRealWord(c); });
+    return all.map(keepCase);
+  }
+
+  /* Missing letter(s): blanks a tricky spot and offers look-alike choices. */
+  const LOOK = [["c", "k", "s"], ["b", "d", "p"], ["m", "n"], ["f", "v"], ["g", "j"], ["t", "d"], ["l", "r"], ["w", "v"], ["s", "z"], ["h", "n"]];
+  const CHUNKS = ["ie", "ei", "ea", "ee", "ai", "ay", "ou", "ow", "oo", "au", "ui", "ue"];
+  function missingItem(word, grade) {
+    const w = word.toLowerCase(), spots = [];
+    for (let i = 0; i < w.length; i++) {
+      if (i === 0 && word[0] !== w[0]) continue; // keep capital letters showing
+      const v = VOWELS.indexOf(w[i]) > -1 || w[i] === "y";
+      const n = (v ? 3 : 1) + (w[i] === w[i - 1] || w[i] === w[i + 1] ? 2 : 0) + (i === 0 ? -0.5 : 0);
+      for (let k = 0; k < n * 2; k++) spots.push([i, 1]);
+    }
+    if (grade >= 3 && w.length >= 6) for (let i = 1; i < w.length - 1; i++) if (CHUNKS.indexOf(w.slice(i, i + 2)) > -1 || w[i] === w[i + 1]) for (let k = 0; k < 6; k++) spots.push([i, 2]);
+    const sp = spots[r(spots.length)], at = sp[0], len = sp[1], ans = w.slice(at, at + len);
+    let alts = [];
+    if (len === 2) alts = ans[0] === ans[1] ? [ans[0], ans + ans[0], ans[0] === "s" ? "c" : ans[0] + "e"] : CHUNKS.filter(function (c) { return c !== ans; });
+    else if (VOWELS.indexOf(ans) > -1 || ans === "y") alts = (VOWELS + "y").split("").filter(function (c) { return c !== ans; });
+    else { const grp = LOOK.find(function (g) { return g.indexOf(ans) > -1; }); alts = (grp || []).filter(function (c) { return c !== ans; }).concat("bcdfghklmnprstvw".split("").filter(function (c) { return c !== ans; })); }
+    const choices = [ans];
+    shuffle(alts.slice(0, len === 2 ? alts.length : 8)).concat(shuffle(alts.slice(8))).forEach(function (c) {
+      const made = w.slice(0, at) + c + w.slice(at + len);
+      if (choices.length < 4 && choices.indexOf(c) === -1 && made !== w && !isRealWord(made)) choices.push(c);
+    });
+    const shown = word.slice(0, at), after = word.slice(at + len);
+    return { ans: ans, choices: shuffle(choices), html: BD.UI.esc(shown) + '<span class="spell-blank">?</span>' + BD.UI.esc(after), plainShow: shown + "_".repeat(len) + after };
+  }
+
+  const spelling = {
+    key: "spelling", title: "Spelling Bee", coach: "lauryn", field: "spellingGrade",
+    round: function (p, grade) {
+      const list = BD.SPELLING[String(grade)] || [];
+      const seen = (p.seenWords.spelling = p.seenWords.spelling || []);
+      const missed = Object.values(p.wordMissed.spelling || {}).filter(function (m) { return m.grade === grade; }).map(function (m) { return m.word; });
+      const fresh = list.filter(function (x) { return seen.indexOf(x[0]) === -1 && missed.indexOf(x[0]) === -1; });
+      const order = missed.slice(0, 4).map(function (wd) { return list.find(function (x) { return x[0] === wd; }); }).filter(Boolean)
+        .concat(shuffle(fresh)).concat(shuffle(list));
+      const out = [], used = new Set(), bag = styleBag(grade, isQuiet(p));
+      order.forEach(function (x) { if (out.length < ROUND && !used.has(x[0])) { used.add(x[0]); out.push(makeSpelling(x, grade, bag())); } });
+      return out;
+    }
+  };
+
+  function makeSpelling(x, grade, style) {
+    const word = x[0], sentence = x[1];
+    const full = sentence.replace("___", word);
+    const blankSent = sentence.replace("___", "_____");
+    const underline = function (shown) { return BD.UI.esc(sentence).replace("___", '<u class="spell-u">' + BD.UI.esc(shown) + '</u>'); };
+    const quiet = isQuiet(BD.Store.current && BD.Store.current());
+    if (style === "listen" && quiet) style = "missing";
+    if ((style === "check" || style === "fix" || style === "pick") && !misspellings(word).length) style = "missing";
+    const base = {
+      id: "spell:" + word, word: word, src: x, mode: style, label: STYLE_INFO[style], choices: null, answer: word,
+      speakNow: null, speakAfter: quiet ? null : { text: word, lang: "en-US" },
+      explain: word + ": " + word.split("").join("-"),
+      facts: "Spelling practice (" + STYLE_INFO[style] + "). The word is \"" + word + "\", used in the sentence: " + full
+    };
+    if (style === "listen") return Object.assign(base, {
+      typedSpell: true, small: true, prompt: "Listen, then spell the word", sub: blankSent,
+      tiles: shuffle(word.split("")), tilesFirst: grade <= 1, speakAfter: null,
+      speakNow: { text: word + ". " + full + " " + word + ".", lang: "en-US" }
+    });
+    if (style === "missing") {
+      const m = missingItem(word, grade);
+      return Object.assign(base, {
+        promptHTML: m.html, sub: blankSent, answer: m.ans, choices: m.choices.map(function (c) { return { value: c }; }),
+        explain: word + ": the missing " + (m.ans.length > 1 ? "letters are" : "letter is") + " \"" + m.ans + "\" (" + word.split("").join("-") + ")",
+        facts: base.facts + " The student sees \"" + m.plainShow + "\" and picks the missing letters."
+      });
+    }
+    if (style === "pick") {
+      const wrong = misspellings(word).slice(0, grade <= 0 ? 2 : 3);
+      return Object.assign(base, {
+        small: true, prompt: "Which spelling is correct?", sub: blankSent,
+        choices: shuffle([word].concat(wrong)).map(function (c) { return { value: c }; })
+      });
+    }
+    if (style === "check") {
+      const right = Math.random() < 0.5, shown = right ? word : misspellings(word)[0];
+      return Object.assign(base, {
+        small: true, prompt: "Is the underlined word spelled correctly?", subHTML: underline(shown),
+        answer: right ? "Spelled correctly" : "Misspelled", shown: shown,
+        choices: [{ value: "Spelled correctly" }, { value: "Misspelled" }],
+        explain: right ? "\"" + word + "\" is spelled correctly." : "\"" + shown + "\" is misspelled. It should be " + word + " (" + word.split("").join("-") + ").",
+        facts: base.facts + " The sentence shows the word spelled \"" + shown + "\" and asks if it is spelled correctly."
+      });
+    }
+    if (style === "fix") {
+      const shown = misspellings(word)[0];
+      return Object.assign(base, {
+        typedSpell: true, small: true, prompt: "This word is misspelled. Type it the right way.", subHTML: underline(shown), shown: shown,
+        tiles: shuffle(word.split("")), tilesFirst: false,
+        explain: "\"" + shown + "\" should be " + word + " (" + word.split("").join("-") + ").",
+        facts: base.facts + " The sentence shows it misspelled as \"" + shown + "\" and the student must type it correctly."
+      });
+    }
+    // scramble
+    let tiles = shuffle(word.split("")), guard = 0;
+    while (tiles.join("") === word && guard++ < 20) tiles = shuffle(word.split(""));
+    return Object.assign(base, {
+      typedSpell: true, small: true, prompt: "Unscramble the letters to finish the sentence", sub: blankSent,
+      tiles: tiles, tilesAlways: true,
+      facts: base.facts + " The letters are shown scrambled: " + tiles.join(" ") + "."
+    });
+  }
+
+  /* Belt rounds: words drawn from the grades around the belt grade (harder as belts go up). */
+  spelling.beltRound = function (p, grade, beltIndex) {
+    const out = [], used = new Set(), bag = styleBag(grade, isQuiet(p));
+    let guard = 0;
+    while (out.length < ROUND && guard++ < 200) {
+      const g = BD.Rank.itemGrade(grade, beltIndex), list = BD.SPELLING[String(g)] || BD.SPELLING[String(grade)];
+      const x = list[r(list.length)];
+      if (used.has(x[0])) continue;
+      used.add(x[0]); out.push(makeSpelling(x, grade, bag()));
+    }
+    return out;
+  };
+  spanish.beltRound = function (p, grade, beltIndex) {
+    const out = [], used = new Set();
+    let guard = 0;
+    while (out.length < ROUND && guard++ < 300) {
+      const topics = this.topics(BD.Rank.itemGrade(grade, beltIndex));
+      const pool = topics.length ? topics : this.topics(grade);
+      const t = pool[r(pool.length)], w = t.words[r(t.words.length)];
+      if (used.has(t.topic + ":" + w[0])) continue;
+      used.add(t.topic + ":" + w[0]);
+      out.push(makeSpanish(t, w[0], grade + (beltIndex >= 6 ? 2 : beltIndex >= 3 ? 1 : 0)));
+    }
+    return out;
+  };
+
+  const GAMES = { spanish: spanish, spelling: spelling };
+
+  /* ---------- play ---------- */
+  /* stripe = { grade, belt, test } when started from the belt panel. */
+  /* school = "practice" or "test" for this week's school spelling words. */
+  function start(game, stripe, school) {
+    const g = GAMES[game], p = BD.Store.current();
+    if (school && !(BD.School && BD.School.has(p))) school = null;
+    if (school) stripe = null;
+    if (stripe) p[g.field] = stripe.grade;
+    else if (p.retry && p.retry[game]) p[g.field] = p.retry[game].grade;
+    const grade = p[g.field];
+    W = { game: game, g: g, grade: grade, school: school || null, noRetry: school === "test", items: school ? BD.School.round(p, school === "test", grade) : stripe ? g.beltRound(p, grade, stripe.belt) : g.round(p, grade), i: 0, xp: 0, correct: 0, firstTry: 0, answered: 0, streak: 0, best: 0, missed: [], stripe: stripe || null, test: !!(stripe && stripe.test) };
+    const label = BD.Rank.subject(BD.Rank.BY_GAME[game]).label;
+    BD.UI.testMode("screen-word-play", W.test ? label + " stripe test" : stripe ? label + " stripe practice · " + BD.BELTS[stripe.belt].name + " Belt" : school === "test" ? "School word test" : "", !BD.Rank.hintsAllowed(BD.Store.current(), grade));
+    $("wordCoachFace").src = BD.Cast.face(g.coach);
+    $("wordCoachName").textContent = BD.Cast.name(g.coach);
+    BD.UI.syncGradeSelect("wordGradeSel", game);
+    BD.UI.show("screen-word-play");
+    BD.Cast.say("wordSay", "start");
+    load();
+  }
+
+  function item() { return W.items[W.i]; }
+
+  function load() {
+    const q = item();
+    W.tries = 0; W.done = false; W.usedTiles = false;
+    $("wordProgress").textContent = (W.i + 1) + " of " + W.items.length;
+    $("wordScore").textContent = W.xp + " XP";
+    $("wordStreak").textContent = W.streak >= 3 ? "Combo ×" + W.streak : "";
+    $("wordTopic").textContent = q.label;
+    $("wordPrompt").innerHTML = q.promptHTML ? '<span class="spell-word">' + q.promptHTML + '</span>' : (q.swatch ? '<span class="big-swatch" style="--sw:' + q.swatch + '"></span>' : "") +
+      (q.pic ? '<span class="pic">' + BD.UI.esc(q.pic) + '</span>' : "") + '<span>' + BD.UI.esc(q.prompt) + '</span>';
+    $("wordPrompt").className = "word-prompt" + (q.small ? " small" : "");
+    if (q.subHTML) $("wordSub").innerHTML = q.subHTML; else $("wordSub").textContent = q.sub;
+    syncQuiet();
+    $("wordListen").hidden = !BD.Speech.available || !q.speakNow; // never read out the answer early
+    $("wordFeedback").innerHTML = ""; $("wordFeedback").className = "word-feedback";
+    $("wordNext").hidden = true;
+    const typed = !q.choices;
+    $("wordType").hidden = !typed;
+    $("wordChoices").hidden = typed;
+    if (typed) {
+      $("wordInput").value = ""; $("wordInput").readOnly = false;
+      $("wordInput").placeholder = q.typedSpell ? "Type the word" : "Type the Spanish word";
+      $("wordCheck").hidden = false; $("wordCheck").disabled = false;
+      W.noHints = !BD.Rank.hintsAllowed(BD.Store.current(), W.grade) || W.noRetry;
+      showTiles(q.tilesAlways || (q.tilesFirst && !W.noHints));
+      $("wordTilesBtn").hidden = !q.typedSpell || q.tilesFirst || q.tilesAlways || W.noRetry;
+      setTimeout(function () { $("wordInput").focus(); }, 60);
+    } else {
+      $("wordChoices").innerHTML = q.choices.map(function (c, i) {
+        return '<button type="button" class="choice' + (c.swatch ? " has-swatch" : "") + '" data-i="' + i + '">' +
+          (c.swatch ? '<span class="big-swatch sm" style="--sw:' + c.swatch + '"></span>' : "") + BD.UI.esc(c.value) + '</button>';
+      }).join("");
+    }
+    const quietNow = W.game === "spelling" && isQuiet(BD.Store.current());
+    if (BD.ReadAloud.auto(W.grade) && !quietNow) setTimeout(function () { if (item() === q) readItem(); }, 250);
+    else if (q.speakNow && !quietNow) setTimeout(function () { BD.Speech.say(q.speakNow.text, q.speakNow.lang, 0.85); }, 250);
+  }
+
+  function showTiles(on) {
+    const q = item();
+    $("wordTiles").hidden = !on || !q.tiles;
+    if (on && q.tiles) $("wordTiles").innerHTML = q.tiles.map(function (ch) { return '<button type="button" class="tile" data-ch="' + BD.UI.esc(ch) + '">' + BD.UI.esc(ch) + '</button>'; }).join("") +
+      '<button type="button" class="tile tile-back" data-ch="back" aria-label="Delete">⌫</button>';
+  }
+
+  function judge(answer) {
+    const q = item();
+    if (q.typedSpell) return answer.trim().toLowerCase() === q.answer.toLowerCase() ? "right" : "wrong";
+    if (answer === q.answer) return "right";
+    if (plain(answer) === plain(q.answer)) return q.mode === "type" && answer.trim() !== q.answer ? "accent" : "right";
+    return "wrong";
+  }
+
+  function answer(value) {
+    if (W.done) return;
+    const q = item(), p = BD.Store.current();
+    const verdict = judge(value);
+    W.tries++;
+    const typed = !q.choices;
+    if (verdict === "wrong" && typed && W.tries < 2 && !W.test && !W.noRetry) {
+      BD.Sound.wrong(); BD.Cast.say("wordSay", "wrong");
+      $("wordFeedback").className = "word-feedback try-again";
+      $("wordFeedback").innerHTML = "<p>Not quite. Try once more!</p>" + (q.typedSpell ? letterDiff(value, q.answer) : "");
+      $("wordInput").select();
+      return;
+    }
+    W.done = true; W.answered++;
+    const ok = verdict !== "wrong";
+    if (W.school && q.word) BD.School.mark(p, q.word, ok && W.tries === 1);
+    const st = ((p.wordStats[W.game] = p.wordStats[W.game] || {})[W.grade] = (p.wordStats[W.game][W.grade] || { r: 0, w: 0 }));
+    const missKey = q.id;
+    const bucket = (p.wordMissed[W.game] = p.wordMissed[W.game] || {});
+    if (ok) {
+      W.correct++; if (W.tries === 1) W.firstTry++;
+      W.streak++; W.best = Math.max(W.best, W.streak);
+      const gain = (W.tries === 1 ? 10 + Math.min(W.streak - 1, 10) : 5) - (W.usedTiles ? 5 : 0);
+      W.xp += Math.max(2, gain); st.r++;
+      if (bucket[missKey]) { bucket[missKey].misses--; if (bucket[missKey].misses <= 0) delete bucket[missKey]; }
+      BD.Sound.right(); BD.Cast.say("wordSay", W.streak >= 3 && W.streak % 3 === 0 ? "streak" : "right");
+      $("wordFeedback").className = "word-feedback solved";
+      $("wordFeedback").innerHTML = '<p class="win-line">' + (W.game === "spanish" ? "¡Muy bien!" : q.mode === "check" ? "Sharp eyes!" : "Spelled it!") + ' +' + Math.max(2, gain) + ' XP</p>' +
+        (verdict === "accent" ? '<p>Watch the accent: <strong>' + BD.UI.esc(q.answer) + '</strong></p>' : "") +
+        '<p>' + BD.UI.esc(q.explain) + '</p>';
+    } else {
+      W.streak = 0; st.w++; W.missed.push(q);
+      bucket[missKey] = { grade: W.grade, misses: Math.min(3, ((bucket[missKey] && bucket[missKey].misses) || 0) + 2), topic: q.topic, es: q.es, word: q.word };
+      if (!q.retry && !W.test && !W.noRetry) W.items.splice(Math.min(W.i + 3, W.items.length), 0,
+        W.game === "spelling" ? Object.assign(makeSpelling(q.src, W.grade, styleBag(W.grade, isQuiet(p))(q.mode)), { retry: true, school: q.school, label: q.label }) : Object.assign({}, q, { retry: true }));
+      BD.Sound.wrong(); BD.Cast.say("wordSay", "wrong");
+      $("wordFeedback").className = "word-feedback revealed";
+      $("wordFeedback").innerHTML = '<p>The answer is <strong>' + BD.UI.esc(q.answer) + '</strong>.</p><p>' + BD.UI.esc(q.explain) + '</p>' +
+        (q.typedSpell ? letterDiff(value, q.answer) : "") + '<p class="muted small">This one will come back in a few turns.</p>';
+    }
+    if (q.choices) document.querySelectorAll("#wordChoices .choice").forEach(function (b) {
+      const v = q.choices[Number(b.dataset.i)].value;
+      b.disabled = true;
+      if (v === q.answer) b.classList.add("is-right"); else if (v === value) b.classList.add("is-wrong");
+    });
+    if (!q.choices) { $("wordInput").readOnly = true; $("wordCheck").hidden = true; $("wordTilesBtn").hidden = true; }
+    if (q.speakAfter && !(W.game === "spelling" && isQuiet(p))) BD.Speech.say(q.speakAfter.text, q.speakAfter.lang, 0.85);
+    $("wordScore").textContent = W.xp + " XP";
+    $("wordListen").hidden = !BD.Speech.available || !(q.speakNow || q.speakAfter) || (W.game === "spelling" && isQuiet(p));
+    $("wordSwap").hidden = true;
+    BD.Store.save(p);
+    $("wordNext").hidden = false;
+    $("wordNext").textContent = W.i + 1 < W.items.length ? "Next" : "See results";
+    setTimeout(function () { $("wordNext").focus(); }, 50);
+  }
+
+  /* Show which letters were right (green) or wrong (red). */
+  function letterDiff(tried, word) {
+    tried = String(tried || "").trim().toLowerCase();
+    const w = word.toLowerCase();
+    let html = "";
+    for (let i = 0; i < Math.max(tried.length, w.length); i++) {
+      const ch = tried[i] || "_";
+      html += '<span class="' + (tried[i] === w[i] ? "l-ok" : "l-bad") + '">' + BD.UI.esc(ch) + '</span>';
+    }
+    return '<p class="letters">' + html + '</p>';
+  }
+
+  /* What the speaker button says: the instructions, never the answer. */
+  function readItem() {
+    const q = item(); if (!q) return;
+    const parts = [];
+    const sent = function (s) { return BD.ReadAloud.words(s || ""); };
+    if (W.game === "spelling") {
+      const src = q.src || [q.word, ""];
+      if (q.mode === "listen") { parts.push({ text: "Listen, then spell the word." }); parts.push(q.speakNow); }
+      else if (q.mode === "missing") parts.push({ text: (q.answer.length > 1 ? "Pick the missing letters. " : "Pick the missing letter. ") + sent(src[1]) });
+      else if (q.mode === "pick") parts.push({ text: "Which spelling is correct? " + sent(src[1]) });
+      else if (q.mode === "check") parts.push({ text: "Look at the underlined word. Is it spelled correctly, or misspelled?" });
+      else if (q.mode === "fix") parts.push({ text: "The underlined word is misspelled. Type it the right way. " + src[1].replace("___", q.word) });
+      else parts.push({ text: "Unscramble the letters to finish the sentence. " + sent(src[1]) });
+    } else {
+      if (q.mode === "es2en") { parts.push({ text: "What does this mean?" }); parts.push({ text: q.es, lang: "es-MX" }); }
+      else if (q.mode === "en2es") parts.push({ text: "How do you say " + q.en + " in Spanish?" });
+      else parts.push({ text: "Type " + q.en + " in Spanish." });
+    }
+    BD.ReadAloud.say(parts);
+  }
+
+  /* Quiet mode and the swap button (spelling only). */
+  function syncQuiet() {
+    const sp = W && W.game === "spelling", q = W && item(), p = BD.Store.current();
+    const btn = $("wordQuiet");
+    btn.hidden = !sp || !BD.Speech.available || BD.Store.muted;
+    btn.textContent = p && p.quietMode ? "Quiet mode: on" : "Quiet mode: off";
+    btn.setAttribute("aria-pressed", p && p.quietMode ? "true" : "false");
+    $("wordSwap").hidden = !sp || !q || q.mode !== "listen" || W.done;
+  }
+  /* Replace a listening challenge with a silent one for the same word. */
+  function silentVersion(q) {
+    return Object.assign(makeSpelling(q.src, W.grade, styleBag(W.grade, true)()), q.retry ? { retry: true } : {});
+  }
+  function swapCurrent() {
+    if (!W || W.done || item().mode !== "listen") return;
+    BD.Speech.stop();
+    W.items[W.i] = silentVersion(item());
+    load();
+  }
+  function toggleQuiet() {
+    const p = BD.Store.current(); if (!W || !p) return;
+    p.quietMode = !p.quietMode; BD.Store.save(p);
+    if (p.quietMode) {
+      BD.Speech.stop();
+      for (let i = W.i + 1; i < W.items.length; i++) if (W.items[i].mode === "listen") W.items[i] = silentVersion(W.items[i]);
+      if (!W.done && item().mode === "listen") { W.items[W.i] = silentVersion(item()); load(); return; }
+    }
+    syncQuiet();
+  }
+
+  function next() {
+    W.i++;
+    if (W.i < W.items.length) return load();
+    finish();
+  }
+
+  function finish() {
+    const p = BD.Store.current(), game = W.game, grade = W.grade, g = W.g;
+    BD.Speech.stop();
+    const acc = W.answered ? Math.round(100 * W.correct / W.answered) : 0;
+    if (W.test) {
+      const review = [];
+      W.missed.forEach(function (q) { if (review.indexOf(q.explain) === -1) review.push(q.explain); });
+      BD.UI.stripeResult({ subject: BD.Rank.BY_GAME[game], grade: grade, pct: acc, score: W.correct + " / " + W.answered, review: review, again: function () { start(game, { grade: grade, belt: BD.Rank.rec(p, grade).belt, test: true }); } });
+      return;
+    }
+    const stripeAgain = W.stripe ? { grade: grade, belt: BD.Rank.rec(p, grade).belt, test: false } : null;
+    if (acc === 100 && W.answered >= 8) W.xp += 25;
+    const school = W.school;
+    const failed = !school && acc < PASS;
+    p.retry = p.retry || {};
+    const wasRetry = !school && !!p.retry[game];
+    if (!school) p.retry[game] = failed ? { grade: grade } : null;
+    if (school === "test") BD.School.recordTest(p, W.correct, W.answered);
+    if (game === "spelling") {
+      const seen = p.seenWords.spelling = p.seenWords.spelling || [];
+      W.items.forEach(function (q) { if (q.word && seen.indexOf(q.word) === -1) seen.push(q.word); });
+      p.seenWords.spelling = seen.slice(-300);
+    }
+    const belt = BD.Rank.practice(p, game, grade, W.xp - (W.banked || 0)); W.banked = W.xp;
+    BD.Store.recordSession(p, Object.assign({ game: game, grade: grade, correct: W.correct, total: W.answered, xp: W.xp }, school ? { school: school } : {}));
+    const missed = [];
+    W.missed.forEach(function (q) { if (!missed.some(function (m) { return m.id === q.id; })) missed.push(q); });
+    const ready = !school && !failed && acc >= 90 && grade < BD.MAX_GRADE;
+    const nm = school ? BD.School.masteredCount(p) + " of " + BD.School.words(p).length + " school words mastered" : "";
+    BD.UI.results({
+      title: school === "test" ? "Word test: " + W.correct + " / " + W.answered + (acc === 100 ? " · perfect!" : acc >= 80 ? " · great job!" : "") : school ? (acc >= 90 ? "School words: crushed it!" : "School words practiced!") :
+        failed ? "Let's train this again" : wasRetry ? "Level passed!" : acc >= 90 ? (game === "spanish" ? "¡Excelente!" : "Spelling champion!") : "Strong work!",
+      subtitle: school ? "Spelling Bee · this week's school words · " + nm : g.title + " · " + BD.gradeLabel(grade),
+      failed: failed ? "You got " + acc + "%. You need " + PASS + "% to pass " + BD.gradeLabel(grade) + ". Look over the words below, then try a new round." : null,
+      passedRetry: wasRetry && !failed ? "You passed with " + acc + "%. All grade levels are unlocked again." : null,
+      stats: [["Correct", W.correct + " / " + W.answered], ["First try", W.firstTry], ["Best streak", W.best], ["XP earned", "+" + W.xp]],
+      belt: belt,
+      lesson: missed.length ? '<div class="tip"><h3>Words to practice</h3><ul>' + missed.map(function (q) { return "<li>" + BD.UI.esc(q.explain) + "</li>"; }).join("") + '</ul>' +
+        (game === "spelling" ? '<p class="muted small">Tip: say the word slowly, clap each part, then write it three times.</p>' : '<p class="muted small">Tip: say each word out loud. Tap Hear it to copy the sound.</p>') + '</div>' : "",
+      listTitle: "", list: [],
+      levelUp: ready ? { text: "You got " + acc + "% at " + BD.gradeLabel(grade) + ". Ready for " + BD.gradeLabel(grade + 1) + "?", action: function () { p[g.field] = grade + 1; BD.Store.save(p); start(game); } } : null,
+      again: function () { start(game, stripeAgain, school); },
+      againLabel: school === "test" ? "Take the test again" : failed ? "Redo this level" : "Play again",
+      setup: null
+    });
+  }
+
+  function changeGrade(gr) {
+    const game = W && W.game; if (!game) return;
+    if (!BD.UI.setGrade(game, gr)) { BD.UI.syncGradeSelect("wordGradeSel", game); return; }
+    start(game);
+  }
+
+  function senseiContext() {
+    const q = item();
+    return {
+      title: W.game === "spelling" ? "Spelling: " + q.label : q.prompt, grade: W.grade, revealed: W.done,
+      chips: W.game === "spanish" ? ["How do I say it?", "Give me a trick to remember it", "Use it in a sentence"] : ["Give me a hint", "How do I sound it out?", "Is there a spelling rule?"],
+      facts: q.facts + (W.done ? " The answer has been shown." : " The student has not answered yet; for spelling, do NOT spell the whole word.")
+    };
+  }
+
+  function planItems(p) {
+    const out = [];
+    ["spanish", "spelling"].forEach(function (game) {
+      const r0 = p.retry && p.retry[game];
+      if (r0) out.push({ kind: game + "Retry", game: game, title: "Pass " + BD.gradeLabel(r0.grade) + " " + GAMES[game].title, sub: "Get 70% to unlock other grades." });
+    });
+    return out;
+  }
+
+  function stop() { if (W) BD.Rank.bank(W, W.game); W = null; BD.Speech.stop(); }
+  function bankNow() { if (W) BD.Rank.bank(W, W.game); }
+
+  function bind() {
+    $("wordChoices").addEventListener("click", function (e) {
+      const b = e.target.closest("[data-i]"); if (!b || !W) return;
+      answer(item().choices[Number(b.dataset.i)].value);
+    });
+    $("wordCheck").addEventListener("click", function () { if (W) answer($("wordInput").value); });
+    $("wordInput").addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); if (W && !W.done) answer($("wordInput").value); else if (W) next(); } });
+    $("wordTiles").addEventListener("click", function (e) {
+      const b = e.target.closest("[data-ch]"); if (!b || !W || W.done) return;
+      const inp = $("wordInput");
+      inp.value = b.dataset.ch === "back" ? inp.value.slice(0, -1) : inp.value + b.dataset.ch;
+      BD.Sound.tap();
+    });
+    $("wordTilesBtn").addEventListener("click", function () { if (!W) return; W.usedTiles = true; showTiles(true); $("wordTilesBtn").hidden = true; });
+    $("wordListen").addEventListener("click", function () {
+      if (!W) return; const q = item();
+      const s = q.speakNow || q.speakAfter; BD.Speech.say(s.text, s.lang, 0.8);
+    });
+    $("wordNext").addEventListener("click", next);
+    $("wordSwap").addEventListener("click", swapCurrent);
+    $("wordRead").addEventListener("click", function () { if (W) readItem(); });
+    $("wordQuiet").addEventListener("click", toggleQuiet);
+    $("wordQuit").addEventListener("click", BD.UI.back);
+    $("wordGradeSel").addEventListener("change", function (e) { changeGrade(Number(e.target.value)); });
+    $("wordAsk").addEventListener("click", function () { if (W) BD.Sensei.open(senseiContext()); });
+  }
+
+  function peek() { return W && W.items[W.i]; }
+
+  return { styleBag: styleBag, STYLE_INFO: STYLE_INFO, bankNow: bankNow, isQuiet: isQuiet, misspellings: misspellings, makeSpelling: makeSpelling, peek: peek, start: start, stop: stop, bind: bind, planItems: planItems, PASS: PASS, GAMES: GAMES, plain: plain };
+})();
