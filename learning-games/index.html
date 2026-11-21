@@ -62,10 +62,13 @@
     <!-- Dojo home -->
     <section class="screen" id="screen-home" hidden>
       <div class="home-hero">
+        <div class="stage-col">
         <button type="button" class="fighter-stage" id="changeFighter" title="Change your champion">
           <span class="fighter-art" id="homeFighter"></span>
           <span class="fighter-change">Change champion</span>
         </button>
+        <button type="button" class="gear-btn" id="gearBtn"><span id="homeGear"></span><span class="gear-label" id="gearLabel">Gear locker</span></button>
+        </div>
         <div class="home-hud">
           <h1 id="homeHello">Ready to train?</h1>
           <p class="streak-line" id="homeStreak"></p>
@@ -85,6 +88,7 @@
         </div>
         <div class="plan-list" id="homePlanList"></div>
       </section>
+      <button type="button" class="dojo-card" id="dojoCard" hidden></button>
       <div class="game-grid">
         <article class="game-card game-math">
           <div class="game-art" aria-hidden="true">
@@ -393,7 +397,7 @@
         <button type="button" class="btn btn-quiet btn-small" id="parentBack">‹ Back</button>
         <h1>Parent corner</h1>
       </div>
-      <p class="muted parent-intro">Progress saves automatically, even in the middle of a round. Signed in to Claude through the shared link, it's kept in your Claude account and follows you to any device. Otherwise it stays in this browser: tap <strong>Back up progress</strong> to get a save code that can move a student to another device or bring them back if the browser is cleared.</p>
+      <p class="muted parent-intro">A quick look at each child's week. Progress saves automatically. <button type="button" class="link-btn" id="parentHow">How saving, belts and badges work</button></p>
       <div id="parentBody"></div>
     </section>
   </main>
@@ -469,8 +473,11 @@
 <script src="js/sensei.js"></script>
 <script src="js/math-game.js"></script>
 <script src="js/sentence-game.js"></script>
+<script src="js/badges.js"></script>
 <script src="js/backup.js"></script>
 <script src="js/certificate.js"></script>
+<script src="js/parent.js"></script>
+<script src="js/dojo.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>

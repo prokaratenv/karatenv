@@ -763,3 +763,70 @@ body.no-speech .say-btn { display: none; }
 .cert-img { width: 100%; height: auto; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,.5); }
 .bd-grads li { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
 .grad-actions { display: grid; gap: 10px; justify-items: center; }
+
+/* Gear locker */
+.gear-btn { display: grid; justify-items: center; gap: 6px; margin-top: 8px; background: none; border: 0; color: var(--gold-2); cursor: pointer; font-family: var(--font-display); font-weight: 800; font-size: .78rem; letter-spacing: .06em; text-transform: uppercase; }
+.gear-rack { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; max-width: 180px; }
+.gear-rack img { width: 34px; height: 34px; object-fit: contain; border-radius: 10px; background: rgba(224,186,119,.12); border: 1px solid rgba(224,186,119,.35); padding: 2px; }
+.gear-rack:empty { display: none; }
+.locker { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+.locker-item { display: grid; justify-items: center; gap: 4px; text-align: center; padding: 10px 8px; border-radius: 16px; border: 1px solid var(--line); background: linear-gradient(180deg, #1B3256, #102240); color: var(--ink); cursor: pointer; font: inherit; }
+.locker-item img { width: 88px; height: 88px; object-fit: contain; }
+.locker-item strong { font-family: var(--font-display); font-size: .9rem; line-height: 1.1; }
+.locker-badge { font-size: .8rem; color: var(--muted); line-height: 1.25; }
+.locker-item.locked { cursor: default; opacity: .75; }
+.locker-item.locked img { filter: grayscale(1) brightness(.35); }
+.locker-item.on { border-color: var(--gold-2); box-shadow: 0 0 0 2px rgba(224,186,119,.35); }
+.locker-state { font-family: var(--font-display); font-size: .7rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--teal); }
+.locker-item.on .locker-state { color: var(--gold-2); }
+.unlock { display: grid; justify-items: center; text-align: center; gap: 8px; }
+.unlock-img { width: 180px; height: 180px; object-fit: contain; filter: drop-shadow(0 10px 20px rgba(0,0,0,.5)); animation: pop .5s ease-out; }
+@keyframes pop { from { transform: scale(.4) rotate(-12deg); opacity: 0; } to { transform: none; opacity: 1; } }
+.stage-col { display: grid; justify-items: center; min-width: 0; }
+
+/* Parent dashboard */
+.pd { display: grid; gap: 2px; margin: 12px 0; border-radius: 16px; overflow: hidden; border: 1px solid var(--line); }
+.pd-row { display: grid; grid-template-columns: 7.2em 1fr; gap: 10px; padding: 10px 12px; background: rgba(13, 24, 48, .6); align-items: baseline; line-height: 1.35; }
+.pd-k { font-family: var(--font-display); font-size: .72rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--teal); }
+.pd-recap { background: linear-gradient(90deg, rgba(224,186,119,.22), rgba(13,24,48,.6)); }
+.pd-recap .pd-k { color: var(--gold-2); }
+.pd-tip { background: rgba(101, 217, 74, .08); }
+.pd-streak { color: var(--gold-2); white-space: nowrap; }
+.pd-row .belt-swatch { display: inline-block; width: 22px; height: 10px; border-radius: 3px; background: var(--belt); vertical-align: middle; box-shadow: inset 0 0 0 1px rgba(0,0,0,.35); }
+.pd-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 10px; }
+.report-more { margin: 8px 0 12px; border-top: 1px solid var(--line); padding-top: 8px; }
+.report-more > summary { cursor: pointer; font-family: var(--font-display); font-weight: 800; color: var(--gold-2); padding: 8px 0; list-style-position: inside; }
+.link-btn { background: none; border: 0; padding: 0; color: var(--gold-2); font: inherit; font-weight: 700; text-decoration: underline; cursor: pointer; }
+.pin-row { display: flex; gap: 10px; align-items: center; }
+.pin-input { width: 9ch; min-height: 54px; border-radius: 14px; border: 2px solid var(--line); background: var(--night); color: var(--ink); text-align: center; font: 800 1.6rem/1 var(--font-display); letter-spacing: .3em; }
+.pin-msg { color: #FFB4A8; min-height: 1.2em; margin: 6px 0 0; }
+/* gear icons are black: give them a soft light behind */
+.locker-item img, .gear-rack img, .unlock-img { background: radial-gradient(circle, rgba(255,255,255,.28), rgba(255,255,255,0) 70%); border-radius: 50%; }
+@media (max-width: 420px) { .pd-row { grid-template-columns: 1fr; gap: 2px; } }
+
+/* Dojo Challenge */
+.dojo-card { display: grid; gap: 8px; width: 100%; margin: 14px 0; padding: 14px 16px; border-radius: 18px; border: 1px solid rgba(224,186,119,.45); background: linear-gradient(120deg, #1C2F52, #13213D); color: var(--ink); text-align: left; cursor: pointer; font: inherit; }
+.dojo-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+.dojo-title { font-family: var(--font-display); font-weight: 900; font-style: italic; text-transform: uppercase; }
+.dojo-num { font-family: var(--font-display); font-weight: 800; color: var(--gold-2); }
+.dojo-bar { height: 12px; border-radius: 99px; background: rgba(0,0,0,.35); overflow: hidden; }
+.dojo-bar i { display: block; height: 100%; border-radius: 99px; background: linear-gradient(90deg, #65D94A, #5CBFC1, #4F6CEE); }
+.dojo-sub { margin: 0; font-size: .92rem; color: var(--muted); }
+.dojo-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 6px; counter-reset: dl; }
+.dojo-list li { counter-increment: dl; display: grid; grid-template-columns: 2em 26px 1fr auto auto; gap: 8px; align-items: center; padding: 8px 10px; border-radius: 12px; background: rgba(13,24,48,.6); }
+.dojo-list li::before { content: counter(dl); font-weight: 800; color: var(--muted); }
+.dojo-list li.me { outline: 2px solid var(--gold-2); }
+.dojo-list .belt-swatch { display: inline-block; width: 24px; height: 10px; border-radius: 3px; background: var(--belt); box-shadow: inset 0 0 0 1px rgba(0,0,0,.35); }
+.dl-name { font-weight: 800; } .dl-belt { color: var(--muted); font-size: .85rem; } .dl-n { font-family: var(--font-display); font-weight: 800; color: var(--gold-2); }
+
+/* Younger champions stand shorter */
+.champ.age-0 img { max-height: 200px; } .champ.age-1 img { max-height: 222px; } .champ.age-2 img { max-height: 244px; }
+.fighter-pick.big .champ.age-0 img { height: 96px; } .fighter-pick.big .champ.age-1 img { height: 106px; } .fighter-pick.big .champ.age-2 img { height: 116px; }
+.grad-champ .champ.age-0 img { max-height: 230px; } .grad-champ .champ.age-1 img { max-height: 255px; } .grad-champ .champ.age-2 img { max-height: 280px; }
+.home-hero { grid-template-columns: auto minmax(0, 1fr); }
+.stage-col { max-width: 46vw; }
+.gear-btn { max-width: 150px; text-align: center; line-height: 1.2; }
+.home-hud h1 { overflow-wrap: anywhere; }
+.start-btn { min-width: 0; max-width: 100%; box-sizing: border-box; }
+.start-main { white-space: normal; }
+.home-hud { min-width: 0; }

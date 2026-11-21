@@ -32,15 +32,17 @@ BD.UI = (function () {
   function fighterOf(p) { return p.avatar || BD.Cast.defaultFighter(p); }
   /* The student's character: a cast member, or the fighter they built. */
   function fighterArt(p, mode) {
-    if (fighterOf(p) === "custom") return BD.Builder.svg(p.custom, BD.beltOf(p).color, mode);
+    const g = BD.Rank.dojoGrade(p);
+    if (fighterOf(p) === "custom") return BD.Builder.svg(p.custom, BD.beltOf(p).color, mode, BD.Cast.ageBand(g));
     if (mode === "face") return '<img src="' + BD.Cast.face(fighterOf(p)) + '" alt="' + esc(BD.Cast.name(fighterOf(p))) + '">';
-    return champArt(fighterOf(p), BD.beltOf(p).color);
+    return champArt(fighterOf(p), BD.beltOf(p).color, g);
   }
   /* A playable character wearing the belt the student has earned
      (white-belt art + the belt area tinted to the belt color). */
-  function champArt(key, beltColor) {
-    const m = "url(" + (BD.MASKS && BD.MASKS[key] ? BD.MASKS[key] : "img/mask-" + key + ".png") + ")";
-    return '<span class="champ" style="--belt:' + beltColor + '"><img src="img/wb-' + key + '.webp" alt="' + esc(BD.Cast.name(key)) + '">' +
+  function champArt(key, beltColor, grade) {
+    const a = BD.Cast.art(key, grade);
+    const m = "url(" + (BD.MASKS && BD.MASKS[a.mask] ? BD.MASKS[a.mask] : "img/mask-" + a.mask + ".png") + ")";
+    return '<span class="champ' + (a.band !== null ? " age-" + a.band : "") + '" style="--belt:' + beltColor + '"><img src="' + a.src + '" alt="' + esc(BD.Cast.name(key)) + '">' +
       '<i class="champ-belt" style="-webkit-mask-image:' + m + ';mask-image:' + m + '"></i></span>';
   }
   /* Round portrait of the student's chosen character, ringed in their belt color. */
@@ -58,14 +60,15 @@ BD.UI = (function () {
   function fighterPicker(elId, selected, big) {
     const me = BD.Store.current();
     const beltCol = big && me ? BD.beltOf(me).color : "#FFFFFF";
+    const myGrade = me ? BD.Rank.dojoGrade(me) : 3;
     const opt = function (k) {
       return '<button type="button" class="fighter-opt" role="radio" data-fighter="' + k + '" aria-checked="' + (k === selected) + '">' +
-        (big ? champArt(k, beltCol) : '<img src="' + BD.Cast.face(k) + '" alt="">') + BD.Cast.name(k) + '</button>';
+        (big ? champArt(k, beltCol, myGrade) : '<img src="' + BD.Cast.face(k) + '" alt="">') + BD.Cast.name(k) + '</button>';
     };
     const kids = BD.Cast.FIGHTERS.slice(0, 6), teachers = BD.Cast.FIGHTERS.slice(6);
     const customCfg = big && me && me.custom ? me.custom : BD.Builder.DEFAULT;
     const build = '<button type="button" class="fighter-opt build-opt" role="radio" data-fighter="custom" aria-checked="' + (selected === "custom") + '">' +
-      '<span class="build-art">' + BD.Builder.svg(customCfg, beltCol, big ? "full" : "face") + '</span>' + (big && me && me.custom ? "My champion" : "Build your own") + '</button>';
+      '<span class="build-art">' + BD.Builder.svg(customCfg, beltCol, big ? "full" : "face", BD.Cast.ageBand(myGrade)) + '</span>' + (big && me && me.custom ? "My champion" : "Build your own") + '</button>';
     $(elId).innerHTML = '<p class="fighter-group">Create</p>' + build +
       (big && me && me.custom ? '<button type="button" class="fighter-opt edit-opt" data-edit="1"><span class="build-art edit-icon">✎</span>Edit my champion</button>' : '') +
       '<p class="fighter-group">Students</p>' + kids.map(opt).join("") +
@@ -207,6 +210,8 @@ BD.UI = (function () {
     $("stripeRetry").onclick = function () { o.again(); };
     show("screen-stripe");
     if (res.passed) { BD.Sound.win(); BD.confetti(res.graduated ? 160 : 90); } else BD.Sound.wrong();
+    BD.Dojo.push();
+    if (!res.graduated) setTimeout(function () { if (currentScreen === "screen-stripe" && !sheetOpen()) BD.Badges.award(p); }, 1400);
   }
 
   /* Graduation celebration. */
@@ -224,6 +229,7 @@ BD.UI = (function () {
     $("gradNextGrade").onclick = function () { p.dojoGrade = gr.grade + 1; BD.Store.save(p); home(); };
     $("gradCert").onclick = function () { BD.Certificate.open(p, { to: gr.to, grade: gr.grade, mastered: gr.mastered, date: new Date().toISOString() }); };
     show("screen-grad");
+    setTimeout(function () { if (currentScreen === "screen-grad" && !sheetOpen()) BD.Badges.award(p); }, 2600);
     BD.Sound.belt(); BD.confetti(260);
     setTimeout(function () { BD.confetti(180); }, 900);
   }
@@ -318,6 +324,9 @@ BD.UI = (function () {
     const todays = p.sessions.filter(function (s) { return s.date && s.date.slice(0, 10) === today; }).length;
     $("homeHello").textContent = "Ready to train, " + p.name + "?";
     $("homeFighter").innerHTML = fighterArt(p, "full");
+    refreshStage();
+    BD.Dojo.render();
+    setTimeout(function () { if (currentScreen === "screen-home" && !sheetOpen()) BD.Badges.award(BD.Store.current(), refreshStage); }, 500);
     $("homeBelt").innerHTML = rankPanel(p);
     $("homeToday").textContent = todays ? todays + (todays === 1 ? " round" : " rounds") + " completed today" : "No rounds yet today";
     const st = BD.streak(p);
@@ -343,6 +352,14 @@ BD.UI = (function () {
     $("homeRedo").hidden = true; // redo items are shown in Sensei's plan instead
     renderPlan(p);
     show("screen-home");
+  }
+
+  /* Gear the champion is wearing, under the home stage. */
+  function refreshStage() {
+    const p = BD.Store.current(); if (!p) return;
+    const n = BD.Badges.earned(p).length;
+    $("homeGear").innerHTML = BD.Badges.rack(p);
+    $("gearLabel").textContent = n ? "Gear locker · " + n + "/" + BD.Badges.BADGES.length : "Gear locker · earn gear!";
   }
 
   /* ---------- Sensei's plan ---------- */
@@ -432,6 +449,8 @@ BD.UI = (function () {
     $("resSay").textContent = "Zumi: " + (o.failed ? BD.Cast.line("retry") : BD.Cast.line("right"));
     $("resSetup").hidden = !o.setup;
     show("screen-results");
+    BD.Dojo.push();
+    setTimeout(function () { if (currentScreen === "screen-results" && !sheetOpen()) BD.Badges.award(BD.Store.current()); }, 1400);
     if (quiet) { /* returning with Back: no fanfare */ }
     else if (!o.failed) { BD.Sound.win(); BD.confetti(80); }
   }
@@ -445,17 +464,28 @@ BD.UI = (function () {
     return out;
   }
   function pct(r, w) { return r + w ? Math.round(100 * r / (r + w)) + "%" : "–"; }
+  /* Grades with any activity (so the tables skip empty columns). */
+  function playedGrades(p) {
+    const set = new Set([BD.Rank.dojoGrade(p)]);
+    (p.sessions || []).forEach(function (x) { if (x.grade !== undefined) set.add(Number(x.grade)); });
+    Object.keys(p.rank || {}).forEach(function (g) { set.add(Number(g)); });
+    Object.keys(p.mathStats || {}).forEach(function (k) { set.add(Number(k.split("-")[0])); });
+    ["sentenceStats", "readStats"].forEach(function (f) { Object.keys(p[f] || {}).forEach(function (g) { set.add(Number(g)); }); });
+    Object.values(p.wordStats || {}).forEach(function (m) { Object.keys(m || {}).forEach(function (g) { set.add(Number(g)); }); });
+    return BD.GRADES.filter(function (g) { return set.has(g); });
+  }
   function parent() {
     const list = BD.Store.players();
     if (!list.length) { $("parentBody").innerHTML = '<p class="muted">No students yet.</p>'; show("screen-parent"); return; }
     $("parentBody").innerHTML = list.map(function (p) {
       const belt = BD.beltOf(p);
+      const cols = playedGrades(p);
       const opRows = Object.keys(BD.MathGame.OPS).map(function (op) {
-        return '<tr><th scope="row">' + BD.MathGame.OPS[op].sym + " " + BD.MathGame.OPS[op].label + '</th>' + BD.GRADES.map(function (g) {
+        return '<tr><th scope="row">' + BD.MathGame.OPS[op].sym + " " + BD.MathGame.OPS[op].label + '</th>' + cols.map(function (g) {
           const s = p.mathStats[g + "-" + op]; return '<td>' + (s ? pct(s.r, s.w) + '<small>' + (s.r + s.w) + '</small>' : "–") + '</td>';
         }).join("") + '</tr>';
       }).join("");
-      const sentRow = '<tr><th scope="row">Fix-It Sentences</th>' + BD.GRADES.map(function (g) {
+      const sentRow = '<tr><th scope="row">Fix-It Sentences</th>' + cols.map(function (g) {
         const s = p.sentenceStats[g]; return '<td>' + (s ? pct(s.r, s.w) + '<small>' + (s.r + s.w) + '</small>' : "–") + '</td>';
       }).join("") + '</tr>';
       const tricky = Object.values(p.tricky).sort(function (a, b) { return b.misses - a.misses; }).slice(0, 16);
@@ -464,40 +494,45 @@ BD.UI = (function () {
         const what = s.game === "spelling" ? "Spelling Bee" : s.game === "spanish" ? "Spanish Dojo" : s.game === "reading" ? "Story Scrolls" : s.game === "math" ? "Math · " + (s.mode === "clock" ? "Speed" : "Practice") + " · " + s.ops.map(function (o) { return BD.MathGame.OPS[o].sym; }).join("") : "Sentences";
         return '<tr><td>' + d.toLocaleDateString(undefined, { month: "short", day: "numeric" }) + '</td><td>' + what + '</td><td>' + BD.gradeShort(s.grade) + '</td><td>' + s.correct + "/" + s.total + '</td><td>+' + s.xp + '</td></tr>';
       }).join("");
-      const readRow = '<tr><th scope="row">Story Scrolls</th>' + BD.GRADES.map(function (g) {
+      const readRow = '<tr><th scope="row">Story Scrolls</th>' + cols.map(function (g) {
         const s = p.readStats[g]; return '<td>' + (s ? pct(s.r, s.w) + '<small>' + (s.r + s.w) + '</small>' : "–") + '</td>';
       }).join("") + '</tr>' + Object.keys(BD.READ_TYPES).map(function (t) {
-        return '<tr><th scope="row" class="indent">' + BD.READ_TYPES[t].label + '</th>' + BD.GRADES.map(function (g) {
+        return '<tr><th scope="row" class="indent">' + BD.READ_TYPES[t].label + '</th>' + cols.map(function (g) {
           const a = (p.readRecent[g] || {})[t]; return '<td>' + (a && a.length ? Math.round(100 * BD.Coach.rate(a)) + "%<small>" + a.length + "</small>" : "–") + '</td>';
         }).join("") + '</tr>';
       }).join("");
       const wordRows = [["spelling", "Spelling Bee"], ["spanish", "Spanish Dojo"]].map(function (gm) {
-        return '<tr><th scope="row">' + gm[1] + '</th>' + BD.GRADES.map(function (g) {
+        return '<tr><th scope="row">' + gm[1] + '</th>' + cols.map(function (g) {
           const s = (p.wordStats[gm[0]] || {})[g]; return '<td>' + (s ? pct(s.r, s.w) + '<small>' + (s.r + s.w) + '</small>' : "–") + '</td>';
         }).join("") + '</tr>';
       }).join("");
-      const typeRow = '<tr><th scope="row">First-try rate by mistake type</th>' + BD.GRADES.map(function () { return "<td></td>"; }).join("") + '</tr>';
+      const typeRow = '<tr><th scope="row">First-try rate by mistake type</th>' + cols.map(function () { return "<td></td>"; }).join("") + '</tr>';
       const typeRows = Object.keys(BD.FIX_TYPES).map(function (t) {
-        return '<tr><th scope="row" class="indent">' + BD.FIX_TYPES[t].label + '</th>' + BD.GRADES.map(function (g) {
+        return '<tr><th scope="row" class="indent">' + BD.FIX_TYPES[t].label + '</th>' + cols.map(function (g) {
           const a = (p.typeRecent[g] || {})[t]; return '<td>' + (a && a.length ? Math.round(100 * BD.Coach.rate(a)) + "%<small>" + a.length + "</small>" : "–") + '</td>';
         }).join("") + '</tr>';
       }).join("");
       const plan = BD.Coach.plan(p);
       return '<article class="report">' +
         '<header class="report-head">' + avatar(p, "lg") + '<div><h3>' + esc(p.name) + '</h3><p class="muted">' + belt.name + ' Belt · ' + p.xp.toLocaleString() + ' XP · practiced ' + p.days.length + (p.days.length === 1 ? " day" : " days") + '</p></div></header>' +
+        BD.Parent.card(p) +
         (redoList(p).length ? '<div class="redo-note"><strong>Redo needed</strong><p>' + redoList(p).join(", ") +
           '. Scored under ' + BD.MathGame.PASS + '%, so this level stays locked in until they pass it.</p><button type="button" class="btn btn-small" data-act="clearRedo">Unlock all levels</button></div>' : '') +
+        '<div class="pd-actions" data-id="' + p.id + '"><button type="button" class="btn btn-primary" data-act="share">Share this week</button>' +
+        '<button type="button" class="btn btn-quiet" data-act="challenge">' + (p.dojoOptIn ? "Dojo Challenge: on" : "Join the Dojo Challenge") + '</button></div>' +
+        '<details class="report-more"><summary>See details</summary>' +
         '<h4 class="label">Belts by grade</h4><p class="belt-summary">' + Object.keys(p.rank || {}).map(Number).sort(function (a, b) { return a - b; }).map(function (g) {
           const r = BD.Rank.rec(p, g);
           return '<span>' + beltSwatch(BD.BELTS[r.belt]) + ' <strong>' + BD.gradeShort(g) + '</strong> ' + BD.BELTS[r.belt].name + (r.mastered ? " (mastered)" : " · " + BD.Rank.stripeCount(r) + "/4 stripes") + (r.stripes.spanish ? " + Spanish" : "") + '</span>';
         }).join("") + '</p>' +
         '<h4 class="label">Accuracy by grade <span class="muted">(number answered underneath)</span></h4>' +
-        '<div class="table-wrap"><table class="grid"><thead><tr><th></th>' + BD.GRADES.map(function (g) { return '<th>' + BD.gradeShort(g) + '</th>'; }).join("") + '</tr></thead><tbody>' + opRows + sentRow + typeRow + typeRows + readRow + wordRows + '</tbody></table></div>' +
+        '<div class="table-wrap"><table class="grid"><thead><tr><th></th>' + cols.map(function (g) { return '<th>' + BD.gradeShort(g) + '</th>'; }).join("") + '</tr></thead><tbody>' + opRows + sentRow + typeRow + typeRows + readRow + wordRows + '</tbody></table></div>' +
         (plan.length ? '<h4 class="label">What Sensei is working on next</h4><ul class="plan-text">' + plan.map(function (it) { return '<li><strong>' + esc(it.title) + '.</strong> ' + esc(it.sub) + '</li>'; }).join("") + '</ul>' : '') +
         '<h4 class="label">Tricky math facts</h4>' +
         (tricky.length ? '<ul class="tricky">' + tricky.map(function (t) { return '<li>' + BD.MathGame.show(t) + '</li>'; }).join("") + '</ul><p class="muted small">These come back in practice rounds until they are answered correctly.</p>' : '<p class="muted">None right now.</p>') +
         '<h4 class="label">Recent rounds</h4>' +
         (recent ? '<div class="table-wrap"><table class="grid recent"><tbody>' + recent + '</tbody></table></div>' : '<p class="muted">No rounds yet.</p>') +
+        '</details>' +
         '<div class="report-actions" data-id="' + p.id + '">' +
         '<button type="button" class="btn btn-primary" data-act="backup">Back up progress</button>' +
         '<button type="button" class="btn btn-quiet" data-act="reset">Reset progress</button>' +
@@ -528,7 +563,7 @@ BD.UI = (function () {
     $("muteBtn").addEventListener("click", function () {
       BD.Store.muted = !BD.Store.muted; syncMute();
     });
-    $("parentBtn").addEventListener("click", parent);
+    $("parentBtn").addEventListener("click", function () { BD.Parent.gate(parent); });
     $("parentBack").addEventListener("click", back);
     [["homeMathGrade", "math"], ["homeSentGrade", "sentence"], ["homeReadGrade", "reading"], ["homeSpellGrade", "spelling"], ["homeSpanishGrade", "spanish"]].forEach(function (pair) {
       $(pair[0]).addEventListener("click", function (e) {
@@ -551,6 +586,16 @@ BD.UI = (function () {
     });
     $("gradContinue").addEventListener("click", home);
     $("startTraining").addEventListener("click", startTraining);
+    $("gearBtn").addEventListener("click", function () { BD.Badges.openLocker(); });
+    $("dojoCard").addEventListener("click", function () { BD.Dojo.openBoard(); });
+    $("parentHow").addEventListener("click", function () {
+      sheet("How Brain Dojo works",
+        '<h4 class="label">Belts and stripes</h4><p>Each grade has its own belt path: White, Yellow, Orange, Blue, Green, Purple, Brown, Red, Black. A belt needs 4 stripes (Math, Reading, Spelling, Comprehension), each earned by scoring 85% on a stripe test. The 4th stripe graduates them to the next belt. Spanish is a bonus stripe.</p>' +
+        '<h4 class="label">Practice and hints</h4><p>Practice earns up to 100 XP per stripe. White through Purple belts can use hints. Brown, Red and Black belts work without them. Pre-K to 1st grade hear instructions read aloud.</p>' +
+        '<h4 class="label">Badges and gear</h4><p>Badges for streaks, perfect rounds, stripes and belts unlock real Engage gear for their champion, from a mouthguard to MMA gloves.</p>' +
+        '<h4 class="label">Saving</h4><p>Progress saves automatically, even mid-round. Opened from the shared link while signed in to Claude, it is kept in that Claude account and follows you to any device. Otherwise it stays in this browser. Use <strong>Back up progress</strong> to get a save code that moves a student to another device or restores them if the browser is cleared.</p>' +
+        '<h4 class="label">Parent PIN</h4><p>The Parent corner is protected by your PIN so kids can\'t reset or remove progress. Forgot it? Tap Forgot PIN and answer the grown-up math question.</p>');
+    });
     $("playRead").addEventListener("click", function () { BD.Reading.start(); });
     $("playSpell").addEventListener("click", function () { BD.WordQuiz.start("spelling"); });
     $("playSpanish").addEventListener("click", function () { BD.WordQuiz.start("spanish"); });
@@ -571,6 +616,8 @@ BD.UI = (function () {
         pl.retry = {}; BD.Store.save(pl); parent(); return;
       }
       if (b.dataset.act === "backup") { BD.Backup.openBackup(p); return; }
+      if (b.dataset.act === "share") { BD.Parent.share(p); return; }
+      if (b.dataset.act === "challenge") { if (BD.Dojo) BD.Dojo.toggle(p, parent); return; }
       if (b.dataset.act === "reset" || b.dataset.act === "remove") {
         box.dataset.pending = b.dataset.act;
         confirm.querySelector(".confirm-text").textContent = b.dataset.act === "reset" ? "Erase all of " + p.name + "'s XP and stats?" : "Remove " + p.name + " and all progress?";
@@ -634,10 +681,11 @@ BD.UI = (function () {
     bind(); syncMute(); BD.Sensei.init();
     BD.Store.onChange(refresh);
     BD.Sync.init();
+    BD.Dojo.init();
     BD.Store.current() ? home() : players();
   }
 
-  return { fighterKey: function (p) { return fighterOf(p); }, beltDetails: beltDetails, testMode: testMode, stripeResult: stripeResult, back: back, setGrade: setGrade, syncGradeSelect: syncGradeSelect, refresh: refresh, sheet: sheet, sheetOpen: sheetOpen, show: show, esc: esc, home: home, players: players, results: results, gradePicker: gradePicker, init: init };
+  return { refreshStage: refreshStage, fighterKey: function (p) { return fighterOf(p); }, beltDetails: beltDetails, testMode: testMode, stripeResult: stripeResult, back: back, setGrade: setGrade, syncGradeSelect: syncGradeSelect, refresh: refresh, sheet: sheet, sheetOpen: sheetOpen, show: show, esc: esc, home: home, players: players, results: results, gradePicker: gradePicker, init: init };
 })();
 
 document.addEventListener("DOMContentLoaded", BD.UI.init);

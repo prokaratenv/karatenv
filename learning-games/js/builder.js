@@ -31,10 +31,13 @@ BD.Builder = (function () {
   }
 
   /* Draw the fighter. mode "full" = whole body, "face" = head portrait. */
-  function svg(cfg, beltColor, mode) {
+  /* age: 0 = Pre-K/K, 1 = 1st–2nd, 2 = 3rd–5th, 3 = 6th–8th (younger = shorter, bigger head). */
+  function svg(cfg, beltColor, mode, age) {
     const c = clean(cfg);
-    const H = { short: 0.86, mid: 1, tall: 1.14 }[c.height] || 1;
-    const B = { slim: 0.84, regular: 1, strong: 1.18 }[c.build] || 1;
+    const A = age === undefined || age === null ? 2 : Math.max(0, Math.min(3, age));
+    const AB = [0.72, 0.84, 0.95, 1.06][A], AH = [1.1, 1.04, 1, 0.94][A], AW = [0.9, 0.95, 1, 1.04][A];
+    const H = ({ short: 0.86, mid: 1, tall: 1.14 }[c.height] || 1) * AB;
+    const B = ({ slim: 0.84, regular: 1, strong: 1.18 }[c.build] || 1) * AW;
     const skin = c.skin, skinD = shade(skin, -0.14), hair = c.hair, hairD = shade(hair, -0.25);
     const ink = "rgba(20,18,30,.35)";
     const th = 70 * H, lh = 74 * H, tw = 76 * B;
@@ -139,7 +142,8 @@ BD.Builder = (function () {
     if (c.features.freckles) [[74, 94], [79, 98], [70, 98], [126, 94], [121, 98], [130, 98]].forEach(function (p) { face += '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="1.6" fill="' + shade(skin, -0.38) + '"/>'; });
     if (c.features.glasses) face += '<g fill="rgba(255,255,255,.12)" stroke="#1B1B22" stroke-width="3.5"><circle cx="82" cy="84" r="13"/><circle cx="118" cy="84" r="13"/></g><path d="M95 83 h10 M69 82 l-14 -4 M131 82 l14 -4" stroke="#1B1B22" stroke-width="3.5" stroke-linecap="round"/>';
 
-    const headGroup = back + ears + head + front + face;
+    const headGroup = mode === "face" ? back + ears + head + front + face :
+      '<g transform="translate(100 ' + hy + ') scale(' + AH + ') translate(-100 -' + hy + ')">' + back + ears + head + front + face + '</g>';
     if (mode === "face") {
       return '<svg viewBox="30 12 140 140" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Custom champion">' +
         '<rect x="30" y="12" width="140" height="140" fill="#24406A"/>' +
@@ -152,7 +156,8 @@ BD.Builder = (function () {
   /* ---------- the builder sheet ---------- */
   let cfg = null, belt = null, onSave = null;
   function render() {
-    $("builderPreview").innerHTML = svg(cfg, belt, "full");
+    const me = BD.Store.current();
+    $("builderPreview").innerHTML = svg(cfg, belt, "full", me ? BD.Cast.ageBand(BD.Rank.dojoGrade(me)) : 2);
     $("builderOpts").innerHTML = Object.keys(OPTIONS).map(function (key) {
       const o = OPTIONS[key];
       let inner = "";

@@ -58,6 +58,9 @@ BD.Rank = (function () {
     if (!subject(key)) throw new Error("Unknown stripe: " + key);
     const r = rec(p, grade);
     const out = { subject: key, grade: grade, pct: pct, passed: pct >= PASS, beltBefore: r.belt, graduated: null, already: !!r.stripes[key] };
+    if (out.passed && !r.stripes[key]) {
+      p.stripeLog = (p.stripeLog || []).concat({ subject: key, grade: grade, date: new Date().toISOString() }).slice(-300);
+    }
     if (out.passed) r.stripes[key] = true;
     if (out.passed && !r.mastered && REQUIRED.every(function (k) { return r.stripes[k]; })) {
       const from = r.belt;

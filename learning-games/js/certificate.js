@@ -19,9 +19,10 @@ BD.Certificate = (function () {
   /* The champion in the new belt: white-belt art, belt area tinted (same as on screen). */
   async function champion(p, beltColor) {
     const key = BD.UI.fighterKey(p);
-    if (key === "custom") return load(svgSrc(BD.Builder.svg(p.custom, beltColor, "full")));
-    const img = await load("img/wb-" + key + ".webp");
-    const mask = await load(BD.MASKS && BD.MASKS[key] ? BD.MASKS[key] : "img/mask-" + key + ".png");
+    if (key === "custom") return load(svgSrc(BD.Builder.svg(p.custom, beltColor, "full", BD.Cast.ageBand(BD.Rank.dojoGrade(p)))));
+    const a = BD.Cast.art(key, BD.Rank.dojoGrade(p));
+    const img = await load(a.src);
+    const mask = await load(BD.MASKS && BD.MASKS[a.mask] ? BD.MASKS[a.mask] : "img/mask-" + a.mask + ".png");
     if (!img) return null;
     const c = document.createElement("canvas"); c.width = img.naturalWidth; c.height = img.naturalHeight;
     const x = c.getContext("2d");
@@ -112,28 +113,24 @@ BD.Certificate = (function () {
     });
   }
 
-  /* Opens a sheet with the certificate and Save / Share buttons. */
-  async function open(p, g) {
-    BD.UI.sheet("Your certificate", '<p class="muted">Making your certificate…</p>');
-    let blob;
-    try { blob = await toBlob(await draw(p, g)); }
-    catch (e) { BD.UI.sheet("Your certificate", '<p>Sorry, the certificate couldn\'t be made on this device.</p>'); return; }
+  /* A sheet showing an image with Save and Share buttons (used for
+     certificates and the weekly progress card). */
+  function offer(blob, name, sheetTitle, shareTitle, shareText, note) {
     const url = URL.createObjectURL(blob);
-    const name = "brain-dojo-" + p.name.replace(/[^a-z0-9]+/gi, "-").toLowerCase() + "-" + (g.mastered ? "mastered-" + BD.gradeShort(g.grade).toLowerCase() : g.to.name.toLowerCase() + "-belt") + ".jpg";
     const file = typeof File === "function" ? new File([blob], name, { type: "image/jpeg" }) : null;
     const canShare = !!(file && navigator.canShare && navigator.canShare({ files: [file] }));
-    BD.UI.sheet("Your certificate",
-      '<img class="cert-img" src="' + url + '" alt="Brain Dojo certificate for ' + BD.UI.esc(p.name) + '">' +
-      '<div class="backup-actions"><button type="button" class="btn btn-primary" id="certSave">Save certificate</button>' +
+    BD.UI.sheet(sheetTitle,
+      '<img class="cert-img" src="' + url + '" alt="' + BD.UI.esc(shareTitle) + '">' +
+      '<div class="backup-actions"><button type="button" class="btn btn-primary" id="certSave">Save picture</button>' +
       (canShare ? '<button type="button" class="btn btn-quiet" id="certShare">Share</button>' : '') + '</div>' +
-      '<p class="muted small" id="certMsg" aria-live="polite">Save it to print, text it to family, or post it. Tag Engage!</p>');
+      '<p class="muted small" id="certMsg" aria-live="polite">' + BD.UI.esc(note || "") + '</p>');
     const msg = function (t) { document.getElementById("certMsg").textContent = t; };
     document.getElementById("certSave").addEventListener("click", async function () {
       let dl = null;
       if (window.claude && typeof window.claude.use === "function") { try { dl = await window.claude.use("downloads"); } catch (e) { dl = null; } }
       if (dl) {
         try { await dl.save({ filename: name, data: blob }); msg("Saved!"); }
-        catch (e) { msg(e && e.code === "declined" ? "Not saved. Tap Save certificate to try again." : "Saving isn't available here. Press and hold the picture to save it."); }
+        catch (e) { msg(e && e.code === "declined" ? "Not saved. Tap Save picture to try again." : "Saving isn't available here. Press and hold the picture to save it."); }
         return;
       }
       try {
@@ -143,9 +140,21 @@ BD.Certificate = (function () {
       } catch (e) { msg("Press and hold the picture to save it."); }
     });
     if (canShare) document.getElementById("certShare").addEventListener("click", function () {
-      navigator.share({ files: [file], title: p.name + " earned a new belt!", text: p.name + " just earned the " + (g.mastered ? BD.gradeLabel(g.grade) + " mastery" : g.to.name + " Belt") + " in Brain Dojo by Engage!" }).catch(function () { /* cancelled */ });
+      navigator.share({ files: [file], title: shareTitle, text: shareText }).catch(function () { /* cancelled */ });
     });
   }
 
-  return { draw: draw, open: open };
+  /* Opens a sheet with the certificate and Save / Share buttons. */
+  async function open(p, g) {
+    BD.UI.sheet("Your certificate", '<p class="muted">Making your certificate…</p>');
+    let blob;
+    try { blob = await toBlob(await draw(p, g)); }
+    catch (e) { BD.UI.sheet("Your certificate", '<p>Sorry, the certificate couldn\'t be made on this device.</p>'); return; }
+    const name = "brain-dojo-" + p.name.replace(/[^a-z0-9]+/gi, "-").toLowerCase() + "-" + (g.mastered ? "mastered-" + BD.gradeShort(g.grade).toLowerCase() : g.to.name.toLowerCase() + "-belt") + ".jpg";
+    offer(blob, name, "Your certificate", p.name + " earned a new belt!",
+      p.name + " just earned the " + (g.mastered ? BD.gradeLabel(g.grade) + " mastery" : g.to.name + " Belt") + " in Brain Dojo by Engage!",
+      "Save it to print, text it to family, or post it. Tag Engage!");
+  }
+
+  return { draw: draw, open: open, offer: offer, champion: champion };
 })();

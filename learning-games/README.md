@@ -20,6 +20,18 @@ Free math, writing, reading, spelling and Spanish practice from Pre-K through 8t
 - **Read it to me:** every game card has a speaker button that reads the instructions aloud (never the answer). Pre-K to 1st grade hear them automatically. Quiet mode or Sound off turns that off.
 - **Certificates:** graduation offers **Get my certificate**, an Engage-branded certificate with the student's name, champion, new belt, grade and date, to save, print or share. Past graduations in the belt card have a Certificate button too.
 
+## Badges, gear and growing up
+
+- **Badges unlock real Engage gear** for the student's champion, in this order: Mouthguard (first round), Black Training Shorts (3-day streak), Engage Black Training Shirt (first stripe), Sparring Gloves (perfect round), Sparring Boots (all four subjects in one week), Sparring Headgear (first new belt), Sparring Chest Gear (7-day streak), Boxing Gloves (1,000 XP), MMA Gloves (3 belts). Gear shows under the champion on the home screen; the **Gear locker** shows every badge and lets them wear or stash each item.
+- **Champions grow up with the grade.** Kimmy, Billy, Tommy, Mackenzie and Rylan look about 5 in Pre-K/K, 7 in 1st–2nd, 10 in 3rd–5th and 13 in 6th–8th, based on the grade they're training. Built champions get younger proportions too. Instructors and Zumi stay the same.
+
+## Parent corner
+
+- **PIN:** the first visit asks for a 4-digit parent PIN, so kids can't reset or remove progress. Forgot it? A grown-up math question lets you set a new one.
+- **Dashboard:** for each child: this week (days, rounds, questions, streak), belt progress, what they're strong at and what to work on, a tip to try at home, last week's recap (highlighted on Mondays) and badges. The detailed tables are under **See details** and only show grades they've played.
+- **Share this week:** makes a progress card picture to text to family or an Engage instructor.
+- **Dojo Challenge:** a weekly team goal (3,000 right answers) for everyone using the shared link. Parents opt each child in; other families see only a first name, belt and weekly count. Needs the shared Claude link while signed in.
+
 ## Saving progress
 
 - Progress saves automatically after every answer that earns XP. If a child taps Back, switches apps or closes the page in the middle of a round, the XP they've earned so far is kept.
@@ -232,5 +244,8 @@ learning-games/
   img/                   character art and Engage logo
   js/backup.js           save codes: back up and restore a student
   js/certificate.js      graduation certificates
+  js/badges.js           badges and the gear locker
+  js/parent.js           parent dashboard, PIN and weekly share card
+  js/dojo.js             weekly Dojo Challenge
   js/app.js              home, results and parent screens
 ```

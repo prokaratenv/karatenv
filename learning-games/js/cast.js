@@ -49,5 +49,16 @@ BD.Cast = (function () {
     el.classList.remove("pop"); void el.offsetWidth; el.classList.add("pop");
   }
 
-  return { PEOPLE: PEOPLE, FIGHTERS: FIGHTERS, COACH: COACH, img: img, face: face, name: name, line: line, say: say, defaultFighter: defaultFighter };
+  /* Student characters grow up with the grade: 0 = Pre-K/K, 1 = 1st–2nd,
+     2 = 3rd–5th, 3 = 6th–8th. Instructors and Zumi stay as they are. */
+  const KIDS = ["kimmy", "billy", "tommy", "mackenzie", "rylan"];
+  function ageBand(grade) { grade = Number(grade); return grade <= 0 ? 0 : grade <= 2 ? 1 : grade <= 5 ? 2 : 3; }
+  /* White-belt art and its belt mask for a character at a grade. */
+  function art(key, grade) {
+    if (KIDS.indexOf(key) === -1) return { src: "img/wb-" + key + ".webp", mask: key, band: null };
+    const b = ageBand(grade === undefined ? 3 : grade);
+    return { src: "img/age-" + key + "-" + b + ".webp", mask: key + "-" + b, band: b };
+  }
+
+  return { KIDS: KIDS, ageBand: ageBand, art: art, PEOPLE: PEOPLE, FIGHTERS: FIGHTERS, COACH: COACH, img: img, face: face, name: name, line: line, say: say, defaultFighter: defaultFighter };
 })();
