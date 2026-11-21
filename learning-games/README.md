@@ -30,7 +30,7 @@ Free math, writing, reading, spelling and Spanish practice from Pre-K through 8t
 - **PIN:** the first visit asks for a 4-digit parent PIN, so kids can't reset or remove progress. Forgot it? A grown-up math question lets you set a new one.
 - **Dashboard:** for each child: this week (days, rounds, questions, streak), belt progress, what they're strong at and what to work on, a tip to try at home, last week's recap (highlighted on Mondays) and badges. The detailed tables are under **See details** and only show grades they've played.
 - **Share this week:** makes a progress card picture to text to family or an Engage instructor.
-- **Dojo Challenge:** a weekly team goal (3,000 right answers) for everyone using the shared link. Parents opt each child in; other families see only a first name, belt and weekly count. Needs the shared Claude link while signed in.
+- **Dojo Challenge:** a weekly team goal (3,000 right answers) for everyone using the shared link. Parents opt each child in; other families see only a first name, belt and weekly count. Needs the shared Claude link while signed in, with Contributor access or above (everyone in your Claude organization; view-only visitors can see the board but not add to it).
 
 ## Saving progress
 

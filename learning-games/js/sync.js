@@ -75,9 +75,8 @@ BD.Sync = (function () {
     });
     setKnown(Object.keys(remote).filter(function (k) { return k.indexOf("player-") === 0; }).map(function (k) { return k.slice(7); }));
 
-    // Each family may write its own private folder even at view-only access
-    // (see the db rules); if a write is refused, flush() falls back to read-only.
-    ready = true; setStatus(canWrite === false ? "saving" : "synced");
+    if (canWrite === false) { setStatus("readonly"); }
+    else { ready = true; setStatus("synced"); }
 
     col.onSnapshot(function (qs) {
       qs.docChanges().forEach(function (ch) {
