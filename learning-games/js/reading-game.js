@@ -192,6 +192,7 @@ BD.Reading = (function () {
     $("readQType").textContent = BD.READ_TYPES[q.type].label;
     $("readQType").className = "q-type q-" + q.type;
     $("readQuestion").textContent = q.q;
+    if (BD.ReadAloud.auto(R.grade)) setTimeout(function () { if (R && question() === q) BD.ReadAloud.say(q.q); }, 300);
     $("readInput").value = ""; $("readInput").readOnly = false;
     $("readFeedback").innerHTML = ""; $("readFeedback").className = "read-feedback";
     $("readCheck").hidden = false; $("readCheck").disabled = false; $("readCheck").textContent = "Check my answer";
@@ -360,6 +361,7 @@ BD.Reading = (function () {
     $("readNext").addEventListener("click", next);
     $("readQuit").addEventListener("click", BD.UI.back);
     $("readGradeSel").addEventListener("change", function (e) { changeGrade(Number(e.target.value)); });
+    $("readQRead").addEventListener("click", function () { if (R) BD.ReadAloud.say(question().q); });
     $("readListen").addEventListener("click", function () {
       if (BD.Speech.speaking()) { BD.Speech.stop(); return; }
       if (R) BD.Speech.say(passage().title + ". " + passage().text + " " + question().q, "en-US", 0.88);

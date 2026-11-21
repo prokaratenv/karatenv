@@ -30,6 +30,18 @@ BD.AVATAR_COLORS = ["#E2402F", "#2D6CDF", "#2FA866", "#7B4BC4", "#F08A24", "#0F9
 
 /* The student's belt at the grade they're training (see js/rank.js). */
 BD.beltOf = function (p) { return BD.Rank ? BD.Rank.belt(p) : BD.BELTS[0]; };
+/* Days in a row with practice, counting today (or up to yesterday if they
+   haven't trained yet today, so the streak isn't lost before they play). */
+BD.streak = function (p) {
+  const days = new Set(p.days || []);
+  const key = function (d) { return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); };
+  const d = new Date();
+  const today = days.has(key(d));
+  if (!today) d.setDate(d.getDate() - 1);
+  let n = 0;
+  while (days.has(key(d))) { n++; d.setDate(d.getDate() - 1); }
+  return { days: n, today: today };
+};
 BD.today = function () {
   const d = new Date();
   return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");

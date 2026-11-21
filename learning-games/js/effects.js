@@ -92,5 +92,41 @@ BD.Speech = (function () {
   function stop() { if (ok) try { window.speechSynthesis.cancel(); } catch (e) { /* ignore */ } }
   function speaking() { return ok && window.speechSynthesis.speaking; }
   if (ok) try { window.speechSynthesis.getVoices(); } catch (e) { /* warm up voice list */ }
-  return { available: ok, say: say, stop: stop, speaking: speaking };
+  /* Several pieces in a row (e.g. English instructions, then a Spanish word). */
+  function sayAll(parts, rate) {
+    if (!ok) return false;
+    try {
+      window.speechSynthesis.cancel();
+      parts.filter(function (x) { return x && x.text; }).forEach(function (x) {
+        const u = new SpeechSynthesisUtterance(x.text);
+        u.lang = x.lang || "en-US";
+        const v = voiceFor(u.lang); if (v) u.voice = v;
+        u.rate = x.rate || rate || 0.9;
+        window.speechSynthesis.speak(u);
+      });
+      return true;
+    } catch (e) { return false; }
+  }
+  return { available: ok, say: say, sayAll: sayAll, stop: stop, speaking: speaking };
 })();
+
+/* READ ALOUD — instructions spoken for children who can't read yet.
+   Every game card has a speaker button. Pre-K to 1st grade hear the
+   instructions automatically unless sound is off or Quiet mode is on. */
+BD.ReadAloud = {
+  can: function () { return BD.Speech.available && !(BD.Store && BD.Store.muted); },
+  auto: function (grade) {
+    const p = BD.Store && BD.Store.current();
+    return this.can() && Number(grade) <= 1 && !(p && p.quietMode);
+  },
+  /* parts: a string, or [{text, lang}] */
+  say: function (parts) {
+    if (!this.can()) return false;
+    return BD.Speech.sayAll(typeof parts === "string" ? [{ text: parts }] : parts, 0.9);
+  },
+  /* Math symbols and blanks as words. */
+  words: function (t) {
+    return String(t).replace(/_{2,}/g, " blank ").replace(/×/g, " times ").replace(/÷/g, " divided by ").replace(/−/g, " minus ")
+      .replace(/\+/g, " plus ").replace(/=\s*\??\s*$/, "").replace(/\s+/g, " ").trim();
+  }
+};

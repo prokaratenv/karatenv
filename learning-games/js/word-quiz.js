@@ -322,7 +322,9 @@ BD.WordQuiz = (function () {
           (c.swatch ? '<span class="big-swatch sm" style="--sw:' + c.swatch + '"></span>' : "") + BD.UI.esc(c.value) + '</button>';
       }).join("");
     }
-    if (q.speakNow && !(W.game === "spelling" && isQuiet(BD.Store.current()))) setTimeout(function () { BD.Speech.say(q.speakNow.text, q.speakNow.lang, 0.85); }, 250);
+    const quietNow = W.game === "spelling" && isQuiet(BD.Store.current());
+    if (BD.ReadAloud.auto(W.grade) && !quietNow) setTimeout(function () { if (item() === q) readItem(); }, 250);
+    else if (q.speakNow && !quietNow) setTimeout(function () { BD.Speech.say(q.speakNow.text, q.speakNow.lang, 0.85); }, 250);
   }
 
   function showTiles(on) {
@@ -405,6 +407,27 @@ BD.WordQuiz = (function () {
       html += '<span class="' + (tried[i] === w[i] ? "l-ok" : "l-bad") + '">' + BD.UI.esc(ch) + '</span>';
     }
     return '<p class="letters">' + html + '</p>';
+  }
+
+  /* What the speaker button says: the instructions, never the answer. */
+  function readItem() {
+    const q = item(); if (!q) return;
+    const parts = [];
+    const sent = function (s) { return BD.ReadAloud.words(s || ""); };
+    if (W.game === "spelling") {
+      const src = q.src || [q.word, ""];
+      if (q.mode === "listen") { parts.push({ text: "Listen, then spell the word." }); parts.push(q.speakNow); }
+      else if (q.mode === "missing") parts.push({ text: (q.answer.length > 1 ? "Pick the missing letters. " : "Pick the missing letter. ") + sent(src[1]) });
+      else if (q.mode === "pick") parts.push({ text: "Which spelling is correct? " + sent(src[1]) });
+      else if (q.mode === "check") parts.push({ text: "Look at the underlined word. Is it spelled correctly, or misspelled?" });
+      else if (q.mode === "fix") parts.push({ text: "The underlined word is misspelled. Type it the right way. " + src[1].replace("___", q.word) });
+      else parts.push({ text: "Unscramble the letters to finish the sentence. " + sent(src[1]) });
+    } else {
+      if (q.mode === "es2en") { parts.push({ text: "What does this mean?" }); parts.push({ text: q.es, lang: "es-MX" }); }
+      else if (q.mode === "en2es") parts.push({ text: "How do you say " + q.en + " in Spanish?" });
+      else parts.push({ text: "Type " + q.en + " in Spanish." });
+    }
+    BD.ReadAloud.say(parts);
   }
 
   /* Quiet mode and the swap button (spelling only). */
@@ -533,6 +556,7 @@ BD.WordQuiz = (function () {
     });
     $("wordNext").addEventListener("click", next);
     $("wordSwap").addEventListener("click", swapCurrent);
+    $("wordRead").addEventListener("click", function () { if (W) readItem(); });
     $("wordQuiet").addEventListener("click", toggleQuiet);
     $("wordQuit").addEventListener("click", BD.UI.back);
     $("wordGradeSel").addEventListener("change", function (e) { changeGrade(Number(e.target.value)); });

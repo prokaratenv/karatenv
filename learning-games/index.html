@@ -68,6 +68,11 @@
         </button>
         <div class="home-hud">
           <h1 id="homeHello">Ready to train?</h1>
+          <p class="streak-line" id="homeStreak"></p>
+          <button type="button" class="btn btn-primary btn-big start-btn" id="startTraining">
+            <span class="start-main">Start training</span>
+            <span class="start-sub" id="startNext"></span>
+          </button>
           <p class="muted" id="homeToday"></p>
         </div>
       </div>
@@ -182,6 +187,7 @@
         <div class="coach-say"><span class="coach-name">Master Young</span><p id="mathSay">Bow in. Let's train!</p></div>
       </div>
       <div class="flashcard" id="mathCard">
+        <button type="button" class="say-btn" id="mathRead" aria-label="Read it to me" title="Read it to me"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
         <div class="problem" id="mathProblem"></div>
         <div class="dots" id="mathDots" hidden aria-hidden="true"></div>
         <div class="answer empty" id="mathAnswer" aria-live="polite">?</div>
@@ -214,6 +220,7 @@
         <div class="coach-say"><span class="coach-name">Master Mrs. Young</span><p id="sentSay">Find every mistake. You've got sharp eyes!</p></div>
       </div>
       <div class="sent-card" id="sentCard">
+        <button type="button" class="say-btn" id="sentRead" aria-label="Read it to me" title="Read it to me"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
         <p class="label">Fix this sentence</p>
         <p class="sent-original" id="sentOriginal"></p>
         <div class="mistakes" id="sentMistakes"></div>
@@ -250,6 +257,7 @@
         <p id="readText"></p>
       </article>
       <div class="q-card">
+        <button type="button" class="say-btn" id="readQRead" aria-label="Read it to me" title="Read it to me"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
         <span class="q-type" id="readQType"></span>
         <p class="q-text" id="readQuestion"></p>
         <label class="sr-only" for="readInput">Your answer</label>
@@ -279,6 +287,7 @@
         <div class="coach-say"><span class="coach-name" id="wordCoachName"></span><p id="wordSay"></p></div>
       </div>
       <div class="word-card" id="wordCard">
+        <button type="button" class="say-btn" id="wordRead" aria-label="Read it to me" title="Read it to me"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
         <p class="label" id="wordTopic"></p>
         <div class="word-prompt" id="wordPrompt"></div>
         <p class="word-sub" id="wordSub"></p>
@@ -337,7 +346,8 @@
         <p class="say" id="gradSay"></p>
       </div>
       <div class="res-actions grad-actions">
-        <button type="button" class="btn btn-primary btn-big" id="gradContinue">Continue</button>
+        <button type="button" class="btn btn-primary btn-big" id="gradCert">Get my certificate</button>
+        <button type="button" class="btn btn-quiet" id="gradContinue">Continue</button>
         <button type="button" class="btn btn-quiet" id="gradNextGrade" hidden>Start the next grade</button>
       </div>
     </section>
@@ -460,6 +470,7 @@
 <script src="js/math-game.js"></script>
 <script src="js/sentence-game.js"></script>
 <script src="js/backup.js"></script>
+<script src="js/certificate.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>

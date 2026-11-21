@@ -239,6 +239,13 @@ BD.MathGame = (function () {
     BD.UI.show("screen-math-play");
     BD.Cast.say("mathSay", "start");
     render();
+    readCard(true);
+  }
+  /* Read the problem out loud (automatic for Pre-K to 1st grade). */
+  function readCard(auto) {
+    if (!S || (auto && (S.mode === "clock" || !BD.ReadAloud.auto(S.grade)))) return;
+    const q = current();
+    BD.ReadAloud.say((LEVELS[S.grade].dots ? "Count the dots. " : "") + "What is " + BD.ReadAloud.words(show(q)) + "?");
   }
 
   function tick() {
@@ -376,6 +383,7 @@ BD.MathGame = (function () {
       })() : freshProblem());
     } else if (S.i >= S.queue.length) return finish();
     render();
+    readCard(true);
   }
 
   /* Leave the round without finishing it (Back button or grade change). */
@@ -480,6 +488,7 @@ BD.MathGame = (function () {
       const b = e.target.closest("[data-key]"); if (b) press(b.dataset.key);
     });
     $("mathQuit").addEventListener("click", BD.UI.back);
+    $("mathRead").addEventListener("click", function (e) { e.stopPropagation(); readCard(false); });
     $("mathGradeSel").addEventListener("change", function (e) { changeGrade(Number(e.target.value)); });
     $("mathGotIt").addEventListener("click", advance);
     $("mathAsk").addEventListener("click", function () { if (S && !S.done) BD.Sensei.open(senseiContext()); });

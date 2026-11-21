@@ -738,3 +738,28 @@ button.rank-belt:hover .belt-svg { transform: scale(1.03); }
 .restore-card { display: grid; gap: 10px; padding: 12px; border-radius: 14px; border: 1px solid var(--line); }
 .restore-bad { color: #FFB4A8; }
 .restore-line { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: center; text-align: center; margin: 14px 0 0; }
+
+/* Read-aloud speaker button on every game card */
+.flashcard, .sent-card, .q-card, .word-card { position: relative; }
+.say-btn {
+  position: absolute; top: 10px; right: 10px; z-index: 2; width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center;
+  border: 2px solid var(--gold-2); background: rgba(10, 20, 38, .85); color: var(--gold-2); cursor: pointer; padding: 0;
+}
+.say-btn svg { width: 22px; height: 22px; }
+.say-btn:active { transform: scale(.94); }
+body.no-speech .say-btn { display: none; }
+
+/* Start training + streak */
+.start-btn { display: grid; gap: 2px; justify-items: center; width: 100%; max-width: 420px; padding-top: 14px; padding-bottom: 14px; }
+.start-main { font-size: clamp(1.15rem, 5vw, 1.6rem); white-space: nowrap; }
+.start-sub { font-family: var(--font-body, inherit); font-style: normal; text-transform: none; font-weight: 700; font-size: .92rem; letter-spacing: 0; opacity: .9; max-width: 100%; line-height: 1.25; text-wrap: balance; }
+.start-sub:empty { display: none; }
+.streak-line { margin: 0; font-weight: 800; color: var(--muted); }
+.streak-line.lit { color: var(--gold-2); }
+.streak-line .flame { filter: grayscale(1); opacity: .6; }
+.streak-line.lit .flame { filter: none; opacity: 1; }
+
+/* Certificate */
+.cert-img { width: 100%; height: auto; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,.5); }
+.bd-grads li { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.grad-actions { display: grid; gap: 10px; justify-items: center; }

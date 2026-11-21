@@ -83,6 +83,12 @@ BD.SentenceGame = (function () {
     $("sentNext").hidden = true;
     $("sentHint").disabled = false;
     setTimeout(function () { input.focus(); }, 50);
+    readItem(true);
+  }
+  /* Read the sentence out loud (automatic for Pre-K to 1st grade). */
+  function readItem(auto) {
+    if (!S || (auto && !BD.ReadAloud.auto(S.grade))) return;
+    BD.ReadAloud.say("Fix the mistakes in this sentence. " + S.items[S.i].text);
   }
 
   function autoSize() {
@@ -271,6 +277,7 @@ BD.SentenceGame = (function () {
     $("sentReset").addEventListener("click", reset);
     $("sentNext").addEventListener("click", next);
     $("sentQuit").addEventListener("click", BD.UI.back);
+    $("sentRead").addEventListener("click", function () { readItem(false); });
     $("sentGradeSel").addEventListener("change", function (e) { changeGrade(Number(e.target.value)); });
     $("sentRules").addEventListener("click", openRules);
     $("sentAsk").addEventListener("click", function () { if (S) BD.Sensei.open(senseiContext()); });

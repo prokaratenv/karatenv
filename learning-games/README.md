@@ -14,6 +14,12 @@ Free math, writing, reading, spelling and Spanish practice from Pre-K through 8t
 - **Belt card:** tap the belt on the home screen to see its stripes, practice XP for each stripe, total Belt XP (out of 500), the next belt, the belt path and past graduations. Tabs along the top switch grades to see the belt for any grade, and **Train this grade** makes it the Dojo grade.
 - **Free play:** the game cards still work for free practice at any grade, and their XP also counts toward that grade's stripes (up to the cap).
 
+## Start training, read aloud and certificates
+
+- **Start training:** the big button on the home screen starts whatever Sensei suggests next (the stripe closest to done, a test they're ready for, or their weakest skill). Underneath, a 🔥 streak counts the days in a row they've trained.
+- **Read it to me:** every game card has a speaker button that reads the instructions aloud (never the answer). Pre-K to 1st grade hear them automatically. Quiet mode or Sound off turns that off.
+- **Certificates:** graduation offers **Get my certificate**, an Engage-branded certificate with the student's name, champion, new belt, grade and date, to save, print or share. Past graduations in the belt card have a Certificate button too.
+
 ## Saving progress
 
 - Progress saves automatically after every answer that earns XP. If a child taps Back, switches apps or closes the page in the middle of a round, the XP they've earned so far is kept.
@@ -225,5 +231,6 @@ learning-games/
   js/builder.js          build-your-own champion (drawn character)
   img/                   character art and Engage logo
   js/backup.js           save codes: back up and restore a student
+  js/certificate.js      graduation certificates
   js/app.js              home, results and parent screens
 ```

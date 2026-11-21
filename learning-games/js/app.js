@@ -120,8 +120,9 @@ BD.UI = (function () {
       const st = i < r.belt || (i === r.belt && r.mastered) ? "done" : i === r.belt ? "now" : "";
       return '<li class="' + st + '"><span class="belt-swatch" style="--belt:' + b.color + '"></span>' + b.name + '</li>';
     }).join("") + '</ol>';
-    const grads = r.grads.length ? '<ul class="plan-text">' + r.grads.map(function (x) {
-      return '<li>Graduated from ' + BD.BELTS[x.belt].name + ' · ' + new Date(x.date).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" }) + '</li>';
+    const grads = r.grads.length ? '<ul class="plan-text bd-grads">' + r.grads.map(function (x, i) {
+      return '<li><span>Graduated from ' + BD.BELTS[x.belt].name + ' · ' + new Date(x.date).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" }) + '</span>' +
+        '<button type="button" class="btn btn-small btn-quiet" data-cert="' + i + '">Certificate</button></li>';
     }).join("") + '</ul>' : '<p class="muted">No graduations yet at this grade.</p>';
     const nextLine = r.mastered ? "Grade mastered! Every belt earned." : next ? "Next belt: <strong>" + next.name + "</strong>. Earn the " + (4 - BD.Rank.stripeCount(r)) + " remaining stripe" + (4 - BD.Rank.stripeCount(r) === 1 ? "" : "s") + " to graduate." : "Black Belt is the top belt. Earn all 4 stripes to master " + BD.gradeLabel(g) + ".";
     sheet("My belt",
@@ -137,6 +138,12 @@ BD.UI = (function () {
     $("infoBody").onclick = function (e) {
       const t = e.target.closest("[data-bd-grade]");
       if (t) { beltDetails(Number(t.dataset.bdGrade)); return; }
+      const c = e.target.closest("[data-cert]");
+      if (c) {
+        const x = r.grads[Number(c.dataset.cert)], last = BD.BELTS.length - 1;
+        BD.Certificate.open(p, { to: BD.BELTS[Math.min(last, x.belt + 1)], grade: g, mastered: x.belt === last, date: x.date });
+        return;
+      }
       if (e.target.id === "bdTrain") { p.dojoGrade = g; BD.Store.save(p); closeSheet(); home(); }
     };
     const tabsEl = $("infoBody").querySelector(".bd-grades"), on = tabsEl && tabsEl.querySelector(".bd-grade.on");
@@ -215,6 +222,7 @@ BD.UI = (function () {
     $("gradXP").textContent = "+" + BD.Rank.GRAD_XP + " XP graduation bonus";
     $("gradNextGrade").hidden = !(gr.mastered && gr.grade < BD.MAX_GRADE);
     $("gradNextGrade").onclick = function () { p.dojoGrade = gr.grade + 1; BD.Store.save(p); home(); };
+    $("gradCert").onclick = function () { BD.Certificate.open(p, { to: gr.to, grade: gr.grade, mastered: gr.mastered, date: new Date().toISOString() }); };
     show("screen-grad");
     BD.Sound.belt(); BD.confetti(260);
     setTimeout(function () { BD.confetti(180); }, 900);
@@ -312,6 +320,11 @@ BD.UI = (function () {
     $("homeFighter").innerHTML = fighterArt(p, "full");
     $("homeBelt").innerHTML = rankPanel(p);
     $("homeToday").textContent = todays ? todays + (todays === 1 ? " round" : " rounds") + " completed today" : "No rounds yet today";
+    const st = BD.streak(p);
+    $("homeStreak").innerHTML = st.days >= 1
+      ? '<span class="flame" aria-hidden="true">🔥</span> ' + st.days + "-day streak" + (st.today ? "" : ' <span class="muted">· train today to keep it!</span>')
+      : '<span class="flame" aria-hidden="true">🔥</span> Start a streak today!';
+    $("homeStreak").classList.toggle("lit", st.today);
     const retry = p.retry || {};
     if (retry.sentence) p.sentenceGrade = retry.sentence.grade;
     if (retry.math) p.mathGrade = retry.math.grade;
@@ -336,10 +349,27 @@ BD.UI = (function () {
   let planItems = [];
   function renderPlan(p) {
     planItems = BD.Coach.plan(p);
+    const first = nextStep(p);
+    $("startNext").textContent = first ? "Next: " + first.title : "";
     $("homePlan").hidden = !planItems.length;
     $("homePlanList").innerHTML = planItems.map(function (it, i) {
       return '<button type="button" class="plan-item plan-' + it.kind + '" data-plan="' + i + '"><strong>' + esc(it.title) + '</strong><span>' + esc(it.sub) + '</span></button>';
     }).join("");
+  }
+  /* The one-tap "Start training" pick: Sensei's top suggestion, or practice
+     for the stripe with the least XP at their dojo grade. */
+  function nextStep(p) {
+    if (planItems[0]) return planItems[0];
+    const g = BD.Rank.dojoGrade(p), r = BD.Rank.rec(p, g);
+    const open = BD.Rank.SUBJECTS.filter(function (s) { return !s.optional && !r.stripes[s.key]; });
+    if (!open.length) return { kind: "mathStart", title: "Warm up with Math Dojo" };
+    const low = open.sort(function (a, b) { return (r.xp[a.key] || 0) - (r.xp[b.key] || 0); })[0];
+    return { kind: "stripePractice", subject: low.key, title: "Practice " + low.label + " for your stripe" };
+  }
+  function startTraining() {
+    const p = BD.Store.current(); if (!p) return;
+    BD.Sound.tap();
+    runPlan(nextStep(p));
   }
   function runPlan(it) {
     const p = BD.Store.current();
@@ -520,6 +550,7 @@ BD.UI = (function () {
       const p = BD.Store.current(); p.dojoGrade = Number(e.target.value); BD.Store.save(p); BD.Sound.tap(); home();
     });
     $("gradContinue").addEventListener("click", home);
+    $("startTraining").addEventListener("click", startTraining);
     $("playRead").addEventListener("click", function () { BD.Reading.start(); });
     $("playSpell").addEventListener("click", function () { BD.WordQuiz.start("spelling"); });
     $("playSpanish").addEventListener("click", function () { BD.WordQuiz.start("spanish"); });
@@ -594,6 +625,7 @@ BD.UI = (function () {
   function sheetOpen() { return !$("infoSheet").hidden || !$("senseiSheet").hidden; }
 
   function syncMute() {
+    document.body.classList.toggle("no-speech", !BD.Speech.available || BD.Store.muted);
     $("muteBtn").textContent = BD.Store.muted ? "Sound off" : "Sound on";
     $("muteBtn").setAttribute("aria-pressed", String(!BD.Store.muted));
   }
@@ -605,7 +637,7 @@ BD.UI = (function () {
     BD.Store.current() ? home() : players();
   }
 
-  return { beltDetails: beltDetails, testMode: testMode, stripeResult: stripeResult, back: back, setGrade: setGrade, syncGradeSelect: syncGradeSelect, refresh: refresh, sheet: sheet, sheetOpen: sheetOpen, show: show, esc: esc, home: home, players: players, results: results, gradePicker: gradePicker, init: init };
+  return { fighterKey: function (p) { return fighterOf(p); }, beltDetails: beltDetails, testMode: testMode, stripeResult: stripeResult, back: back, setGrade: setGrade, syncGradeSelect: syncGradeSelect, refresh: refresh, sheet: sheet, sheetOpen: sheetOpen, show: show, esc: esc, home: home, players: players, results: results, gradePicker: gradePicker, init: init };
 })();
 
 document.addEventListener("DOMContentLoaded", BD.UI.init);
