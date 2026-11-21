@@ -387,11 +387,9 @@ BD.UI = (function () {
     $("homeSpanishGrade").innerHTML = gradePicker("spanishGradePick", p.spanishGrade, !!retry.spanish);
     const hasSchool = BD.School.has(p);
     $("homeSchool").hidden = !hasSchool;
-    $("homeSchool").innerHTML = hasSchool ? '<button type="button" class="gt-inner" data-school="practice"><span class="gt-emoji" aria-hidden="true">📝</span><span class="gt-name">School Words</span><span class="gt-grade">' + BD.School.masteredCount(p) + ' of ' + BD.School.words(p).length + ' mastered</span></button>' +
-      '<button type="button" class="gt-test" data-school="test">Word test</button>' : "";
-    [["gtMath", "mathGrade"], ["gtSent", "sentenceGrade"], ["gtRead", "readingGrade"], ["gtSpell", "spellingGrade"], ["gtSpanish", "spanishGrade"]].forEach(function (x) { $(x[0]).textContent = BD.gradeLabel(p[x[1]]); });
+    $("homeSchool").innerHTML = hasSchool ? '<p class="eyebrow">This week\'s school words · ' + BD.School.masteredCount(p) + '/' + BD.School.words(p).length + ' mastered</p>' +
+      '<div class="school-btns"><button type="button" class="btn btn-small btn-gold" data-school="practice">📝 Practice school words</button><button type="button" class="btn btn-small btn-quiet" data-school="test">Word test</button></div>' : "";
     $("flashCard").innerHTML = BD.MathGame.flashTile(p);
-    beltSummary(p);
     const notes = [];
     if (retry.math) notes.push("<strong>Math Dojo:</strong> redo " + BD.gradeLabel(retry.math.grade) + " " + retry.math.ops.map(function (o) { return BD.MathGame.OPS[o].sym; }).join(" ") + " and score " + BD.MathGame.PASS + "% to unlock other levels.");
     if (retry.sentence) notes.push("<strong>Fix-It Sentences:</strong> redo " + BD.gradeLabel(retry.sentence.grade) + " and fix " + BD.SentenceGame.PASS + "% to unlock other grades.");
@@ -400,15 +398,6 @@ BD.UI = (function () {
     renderPlan(p);
     BD.Quest.render(p);
     show("screen-home");
-  }
-
-  /* The one-line belt summary; tapping it opens stripes, practice and tests. */
-  function beltSummary(p) {
-    const g = BD.Rank.dojoGrade(p), r = BD.Rank.rec(p, g), sc = BD.Rank.stripeCount(r);
-    $("beltSummary").innerHTML = '<span class="bs-belt">' + BD.Rank.beltSVG(r.belt, r.stripes) + '</span>' +
-      '<span class="bs-txt"><strong>' + BD.gradeLabel(g) + ' · ' + BD.BELTS[r.belt].name + ' Belt</strong><span class="muted small">' + (r.mastered ? "Grade mastered!" : sc + " of 4 stripes · " + BD.Rank.beltXP(r) + " / 500 belt XP") + '</span></span>' +
-      '<span class="bs-open">Stripes &amp; tests <span aria-hidden="true">›</span></span>';
-    try { $("beltFold").open = sessionStorage.getItem("bd.beltOpen") === "1"; } catch (e) { /* default closed */ }
   }
 
   /* Gear the champion is wearing, under the home stage. */
@@ -425,7 +414,7 @@ BD.UI = (function () {
     planItems = BD.Coach.plan(p);
     const first = nextStep(p);
     $("startNext").textContent = first ? "Next: " + first.title : "";
-    $("homePlan").hidden = true; // Start training runs Sensei's top pick; the list stays off the home screen to keep it simple
+    $("homePlan").hidden = !planItems.length;
     $("homePlanList").innerHTML = planItems.map(function (it, i) {
       return '<button type="button" class="plan-item plan-' + it.kind + '" data-plan="' + i + '"><strong>' + esc(it.title) + '</strong><span>' + esc(it.sub) + '</span></button>';
     }).join("");
@@ -661,7 +650,6 @@ BD.UI = (function () {
     $("gearBtn").addEventListener("click", function () { BD.Badges.openLocker(); });
     $("dojoCard").addEventListener("click", function () { BD.Dojo.openBoard(); });
     $("flashCard").addEventListener("click", function () { BD.MathGame.openFlash(); });
-    $("beltFold").addEventListener("toggle", function () { try { sessionStorage.setItem("bd.beltOpen", $("beltFold").open ? "1" : "0"); } catch (e) { /* ignore */ } });
     $("parentHow").addEventListener("click", function () {
       sheet("How Brain Dojo works",
         '<h4 class="label">Belts and stripes</h4><p>Each grade has its own belt path: White, Yellow, Orange, Blue, Green, Purple, Brown, Red, Black. A belt needs 4 stripes (Math, Reading, Spelling, Comprehension), each earned by scoring 85% on a stripe test. The 4th stripe graduates them to the next belt. Spanish is a bonus stripe.</p>' +
@@ -784,7 +772,7 @@ BD.UI = (function () {
       const m = BD.Music.prefs(), fx = !BD.Store.muted;
       sheet("Sound",
         '<div class="sound-menu">' +
-        '<label class="sound-row"><span><strong>🎵 Music</strong><span class="muted small">Calm music in the dojo, adventure on the map, boss music in battles.</span></span>' +
+        '<label class="sound-row"><span><strong>🎵 Music</strong><span class="muted small">Upbeat dojo music, adventure on the map, boss music in battles.</span></span>' +
         '<input type="checkbox" class="switch" id="sndMusic"' + (m.music ? " checked" : "") + '></label>' +
         '<label class="sound-vol' + (m.music ? "" : " off") + '"><span>Music volume</span><input type="range" id="sndVol" min="5" max="100" step="5" value="' + m.vol + '"' + (m.music ? "" : " disabled") + '></label>' +
         '<label class="sound-row"><span><strong>🔔 Sound effects &amp; voice</strong><span class="muted small">Dings, cheers and read-aloud instructions.</span></span>' +

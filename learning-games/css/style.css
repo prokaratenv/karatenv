@@ -1053,7 +1053,7 @@ body.duel-on .topbar, body.duel-on .footer { visibility: hidden; }
 .btn-gold { background: var(--gold); color: var(--accent-ink); border: 0; font-weight: 800; }
 
 /* ---------- Daily quest + Adventure Map ---------- */
-.quest-row { display: grid; grid-template-columns: 1.3fr 1fr; gap: 12px; margin: 0 0 12px; }
+.quest-row { display: grid; grid-template-columns: 1.25fr 1fr 1fr; gap: 12px; margin: 0 0 12px; }
 @media (max-width: 560px) { .quest-row { grid-template-columns: 1fr; } }
 .quest-card, .map-card { display: flex; align-items: center; gap: 12px; text-align: left; padding: 12px 14px; border-radius: 18px; border: 1px solid var(--line); background: linear-gradient(120deg, #1F3358, #172846); color: var(--ink); cursor: pointer; font: inherit; min-width: 0; }
 .quest-card:hover, .map-card:hover { border-color: var(--teal); }
@@ -1232,3 +1232,5 @@ body.duel-on .topbar, body.duel-on .footer { visibility: hidden; }
 .gt-test { margin: 2px 0 10px; padding: 4px 12px; border-radius: 999px; border: 1px solid var(--line); background: rgba(255,255,255,.05); color: var(--teal); font: inherit; font-size: .78rem; font-weight: 800; cursor: pointer; }
 #screen-home .fun-row { margin: 0; }
 #screen-home .dojo-card { margin-top: 10px; }
+.family-link.relink, .family-card.relink { border-color: var(--warn); background: var(--warn-bg); }
+.family-link.relink strong { color: var(--warn); }

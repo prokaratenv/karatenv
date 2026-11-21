@@ -16,7 +16,7 @@ BD.Family = (function () {
 
   let acct = read();
   // Older links without an encryption key sign in again once (nothing readable is kept on the server).
-  if (acct && (typeof acct.token !== "string" || !/^[a-f0-9]{32}\.[a-f0-9]{64}$/.test(acct.token) || typeof acct.k !== "string")) { acct = null; write(null); }
+  if (acct && (typeof acct.token !== "string" || !/^[a-f0-9]{32}\.[a-f0-9]{64}$/.test(acct.token) || typeof acct.k !== "string")) { acct = null; write(null); try { localStorage.setItem("brainDojo.relink", "1"); } catch (e) { /* blocked */ } }
 
   /* ---------- end-to-end encryption ----------
      Each student is encrypted on the device (AES-GCM) before it's sent, with a
@@ -176,6 +176,7 @@ BD.Family = (function () {
       if (!/^[a-f0-9]{32}$/.test(res.salt || "") || !(window.crypto && crypto.subtle)) { busy = false; return msg(!(window.crypto && crypto.subtle) ? "This browser can't lock the data safely. Please update it and try again." : "The family account service needs an update. Please let Engage know, and try again later."); }
       // only a short hint of the email is kept on the device; the email itself becomes the lock's key
       acct = { token: res.token, hint: masked(email), k: await deriveKey(email, res.salt), at: new Date().toISOString() }; keyObj = null; write(acct);
+      try { localStorage.removeItem("brainDojo.familySync"); localStorage.removeItem("brainDojo.relink"); } catch (e) { /* blocked */ }
       const before = BD.Store.players().length;
       await apply(res);
       await flush();
@@ -198,6 +199,7 @@ BD.Family = (function () {
   /* ---------- Parent corner card ---------- */
   function cardHTML() {
     if (!enabled()) return "";
+    if (!linked() && needsRelink()) return '<div class="family-card relink"><span class="lead-icon" aria-hidden="true">🔗</span><div><strong>Please sign in again to keep syncing</strong><p class="muted small">Family sign-in now uses your parent email. Sign in once on this device: its students go up to your family account and show on your other devices.</p></div><button type="button" class="btn btn-gold" id="faOpen">Sign in with email</button></div>';
     if (!linked()) return '<div class="family-card"><span class="lead-icon" aria-hidden="true">🔗</span><div><strong>Use Brain Dojo on every device</strong><p class="muted small">Link this device to your email so your kids\' progress shows on any phone, iPad or computer they use.</p></div><button type="button" class="btn btn-gold" id="faOpen">Sign in with email</button></div>';
     return '<div class="family-card linked"><span class="lead-icon" aria-hidden="true">🔗</span><div><strong>Family account: ' + esc(acct.hint) + ' ✓</strong><p class="muted small">This device syncs automatically. To add another device, open Brain Dojo there and sign in with the same email.</p></div>' +
       '<div class="family-actions"><button type="button" class="btn btn-small btn-quiet" id="faSignOut">Sign out this device</button><button type="button" class="btn btn-small btn-quiet" id="faMore">More</button></div></div>';
@@ -226,9 +228,21 @@ BD.Family = (function () {
     };
   }
 
+  /* Devices that were linked with an older sign-in (the short-lived Family Sync
+     Code, or an email link from before encryption) need one fresh sign-in. */
+  function needsRelink() {
+    if (linked()) return false;
+    try { return !!(localStorage.getItem("brainDojo.familySync") || localStorage.getItem("brainDojo.relink")); } catch (e) { return false; }
+  }
   function welcome() {
     const w = $("welcomeFamily");
-    if (w) { w.hidden = !enabled(); w.innerHTML = linked() ? "🔗 Linked to " + esc(acct.hint) + " · progress syncs to every device" : "🔗 <strong>Already training on another device?</strong> Sign in with a parent's email ›"; w.disabled = linked(); w.classList.toggle("linked", linked()); }
+    if (w) {
+      w.hidden = !enabled();
+      w.innerHTML = linked() ? "🔗 Linked to " + esc(acct.hint) + " · progress syncs to every device"
+        : needsRelink() ? "🔗 <strong>Sign in again to keep syncing:</strong> family sign-in now uses your parent email ›"
+        : "🔗 <strong>Already training on another device?</strong> Sign in with a parent's email ›";
+      w.disabled = linked(); w.classList.toggle("linked", linked()); w.classList.toggle("relink", needsRelink());
+    }
   }
   function refreshUI() { welcome(); if (BD.UI && BD.UI.refresh) BD.UI.refresh(); }
   function startPolling() {

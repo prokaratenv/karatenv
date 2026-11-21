@@ -95,14 +95,14 @@ Brain Dojo has its own soundtrack, composed for it and played by small synthesiz
 
 | Piece | Where it plays |
 |---|---|
-| **Morning Bow** | Welcome, home and parent screens: calm koto and soft pad |
+| **Morning Bow** | Welcome, home and parent screens: an upbeat koto and flute tune with a light beat |
 | **Path of Belts** | The Adventure Map: a bright flute adventure |
 | **Quiet Mind** | While answering questions: very soft, no melody, so it doesn't distract |
 | **Rival Stance** | Boss battles and Partner Challenge: taiko drums and a driving bass |
 | **Iron Tower** | The Black Belt boss and Final Boss Master Young: faster and heavier |
 | **Victory fanfare** | Wins, stripes and graduations |
 
-- Music starts quietly after the first tap (browsers require a tap first). It gets softer while a voice reads aloud, and pauses when the app is in the background.
+- Music starts at **15% volume** after the first tap (browsers require a tap first). It gets softer while a voice reads aloud, and pauses when the app is in the background.
 - The top-bar **🔊 Sound** button opens the Sound menu, which has **Music on/off**, **Music volume**, and **Sound effects & voice on/off** (dings, cheers and read-aloud). Settings are remembered on each device.
 
 ## Offline play

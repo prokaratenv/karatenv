@@ -28,7 +28,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cabin:wght@400;600;700&family=Montserrat:ital,wght@0,600;0,700;0,800;0,900;1,800;1,900&display=swap">
-<link rel="stylesheet" href="css/style.css?v=1a4cb70441">
+<link rel="stylesheet" href="css/style.css?v=7754b77261">
 </head>
 <body>
 <div class="bg-streaks" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
@@ -79,7 +79,6 @@
 
     <!-- Dojo home -->
     <section class="screen" id="screen-home" hidden>
-      <!-- 1. Champion + the one big button -->
       <div class="home-hero">
         <div class="stage-col">
         <button type="button" class="fighter-stage" id="changeFighter" title="Change your champion">
@@ -98,44 +97,98 @@
           <p class="muted" id="homeToday"></p>
         </div>
       </div>
-
-      <!-- 2. Today -->
-      <h2 class="home-label">Today</h2>
-      <div class="today-row">
+      <div class="quest-row">
         <button type="button" class="quest-card" id="questCard"></button>
         <button type="button" class="tile-card flash-card" id="flashCard"></button>
         <button type="button" class="map-card" id="mapCard"></button>
       </div>
-
-      <!-- 3. My belt (tap to open stripes, practice and tests) -->
-      <details class="belt-fold" id="beltFold">
-        <summary class="belt-sum" id="beltSummary"></summary>
-        <div class="belt-panel" id="homeBelt"></div>
-      </details>
-      <div class="redo-note" id="homeRedo" hidden></div>
-
-      <!-- 4. Play -->
-      <h2 class="home-label">Play</h2>
-      <div class="play-grid">
-        <button type="button" class="game-tile tile-math" id="playMath"><img src="img/face-cd.webp" alt=""><span class="gt-name">Math Dojo</span><span class="gt-grade" id="gtMath"></span></button>
-        <button type="button" class="game-tile tile-sent" id="playSent"><img src="img/face-michele.webp" alt=""><span class="gt-name">Fix-It Sentences</span><span class="gt-grade" id="gtSent"></span></button>
-        <button type="button" class="game-tile tile-read" id="playRead"><img src="img/face-kyra.webp" alt=""><span class="gt-name">Story Scrolls</span><span class="gt-grade" id="gtRead"></span></button>
-        <button type="button" class="game-tile tile-spell" id="playSpell"><img src="img/face-lauryn.webp" alt=""><span class="gt-name">Spelling Bee</span><span class="gt-grade" id="gtSpell"></span></button>
-        <button type="button" class="game-tile tile-spanish" id="playSpanish"><img src="img/face-bridgette.webp" alt=""><span class="gt-name">Spanish Dojo</span><span class="gt-grade" id="gtSpanish"></span></button>
-        <div class="game-tile tile-school school-cta" id="homeSchool" hidden></div>
-      </div>
-
-      <!-- 5. Challenges -->
-      <h2 class="home-label">Challenges</h2>
       <div class="fun-row">
         <button type="button" class="boss-card" id="bossCard"></button>
         <button type="button" class="duel-card" id="duelCard"><span class="duel-icon" aria-hidden="true">⚔️</span><span><strong>Partner Challenge</strong><span class="boss-sub">2 players · one screen</span></span></button>
       </div>
+      <div class="belt-panel" id="homeBelt"></div>
+      <div class="redo-note" id="homeRedo" hidden></div>
+      <section class="plan" id="homePlan" hidden>
+        <div class="coach-row">
+          <img class="coach-face" src="img/face-michele.webp" alt="">
+          <div class="coach-say"><span class="coach-name">Master Mrs. Young · Sensei's plan for you</span></div>
+        </div>
+        <div class="plan-list" id="homePlanList"></div>
+      </section>
       <button type="button" class="dojo-card" id="dojoCard" hidden></button>
-
-      <!-- kept for Sensei's plan and grade locks (shown inside the games instead) -->
-      <section class="plan" id="homePlan" hidden><div class="plan-list" id="homePlanList"></div></section>
-      <div hidden><div id="homeMathGrade"></div><div id="homeSentGrade"></div><div id="homeReadGrade"></div><div id="homeSpellGrade"></div><div id="homeSpanishGrade"></div></div>
+      <div class="game-grid">
+        <article class="game-card game-math">
+          <div class="game-art" aria-hidden="true">
+            <img class="game-coach" src="img/cd.webp" alt="">
+            <div class="art-chips"><span>7×8</span><span>48÷6</span><span>36+9</span></div>
+          </div>
+          <div class="game-body">
+            <p class="coach-tag">Coach: Master Young</p>
+            <h2>Math Dojo</h2>
+            <p>Flashcards for adding, subtracting, multiplying and dividing. Build combos, beat the clock, earn XP.</p>
+            <p class="eyebrow">Math grade level</p>
+            <div id="homeMathGrade"></div>
+            <button type="button" class="btn btn-primary btn-big" id="playMath">Play Math Dojo</button>
+          </div>
+        </article>
+        <article class="game-card game-sent">
+          <div class="game-art sent-art" aria-hidden="true">
+            <img class="game-coach" src="img/michele.webp" alt="">
+            <div class="art-chips"><span><s>the</s> The</span><span>dog<b>.</b></span></div>
+          </div>
+          <div class="game-body">
+            <p class="coach-tag">Coach: Master Mrs. Young</p>
+            <h2>Fix-It Sentences</h2>
+            <p>Each sentence has mistakes in capitals, punctuation, spelling or grammar. Find them and fix them.</p>
+            <p class="eyebrow">Sentence grade level</p>
+            <div id="homeSentGrade"></div>
+            <button type="button" class="btn btn-primary btn-big" id="playSent">Play Fix-It Sentences</button>
+          </div>
+        </article>
+        <article class="game-card game-read">
+          <div class="game-art read-art" aria-hidden="true">
+            <img class="game-coach" src="img/kyra.webp" alt="">
+            <div class="art-chips"><span>Who?</span><span>Why?</span><span>Main idea</span></div>
+          </div>
+          <div class="game-body">
+            <p class="coach-tag">Coach: Ms. Kyra</p>
+            <h2>Story Scrolls</h2>
+            <p>Read two short stories, then answer questions in your own words. Sensei reads each answer and tells you how you did.</p>
+            <p class="eyebrow">Reading grade level</p>
+            <div id="homeReadGrade"></div>
+            <button type="button" class="btn btn-primary btn-big" id="playRead">Play Story Scrolls</button>
+          </div>
+        </article>
+        <article class="game-card game-spell">
+          <div class="game-art spell-art" aria-hidden="true">
+            <img class="game-coach" src="img/lauryn.webp" alt="">
+            <div class="art-chips"><span>c-a-t</span><span>B-E-E</span><span>spell it!</span></div>
+          </div>
+          <div class="game-body">
+            <p class="coach-tag">Coach: Ms. Lauryn</p>
+            <h2>Spelling Bee</h2>
+            <p>Missing letters, spot the misspelling, fix it, unscramble and listen-and-spell. Quiet mode works without sound.</p>
+            <p class="eyebrow">Spelling grade level</p>
+            <div id="homeSpellGrade"></div>
+            <div class="school-cta" id="homeSchool" hidden></div>
+            <button type="button" class="btn btn-primary btn-big" id="playSpell">Play Spelling Bee</button>
+          </div>
+        </article>
+        <article class="game-card game-spanish">
+          <div class="game-art spanish-art" aria-hidden="true">
+            <img class="game-coach" src="img/bridgette.webp" alt="">
+            <div class="art-chips"><span>¡Hola!</span><span>rojo</span><span>gracias</span></div>
+          </div>
+          <div class="game-body">
+            <p class="coach-tag">Coach: Ms. Bridgette</p>
+            <h2>Spanish Dojo</h2>
+            <p>Learn Spanish words, from colors and animals to everyday phrases. Tap Hear it to copy the sound.</p>
+            <p class="eyebrow">Spanish grade level</p>
+            <div id="homeSpanishGrade"></div>
+            <button type="button" class="btn btn-primary btn-big" id="playSpanish">Play Spanish Dojo</button>
+          </div>
+        </article>
+      </div>
     </section>
 
     <!-- Math setup -->
@@ -515,41 +568,41 @@
   </div>
 </div>
 
-<script src="data/sentence-bank.js?v=1a4cb70441"></script>
-<script src="data/reading-bank.js?v=1a4cb70441"></script>
-<script src="data/spanish-bank.js?v=1a4cb70441"></script>
-<script src="data/spelling-bank.js?v=1a4cb70441"></script>
-<script src="js/config.js?v=1a4cb70441"></script>
-<script src="js/storage.js?v=1a4cb70441"></script>
-<script src="js/cast.js?v=1a4cb70441"></script>
-<script src="js/masks.js?v=1a4cb70441"></script>
-<script src="js/rank.js?v=1a4cb70441"></script>
-<script src="js/builder.js?v=1a4cb70441"></script>
-<script src="js/effects.js?v=1a4cb70441"></script>
-<script src="js/music.js?v=1a4cb70441"></script>
-<script src="js/explain.js?v=1a4cb70441"></script>
-<script src="js/coach.js?v=1a4cb70441"></script>
-<script src="js/sentence-gen.js?v=1a4cb70441"></script>
-<script src="js/reading-game.js?v=1a4cb70441"></script>
-<script src="js/word-quiz.js?v=1a4cb70441"></script>
-<script src="js/school.js?v=1a4cb70441"></script>
-<script src="js/sync.js?v=1a4cb70441"></script>
-<script src="js/sensei.js?v=1a4cb70441"></script>
-<script src="js/math-game.js?v=1a4cb70441"></script>
-<script src="js/sentence-game.js?v=1a4cb70441"></script>
-<script src="js/scratch.js?v=1a4cb70441"></script>
-<script src="js/quick.js?v=1a4cb70441"></script>
-<script src="js/boss.js?v=1a4cb70441"></script>
-<script src="js/duel.js?v=1a4cb70441"></script>
-<script src="js/badges.js?v=1a4cb70441"></script>
-<script src="js/mini.js?v=1a4cb70441"></script>
-<script src="js/backup.js?v=1a4cb70441"></script>
-<script src="js/certificate.js?v=1a4cb70441"></script>
-<script src="js/parent.js?v=1a4cb70441"></script>
-<script src="js/dojo.js?v=1a4cb70441"></script>
-<script src="js/quest.js?v=1a4cb70441"></script>
-<script src="js/leads.js?v=1a4cb70441"></script>
-<script src="js/family.js?v=1a4cb70441"></script>
-<script src="js/app.js?v=1a4cb70441"></script>
+<script src="data/sentence-bank.js?v=7754b77261"></script>
+<script src="data/reading-bank.js?v=7754b77261"></script>
+<script src="data/spanish-bank.js?v=7754b77261"></script>
+<script src="data/spelling-bank.js?v=7754b77261"></script>
+<script src="js/config.js?v=7754b77261"></script>
+<script src="js/storage.js?v=7754b77261"></script>
+<script src="js/cast.js?v=7754b77261"></script>
+<script src="js/masks.js?v=7754b77261"></script>
+<script src="js/rank.js?v=7754b77261"></script>
+<script src="js/builder.js?v=7754b77261"></script>
+<script src="js/effects.js?v=7754b77261"></script>
+<script src="js/music.js?v=7754b77261"></script>
+<script src="js/explain.js?v=7754b77261"></script>
+<script src="js/coach.js?v=7754b77261"></script>
+<script src="js/sentence-gen.js?v=7754b77261"></script>
+<script src="js/reading-game.js?v=7754b77261"></script>
+<script src="js/word-quiz.js?v=7754b77261"></script>
+<script src="js/school.js?v=7754b77261"></script>
+<script src="js/sync.js?v=7754b77261"></script>
+<script src="js/sensei.js?v=7754b77261"></script>
+<script src="js/math-game.js?v=7754b77261"></script>
+<script src="js/sentence-game.js?v=7754b77261"></script>
+<script src="js/scratch.js?v=7754b77261"></script>
+<script src="js/quick.js?v=7754b77261"></script>
+<script src="js/boss.js?v=7754b77261"></script>
+<script src="js/duel.js?v=7754b77261"></script>
+<script src="js/badges.js?v=7754b77261"></script>
+<script src="js/mini.js?v=7754b77261"></script>
+<script src="js/backup.js?v=7754b77261"></script>
+<script src="js/certificate.js?v=7754b77261"></script>
+<script src="js/parent.js?v=7754b77261"></script>
+<script src="js/dojo.js?v=7754b77261"></script>
+<script src="js/quest.js?v=7754b77261"></script>
+<script src="js/leads.js?v=7754b77261"></script>
+<script src="js/family.js?v=7754b77261"></script>
+<script src="js/app.js?v=7754b77261"></script>
 </body>
 </html>

@@ -1,7 +1,7 @@
 /* MUSIC — an original Brain Dojo soundtrack, played by little synthesizers
    in code (no audio files, so it works offline and loads instantly).
    Pieces:
-     dojo   "Morning Bow"    welcome, home and parent screens (calm koto + pad)
+     dojo   "Morning Bow"    welcome, home and parent screens (bright koto, flute and a light beat)
      map    "Path of Belts"  the Adventure Map (bright flute adventure)
      focus  "Quiet Mind"     while kids answer questions (very soft, no melody)
      boss   "Rival Stance"   boss battles and Partner Challenge (taiko drive)
@@ -13,7 +13,14 @@ window.BD = window.BD || {};
 
 BD.Music = (function () {
   const KEY = "brainDojo.audio";
-  const load = function () { try { return Object.assign({ music: true, vol: 35 }, JSON.parse(localStorage.getItem(KEY) || "{}")); } catch (e) { return { music: true, vol: 35 }; } };
+  const DEFAULT_VOL = 15; // music starts at 15%
+  const load = function () {
+    let p = {};
+    try { p = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch (e) { p = {}; }
+    // earlier versions saved 35% as the starting level: move those to the new 15% start
+    if (!p.v2) { if (p.vol === 35 || p.vol === undefined) p.vol = DEFAULT_VOL; p.v2 = true; }
+    return Object.assign({ music: true, vol: DEFAULT_VOL, v2: true }, p);
+  };
   let prefs = load();
   const savePrefs = function () { try { localStorage.setItem(KEY, JSON.stringify(prefs)); } catch (e) { /* storage blocked */ } };
 
@@ -54,12 +61,13 @@ BD.Music = (function () {
   const riff = function (chords, rel) { const s = []; chords.forEach(function (c) { rel.forEach(function (r) { s.push({ m: c[0] - 12 + r, len: 1 }); }); }); return s; };
 
   const TRACKS = {
-    dojo: { bpm: 80, gain: 1, parts: [
-      { inst: "pad", vel: 0.16, steps: perBar(DOJO_CH, [0], 8) },
-      { inst: "koto", vel: 0.32, steps: arp(DOJO_CH, [0, 2, 1, 3, 2, 1, 3, 2], 12) },
-      { inst: "bass", vel: 0.3, steps: perBar(DOJO_CH, [0, 4], 4, function (c, s) { return [c[0] - 12 + (s === 4 ? 7 : 0)]; }) },
-      { inst: "taiko", vel: 0.35, steps: beat([1, 0, 0, 0, 0, 0.45, 0, 0]) },
-      { inst: "flute", vel: 0.2, steps: Array(32).fill(null).concat(line("A4 - C5 - D5 - - - | C5 - A4 - G4 - - - | F4 - G4 A4 - - C5 - | A4 - - - - - - .")) }
+    dojo: { bpm: 100, gain: 1, parts: [
+      { inst: "pad", vel: 0.12, steps: perBar(DOJO_CH, [0], 8) },
+      { inst: "koto", vel: 0.3, steps: arp(DOJO_CH, [0, 2, 1, 3, 2, 1, 3, 2], 12) },
+      { inst: "bass", vel: 0.3, steps: perBar(DOJO_CH, [0, 3, 4, 6], 1, function (c, s) { return [c[0] - 12 + (s === 4 ? 7 : s === 6 ? 12 : 0)]; }) },
+      { inst: "taiko", vel: 0.38, steps: beat([1, 0, 0, 0.5, 0.8, 0, 0.4, 0]) },
+      { inst: "shaker", vel: 0.1, steps: beat([0.7, 0.4, 0.7, 0.4, 0.7, 0.4, 0.7, 0.5]) },
+      { inst: "flute", vel: 0.2, steps: line("D5 - F5 - A5 - G5 F5 | D5 - - - C5 - D5 - | G4 - Bb4 - D5 - F5 - | E5 - - - D5 - C5 - | A4 - C5 - D5 - F5 - | G5 - F5 D5 - - C5 - | Bb4 - D5 - G5 - F5 - | E5 - D5 - C#5 - - .") }
     ] },
     map: { bpm: 100, gain: 1, parts: [
       { inst: "pad", vel: 0.12, steps: perBar(MAP_CH, [0], 8) },
