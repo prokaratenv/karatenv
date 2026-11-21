@@ -44,7 +44,7 @@ BD.streak = function (p) {
 };
 /* Every point a student earns goes through here, so the weekly leaderboard can count it. */
 BD.addXP = function (p, n) {
-  n = Math.max(0, Math.round(Number(n) || 0)); if (!n) return 0;
+  n = Math.max(0, Math.round((Number(n) || 0) * 2) / 2); if (!n) return 0; // half points allowed (flashcard bonus is 2.5)
   p.xp = (p.xp || 0) + n;
   const log = p.xpLog = p.xpLog && typeof p.xpLog === "object" ? p.xpLog : {}, t = BD.today();
   log[t] = (log[t] || 0) + n;
@@ -111,7 +111,8 @@ BD.Store = (function () {
     p.gearHidden = Array.isArray(p.gearHidden) ? p.gearHidden.filter(function (g) { return GEAR_KEYS.indexOf(g) !== -1; }) : [];
     if (p.badges && typeof p.badges === "object") Object.keys(p.badges).forEach(function (k) { if (!/^[a-z0-9-]{2,30}$/.test(k) || typeof p.badges[k] !== "string") delete p.badges[k]; });
     p.dojoOptIn = !!p.dojoOptIn;
-    if (p.xpLog && typeof p.xpLog === "object") { const xl = {}; Object.keys(p.xpLog).forEach(function (k) { if (/^\d{4}-\d\d-\d\d$/.test(k)) xl[k] = Math.max(0, Math.min(10000, Math.round(Number(p.xpLog[k]) || 0))); }); p.xpLog = xl; } else delete p.xpLog;
+    if (p.flash && typeof p.flash === "object" && /^\d{4}-\d\d-\d\d$/.test(p.flash.day)) p.flash = { day: p.flash.day, ops: (Array.isArray(p.flash.ops) ? p.flash.ops : []).filter(function (o, i, a) { return ["add", "sub", "mul", "div"].indexOf(o) !== -1 && a.indexOf(o) === i; }) }; else delete p.flash;
+    if (p.xpLog && typeof p.xpLog === "object") { const xl = {}; Object.keys(p.xpLog).forEach(function (k) { if (/^\d{4}-\d\d-\d\d$/.test(k)) xl[k] = Math.max(0, Math.min(10000, Math.round((Number(p.xpLog[k]) || 0) * 2) / 2)); }); p.xpLog = xl; } else delete p.xpLog;
     if (["gi", "training", "sparring", "boxing", "mma"].indexOf(p.outfit) === -1) p.outfit = "gi";
     if (BD.School) BD.School.sanitize(p); else if (p.school && typeof p.school !== "object") delete p.school;
     if (BD.Quest) BD.Quest.sanitize(p);

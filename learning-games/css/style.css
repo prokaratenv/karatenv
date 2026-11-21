@@ -1139,3 +1139,17 @@ body.duel-on .topbar, body.duel-on .footer { visibility: hidden; }
 .terms a { color: var(--teal); }
 .xp-warn { margin: 10px 0; padding: 12px 14px; border-radius: 14px; border: 1px solid var(--warn); background: var(--warn-bg); }
 .xp-warn p { margin: 6px 0 0; }
+
+/* ---------- Daily Flashcards ---------- */
+.flash-block { border: 1px solid rgba(224,186,119,.55); border-radius: 18px; padding: 14px; background: linear-gradient(140deg, rgba(224,186,119,.12), rgba(19,34,61,.6)); }
+.flash-block .muted { margin: 0 0 10px; }
+.flash-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+@media (max-width: 560px) { .flash-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.flash-btn { display: grid; justify-items: center; gap: 2px; padding: 12px 6px; border-radius: 16px; border: 2px solid var(--line); background: var(--surface-2); color: var(--ink); font: inherit; cursor: pointer; min-width: 0; }
+.flash-btn:hover:not(:disabled) { border-color: var(--gold-2); transform: translateY(-1px); }
+.flash-btn .op-sym { font-family: var(--font-display); font-weight: 900; font-size: 2.2rem; line-height: 1; color: var(--gold-2); }
+.flash-name { font-weight: 800; font-size: .95rem; }
+.flash-state { font-size: .75rem; color: var(--teal); font-weight: 700; text-align: center; }
+.flash-btn.done { border-color: var(--good); background: var(--good-bg); }
+.flash-btn.done .flash-state { color: #CFF7C2; }
+.flash-btn:disabled { opacity: .45; cursor: not-allowed; }

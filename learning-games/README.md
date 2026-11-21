@@ -14,6 +14,13 @@ Free math, writing, reading, spelling and Spanish practice from Pre-K through 8t
 - **Belt card:** tap the belt on the home screen to see its stripes, practice XP for each stripe, total Belt XP (out of 500), the next belt, the belt path and past graduations. Tabs along the top switch grades to see the belt for any grade, and **Train this grade** makes it the Dojo grade.
 - **Free play:** the game cards still work for free practice at any grade, and their XP also counts toward that grade's stripes (up to the cap).
 
+## Daily Flashcards (math bonus points)
+
+In **Math Dojo**, the top of the screen has **⚡ Daily Flashcards**: big buttons for **+ Addition, − Subtraction, × Multiplication and ÷ Division**. Each one is a quick set of 10 cards of just that skill at the student's math grade. No missed-card repeats or explanations slow it down, so they build speed.
+- **Bonus:** finishing a set with 70% or better earns **+2.5 bonus XP**, once per skill per day. All four skills = **+10 a day** (Pre-K to 1st grade have addition and subtraction, so up to +5).
+- The buttons show ✓ once a skill's bonus is earned today. Extra sets still count as practice XP for the Math stripe (up to its 100 cap), just without another bonus. Everything resets at midnight.
+- Bonus XP counts toward total XP and the weekly leaderboard. A low flashcard score never locks a level.
+
 ## Start training, read aloud and certificates
 
 - **Start training:** the big button on the home screen starts whatever Sensei suggests next (the stripe closest to done, a test they're ready for, or their weakest skill). Underneath, a 🔥 streak counts the days in a row they've trained.
@@ -37,7 +44,7 @@ Free math, writing, reading, spelling and Spanish practice from Pre-K through 8t
 - **PIN:** the first visit asks for a 4-digit parent PIN, so kids can't reset or remove progress. Forgot it? A grown-up math question lets you set a new one.
 - **Dashboard:** for each child: this week (days, rounds, questions, streak), belt progress, what they're strong at and what to work on, a tip to try at home, last week's recap (highlighted on Mondays) and badges. The detailed tables are under **See details** and only show grades they've played.
 - **Share this week:** makes a progress card picture to text to family or an Engage instructor.
-- **Dojo Challenge:** a weekly team goal (3,000 right answers) plus a **leaderboard ranked by XP earned this week** (practice, graduations, bosses, Partner Challenges and daily chests). Stripe tests alone give no points, so doing the practice is how to climb it. for everyone using the shared link. Parents opt each child in; other families see only a first name, belt and weekly count. Needs the shared Claude link while signed in, with Contributor access or above (everyone in your Claude organization; view-only visitors can see the board but not add to it).
+- **Dojo Challenge:** a weekly team goal (3,000 right answers) plus a **leaderboard ranked by XP earned this week** (practice, graduation bonuses, Daily Flashcards, bosses, Partner Challenges and daily chests). Stripe tests alone give no points, so doing the practice is how to climb it. for everyone using the shared link. Parents opt each child in; other families see only a first name, belt and weekly count. Needs the shared Claude link while signed in, with Contributor access or above (everyone in your Claude organization; view-only visitors can see the board but not add to it).
 
 ## School Words (from your child's teacher)
 

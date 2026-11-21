@@ -29,7 +29,7 @@ BD.Dojo = (function () {
       players: e.players.slice(0, 6).map(function (pl) {
         const b = BELT_BY_NAME[pl && pl.belt] || BD.BELTS[0];
         const reps = Math.max(0, Math.min(1500, Math.round(Number(pl && pl.reps) || 0))); // no one answers 1,500+ in a week
-        const xp = Math.max(0, Math.min(10000, Math.round(Number(pl && pl.xp) || 0)));
+        const xp = Math.max(0, Math.min(10000, Math.round((Number(pl && pl.xp) || 0) * 2) / 2));
         return { name: firstName(pl && pl.name), belt: b.name, color: b.color, reps: reps, xp: xp };
       })
     };
@@ -108,7 +108,7 @@ BD.Dojo = (function () {
       (b.rows.length ? '<ol class="dojo-list">' + b.rows.map(function (r) {
         return '<li' + (r.me ? ' class="me"' : '') + '><span class="belt-swatch" style="--belt:' + r.color + '"></span><span class="dl-name">' + BD.UI.esc(r.name) + '</span><span class="dl-belt">' + BD.UI.esc(r.belt) + '</span><span class="dl-n">' + r.xp.toLocaleString() + ' XP</span></li>';
       }).join("") + '</ol>' : '<p class="muted">No one has joined yet this week. Be the first!</p>') +
-      '<p class="muted small">XP comes from doing the work: practice (up to 100 per stripe), graduation bonuses earned by that practice (up to +100), bosses, challenges and daily chests. Stripe tests alone give no points. Only first names and belts are shown. Parents can join or leave in the Parent corner.</p>');
+      '<p class="muted small">XP comes from doing the work: practice (up to 100 per stripe), graduation bonuses earned by that practice (up to +100), Daily Flashcards (up to +10 a day), bosses, challenges and daily chests. Stripe tests alone give no points. Only first names and belts are shown. Parents can join or leave in the Parent corner.</p>');
   }
 
   /* Parent corner toggle. */

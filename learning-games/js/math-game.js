@@ -11,6 +11,14 @@ BD.MathGame = (function () {
   const PRACTICE_CARDS = 20;
   const PASS = 70; // below this percent, the level must be redone
   const CLOCK_SECONDS = 60;
+  /* Daily Flashcards: a quick set of one skill. Finishing a set (70%+) earns a
+     +2.5 bonus, once per skill per day: up to 10 bonus points a day. */
+  const FLASH_CARDS = 10, FLASH_BONUS = 2.5;
+  function flashToday(p) {
+    const t = BD.today();
+    if (!p.flash || p.flash.day !== t) p.flash = { day: t, ops: [] };
+    return p.flash;
+  }
 
   const r = function (lo, hi) { return lo + Math.floor(Math.random() * (hi - lo + 1)); };
   const chance = function (p) { return Math.random() < p; };
@@ -162,6 +170,15 @@ BD.MathGame = (function () {
       (retry ? '<div class="redo-note"><strong>Redo this level</strong><p>Score ' + PASS + '% or better on ' + BD.gradeLabel(grade) + ' ' +
         ops.map(function (o) { return OPS[o].label.toLowerCase(); }).join(", ") + ' to unlock higher grades. Read Sensei\'s tips first. Too hard right now? Pick a lower grade below.</p>' +
         '<button type="button" class="btn btn-small" id="mathTipsBtn">Read the tips</button></div>' : '') +
+      (function () {
+        const done = flashToday(p).ops;
+        return '<div class="setup-block flash-block"><h3 class="label">⚡ Daily Flashcards</h3><p class="muted small">' + FLASH_CARDS + ' quick cards of one skill. Finish a set (70%+) for a <strong>+' + FLASH_BONUS + ' bonus</strong>, once per skill each day (up to +' + (FLASH_BONUS * 4) + ' a day). Today: <strong>+' + (done.length * FLASH_BONUS) + '</strong></p><div class="flash-grid" id="mathFlashPick">' +
+          Object.keys(OPS).map(function (k) {
+            const ok = allowed.indexOf(k) !== -1, got = done.indexOf(k) !== -1;
+            return '<button type="button" class="flash-btn' + (got ? " done" : "") + '" data-flash="' + k + '"' + (ok && !retry ? "" : " disabled") + '>' +
+              '<span class="op-sym">' + OPS[k].sym + '</span><span class="flash-name">' + OPS[k].label + '</span><span class="flash-state">' + (!ok ? "Starts in 2nd grade" : got ? "✓ Bonus earned today" : "+" + FLASH_BONUS + " bonus") + '</span></button>';
+          }).join("") + '</div></div>';
+      })() +
       '<div class="setup-block"><h3 class="label">Grade level</h3>' + BD.UI.gradePicker("mathGradePick", grade, !!retry) +
       '<p class="muted" id="mathLevelAbout">' + LEVELS[grade].about + '</p></div>' +
       '<div class="setup-block"><h3 class="label">Which skills?</h3><div class="chips" id="mathOpsPick">' +
@@ -189,6 +206,10 @@ BD.MathGame = (function () {
       if (i !== -1 && cur.length > 1) cur.splice(i, 1); else if (i === -1) cur.push(k);
       p.mathOps = Object.keys(OPS).filter(function (o) { return cur.indexOf(o) !== -1; });
       BD.Store.save(); BD.Sound.tap(); openSetup();
+    });
+    $("mathFlashPick").addEventListener("click", function (e) {
+      const b = e.target.closest("[data-flash]"); if (!b || b.disabled) return;
+      BD.Sound.tap(); start("flash", [b.dataset.flash]);
     });
     document.querySelectorAll("#mathSetupBody .mode-card").forEach(function (btn) {
       btn.addEventListener("click", function () { start(btn.dataset.mode); });
@@ -224,6 +245,8 @@ BD.MathGame = (function () {
     };
     if (S.test) {
       for (let n = 0; n < 20; n++) S.queue.push(freshProblem());
+    } else if (mode === "flash") {
+      for (let n = 0; n < FLASH_CARDS; n++) S.queue.push(freshProblem());
     } else if (mode === "practice") {
       const tricky = trickyFor(p, S.grade, S.ops).slice(0, 4).map(function (t) { return build(t.op, t.a, t.b, t.grade); });
       for (let n = 0; n < PRACTICE_CARDS - tricky.length; n++) S.queue.push(freshProblem());
@@ -235,7 +258,7 @@ BD.MathGame = (function () {
     }
     buildKeypad();
     BD.UI.syncGradeSelect("mathGradeSel", "math");
-    BD.UI.testMode("screen-math-play", S.test ? "Math stripe test" : S.stripe ? "Math stripe practice · " + BD.BELTS[S.stripe.belt].name + " Belt" : "", !BD.Rank.hintsAllowed(BD.Store.current(), S.grade));
+    BD.UI.testMode("screen-math-play", S.test ? "Math stripe test" : S.stripe ? "Math stripe practice · " + BD.BELTS[S.stripe.belt].name + " Belt" : mode === "flash" ? "⚡ " + OPS[S.ops[0]].label + " flashcards" : "", !BD.Rank.hintsAllowed(BD.Store.current(), S.grade));
     BD.UI.show("screen-math-play");
     BD.Cast.say("mathSay", "start");
     BD.Scratch.close(); BD.Scratch.clear();
@@ -274,7 +297,7 @@ BD.MathGame = (function () {
     $("mathAnswer").classList.toggle("empty", !S.input);
     $("mathFeedback").textContent = "";
     $("mathCard").className = "flashcard";
-    if (S.mode === "practice") $("mathProgress").textContent = (S.test ? "Test " : "Card ") + (S.i + 1) + " of " + S.queue.length;
+    if (S.mode !== "clock") $("mathProgress").textContent = (S.test ? "Test " : "Card ") + (S.i + 1) + " of " + S.queue.length;
     else tick();
     $("mathStreak").textContent = S.streak >= 3 ? "Combo ×" + S.streak : "";
     $("mathScore").textContent = S.xp + " XP";
@@ -421,6 +444,16 @@ BD.MathGame = (function () {
     }
     // Bonus for a strong round
     if (acc === 100 && S.answered >= 10) S.xp += 25;
+    // Daily Flashcards bonus: once per skill per day, for finishing a set at 70%+
+    let flashBonus = 0, flashNote = "";
+    if (mode === "flash") {
+      const ft = flashToday(p), op = S.ops[0];
+      if (S.answered >= FLASH_CARDS && acc >= PASS && ft.ops.indexOf(op) === -1) { ft.ops.push(op); flashBonus = BD.addXP(p, FLASH_BONUS); }
+      const left = Object.keys(OPS).filter(function (o) { return opsFor(grade).indexOf(o) !== -1 && ft.ops.indexOf(o) === -1; });
+      flashNote = flashBonus ? "⚡ +" + FLASH_BONUS + " flashcard bonus! Today: +" + (ft.ops.length * FLASH_BONUS) + " of " + (FLASH_BONUS * 4) + "." + (left.length ? " Still open today: " + left.map(function (o) { return OPS[o].label.toLowerCase(); }).join(", ") + "." : " All four done today!")
+        : acc < PASS ? "Score " + PASS + "% or better on a set to earn the +" + FLASH_BONUS + " bonus. Try again!"
+        : "You already earned today's " + OPS[op].label.toLowerCase() + " bonus. Great extra practice!" + (left.length ? " Bonus still open: " + left.map(function (o) { return OPS[o].label.toLowerCase(); }).join(", ") + "." : "");
+    }
     const belt = BD.Rank.practice(p, "math", grade, S.xp - (S.banked || 0)); S.banked = S.xp;
     BD.Store.recordSession(p, {
       game: "math", mode: S.mode, grade: S.grade, ops: S.ops, correct: S.correct, total: S.answered, xp: S.xp
@@ -430,11 +463,11 @@ BD.MathGame = (function () {
     S.missed.forEach(function (q) { if (!uniqueMissed.some(function (u) { return u.key === q.key; })) uniqueMissed.push(q); });
     const enough = S.mode === "practice" ? S.answered >= 15 : S.correct >= 15;
     const ready = acc >= 90 && enough && S.grade < BD.MAX_GRADE;
-    const failed = acc < PASS && S.answered >= 5;
+    const failed = mode !== "flash" && acc < PASS && S.answered >= 5;
     p.retry = p.retry || {};
     const wasRetry = !!p.retry.math;
     if (failed) p.retry.math = { grade: grade, ops: S.ops.slice() };
-    const passedRetry = wasRetry && !failed && S.answered >= 5;
+    const passedRetry = mode !== "flash" && wasRetry && !failed && S.answered >= 5;
     if (passedRetry) p.retry.math = null;
     BD.Store.save();
     const ops = S.ops;
@@ -442,18 +475,20 @@ BD.MathGame = (function () {
     const missedOps = ops.filter(function (o) { return uniqueMissed.some(function (q) { return q.op === o; }); });
 
     BD.UI.results({
-      title: failed ? "Let's train this again" : passedRetry ? "Level passed!" : S.mode === "clock" ? (record ? "New record!" : "Time!") : (acc >= 90 ? "Outstanding!" : "Strong work!"),
+      title: mode === "flash" ? (flashBonus ? "Flashcards done! +" + FLASH_BONUS : acc >= 90 ? "Lightning fast!" : "Flashcards done!") :
+        failed ? "Let's train this again" : passedRetry ? "Level passed!" : S.mode === "clock" ? (record ? "New record!" : "Time!") : (acc >= 90 ? "Outstanding!" : "Strong work!"),
+      coachNote: flashNote || null,
       failed: failed ? "You got " + acc + "%. You need " + PASS + "% to pass " + BD.gradeLabel(grade) + ". Read Sensei's lesson below, then redo the level. You've got this!" : null,
       passedRetry: passedRetry ? "You passed with " + acc + "%. All levels are unlocked again." : null,
       lesson: uniqueMissed.length || failed ? lessonHTML(grade, failed ? ops : missedOps, uniqueMissed) : "",
       subtitle: "Math Dojo · " + BD.gradeLabel(S.grade) + " · " + S.ops.map(function (o) { return OPS[o].sym; }).join(" "),
-      stats: [["Correct", S.correct + (S.mode === "practice" ? " / " + S.answered : "")], ["Accuracy", acc + "%"], ["Best streak", S.bestStreak], ["XP earned", "+" + S.xp]],
+      stats: [["Correct", S.correct + (S.mode !== "clock" ? " / " + S.answered : "")], ["Accuracy", acc + "%"], ["Best streak", S.bestStreak], ["XP earned", "+" + S.xp]].concat(flashBonus ? [["Bonus", "+" + flashBonus]] : []),
       belt: belt,
       listTitle: uniqueMissed.length ? "Facts to practice" : "",
       list: uniqueMissed.slice(0, 12).map(function (q) { return show(q) + " = " + num(q.answer); }),
-      levelUp: ready && !failed ? { text: "You got " + acc + "% at " + BD.gradeLabel(grade) + ". Ready to try " + BD.gradeLabel((grade + 1)) + "?", action: function () { p.mathGrade = grade + 1; BD.Store.save(); openSetup(); } } : null,
+      levelUp: ready && !failed && mode !== "flash" ? { text: "You got " + acc + "% at " + BD.gradeLabel(grade) + ". Ready to try " + BD.gradeLabel((grade + 1)) + "?", action: function () { p.mathGrade = grade + 1; BD.Store.save(); openSetup(); } } : null,
       again: function () { start(mode, stripeAgain ? null : ops, stripeAgain); },
-      againLabel: failed ? "Redo this level" : "Go again",
+      againLabel: failed ? "Redo this level" : mode === "flash" ? "Another set" : "Go again",
       setup: failed ? null : openSetup
     });
   }
@@ -504,5 +539,5 @@ BD.MathGame = (function () {
 
   function bankNow() { if (S && !S.done) BD.Rank.bank(S, "math"); }
 
-  return { bankNow: bankNow, opsFor: opsFor, stop: stop, start: start, openSetup: openSetup, bind: bind, makeProblem: makeProblem, LEVELS: LEVELS, OPS: OPS, show: show, PASS: PASS };
+  return { FLASH_BONUS: FLASH_BONUS, flashToday: flashToday, bankNow: bankNow, opsFor: opsFor, stop: stop, start: start, openSetup: openSetup, bind: bind, makeProblem: makeProblem, LEVELS: LEVELS, OPS: OPS, show: show, PASS: PASS };
 })();
