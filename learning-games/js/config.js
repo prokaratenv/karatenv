@@ -11,8 +11,9 @@ BD.CONFIG = {
     "https://script.google.com/macros/s/AKfycbyP5EiR5NzP9GZ0ccb2Nl8yZcDRMyfoI5WVpOC9zd3Wq1ZLPYselJ22V2fdrAUSgcdV/exec",
   ],
   /* accountEndpoint: the Family Sync web app URL (tools/family-sync.gs). With it,
-     parents sign in with their email and progress follows students to any device. */
-  accountEndpoint: "https://script.google.com/macros/s/AKfycbwGjo6X4NQ94DZTZ14RSwaOv1MMczA2WuBb7ZrGW2-J9E7QbPsWyS4U4hEj7nh4_pDN3w/exec",
+     families link devices with a private Family Sync Code. Progress is encrypted
+     on the device first; the script stores only the locked copy. */
+  accountEndpoint: "https://script.google.com/macros/s/AKfycbx8GBasakjcxFhWnzYCnfu3WK4us_adJecdrOW8IUMFHsXrD1okLhQeWkPb2T4h-BRA7A/exec",
   studioName: "Engage Lifestyle Martial Arts",
   studioSite: "https://engagemartialarts.com"
 };
