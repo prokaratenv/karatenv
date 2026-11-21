@@ -52,8 +52,9 @@ The home screen is kept simple. From top to bottom:
 | Sparring Headgear | Yellow Belt with 3 stripes |
 | Sparring Chest Gear | Yellow Belt with 4 stripes |
 | **Full Sparring Gear outfit** | The Yellow → Orange Belt graduation, when sparring starts in class |
-| Nunchucks (for show) | Blue Belt |
 | Boxing Gloves | Green Belt |
+| Nunchucks (for show) | Green Belt |
+| **High Rank Uniform** | Green Belt: a black gi with the collar stripe and belt in the student's belt color (green, purple, brown, red). Built champions get it too. |
 | **Judo Moves** (skill) | Green Belt: every 5 right in a row is a judo throw in boss battles (−3) and sparring (+2) |
 | Kamas (for show) | Purple Belt |
 | Bo Staff (for show) | Brown Belt |

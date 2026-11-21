@@ -53,8 +53,9 @@ BD.Badges = (function () {
     { id: "yellow-3", name: "Yellow Belt · 3 Stripes", how: "Earn 3 stripes on your Yellow Belt.", gear: "headgear", test: function (p) { return yellowStripes(p) >= 3; } },
     { id: "yellow-4", name: "Yellow Belt · 4 Stripes", how: "Earn all 4 stripes on your Yellow Belt.", gear: "chest", test: function (p) { return yellowStripes(p) >= 4; } },
     { id: "orange-spar", name: "Ready to Spar!", how: "Graduate from Yellow to Orange Belt. That's when sparring starts at Engage!", gear: null, unlocks: "sparring", test: reachedOrange },
-    { id: "blue-nunchucks", name: "Blue Belt", how: "Reach Blue Belt.", gear: "nunchucks", test: function (p) { return reached(p, 3); } },
+    { id: "green-nunchucks", name: "Green Belt", how: "Reach Green Belt.", gear: "nunchucks", test: function (p) { return reached(p, 4); } },
     { id: "green-boxing", name: "Green Belt", how: "Reach Green Belt.", gear: "boxing", test: function (p) { return reached(p, 4); } },
+    { id: "green-highrank", name: "High Rank", how: "Reach Green Belt: earn the High Rank Uniform, a black gi with a collar stripe in your belt color.", gear: null, unlocks: "highrank", test: function (p) { return reached(p, 4); } },
     { id: "green-judo", name: "Judo Moves", how: "Reach Green Belt. Every 5 right in a row becomes a judo throw in battles and sparring!", gear: null, skill: "judo", test: function (p) { return reached(p, 4); } },
     { id: "purple-kamas", name: "Purple Belt", how: "Reach Purple Belt.", gear: "kamas", test: function (p) { return reached(p, 5); } },
     { id: "brown-bo", name: "Brown Belt", how: "Reach Brown Belt.", gear: "bo", test: function (p) { return reached(p, 6); } },
@@ -73,7 +74,8 @@ BD.Badges = (function () {
     { id: "training", name: "Engage Training", gear: ["shirt", "shorts"] },
     { id: "sparring", name: "Sparring Gear", gear: ["mouthguard", "shirt", "sparring", "headgear", "chest", "boots"], badge: "orange-spar" },
     { id: "boxing", name: "Boxing", gear: ["mouthguard", "shirt", "shorts", "boxing"] },
-    { id: "mma", name: "MMA", gear: ["mouthguard", "shirt", "shorts", "mma"] }
+    { id: "mma", name: "MMA", gear: ["mouthguard", "shirt", "shorts", "mma"] },
+    { id: "highrank", name: "High Rank Uniform", gear: [], badge: "green-highrank" }
   ];
   OUTFITS.forEach(function (o) { o.needs = o.gear; });
   const outfitById = function (id) { return OUTFITS.find(function (o) { return o.id === id; }) || OUTFITS[0]; };
@@ -127,11 +129,11 @@ BD.Badges = (function () {
       '<div class="outfits">' + OUTFITS.map(function (o) {
         const open = outfitUnlocked(p, o), on = now === o.id;
         const missing = o.needs.filter(function (g) { return !hasGear(p, g); }).map(function (g) { return GEAR[g].name; })
-          .concat(o.badge && !(p.badges && p.badges[o.badge]) ? ["Orange Belt graduation"] : []);
+          .concat(o.badge && !(p.badges && p.badges[o.badge]) ? [o.id === "highrank" ? "Green Belt" : "Orange Belt graduation"] : []);
         return '<button type="button" class="outfit' + (on ? " on" : "") + (open && kid ? "" : " locked") + '"' + (open && kid ? ' data-outfit="' + o.id + '" aria-pressed="' + on + '"' : ' disabled') + '>' +
           '<span class="outfit-art">' + BD.UI.championHTML(p, o.id) + '</span>' +
           '<strong>' + esc(o.name) + '</strong>' +
-          '<span class="locker-state">' + (on ? "Wearing" : open ? (kid ? "Tap to wear" : "Unlocked") : "🔒 " + (o.badge ? "Unlocks at Orange Belt" : (o.needs.length - missing.length) + " of " + o.needs.length + " pieces")) + '</span>' +
+          '<span class="locker-state">' + (on ? "Wearing" : open ? (kid ? "Tap to wear" : "Unlocked") : "🔒 " + (o.badge ? (o.id === "highrank" ? "Unlocks at Green Belt" : "Unlocks at Orange Belt") : (o.needs.length - missing.length) + " of " + o.needs.length + " pieces")) + '</span>' +
           (open ? "" : '<span class="outfit-need">Still need: ' + esc(missing.join(", ")) + '</span>') + '</button>';
       }).join("") + '</div>' +
       '<h4 class="label">Gear collection · ' + GEAR_BADGES.filter(function (b) { return hasGear(p, b.gear); }).length + ' of ' + GEAR_BADGES.length + '</h4>' +
@@ -183,13 +185,13 @@ BD.Badges = (function () {
         '<div class="res-actions"><button type="button" class="btn btn-primary" id="unlockNext">' + (list.length > 1 ? "Next unlock" : "Awesome!") + '</button><button type="button" class="btn btn-quiet" id="unlockLocker">Open my locker</button></div></div>');
       BD.Sound.belt(); BD.confetti(120); nextBtns(); return;
     }
-    if (!g) { // the Orange Belt milestone: the full sparring outfit
-      const p = BD.Store.current(), o = b.outfit || outfitById(b.unlocks);
-      BD.UI.sheet("Ready to spar!",
+    if (!g) { // an outfit milestone: the full sparring outfit (Orange) or the High Rank Uniform (Green)
+      const p = BD.Store.current(), o = b.outfit || outfitById(b.unlocks), hr = b.unlocks === "highrank";
+      BD.UI.sheet(hr ? "High Rank Uniform!" : "Ready to spar!",
         '<div class="unlock">' + (canWearOutfits(p) ? '<div class="unlock-outfit">' + BD.UI.championHTML(p, o.id) + '</div>' : '') +
-        '<h3>Full Sparring Gear outfit unlocked!</h3><p>🏅 <strong>' + esc(b.name) + '</strong>: ' + esc(b.how) + '</p>' +
+        '<h3>' + (hr ? "High Rank Uniform unlocked!" : "Full Sparring Gear outfit unlocked!") + '</h3><p>🏅 <strong>' + esc(b.name) + '</strong>: ' + esc(b.how) + '</p>' +
         (canWearOutfits(p) && b.outfit ? '<p class="muted">Your champion is wearing it now.</p>' : '<p class="muted">Find it in your Gear locker.</p>') +
-        '<div class="res-actions"><button type="button" class="btn btn-primary" id="unlockNext">' + (list.length > 1 ? "Next unlock" : "Let\'s spar!") + '</button>' +
+        '<div class="res-actions"><button type="button" class="btn btn-primary" id="unlockNext">' + (list.length > 1 ? "Next unlock" : hr ? "Osu!" : "Let\'s spar!") + '</button>' +
         '<button type="button" class="btn btn-quiet" id="unlockLocker">Open my locker</button></div></div>');
       BD.Sound.belt(); BD.confetti(160);
       document.getElementById("unlockNext").onclick = function () { celebrate(list.slice(1), done); if (list.length === 1) document.getElementById("infoClose").click(); };

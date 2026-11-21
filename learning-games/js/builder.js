@@ -49,7 +49,9 @@ BD.Builder = (function () {
      — the same outfits the student characters wear, drawn to fit this body. */
   function svg(cfg, beltColor, mode, age, outfit) {
     const c = clean(cfg);
-    const fit = ["training", "sparring", "boxing", "mma"].indexOf(outfit) !== -1 ? outfit : "gi";
+    let fit = ["training", "sparring", "boxing", "mma", "highrank"].indexOf(outfit) !== -1 ? outfit : "gi";
+    const highRank = fit === "highrank";
+    if (highRank) { fit = "gi"; c.uniform = "black"; } // black gi with a belt-colored collar
     if (fit !== "gi") c.uniform = fit === "sparring" ? "spar" : "shirt";
     const A = age === undefined || age === null ? 2 : Math.max(0, Math.min(3, age));
     const AB = [0.72, 0.84, 0.95, 1.06][A], AH = [1.1, 1.04, 1, 0.94][A], AW = [0.9, 0.95, 1, 1.04][A];
@@ -61,7 +63,7 @@ BD.Builder = (function () {
     const oy = 306 - (124 + th + lh + 10); // keep feet on the ground
     const tTop = 124, tBot = tTop + th, cx = 100;
     const gi = c.uniform === "white" ? "#F2F2F0" : "#1F1E26"; // spar: black pants
-    const giEdge = c.uniform === "white" ? "#C9CBD3" : "#3A3946";
+    const giEdge = highRank ? (beltColor || "#3A3946") : c.uniform === "white" ? "#C9CBD3" : "#3A3946";
     const spar = c.uniform === "spar";
     const shirt = c.uniform === "shirt" || spar;
     const pants = !(c.uniform === "shirt");
@@ -119,8 +121,8 @@ BD.Builder = (function () {
       } else body += '<image href="img/engage-mark.webp" x="' + (cx + tw * 0.08) + '" y="' + (tTop + th * 0.18) + '" width="20" height="11"/>';
     } else {
       // crossed lapels
-      body += '<path d="M' + (cx - 13) + ' ' + tTop + ' L' + (cx + 10) + ' ' + (tTop + th * 0.62) + '" stroke="' + giEdge + '" stroke-width="5" stroke-linecap="round"/>';
-      body += '<path d="M' + (cx + 13) + ' ' + tTop + ' L' + (cx - 4) + ' ' + (tTop + th * 0.4) + '" stroke="' + giEdge + '" stroke-width="5" stroke-linecap="round"/>';
+      body += '<path d="M' + (cx - 13) + ' ' + tTop + ' L' + (cx + 10) + ' ' + (tTop + th * 0.62) + '" stroke="' + giEdge + '" stroke-width="' + (highRank ? 7 : 5) + '" stroke-linecap="round"/>';
+      body += '<path d="M' + (cx + 13) + ' ' + tTop + ' L' + (cx - 4) + ' ' + (tTop + th * 0.4) + '" stroke="' + giEdge + '" stroke-width="' + (highRank ? 7 : 5) + '" stroke-linecap="round"/>';
       body += '<path d="M' + (cx - 11) + ' ' + tTop + ' L' + cx + ' ' + (tTop + 13) + ' L' + (cx + 11) + ' ' + tTop + 'z" fill="' + skin + '"/>';
       body += '<image href="img/engage-mark.webp" x="' + (cx + tw * 0.12) + '" y="' + (tTop + 14) + '" width="17" height="10"/>';
     }
