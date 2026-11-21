@@ -114,6 +114,7 @@ BD.Store = (function () {
     if (p.badges && typeof p.badges === "object") Object.keys(p.badges).forEach(function (k) { if (!/^[a-z0-9-]{2,30}$/.test(k) || typeof p.badges[k] !== "string") delete p.badges[k]; });
     p.dojoOptIn = !!p.dojoOptIn;
     if (p.flash && typeof p.flash === "object" && /^\d{4}-\d\d-\d\d$/.test(p.flash.day)) p.flash = { day: p.flash.day, ops: (Array.isArray(p.flash.ops) ? p.flash.ops : []).filter(function (o, i, a) { return ["add", "sub", "mul", "div"].indexOf(o) !== -1 && a.indexOf(o) === i; }) }; else delete p.flash;
+    if (p.flashSpell && typeof p.flashSpell === "object" && /^\d{4}-\d\d-\d\d$/.test(p.flashSpell.day)) p.flashSpell = { day: p.flashSpell.day, styles: (Array.isArray(p.flashSpell.styles) ? p.flashSpell.styles : []).filter(function (o, i, a) { return ["missing", "pick", "scramble", "fix", "check"].indexOf(o) !== -1 && a.indexOf(o) === i; }) }; else delete p.flashSpell;
     if (p.xpLog && typeof p.xpLog === "object") { const xl = {}; Object.keys(p.xpLog).forEach(function (k) { if (/^\d{4}-\d\d-\d\d$/.test(k)) xl[k] = Math.max(0, Math.min(10000, Math.round((Number(p.xpLog[k]) || 0) * 2) / 2)); }); p.xpLog = xl; } else delete p.xpLog;
     if (["gi", "training", "sparring", "boxing", "mma", "highrank", "leadership", "athlete", "bbc"].indexOf(p.outfit) === -1) p.outfit = "gi";
     if (p.nick !== undefined && (typeof p.nick !== "string" || !(BD.Dojo ? BD.Dojo.nickOk(p.nick, p.name) : /^[A-Za-z]+ [A-Za-z]+ [1-9][0-9]?$/.test(p.nick)))) delete p.nick;

@@ -1318,7 +1318,7 @@ body.duel-on .topbar, body.duel-on .footer { visibility: hidden; }
 .team-e { display: inline-grid; place-items: center; flex: none; width: 30px; height: 30px; border-radius: 50%; background: #15151C; border: 2px solid currentColor; font-family: var(--font-display); font-weight: 900; font-style: italic; font-size: 1rem; line-height: 1; vertical-align: middle; }
 .team-leadership { color: #B07CFF; }
 .team-athlete { color: #3FD07F; }
-.team-bbc { color: #fff; border-color: transparent; background: linear-gradient(135deg, #F5C518, #F28C28, #2FA866, #2F6FD6, #7B4BC4, #D63A2F); }
+.team-bbc { color: #fff; border-color: transparent; background: linear-gradient(135deg, #65D94A, #5CBFC1, #4F6CEE); } /* Engage Earthtone Gradient */
 .chest-prize .team-e { width: 72px; height: 72px; font-size: 2.2rem; border-width: 3px; }
 .team-block { padding: 12px; border-radius: 14px; background: rgba(255, 255, 255, .04); border: 1px solid rgba(255, 255, 255, .1); margin: 10px 0; }
 .team-block.in { border-color: rgba(224, 186, 119, .45); }
@@ -1342,3 +1342,13 @@ body.duel-on .topbar, body.duel-on .footer { visibility: hidden; }
 .lesson-opt.wrong { opacity: .5; text-decoration: line-through; }
 .lesson-note { min-height: 1.4em; }
 .xp-pop { font-family: var(--font-display); font-weight: 900; font-size: 1.6rem; color: var(--gold-2, #E0BA77); margin: 4px 0; }
+/* unscramble: first-letter hint, and used tiles go dark */
+.scramble-hint { display: block; margin-top: 6px; font-size: .9rem; font-weight: 600; color: var(--gold-2); }
+.tile.used, .tile:disabled:not(.tile-back) { background: #2A3550; color: #5D6B88; box-shadow: 0 2px 0 #0A1426; transform: translateY(2px); opacity: .55; cursor: default; }
+.lesson-say { width: 100%; box-sizing: border-box; border-radius: 12px; border: 1px solid rgba(255, 255, 255, .25); background: rgba(255, 255, 255, .06); color: var(--ink); font: inherit; padding: 10px 12px; resize: vertical; }
+.lesson-say:focus { outline: none; border-color: var(--gold-2); }
+.team-upkeep { color: var(--gold-2); }
+.team-tp > span:last-child { display: grid; gap: 4px; }
+.tp-moment { margin: 6px 0 2px; }
+.tp-list { margin: 0; padding-left: 18px; display: grid; gap: 3px; }
+.tp-say { margin: 4px 0; font-style: italic; }

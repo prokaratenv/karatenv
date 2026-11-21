@@ -1,19 +1,23 @@
 /* CHARACTER TEAMS — Leadership Team (Orange Belt), Athlete Team (Green Belt)
    and Black Belt Club (Brown Belt). Students who join get the team's E on
-   their uniform (purple, green, belt-color gradient; gold is for Engage
+   their uniform (purple, green, the Engage brand gradient; gold is for Engage
    instructors only), the team shirt and shorts, and one character lesson a
    week: a real moment, told for their age, with three questions (What could
-   you do? What's the right response? What should you say?). A home mission
-   is checked off by a parent in the Parents area. */
+   you do? What's the right response? What should you say?), then their own
+   words. Parents see the answers in the Parents area as talking points.
+   Upkeep: miss 3 weekly lessons in a row, or more than 3 in all, and the
+   membership (and the team E and team outfit) ends; students can rejoin. */
 window.BD = window.BD || {};
 
 BD.Teams = (function () {
-  const LESSON_XP = 5, MISSION_XP = 5, DAY = 864e5;
-  const GRADIENT = "linear-gradient(135deg, #F5C518 0%, #F28C28 20%, #2FA866 40%, #2F6FD6 60%, #7B4BC4 80%, #D63A2F 100%)";
+  const LESSON_XP = 5, DAY = 864e5, MAX_IN_ROW = 3, MAX_TOTAL = 3;
+  /* Engage brand Earthtone Gradient (brand guide): bright green, teal, bright purple. */
+  const BRAND_STOPS = ["#65D94A", "#5CBFC1", "#4F6CEE"];
+  const GRADIENT = "linear-gradient(135deg, #65D94A 0%, #5CBFC1 50%, #4F6CEE 100%)";
   const TEAMS = [
     { id: "leadership", name: "Leadership Team", short: "Leadership", belt: 2, focus: "Leadership character skills", color: "#8B4BE0", e: "purple E" },
     { id: "athlete", name: "Athlete Team", short: "Athlete", belt: 4, focus: "Performance and bravery skills", color: "#2FA866", e: "green E" },
-    { id: "bbc", name: "Black Belt Club", short: "BBC", belt: 6, focus: "Dedication and perseverance skills", color: "#7B4BC4", gradient: GRADIENT, e: "belt-color gradient E" }
+    { id: "bbc", name: "Black Belt Club", short: "BBC", belt: 6, focus: "Dedication and perseverance skills", color: "#5CBFC1", gradient: GRADIENT, e: "Engage gradient E" }
   ];
   const byId = function (id) { return TEAMS.find(function (t) { return t.id === id; }); };
 
@@ -126,11 +130,40 @@ BD.Teams = (function () {
   }
   function week(p, id) { const log = (p.teamLog = p.teamLog || {}); log[id] = log[id] || {}; return log[id][weekKey()] || null; }
   function setWeek(p, id, v) { const log = (p.teamLog = p.teamLog || {}); log[id] = log[id] || {}; log[id][weekKey()] = Object.assign({ l: lessonIndex(p, id) }, log[id][weekKey()] || {}, v); }
+  /* Upkeep: weeks after the joining week that ended without the lesson. */
+  function upkeep(p, id) {
+    if (!joined(p, id)) return { missed: 0, inRow: 0 };
+    const start = BD.Parent.weekStart(new Date(p.teams[id] + "T12:00:00").getTime()), now = BD.Parent.weekStart(Date.now());
+    const log = (p.teamLog || {})[id] || {};
+    let missed = 0, inRow = 0;
+    for (let w = start + 7 * DAY; w < now - DAY; w += 7 * DAY) {
+      const k = dstr(BD.Parent.weekStart(w + DAY)); // DST-safe week key
+      if (log[k] && log[k].done) inRow = 0; else { missed++; inRow++; }
+    }
+    return { missed: missed, inRow: inRow };
+  }
+  function lapsed(u) { return u.inRow >= MAX_IN_ROW || u.missed > MAX_TOTAL; }
+  /* Ends memberships that weren't kept up. Returns the teams that just ended. */
+  function enforce(p) {
+    const ended = myTeams(p).filter(function (t) { return lapsed(upkeep(p, t.id)); });
+    if (!ended.length) return [];
+    p.teamLost = p.teamLost || {};
+    ended.forEach(function (t) { delete p.teams[t.id]; p.teamLost[t.id] = BD.today(); if (p.outfit === t.id) p.outfit = "gi"; });
+    BD.Store.save(p);
+    return ended;
+  }
+  function upkeepLine(p, id) {
+    const u = upkeep(p, id), w = week(p, id) || {};
+    const left = Math.min(MAX_IN_ROW - u.inRow, MAX_TOTAL + 1 - u.missed);
+    return (w.done ? "This week's lesson is done ✓. " : "Do this week's lesson to keep your spot. ") +
+      "Missed weeks: " + u.missed + (u.missed || u.inRow ? " (" + left + " more " + (left === 1 ? "miss" : "misses") + " ends your membership)" : "") + ".";
+  }
   function lessonsDone(p, id) { return Object.keys((p.teamLog || {})[id] || {}).filter(function (k) { return p.teamLog[id][k].done; }).length; }
 
   function join(p, id) {
     if (!eligible(p, id) || joined(p, id)) return false;
     p.teams = p.teams || {}; p.teams[id] = BD.today();
+    if (p.teamLost) delete p.teamLost[id];
     if (BD.Badges.canWear(p)) p.outfit = id;
     BD.Store.save(p);
     return true;
@@ -140,18 +173,20 @@ BD.Teams = (function () {
   function patch(t) { return '<span class="team-e team-' + t.id + '" aria-hidden="true">E</span>'; }
   function card(p) {
     const el = document.getElementById("teamCard"); if (!el) return;
+    const ended = enforce(p);
+    if (ended.length) setTimeout(function () { if (!BD.UI.sheetOpen()) lostSheet(p, ended); }, 700);
     const mine = myTeams(p), inv = invites(p);
     el.hidden = !mine.length && !inv.length;
     if (el.hidden) return;
     const todo = mine.filter(function (t) { const w = week(p, t.id); return !w || !w.done; });
     el.innerHTML = '<span class="team-patches">' + (mine.length ? mine : inv).map(patch).join("") + '</span><span><strong>' +
       (inv.length ? "You're invited: " + esc(inv[0].name) + "!" : "My Teams") + '</strong><span class="boss-sub">' +
-      (inv.length ? "Join the team and get its E on your uniform" : todo.length ? "This week's lesson is ready · +" + LESSON_XP + " XP" : "Lessons done this week ✓") + '</span></span>';
+      (inv.length ? (p.teamLost && p.teamLost[inv[0].id] ? "Rejoin and keep up with the weekly lessons" : "Join the team and get its E on your uniform") : todo.length ? "This week's lesson is ready · do it to keep your spot" : "Lessons done this week ✓") + '</span></span>';
   }
 
   /* ---------- hub ---------- */
   function hubHTML(p) {
-    return '<p class="muted small">Three Engage teams for students who lead, compete and keep going. Each team has a weekly character lesson and a home mission.</p>' +
+    return '<p class="muted small">Three Engage teams for students who lead, compete and keep going. Each team has a weekly character lesson. Upkeep matters: miss 3 weeks in a row, or more than 3 in all, and the membership ends.</p>' +
       TEAMS.map(function (t) {
         const isIn = joined(p, t.id), can = eligible(p, t.id);
         let body;
@@ -159,10 +194,12 @@ BD.Teams = (function () {
           const li = lessonIndex(p, t.id), les = L[t.id][li], w = week(p, t.id) || {};
           body = '<p class="team-week"><strong>This week: ' + esc(les.title) + '</strong> <span class="muted">(' + esc(les.value) + ')</span></p>' +
             '<div class="team-actions"><button type="button" class="btn btn-small ' + (w.done ? "btn-quiet" : "btn-primary") + '" data-team-lesson="' + t.id + '">' + (w.done ? "Do it again" : "Start lesson · +" + LESSON_XP + " XP") + '</button></div>' +
-            '<p class="small team-mission"><strong>Home mission:</strong> ' + esc(les.mission) + (w.mission ? ' <span class="team-ok">✓ Parent checked it off</span>' : ' <span class="muted">(a parent checks it off in Parents · +' + MISSION_XP + ' XP)</span>') + '</p>' +
+            '<p class="small team-mission"><strong>Try it this week:</strong> ' + esc(les.mission) + '</p>' +
+            '<p class="small team-upkeep">' + esc(upkeepLine(p, t.id)) + '</p>' +
             '<p class="muted small">' + lessonsDone(p, t.id) + (lessonsDone(p, t.id) === 1 ? " lesson" : " lessons") + ' done · Team shirt and shorts in your Gear locker</p>';
         } else if (can) {
           body = '<p>' + esc(t.focus) + '. Join to get the ' + esc(t.e) + ' on your uniform and the team shirt and shorts.</p>' +
+            '<p class="muted small">To stay on the team, finish the weekly lesson. Missing 3 weeks in a row, or more than 3 weeks in all, ends the membership and its gear.</p>' +
             '<div class="team-actions"><button type="button" class="btn btn-small btn-gold" data-team-join="' + t.id + '">Join the ' + esc(t.name) + '</button></div>';
         } else body = '<p class="muted">' + esc(t.focus) + '. Opens at ' + BD.BELTS[t.belt].name + ' Belt.</p>';
         return '<section class="team-block' + (isIn ? " in" : can ? "" : " locked") + '">' +
@@ -182,7 +219,7 @@ BD.Teams = (function () {
     BD.UI.sheet("Welcome to the team!", '<div class="unlock">' +
       (BD.Badges.canWear(p) ? '<div class="unlock-outfit">' + BD.UI.championHTML(p, t.id) + '</div>' : '') +
       '<h3>' + patch(t) + ' ' + esc(t.name) + '</h3><p>Your uniform now has the <strong>' + esc(t.e) + '</strong>, and the ' + esc(t.short) + ' shirt and shorts are in your Gear locker.</p>' +
-      '<p class="muted">Every week there\'s a new character lesson. Your first one is ready.</p>' +
+      '<p class="muted">Every week there\'s a new character lesson, and finishing it keeps your spot on the team. Your first one is ready.</p>' +
       '<div class="res-actions"><button type="button" class="btn btn-primary" id="teamFirst">Start my first lesson</button><button type="button" class="btn btn-quiet" id="teamLater">Later</button></div></div>');
     BD.Sound.belt(); BD.confetti(140);
     document.getElementById("teamFirst").onclick = function () { startLesson(p, t.id); };
@@ -196,6 +233,7 @@ BD.Teams = (function () {
   function shuffle(a) { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); const t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
   function startLesson(p, id) {
     const t = byId(id), li = lessonIndex(p, id), les = L[id][li], ag = ageGroup(p), mo = les.m[ag];
+    const firstTime = !(week(p, id) || {}).done, picks = [];
     let q = 0, tries = 0;
     const intro = function () {
       BD.UI.sheet(t.name, '<div class="lesson">' +
@@ -206,55 +244,94 @@ BD.Teams = (function () {
       document.getElementById("lessonGo").onclick = ask;
     };
     const ask = function () {
-      const right = mo[q + 1], opts = shuffle([right].concat(les.no[q]));
+      const opts = shuffle([0, 1, 2]); // 0 = the best answer, 1-2 = the "not quite" choices
+      const text = function (c) { return c === 0 ? mo[q + 1] : les.no[q][c - 1]; };
       BD.UI.sheet(t.name, '<div class="lesson">' +
         '<p class="eyebrow">Question ' + (q + 1) + ' of 3</p>' +
         '<p class="lesson-moment">' + esc(mo[0]) + '</p><h3>' + QUESTIONS[q] + '</h3>' +
-        '<div class="lesson-opts">' + opts.map(function (o) { return '<button type="button" class="lesson-opt" data-ok="' + (o === right ? 1 : 0) + '">' + esc(o) + '</button>'; }).join("") + '</div>' +
+        '<div class="lesson-opts">' + opts.map(function (c) { return '<button type="button" class="lesson-opt" data-code="' + c + '" data-ok="' + (c === 0 ? 1 : 0) + '">' + esc(text(c)) + '</button>'; }).join("") + '</div>' +
         '<p class="lesson-note" id="lessonNote" aria-live="polite"></p></div>');
       document.getElementById("infoBody").onclick = function (e) {
         const b = e.target.closest(".lesson-opt"); if (!b || b.disabled) return;
+        if (picks[q] === undefined) picks[q] = Number(b.dataset.code); // their first choice is what parents see
         if (b.dataset.ok === "1") {
           b.classList.add("right"); BD.Sound.right();
           document.querySelectorAll(".lesson-opt").forEach(function (x) { x.disabled = true; });
           document.getElementById("lessonNote").innerHTML = '<strong>' + (tries ? "There it is." : "Yes!") + '</strong> ' + esc(les.tip);
-          setTimeout(function () { q++; tries = 0; if (q < 3) ask(); else finish(); }, 1300);
+          setTimeout(function () { q++; tries = 0; if (q < 3) ask(); else ownWords(); }, 1300);
         } else {
           tries++; b.classList.add("wrong"); b.disabled = true; BD.Sound.wrong();
           document.getElementById("lessonNote").innerHTML = '<strong>Not quite.</strong> ' + esc(les.tip) + ' Try another one.';
         }
       };
     };
-    const finish = function () {
-      const first = !(week(p, id) || {}).done;
+    /* A last challenge: say it in their own words (optional). */
+    const ownWords = function () {
+      BD.UI.sheet(t.name, '<div class="lesson">' +
+        '<p class="eyebrow">Your turn</p><p class="lesson-moment">' + esc(mo[0]) + '</p>' +
+        '<h3>How would YOU say it?</h3><p class="muted small">Use your own words. Your parents can see this in the Parents area.</p>' +
+        '<textarea id="lessonSay" class="lesson-say" maxlength="140" rows="3" placeholder="I would say…"></textarea>' +
+        '<div class="res-actions"><button type="button" class="btn btn-primary" id="lessonSaySave">Done</button><button type="button" class="btn btn-quiet" id="lessonSaySkip">Skip</button></div></div>');
+      document.getElementById("lessonSaySave").onclick = function () { finish(clean(document.getElementById("lessonSay").value)); };
+      document.getElementById("lessonSaySkip").onclick = function () { finish(""); };
+      setTimeout(function () { const el = document.getElementById("lessonSay"); if (el) el.focus(); }, 60);
+    };
+    const finish = function (said) {
       let xp = 0;
-      if (first) { setWeek(p, id, { done: BD.today() }); xp = BD.addXP(p, LESSON_XP); BD.Store.recordSession(p, { game: "team", grade: BD.Rank.dojoGrade(p), correct: 3, total: 3, xp: xp, mode: id }); }
+      if (firstTime) {
+        setWeek(p, id, { done: BD.today(), l: li, a: ag, picks: picks.slice(0, 3), say: said || undefined });
+        xp = BD.addXP(p, LESSON_XP);
+        BD.Store.recordSession(p, { game: "team", grade: BD.Rank.dojoGrade(p), correct: picks.filter(function (c) { return c === 0; }).length, total: 3, xp: xp, mode: id });
+      } else if (said) setWeek(p, id, { say: said });
       BD.Store.save(p);
       BD.UI.sheet(t.name, '<div class="unlock lesson">' + '<div class="chest-prize">' + patch(t) + '</div>' +
         '<h3>Lesson complete!</h3>' + (xp ? '<p class="xp-pop">+' + xp + ' XP</p>' : '<p class="muted">Already counted this week. Great review!</p>') +
-        '<p><strong>Home mission:</strong> ' + esc(les.mission) + '</p><p class="muted small">Ask a parent to check it off in the Parents area for +' + MISSION_XP + ' XP.</p>' +
+        '<p><strong>Try it this week:</strong> ' + esc(les.mission) + '</p><p class="muted small">You\'re keeping your spot on the ' + esc(t.name) + '. See you next week!</p>' +
         '<div class="res-actions"><button type="button" class="btn btn-primary" id="lessonDone">Osu!</button></div></div>');
       BD.Sound.belt(); BD.confetti(80);
       document.getElementById("lessonDone").onclick = function () { document.getElementById("infoClose").click(); if (BD.UI.home) BD.UI.home(); };
     };
     intro();
   }
+  function clean(s) { return String(s || "").replace(/[\u0000-\u001f\u007f<>]/g, " ").replace(/\s+/g, " ").trim().slice(0, 140); }
 
-  /* ---------- Parents area: home missions ---------- */
-  function parentHTML(p) {
-    const mine = myTeams(p); if (!mine.length) return "";
-    return '<div class="pd team-pd"><h4 class="label">Engage Teams · home missions</h4>' + mine.map(function (t) {
-      const les = L[t.id][lessonIndex(p, t.id)], w = week(p, t.id) || {};
-      return '<div class="pd-row"><span class="pd-k">' + patch(t) + ' ' + esc(t.short) + '</span><span><strong>' + esc(les.title) + '.</strong> ' + esc(les.mission) +
-        (w.done ? ' <span class="team-ok">Lesson done</span>' : ' <span class="muted">(lesson not done yet)</span>') + ' ' +
-        (w.mission ? '<span class="team-ok">✓ Mission checked off</span>' : '<button type="button" class="btn btn-small btn-gold" data-mission="' + t.id + '" data-pid="' + p.id + '">They did it · +' + MISSION_XP + ' XP</button>') + '</span></div>';
-    }).join("") + '</div>';
+  function lostSheet(p, ended) {
+    BD.UI.sheet("Team membership ended", '<div class="unlock">' + ended.map(patch).join(" ") +
+      '<h3>' + ended.map(function (t) { return esc(t.name); }).join(" and ") + '</h3>' +
+      '<p>The weekly lessons were missed ' + MAX_IN_ROW + ' weeks in a row (or more than ' + MAX_TOTAL + ' weeks in all), so the membership, the team E and the team outfit are paused.</p>' +
+      '<p class="muted">Upkeep is part of being on the team. You can rejoin from Engage Teams and start fresh.</p>' +
+      '<div class="res-actions"><button type="button" class="btn btn-primary" id="lostOk">Rejoin</button><button type="button" class="btn btn-quiet" id="lostLater">Later</button></div></div>');
+    document.getElementById("lostOk").onclick = function () { openHub(); };
+    document.getElementById("lostLater").onclick = function () { document.getElementById("infoClose").click(); };
+    if (BD.UI.refreshStage) BD.UI.refreshStage();
+    const hf = document.getElementById("homeFighter"); if (hf) hf.innerHTML = BD.UI.championHTML(p);
   }
-  function confirmMission(pid, id, btn) {
-    const p = BD.Store.get(pid);
-    if (!p || !joined(p, id) || (week(p, id) || {}).mission) return;
-    setWeek(p, id, { mission: BD.today() }); BD.addXP(p, MISSION_XP); BD.Store.save(p);
-    if (btn) btn.outerHTML = '<span class="team-ok">✓ Mission checked off · +' + MISSION_XP + ' XP</span>';
+
+  /* ---------- Parents area: talking points from the student's answers ---------- */
+  function answersHTML(id, w) {
+    const les = L[id][w.l || 0], mo = les.m[w.a === undefined ? 1 : w.a], picks = w.picks || [];
+    return '<p class="tp-moment"><strong>' + esc(les.title) + '</strong> (' + esc(les.value) + '): ' + esc(mo[0]) + '</p><ul class="tp-list">' +
+      QUESTIONS.map(function (qq, i) {
+        const c = picks[i]; if (c === undefined) return "";
+        const chose = c === 0 ? mo[i + 1] : les.no[i][c - 1];
+        const qt = function (x) { return /^["(]/.test(x) ? esc(x) : '"' + esc(x) + '"'; };
+        return '<li><span class="muted">' + qq + '</span> They chose: ' + qt(chose) + (c === 0 ? ' <span class="team-ok">✓ best answer</span>' : ' <span class="muted">(then found: ' + qt(mo[i + 1]) + ')</span>') + '</li>';
+      }).join("") + '</ul>' +
+      (w.say ? '<p class="tp-say">In their own words: "' + esc(w.say) + '"</p>' : "") +
+      '<p class="muted small">Talking point: ask when a moment like this came up for them, and try this together: ' + esc(les.mission) + '</p>';
+  }
+  function parentHTML(p) {
+    const mine = myTeams(p), lost = Object.keys(p.teamLost || {}).map(byId).filter(Boolean);
+    if (!mine.length && !lost.length) return "";
+    return '<div class="pd team-pd"><h4 class="label">Engage Teams · talking points</h4>' + mine.map(function (t) {
+      const log = (p.teamLog || {})[t.id] || {}, keys = Object.keys(log).filter(function (k) { return log[k].done; }).sort();
+      const last = keys.length ? log[keys[keys.length - 1]] : null, u = upkeep(p, t.id), w = week(p, t.id) || {};
+      return '<div class="pd-row team-tp"><span class="pd-k">' + patch(t) + ' ' + esc(t.short) + '</span><span>' +
+        '<span class="small">' + (w.done ? '<span class="team-ok">This week\'s lesson done</span>' : "This week's lesson not done yet") + ' · missed weeks: ' + u.missed + (u.inRow ? " (" + u.inRow + " in a row)" : "") + '</span>' +
+        (last ? answersHTML(t.id, last) : '<p class="muted small">Their answers show here after the first lesson.</p>') + '</span></div>';
+    }).join("") + lost.map(function (t) {
+      return '<div class="pd-row"><span class="pd-k">' + patch(t) + ' ' + esc(t.short) + '</span><span class="muted">Membership ended on ' + esc(p.teamLost[t.id]) + ' after missed weekly lessons. They can rejoin anytime.</span></div>';
+    }).join("") + '</div>';
   }
 
   function sanitize(p) {
@@ -266,21 +343,20 @@ BD.Teams = (function () {
         const keep = {}; Object.keys(src).filter(function (k) { return /^\d{4}-\d\d-\d\d$/.test(k) && src[k] && typeof src[k] === "object"; }).sort().slice(-60).forEach(function (k) {
           const v = src[k], o = { l: Math.max(0, Math.min(9, Number(v.l) || 0)) };
           if (typeof v.done === "string" && /^\d{4}-\d\d-\d\d$/.test(v.done)) o.done = v.done;
-          if (typeof v.mission === "string" && /^\d{4}-\d\d-\d\d$/.test(v.mission)) o.mission = v.mission;
+          if (Array.isArray(v.picks)) o.picks = v.picks.slice(0, 3).map(function (c) { return Math.max(0, Math.min(2, Math.round(Number(c) || 0))); });
+          if (v.a !== undefined) o.a = Math.max(0, Math.min(2, Math.round(Number(v.a) || 0)));
+          if (typeof v.say === "string" && v.say.trim()) o.say = clean(v.say);
           keep[k] = o;
         });
         out[x.id] = keep;
       });
       p.teamLog = out;
     } else delete p.teamLog;
+    if (p.teamLost && typeof p.teamLost === "object") { const l = {}; TEAMS.forEach(function (x) { if (typeof p.teamLost[x.id] === "string" && /^\d{4}-\d\d-\d\d$/.test(p.teamLost[x.id]) && !(p.teams && p.teams[x.id])) l[x.id] = p.teamLost[x.id]; }); p.teamLost = l; } else delete p.teamLost;
   }
   function bind() {
     const c = document.getElementById("teamCard");
     if (c) c.addEventListener("click", function () { BD.Sound.tap(); openHub(); });
-    document.addEventListener("click", function (e) {
-      const b = e.target.closest("[data-mission]"); if (!b) return;
-      confirmMission(b.dataset.pid, b.dataset.mission, b); BD.Sound.right();
-    });
   }
-  return { TEAMS: TEAMS, LESSONS: L, LESSON_XP: LESSON_XP, MISSION_XP: MISSION_XP, GRADIENT: GRADIENT, byId: byId, eligible: eligible, joined: joined, myTeams: myTeams, invites: invites, logo: logo, join: join, card: card, openHub: openHub, startLesson: startLesson, parentHTML: parentHTML, confirmMission: confirmMission, lessonIndex: lessonIndex, ageGroup: ageGroup, sanitize: sanitize, bind: bind };
+  return { TEAMS: TEAMS, LESSONS: L, LESSON_XP: LESSON_XP, GRADIENT: GRADIENT, BRAND_STOPS: BRAND_STOPS, upkeep: upkeep, enforce: enforce, byId: byId, eligible: eligible, joined: joined, myTeams: myTeams, invites: invites, logo: logo, join: join, card: card, openHub: openHub, startLesson: startLesson, parentHTML: parentHTML, lessonIndex: lessonIndex, ageGroup: ageGroup, sanitize: sanitize, bind: bind };
 })();

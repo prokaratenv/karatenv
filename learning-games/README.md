@@ -73,12 +73,19 @@ Three teams open as students climb the belts. Joining is the student's choice (a
 | --- | --- | --- | --- | --- |
 | Leadership Team | Orange Belt | Leadership character skills | Purple E | Black shirt and shorts, purple trim, LEADERSHIP |
 | Athlete Team | Green Belt | Performance and bravery skills | Green E | Black shirt and shorts, green trim, ATHLETE |
-| Black Belt Club | Brown Belt | Dedication and perseverance skills | Belt-color gradient E | Black shirt and shorts, rainbow belt-color trim, BBC |
+| Black Belt Club | Brown Belt | Dedication and perseverance skills | Engage gradient E (brand Earthtone Gradient: #65D94A, #5CBFC1, #4F6CEE) | Black shirt and shorts, Engage gradient trim, BBC |
 
 - **The E on the uniform:** everyone wears a white E. Team members get their team's E on every uniform (gi, High Rank, training, boxing, MMA); students on more than one team show their highest team, and a team shirt always shows its own team's E. **Gold is reserved for Engage instructors.** The sparring chest protector keeps its white E.
-- **Weekly lesson** (one per team, rotating through 4 lessons, built on the 4 C's and the martial arts core values): a coach talk, one real moment written for the student's age (Pre-K to 1st, 2nd to 4th, 5th to 8th), then three questions: *What could you do? What's the right response? What should you say?* A wrong pick never costs anything; it gets a coaching line and another try. **+5 XP** the first time each week.
-- **Home mission:** each lesson ends with a mission at home. A parent checks it off in **Parents** (Engage Teams · home missions) for **+5 XP**.
+- **Weekly lesson** (one per team, rotating through 4 lessons, built on the 4 C's and the martial arts core values): a coach talk, one real moment written for the student's age (Pre-K to 1st, 2nd to 4th, 5th to 8th), then three questions: *What could you do? What's the right response? What should you say?* A wrong pick never costs anything; it gets a coaching line and another try. Then an optional last challenge: *How would YOU say it?* in their own words. **+5 XP** the first time each week. No parent sign-off is needed.
+- **Talking points for parents:** the Parents area shows each team's latest lesson, the student's first choice on each question (and the best answer if they found it after), and their own words, plus a "try this together" idea.
+- **Upkeep:** finishing the weekly lesson keeps the spot. Missing **3 weeks in a row**, or **more than 3 weeks in all**, ends the membership, with its team E and team outfit (the joining week doesn't count). Students can rejoin from Engage Teams and start fresh. The hub and the Parents area show missed weeks.
 - Lesson text lives in `js/teams.js` (`LESSONS`), drafted in the "Brain Dojo Character Teams: Lesson Drafts" doc.
+
+## Daily Flashcards (math and spelling)
+
+The **⚡ Daily Flashcards** tile opens both. **Math:** 10 cards of one skill (+, −, ×, ÷). **Spelling:** 10 words of one puzzle type (Missing letters, Pick the spelling, Unscramble, Fix the spelling; Spelling check below 2nd grade). Each set finished at 70% or better earns **+2.5**, once per skill or type each day: up to **+10 a day for math and +10 for spelling**. Flashcard sets never lock a level.
+
+**Unscramble puzzles** show a hint (the first letter), and each letter tile goes dark once it's used, by tapping or typing.
 
 ## Tournaments
 

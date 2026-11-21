@@ -50,10 +50,10 @@ BD.Certificate = (function () {
       const mx = m.getContext("2d");
       mx.drawImage(mk, 0, 0, c.width, c.height);
       let fill = color;
-      if (String(color).indexOf("gradient") !== -1) { // the Black Belt Club E: belt colors, corner to corner
+      if (String(color).indexOf("gradient") !== -1) { // the Black Belt Club E: Engage brand gradient, corner to corner
         const box = (BD.LOGO_BOX && BD.LOGO_BOX[a.logo]) || [0, 0, 1, 1];
         fill = mx.createLinearGradient(box[0] * c.width, box[1] * c.height, box[2] * c.width, box[3] * c.height);
-        ["#F5C518", "#F28C28", "#2FA866", "#2F6FD6", "#7B4BC4", "#D63A2F"].forEach(function (col, i) { fill.addColorStop(i / 5, col); });
+        BD.Teams.BRAND_STOPS.forEach(function (col, i, a) { fill.addColorStop(i / (a.length - 1), col); });
       }
       mx.globalCompositeOperation = "source-in"; mx.fillStyle = fill; mx.fillRect(0, 0, c.width, c.height);
       x.globalCompositeOperation = "multiply"; x.drawImage(m, 0, 0);

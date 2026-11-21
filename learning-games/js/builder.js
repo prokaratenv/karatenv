@@ -61,7 +61,7 @@ BD.Builder = (function () {
     const grad = logoColor && logoColor.indexOf("gradient") !== -1;
     const eFill = !logoColor ? "#F2F2F0" : grad ? "url(#bdTeamGrad)" : logoColor;
     const trim = teamFit === "bbc" ? "url(#bdTeamGrad)" : teamFit && BD.Teams ? BD.Teams.byId(teamFit).color : null;
-    const defs = grad || teamFit === "bbc" ? '<defs><linearGradient id="bdTeamGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F5C518"/><stop offset=".2" stop-color="#F28C28"/><stop offset=".4" stop-color="#2FA866"/><stop offset=".6" stop-color="#2F6FD6"/><stop offset=".8" stop-color="#7B4BC4"/><stop offset="1" stop-color="#D63A2F"/></linearGradient></defs>' : "";
+    const defs = grad || teamFit === "bbc" ? '<defs><linearGradient id="bdTeamGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#65D94A"/><stop offset=".5" stop-color="#5CBFC1"/><stop offset="1" stop-color="#4F6CEE"/></linearGradient></defs>' : "";
     const highRank = fit === "highrank";
     if (highRank) { fit = "gi"; c.uniform = "black"; } // black gi with a belt-colored collar
     if (fit !== "gi") c.uniform = fit === "sparring" ? "spar" : "shirt";

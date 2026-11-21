@@ -270,19 +270,48 @@ BD.WordQuiz = (function () {
 
   const GAMES = { spanish: spanish, spelling: spelling };
 
+  /* Daily Spelling Flashcards: 10 words of one puzzle type. Finishing a set
+     with 70%+ earns +2.5, once per type per day (up to +10 a day), like the
+     math flashcards. */
+  const FLASH_BONUS = 2.5;
+  const FLASH_NAMES = { missing: "Missing letters", pick: "Pick the spelling", scramble: "Unscramble", fix: "Fix the spelling", check: "Spelling check" };
+  function flashStyles(p) { return ["missing", "pick", "scramble", Number(p.spellingGrade) >= 2 ? "fix" : "check"]; }
+  function flashToday(p) {
+    const t = BD.today();
+    if (!p.flashSpell || p.flashSpell.day !== t) p.flashSpell = { day: t, styles: [] };
+    return p.flashSpell;
+  }
+  function flashRound(p, grade, style) {
+    const list = BD.SPELLING[String(grade)] || [];
+    const seen = (p.seenWords.spelling = p.seenWords.spelling || []);
+    const fresh = shuffle(list.filter(function (x) { return seen.indexOf(x[0]) === -1; })).concat(shuffle(list));
+    const out = [], used = new Set();
+    fresh.forEach(function (x) { if (out.length < ROUND && !used.has(x[0])) { used.add(x[0]); out.push(makeSpelling(x, grade, style)); } });
+    return out;
+  }
+  function flashHTML(p) {
+    const done = flashToday(p).styles;
+    return '<div class="flash-grid" id="spellFlashPick">' + flashStyles(p).map(function (s) {
+      const got = done.indexOf(s) !== -1;
+      return '<button type="button" class="flash-btn' + (got ? " done" : "") + '" data-spellflash="' + s + '"><span class="op-sym">Aa</span><span class="flash-name">' + FLASH_NAMES[s] + '</span><span class="flash-state">' + (got ? "✓ Bonus earned" : "+" + FLASH_BONUS + " bonus") + '</span></button>';
+    }).join("") + '</div>';
+  }
+  function flashDone(p) { return flashToday(p).styles.length * FLASH_BONUS; }
+
   /* ---------- play ---------- */
   /* stripe = { grade, belt, test } when started from the belt panel. */
   /* school = "practice" or "test" for this week's school spelling words. */
-  function start(game, stripe, school) {
+  function start(game, stripe, school, flash) {
     const g = GAMES[game], p = BD.Store.current();
     if (school && !(BD.School && BD.School.has(p))) school = null;
     if (school) stripe = null;
     if (stripe) p[g.field] = stripe.grade;
     else if (p.retry && p.retry[game]) p[g.field] = p.retry[game].grade;
     const grade = p[g.field];
-    W = { game: game, g: g, grade: grade, school: school || null, noRetry: school === "test", items: school ? BD.School.round(p, school === "test", grade) : stripe ? g.beltRound(p, grade, stripe.belt) : g.round(p, grade), i: 0, xp: 0, correct: 0, firstTry: 0, answered: 0, streak: 0, best: 0, missed: [], stripe: stripe || null, test: !!(stripe && stripe.test) };
+    if (flash) { stripe = null; school = null; }
+    W = { game: game, g: g, grade: grade, school: school || null, flash: flash || null, noRetry: school === "test", items: flash ? flashRound(p, grade, flash) : school ? BD.School.round(p, school === "test", grade) : stripe ? g.beltRound(p, grade, stripe.belt) : g.round(p, grade), i: 0, xp: 0, correct: 0, firstTry: 0, answered: 0, streak: 0, best: 0, missed: [], stripe: stripe || null, test: !!(stripe && stripe.test) };
     const label = BD.Rank.subject(BD.Rank.BY_GAME[game]).label;
-    BD.UI.testMode("screen-word-play", W.test ? label + " stripe test" : stripe ? label + " stripe practice · " + BD.BELTS[stripe.belt].name + " Belt" : school === "test" ? "School word test" : "", !BD.Rank.hintsAllowed(BD.Store.current(), grade));
+    BD.UI.testMode("screen-word-play", W.test ? label + " stripe test" : flash ? "⚡ Spelling flashcards · " + FLASH_NAMES[flash] : stripe ? label + " stripe practice · " + BD.BELTS[stripe.belt].name + " Belt" : school === "test" ? "School word test" : "", !BD.Rank.hintsAllowed(BD.Store.current(), grade));
     $("wordCoachFace").src = BD.Cast.face(g.coach);
     $("wordCoachName").textContent = BD.Cast.name(g.coach);
     BD.UI.syncGradeSelect("wordGradeSel", game);
@@ -301,7 +330,8 @@ BD.WordQuiz = (function () {
     $("wordStreak").textContent = W.streak >= 3 ? "Combo ×" + W.streak : "";
     $("wordTopic").textContent = q.label;
     $("wordPrompt").innerHTML = q.promptHTML ? '<span class="spell-word">' + q.promptHTML + '</span>' : (q.swatch ? '<span class="big-swatch" style="--sw:' + q.swatch + '"></span>' : "") +
-      (q.pic ? '<span class="pic">' + BD.UI.esc(q.pic) + '</span>' : "") + '<span>' + BD.UI.esc(q.prompt) + '</span>';
+      (q.pic ? '<span class="pic">' + BD.UI.esc(q.pic) + '</span>' : "") + '<span>' + BD.UI.esc(q.prompt) + '</span>' +
+      (q.tilesAlways && q.answer ? '<span class="scramble-hint">Hint: it starts with <strong>' + BD.UI.esc(q.answer.charAt(0)) + '</strong></span>' : "");
     $("wordPrompt").className = "word-prompt" + (q.small ? " small" : "");
     if (q.subHTML) $("wordSub").innerHTML = q.subHTML; else $("wordSub").textContent = q.sub;
     syncQuiet();
@@ -335,6 +365,17 @@ BD.WordQuiz = (function () {
     $("wordTiles").hidden = !on || !q.tiles;
     if (on && q.tiles) $("wordTiles").innerHTML = q.tiles.map(function (ch) { return '<button type="button" class="tile" data-ch="' + BD.UI.esc(ch) + '">' + BD.UI.esc(ch) + '</button>'; }).join("") +
       '<button type="button" class="tile tile-back" data-ch="back" aria-label="Delete">⌫</button>';
+    syncTiles();
+  }
+  /* Darken each letter tile once it's been used (typed or tapped). */
+  function syncTiles() {
+    const box = $("wordTiles"); if (!box || box.hidden) return;
+    const left = $("wordInput").value.toLowerCase().split("");
+    box.querySelectorAll(".tile:not(.tile-back)").forEach(function (t) {
+      const i = left.indexOf(String(t.dataset.ch).toLowerCase());
+      const used = i !== -1; if (used) left.splice(i, 1);
+      t.classList.toggle("used", used); t.disabled = used; t.setAttribute("aria-pressed", used ? "true" : "false");
+    });
   }
 
   function judge(answer) {
@@ -483,10 +524,20 @@ BD.WordQuiz = (function () {
     const stripeAgain = W.stripe ? { grade: grade, belt: BD.Rank.rec(p, grade).belt, test: false } : null;
     if (acc === 100 && W.answered >= 8) W.xp += 25;
     const school = W.school;
-    const failed = !school && acc < PASS;
+    const flash = W.flash;
+    const failed = !school && !flash && acc < PASS;
     p.retry = p.retry || {};
-    const wasRetry = !school && !!p.retry[game];
-    if (!school) p.retry[game] = failed ? { grade: grade } : null;
+    const wasRetry = !school && !flash && !!p.retry[game];
+    if (!school && !flash) p.retry[game] = failed ? { grade: grade } : null;
+    let flashNote = "";
+    if (flash) {
+      const ft = flashToday(p), left = flashStyles(p).filter(function (s) { return ft.styles.indexOf(s) === -1 && s !== flash; });
+      let bonus = 0;
+      if (W.answered >= ROUND && acc >= PASS && ft.styles.indexOf(flash) === -1) { ft.styles.push(flash); bonus = BD.addXP(p, FLASH_BONUS); }
+      flashNote = bonus ? "⚡ +" + FLASH_BONUS + " spelling flashcard bonus! Today: +" + (ft.styles.length * FLASH_BONUS) + " of +" + (FLASH_BONUS * 4) + "." + (left.length ? " Still open today: " + left.map(function (s) { return FLASH_NAMES[s].toLowerCase(); }).join(", ") + "." : " All four done today!")
+        : acc < PASS ? "Score " + PASS + "% or better on a set to earn the +" + FLASH_BONUS + " bonus. Try again!"
+        : "You already earned today's " + FLASH_NAMES[flash].toLowerCase() + " bonus. Great extra practice!";
+    }
     if (school === "test") BD.School.recordTest(p, W.correct, W.answered);
     if (game === "spelling") {
       const seen = p.seenWords.spelling = p.seenWords.spelling || [];
@@ -500,18 +551,18 @@ BD.WordQuiz = (function () {
     const ready = !school && !failed && acc >= 90 && grade < BD.MAX_GRADE;
     const nm = school ? BD.School.masteredCount(p) + " of " + BD.School.words(p).length + " school words mastered" : "";
     BD.UI.results({
-      title: school === "test" ? "Word test: " + W.correct + " / " + W.answered + (acc === 100 ? " · perfect!" : acc >= 80 ? " · great job!" : "") : school ? (acc >= 90 ? "School words: crushed it!" : "School words practiced!") :
+      title: flash ? (acc >= PASS ? "Flashcards done!" : "Keep practicing!") : school === "test" ? "Word test: " + W.correct + " / " + W.answered + (acc === 100 ? " · perfect!" : acc >= 80 ? " · great job!" : "") : school ? (acc >= 90 ? "School words: crushed it!" : "School words practiced!") :
         failed ? "Let's train this again" : wasRetry ? "Level passed!" : acc >= 90 ? (game === "spanish" ? "¡Excelente!" : "Spelling champion!") : "Strong work!",
-      subtitle: school ? "Spelling Bee · this week's school words · " + nm : g.title + " · " + BD.gradeLabel(grade),
+      subtitle: flash ? "⚡ Spelling flashcards · " + FLASH_NAMES[flash] + " · " + BD.gradeLabel(grade) : school ? "Spelling Bee · this week's school words · " + nm : g.title + " · " + BD.gradeLabel(grade),
       failed: failed ? "You got " + acc + "%. You need " + PASS + "% to pass " + BD.gradeLabel(grade) + ". Look over the words below, then try a new round." : null,
       passedRetry: wasRetry && !failed ? "You passed with " + acc + "%. All grade levels are unlocked again." : null,
       stats: [["Correct", W.correct + " / " + W.answered], ["First try", W.firstTry], ["Best streak", W.best], ["XP earned", "+" + W.xp]],
       belt: belt,
-      lesson: missed.length ? '<div class="tip"><h3>Words to practice</h3><ul>' + missed.map(function (q) { return "<li>" + BD.UI.esc(q.explain) + "</li>"; }).join("") + '</ul>' +
-        (game === "spelling" ? '<p class="muted small">Tip: say the word slowly, clap each part, then write it three times.</p>' : '<p class="muted small">Tip: say each word out loud. Tap Hear it to copy the sound.</p>') + '</div>' : "",
+      lesson: (flashNote ? '<div class="tip flash-note"><p><strong>' + BD.UI.esc(flashNote) + '</strong></p></div>' : "") + (missed.length ? '<div class="tip"><h3>Words to practice</h3><ul>' + missed.map(function (q) { return "<li>" + BD.UI.esc(q.explain) + "</li>"; }).join("") + '</ul>' +
+        (game === "spelling" ? '<p class="muted small">Tip: say the word slowly, clap each part, then write it three times.</p>' : '<p class="muted small">Tip: say each word out loud. Tap Hear it to copy the sound.</p>') + '</div>' : ""),
       listTitle: "", list: [],
-      levelUp: ready ? { text: "You got " + acc + "% at " + BD.gradeLabel(grade) + ". Ready for " + BD.gradeLabel(grade + 1) + "?", action: function () { p[g.field] = grade + 1; BD.Store.save(p); start(game); } } : null,
-      again: function () { start(game, stripeAgain, school); },
+      levelUp: ready && !flash ? { text: "You got " + acc + "% at " + BD.gradeLabel(grade) + ". Ready for " + BD.gradeLabel(grade + 1) + "?", action: function () { p[g.field] = grade + 1; BD.Store.save(p); start(game); } } : null,
+      again: function () { start(game, stripeAgain, school, flash); },
       againLabel: school === "test" ? "Take the test again" : failed ? "Redo this level" : "Play again",
       setup: null
     });
@@ -555,8 +606,9 @@ BD.WordQuiz = (function () {
       const b = e.target.closest("[data-ch]"); if (!b || !W || W.done) return;
       const inp = $("wordInput");
       inp.value = b.dataset.ch === "back" ? inp.value.slice(0, -1) : inp.value + b.dataset.ch;
-      BD.Sound.tap();
+      BD.Sound.tap(); syncTiles();
     });
+    $("wordInput").addEventListener("input", syncTiles);
     $("wordTilesBtn").addEventListener("click", function () { if (!W) return; W.usedTiles = true; showTiles(true); $("wordTilesBtn").hidden = true; });
     $("wordListen").addEventListener("click", function () {
       if (!W) return; const q = item();
@@ -573,5 +625,5 @@ BD.WordQuiz = (function () {
 
   function peek() { return W && W.items[W.i]; }
 
-  return { styleBag: styleBag, STYLE_INFO: STYLE_INFO, bankNow: bankNow, isQuiet: isQuiet, misspellings: misspellings, makeSpelling: makeSpelling, peek: peek, start: start, stop: stop, bind: bind, planItems: planItems, PASS: PASS, GAMES: GAMES, plain: plain };
+  return { flashHTML: flashHTML, flashDone: flashDone, flashToday: flashToday, FLASH_NAMES: FLASH_NAMES, SPELL_FLASH_BONUS: FLASH_BONUS, styleBag: styleBag, STYLE_INFO: STYLE_INFO, bankNow: bankNow, isQuiet: isQuiet, misspellings: misspellings, makeSpelling: makeSpelling, peek: peek, start: start, stop: stop, bind: bind, planItems: planItems, PASS: PASS, GAMES: GAMES, plain: plain };
 })();
