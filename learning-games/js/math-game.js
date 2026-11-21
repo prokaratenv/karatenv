@@ -238,6 +238,7 @@ BD.MathGame = (function () {
     BD.UI.testMode("screen-math-play", S.test ? "Math stripe test" : S.stripe ? "Math stripe practice · " + BD.BELTS[S.stripe.belt].name + " Belt" : "", !BD.Rank.hintsAllowed(BD.Store.current(), S.grade));
     BD.UI.show("screen-math-play");
     BD.Cast.say("mathSay", "start");
+    BD.Scratch.close(); BD.Scratch.clear();
     render();
     readCard(true);
   }
@@ -292,7 +293,7 @@ BD.MathGame = (function () {
 
   function press(k) {
     if (!S || S.locked) return;
-    if (k === "go") return submit();
+    if (k === "go") { if (BD.Scratch.isOpen()) BD.Scratch.close(); return submit(); }
     if (k === "⌫") S.input = S.input.slice(0, -1);
     else if (k === "−") { if (S.grade >= 7) S.input = S.input.charAt(0) === "-" ? S.input.slice(1) : "-" + S.input; }
     else if (S.input.replace("-", "").length < 6) S.input += k;
@@ -382,6 +383,7 @@ BD.MathGame = (function () {
         return t ? build(t.op, t.a, t.b, t.grade) : freshProblem();
       })() : freshProblem());
     } else if (S.i >= S.queue.length) return finish();
+    BD.Scratch.clear();
     render();
     readCard(true);
   }
@@ -389,6 +391,7 @@ BD.MathGame = (function () {
   /* Leave the round without finishing it (Back button or grade change). */
   function stop() {
     if (!S) return;
+    BD.Scratch.close();
     BD.Rank.bank(S, "math");
     clearInterval(S.timer); S = null;
   }
@@ -488,6 +491,10 @@ BD.MathGame = (function () {
       const b = e.target.closest("[data-key]"); if (b) press(b.dataset.key);
     });
     $("mathQuit").addEventListener("click", BD.UI.back);
+    $("mathScratch").addEventListener("click", function () {
+      if (!S) return;
+      BD.Scratch.open({ problem: function () { return S ? show(current()) + " = ?" : ""; }, answerEl: $("mathAnswer"), keypadEl: $("mathKeypad") });
+    });
     $("mathRead").addEventListener("click", function (e) { e.stopPropagation(); readCard(false); });
     $("mathGradeSel").addEventListener("change", function (e) { changeGrade(Number(e.target.value)); });
     $("mathGotIt").addEventListener("click", advance);

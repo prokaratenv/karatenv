@@ -11,7 +11,28 @@ BD.Dojo = (function () {
   let col = null, uid = null, entries = {}, ready = false, timer = null;
 
   function weekId() { const d = new Date(BD.Parent.weekStart()); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
-  function firstName(n) { return String(n || "").trim().split(/\s+/)[0].slice(0, 14) || "Champion"; }
+  /* Names other families see: letters only, short, and never a rude word. */
+  const BLOCK = ["fuck", "shit", "bitch", "ass", "dick", "cock", "pussy", "cunt", "damn", "hell", "sex", "porn", "nude", "boob", "penis", "vagina", "nigg", "fag", "retard", "slut", "whore", "rape", "kill", "die", "hate", "poop", "butt", "fart", "pee", "crap", "stupid", "idiot", "dumb", "loser", "suck"];
+  function firstName(n) {
+    const w = String(n || "").trim().split(/\s+/)[0].replace(/[^A-Za-zÀ-ÖØ-öø-ÿ'-]/g, "").slice(0, 14);
+    const low = w.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z]/g, "");
+    if (!w || BLOCK.some(function (b) { return low.indexOf(b) !== -1 && !(b === "ass" && /^(cass|bass|tass|jass|vass|lass|kass)/.test(low)) && !(b === "die" && /^(dieg|dier|diet)/.test(low)) && !(b === "hell" && /^(hellen|helle|shell)/.test(low)); })) return "Champion";
+    return w.charAt(0).toUpperCase() + w.slice(1);
+  }
+  /* Entries come from other families: keep only what the board needs, checked. */
+  const BELT_BY_NAME = {};
+  function cleanEntry(e) {
+    if (!e || typeof e !== "object" || typeof e.week !== "string" || !Array.isArray(e.players)) return null;
+    BD.BELTS.forEach(function (b) { BELT_BY_NAME[b.name] = b; });
+    return {
+      week: e.week.slice(0, 10),
+      players: e.players.slice(0, 6).map(function (pl) {
+        const b = BELT_BY_NAME[pl && pl.belt] || BD.BELTS[0];
+        const reps = Math.max(0, Math.min(1500, Math.round(Number(pl && pl.reps) || 0))); // no one answers 1,500+ in a week
+        return { name: firstName(pl && pl.name), belt: b.name, color: b.color, reps: reps };
+      })
+    };
+  }
 
   async function init() {
     if (!window.claude || typeof window.claude.use !== "function") return;
@@ -23,9 +44,9 @@ BD.Dojo = (function () {
     col = db.collection("dojo");
     try {
       const snap = await col.get();
-      snap.docs.forEach(function (d) { if (d.exists) entries[d.id] = d.data(); });
+      snap.docs.forEach(function (d) { if (d.exists) entries[d.id] = cleanEntry(d.data()); });
       col.onSnapshot(function (qs) {
-        qs.docs.forEach(function (d) { entries[d.id] = d.data(); });
+        qs.docs.forEach(function (d) { entries[d.id] = cleanEntry(d.data()); });
         render();
       }, function () { /* keep what we have */ });
     } catch (e) { col = null; return; }
@@ -39,7 +60,7 @@ BD.Dojo = (function () {
     const ws = BD.Parent.weekStart(), now = Date.now() + 864e5;
     return BD.Store.players().filter(function (p) { return p.dojoOptIn; }).map(function (p) {
       const w = BD.Parent.weekStats(p, ws, now), belt = BD.beltOf(p);
-      return { pid: p.id, name: firstName(p.name), belt: belt.name, color: belt.color, reps: w.correct };
+      return { name: firstName(p.name), belt: belt.name, reps: Math.min(1500, w.correct) };
     });
   }
   function push() {
@@ -49,8 +70,8 @@ BD.Dojo = (function () {
       const doc = { week: weekId(), players: mine(), updatedAt: Date.now() };
       const was = entries[uid];
       if (!doc.players.length && !was) return;
-      if (was && JSON.stringify(was.players) === JSON.stringify(doc.players) && was.week === doc.week) return;
-      try { await col.doc(uid).set(doc); entries[uid] = doc; render(); } catch (e) { /* can't write here: the board stays read-only */ }
+      if (was && JSON.stringify(was.players.map(function (x) { return [x.name, x.belt, x.reps]; })) === JSON.stringify(doc.players.map(function (x) { return [x.name, x.belt, x.reps]; })) && was.week === doc.week) return;
+      try { await col.doc(uid).set(doc); entries[uid] = cleanEntry(doc); render(); } catch (e) { /* can't write here: the board stays read-only */ }
     }, 1500);
   }
 

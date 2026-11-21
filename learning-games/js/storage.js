@@ -73,9 +73,30 @@ BD.Store = (function () {
       wordStats: {}, wordMissed: {}, seenWords: {}
     };
     Object.keys(d).forEach(function (k) { if (p[k] === undefined || p[k] === null) p[k] = d[k]; });
+    sanitize(p);
     const has = function (v) { return v !== undefined && v !== null && v !== ""; };
     const base = has(p.sentenceGrade) ? p.sentenceGrade : has(p.mathGrade) ? p.mathGrade : 3;
     ["readingGrade", "spanishGrade", "spellingGrade"].forEach(function (k) { if (!has(p[k])) p[k] = base; });
+    return p;
+  }
+  /* Check every field that ends up on screen, so a doctored save code or
+     synced record can't inject anything into the page. */
+  function sanitize(p) {
+    const FIGHTER_KEYS = ["kimmy", "billy", "tommy", "mackenzie", "rylan", "zumi", "cd", "michele", "bridgette", "kyra", "lauryn", "custom"];
+    const GEAR_KEYS = ["mouthguard", "shorts", "shirt", "sparring", "boots", "headgear", "chest", "boxing", "mma"];
+    const gradeOk = function (g, dflt) { g = Number(g); return isFinite(g) ? Math.max(-1, Math.min(8, Math.round(g))) : dflt; };
+    if (typeof p.id !== "string" || !/^[a-z0-9]{4,40}$/i.test(p.id)) p.id = "p" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+    p.name = String(p.name == null ? "" : p.name).replace(/[\u0000-\u001f\u007f<>]/g, "").trim().slice(0, 20) || "Champion";
+    if (typeof p.color !== "string" || !/^#[0-9a-f]{6}$/i.test(p.color)) p.color = BD.AVATAR_COLORS[0];
+    if (p.avatar !== undefined && FIGHTER_KEYS.indexOf(p.avatar) === -1) delete p.avatar;
+    if (p.custom !== undefined && (typeof p.custom !== "object" || p.custom === null)) delete p.custom;
+    ["mathGrade", "sentenceGrade", "readingGrade", "spanishGrade", "spellingGrade"].forEach(function (k) { if (p[k] !== undefined) p[k] = gradeOk(p[k], 3); });
+    if (p.dojoGrade !== undefined && p.dojoGrade !== null) p.dojoGrade = gradeOk(p.dojoGrade, 3);
+    p.xp = Math.max(0, Number(p.xp) || 0);
+    p.gear = Array.isArray(p.gear) ? p.gear.filter(function (g) { return GEAR_KEYS.indexOf(g) !== -1; }) : [];
+    p.gearHidden = Array.isArray(p.gearHidden) ? p.gearHidden.filter(function (g) { return GEAR_KEYS.indexOf(g) !== -1; }) : [];
+    if (p.badges && typeof p.badges === "object") Object.keys(p.badges).forEach(function (k) { if (!/^[a-z0-9-]{2,30}$/.test(k) || typeof p.badges[k] !== "string") delete p.badges[k]; });
+    p.dojoOptIn = !!p.dojoOptIn;
     return p;
   }
   function newPlayer(name, grade) {

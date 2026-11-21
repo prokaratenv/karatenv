@@ -3,6 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!-- Kids' app: keep it out of search engines and AI crawlers (link previews still work). -->
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+<meta name="googlebot" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
 <title>Brain Dojo by Engage</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="description" content="Brain Dojo by Engage: math, sentence-fixing and reading practice for grades 3 to 7, with belts to earn.">
@@ -206,6 +210,7 @@
           <button type="button" class="btn btn-primary" id="mathGotIt">Got it, next card</button>
         </div>
       </div>
+      <button type="button" class="btn btn-quiet scratch-btn" id="mathScratch"><span aria-hidden="true">✏️</span> Scratch paper</button>
       <div class="keypad" id="mathKeypad"></div>
     </section>
 
@@ -408,6 +413,24 @@
 </div>
 <canvas id="confetti" aria-hidden="true"></canvas>
 
+<div class="scratch-sheet" id="scratchSheet" role="dialog" aria-modal="true" aria-label="Scratch paper" hidden>
+  <div class="scratch-head">
+    <p class="scratch-problem" id="scratchProblem"></p>
+    <p class="scratch-answer" id="scratchAnswer" aria-live="polite"></p>
+    <button type="button" class="btn btn-quiet btn-small" id="scratchClose">Done</button>
+  </div>
+  <canvas class="scratch-canvas" id="scratchCanvas" aria-label="Drawing area. Draw with your finger to work it out."></canvas>
+  <div class="scratch-tools" id="scratchTools" role="toolbar" aria-label="Pen tools">
+    <button type="button" class="sw" data-color="#1A2C6B" style="--c:#1A2C6B" aria-label="Blue pen"></button>
+    <button type="button" class="sw" data-color="#D63A2F" style="--c:#D63A2F" aria-label="Red pen"></button>
+    <button type="button" class="sw" data-color="#1E8A4C" style="--c:#1E8A4C" aria-label="Green pen"></button>
+    <button type="button" class="tool" id="scratchErase">Eraser</button>
+    <button type="button" class="tool" id="scratchUndo">Undo</button>
+    <button type="button" class="tool" id="scratchClear">Clear</button>
+  </div>
+  <div class="scratch-keys" id="scratchKeys"></div>
+</div>
+
 <div class="sheet-backdrop" id="infoSheet" hidden>
   <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="infoTitle">
     <div class="sheet-head"><h2 id="infoTitle"></h2><button type="button" class="btn btn-quiet btn-small" id="infoClose">Close</button></div>
@@ -473,6 +496,7 @@
 <script src="js/sensei.js"></script>
 <script src="js/math-game.js"></script>
 <script src="js/sentence-game.js"></script>
+<script src="js/scratch.js"></script>
 <script src="js/badges.js"></script>
 <script src="js/backup.js"></script>
 <script src="js/certificate.js"></script>

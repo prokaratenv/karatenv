@@ -632,6 +632,7 @@ BD.UI = (function () {
     $("restoreBtn").addEventListener("click", function () { BD.Backup.openRestore(); });
     $("infoSheet").addEventListener("click", function (e) { if (e.target === $("infoSheet")) closeSheet(); });
     document.addEventListener("keydown", function (e) { if (e.key === "Escape" && !$("infoSheet").hidden) closeSheet(); });
+    BD.Scratch.bind();
     BD.MathGame.bind();
     BD.SentenceGame.bind();
     BD.Reading.bind();

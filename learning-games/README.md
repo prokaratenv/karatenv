@@ -32,6 +32,19 @@ Free math, writing, reading, spelling and Spanish practice from Pre-K through 8t
 - **Share this week:** makes a progress card picture to text to family or an Engage instructor.
 - **Dojo Challenge:** a weekly team goal (3,000 right answers) for everyone using the shared link. Parents opt each child in; other families see only a first name, belt and weekly count. Needs the shared Claude link while signed in, with Contributor access or above (everyone in your Claude organization; view-only visitors can see the board but not add to it).
 
+## Scratch paper
+
+In Math Dojo, **Scratch paper** opens a sheet of graph paper to work a problem out with a finger, stylus or mouse. The problem stays pinned at the top and the keypad sits underneath, so they can type the answer without closing it; Check closes the paper and shows the result. Three pen colors, eraser, undo and clear. A fresh page starts with each new problem. It's allowed on stripe tests too (it's paper, not a hint). Nothing drawn is saved or sent anywhere.
+
+## Safety and security
+
+- **Only the owner can change the app.** The shared link is view-only: visitors can use the games but can't edit the page. Updates come only from the owner's Claude account (and this repository).
+- **Shared data is locked down.** Database rules allow writing in just two places: each signed-in family's own private folder, and their own single Dojo Challenge entry. Everything else is owner-only. Dojo entries from other families are checked before they're shown: first names only, letters only, a rude-word filter (anything flagged shows as "Champion"), real belt names and colors only, and weekly counts capped at 1,500.
+- **No code can be slipped in.** Everything typed by kids, written by AI or loaded from a save code is escaped before it's shown, and every student record (loaded, synced or restored) is checked field by field. A doctored save code can't run anything.
+- **Kid-safe AI.** Sensei only helps with schoolwork, never asks for personal details or shares links, refuses unsafe topics, sends a child who says they're hurt or unsafe to a trusted grown-up, and ignores attempts to change its rules.
+- **Hidden from search engines and AI crawlers.** The pages carry noindex/nofollow/noarchive tags (link previews in texts still work), and the Claude link has a long random address that is only found if someone shares it.
+- **No secrets** (API keys, passwords) are stored in the app or this repository.
+
 ## Saving progress
 
 - Progress saves automatically after every answer that earns XP. If a child taps Back, switches apps or closes the page in the middle of a round, the XP they've earned so far is kept.
@@ -247,5 +260,6 @@ learning-games/
   js/badges.js           badges and the gear locker
   js/parent.js           parent dashboard, PIN and weekly share card
   js/dojo.js             weekly Dojo Challenge
+  js/scratch.js          scratch paper for math
   js/app.js              home, results and parent screens
 ```

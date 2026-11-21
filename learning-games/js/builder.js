@@ -19,9 +19,21 @@ BD.Builder = (function () {
   };
   const DEFAULT = { look: "boy", height: "mid", build: "regular", skin: "#F6CBA3", hairStyle: "short", hair: "#8A5A32", eyes: "#6B3E1F", mouth: "smile", features: { freckles: false, glasses: false, cheeks: true }, uniform: "black" };
 
+  /* Only values the builder offers are kept (a save code can't inject anything). */
   function clean(cfg) {
-    const c = Object.assign({}, DEFAULT, cfg || {});
-    c.features = Object.assign({}, DEFAULT.features, (cfg && cfg.features) || {});
+    cfg = cfg && typeof cfg === "object" ? cfg : {};
+    const c = Object.assign({}, DEFAULT);
+    Object.keys(OPTIONS).forEach(function (key) {
+      const o = OPTIONS[key];
+      if (o.type === "toggles") return;
+      const allowed = o.type === "swatch" ? o.values : o.values.map(function (v) { return v[0]; });
+      if (allowed.indexOf(cfg[key]) !== -1) c[key] = cfg[key];
+    });
+    c.features = Object.assign({}, DEFAULT.features);
+    const f = cfg.features && typeof cfg.features === "object" ? cfg.features : {};
+    Object.keys(OPTIONS).forEach(function (key) {
+      if (OPTIONS[key].type === "toggles") OPTIONS[key].values.forEach(function (v) { if (v[0] in f) c.features[v[0]] = !!f[v[0]]; });
+    });
     return c;
   }
   function shade(hex, amt) {

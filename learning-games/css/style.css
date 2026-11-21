@@ -830,3 +830,22 @@ body.no-speech .say-btn { display: none; }
 .start-btn { min-width: 0; max-width: 100%; box-sizing: border-box; }
 .start-main { white-space: normal; }
 .home-hud { min-width: 0; }
+
+/* Scratch paper */
+.scratch-btn { display: flex; margin: 14px auto 0; gap: 8px; }
+.scratch-sheet { position: fixed; inset: 0; z-index: 60; display: flex; flex-direction: column; background: #0C1830; padding: max(10px, env(safe-area-inset-top)) 10px max(10px, env(safe-area-inset-bottom)); gap: 8px; }
+.scratch-sheet[hidden] { display: none; }
+.scratch-head { display: flex; align-items: center; gap: 10px; }
+.scratch-problem { margin: 0; flex: 1; font-family: var(--font-display); font-weight: 900; font-size: clamp(1.4rem, 6vw, 2.2rem); color: var(--ink); }
+.scratch-answer { margin: 0; min-width: 2.6em; text-align: center; padding: 4px 10px; border-radius: 12px; border: 2px solid var(--gold-2); font-family: var(--font-display); font-weight: 900; font-size: 1.4rem; color: var(--gold-2); }
+.scratch-canvas { flex: 1; min-height: 160px; width: 100%; border-radius: 16px; touch-action: none; cursor: crosshair;
+  background-color: #FDFDF8; background-image: linear-gradient(rgba(79,108,238,.16) 1px, transparent 1px), linear-gradient(90deg, rgba(79,108,238,.16) 1px, transparent 1px); background-size: 24px 24px; }
+.scratch-tools { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; align-items: center; }
+.scratch-tools .sw { width: 40px; height: 40px; border-radius: 50%; border: 3px solid rgba(255,255,255,.25); background: var(--c); cursor: pointer; }
+.scratch-tools .sw.on { border-color: var(--gold-2); box-shadow: 0 0 0 3px rgba(224,186,119,.35); }
+.scratch-tools .tool { min-height: 40px; padding: 0 14px; border-radius: 12px; border: 1px solid var(--line); background: #172B4C; color: var(--ink); font-weight: 800; cursor: pointer; }
+.scratch-tools .tool.on { border-color: var(--gold-2); color: var(--gold-2); }
+.scratch-tools .tool:disabled { opacity: .45; cursor: default; }
+.scratch-keys .keypad { margin: 0 auto; gap: 6px; }
+.scratch-keys .key { min-height: 46px; font-size: 1.4rem; }
+.scratch-keys .key-go { font-size: 1.1rem; }
