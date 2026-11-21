@@ -54,9 +54,10 @@ BD.Cast = (function () {
   const KIDS = ["kimmy", "billy", "tommy", "mackenzie", "rylan"];
   function ageBand(grade) { grade = Number(grade); return grade <= 0 ? 0 : grade <= 2 ? 1 : grade <= 5 ? 2 : 3; }
   /* White-belt art and its belt mask for a character at a grade. */
-  function art(key, grade) {
+  function art(key, grade, outfit) {
     if (KIDS.indexOf(key) === -1) return { src: "img/wb-" + key + ".webp", mask: key, band: null };
     const b = ageBand(grade === undefined ? 3 : grade);
+    if (outfit && outfit !== "gi") return { src: "img/fit-" + key + "-" + b + "-" + outfit + ".webp", mask: key + "-" + b + "-" + outfit, band: b };
     return { src: "img/age-" + key + "-" + b + ".webp", mask: key + "-" + b, band: b };
   }
 

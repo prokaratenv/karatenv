@@ -30,61 +30,28 @@ BD.Certificate = (function () {
     return svg;
   }
 
-  /* The champion in the new belt and the gear they're wearing, drawn the same
-     way as on screen: art, gear under the belt, belt tint, gear on top. */
+  /* The champion in the new belt and outfit, drawn the same way as on screen. */
   async function champion(p, beltColor) {
-    const key = BD.UI.fighterKey(p), gear = BD.Badges.equipped(p), band = BD.Cast.ageBand(BD.Rank.dojoGrade(p));
-    if (key === "custom") return load(svgSrc(await inlineImages(BD.Builder.svg(p.custom, beltColor, "full", band, gear))));
-    const a = BD.Cast.art(key, BD.Rank.dojoGrade(p));
+    const key = BD.UI.fighterKey(p), band = BD.Cast.ageBand(BD.Rank.dojoGrade(p));
+    if (key === "custom") return load(svgSrc(await inlineImages(BD.Builder.svg(p.custom, beltColor, "full", band))));
+    const a = BD.Cast.art(key, BD.Rank.dojoGrade(p), BD.Badges.outfit(p));
     const img = await load(a.src);
     const mask = await load(BD.MASKS && BD.MASKS[a.mask] ? BD.MASKS[a.mask] : "img/mask-" + a.mask + ".png");
     if (!img) return null;
-    const W = img.naturalWidth, H = img.naturalHeight;
-    const fit = BD.GearFit.layers(a.mask, gear);
-    const px = fit ? Math.round(W * 0.2) : 0, py = fit ? Math.round(H * 0.12) : 0;
-    const c = document.createElement("canvas"); c.width = W + px * 2; c.height = H + py * 2;
+    const c = document.createElement("canvas"); c.width = img.naturalWidth; c.height = img.naturalHeight;
     const x = c.getContext("2d");
-    const sprites = {};
-    if (fit) await Promise.all(fit.under.concat(fit.over, fit.top).map(function (L) { return load(L.src).then(function (im) { sprites[L.src] = im; }); }));
-    const put = function (L) {
-      const im = sprites[L.src]; if (!im) return;
-      const dx = px + L.l * W, dy = py + L.t * H, dw = L.w * W, dh = L.h * H;
-      x.save();
-      if (L.flip) { x.translate(dx + dw, dy); x.scale(-1, 1); x.drawImage(im, 0, 0, dw, dh); } else x.drawImage(im, dx, dy, dw, dh);
-      x.restore();
-    };
-    const layer = document.createElement("canvas"); layer.width = c.width; layer.height = c.height;
-    const lx = layer.getContext("2d");
-    lx.drawImage(img, px, py);
-    if (fit) {
-      fit.under.forEach(function (L) { const im = sprites[L.src]; if (im) lx.drawImage(im, px + L.l * W, py + L.t * H, L.w * W, L.h * H); });
-      if (fit.redrawBelt && mask) {
-        const bc = document.createElement("canvas"); bc.width = W; bc.height = H;
-        const bx = bc.getContext("2d"); bx.drawImage(img, 0, 0); bx.globalCompositeOperation = "destination-in"; bx.drawImage(mask, 0, 0, W, H);
-        lx.drawImage(bc, px, py);
-      }
-    }
+    x.drawImage(img, 0, 0);
     if (mask) {
       const m = document.createElement("canvas"); m.width = c.width; m.height = c.height;
       const mx = m.getContext("2d");
-      mx.drawImage(mask, px, py, W, H);
-      mx.globalCompositeOperation = "source-in"; mx.fillStyle = beltColor; mx.fillRect(0, 0, m.width, m.height);
-      lx.globalCompositeOperation = "multiply"; lx.drawImage(m, 0, 0);
-      lx.globalCompositeOperation = "destination-in"; lx.drawImage(img, px, py); // keep the character's outline
-      lx.globalCompositeOperation = "source-over";
-    }
-    x.drawImage(layer, 0, 0);
-    if (fit) {
-      fit.over.forEach(put);
-      if (fit.faceClip) {
-        const f = fit.faceClip;
-        x.save(); x.beginPath(); x.ellipse(px + f.cx * W, py + f.cy * H, f.rx * W, f.ry * H, 0, 0, Math.PI * 2); x.clip();
-        x.drawImage(img, px, py); x.restore();
-      }
-      fit.top.forEach(put);
+      mx.drawImage(mask, 0, 0, c.width, c.height);
+      mx.globalCompositeOperation = "source-in"; mx.fillStyle = beltColor; mx.fillRect(0, 0, c.width, c.height);
+      x.globalCompositeOperation = "multiply"; x.drawImage(m, 0, 0);
+      x.globalCompositeOperation = "destination-in"; x.drawImage(img, 0, 0); // keep the original outline
     }
     return c;
   }
+
 
 
   function fitText(x, text, font, max, start) {

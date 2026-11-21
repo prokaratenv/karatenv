@@ -97,6 +97,7 @@ BD.Store = (function () {
     p.gearHidden = Array.isArray(p.gearHidden) ? p.gearHidden.filter(function (g) { return GEAR_KEYS.indexOf(g) !== -1; }) : [];
     if (p.badges && typeof p.badges === "object") Object.keys(p.badges).forEach(function (k) { if (!/^[a-z0-9-]{2,30}$/.test(k) || typeof p.badges[k] !== "string") delete p.badges[k]; });
     p.dojoOptIn = !!p.dojoOptIn;
+    if (["gi", "training", "sparring", "boxing", "mma"].indexOf(p.outfit) === -1) p.outfit = "gi";
     return p;
   }
   function newPlayer(name, grade) {

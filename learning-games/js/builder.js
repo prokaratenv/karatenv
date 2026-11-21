@@ -45,7 +45,7 @@ BD.Builder = (function () {
   /* Draw the fighter. mode "full" = whole body, "face" = head portrait. */
   /* age: 0 = Pre-K/K, 1 = 1st–2nd, 2 = 3rd–5th, 3 = 6th–8th (younger = shorter, bigger head). */
   let clipN = 0;
-  function svg(cfg, beltColor, mode, age, gear) {
+  function svg(cfg, beltColor, mode, age) {
     const c = clean(cfg);
     const A = age === undefined || age === null ? 2 : Math.max(0, Math.min(3, age));
     const AB = [0.72, 0.84, 0.95, 1.06][A], AH = [1.1, 1.04, 1, 0.94][A], AW = [0.9, 0.95, 1, 1.04][A];
@@ -164,36 +164,7 @@ BD.Builder = (function () {
         '<rect x="30" y="12" width="140" height="140" fill="#24406A"/>' +
         '<g>' + body.replace(/<image[^>]*>/g, "") + '</g>' + headGroup + '</svg>';
     }
-    // ---- equipped gear (same sprites as the cast characters) ----
-    let under = "", over = "", gTop = "", defs = "";
-    if (gear && gear.length) {
-      const has = function (g) { return gear.indexOf(g) !== -1; };
-      const A = (BD.GearFit && BD.GearFit.ASPECT) || {};
-      const im = function (src, x, y, w, h, flip) {
-        return '<image href="' + src + '" x="' + x.toFixed(1) + '" y="' + y.toFixed(1) + '" width="' + w.toFixed(1) + '" height="' + h.toFixed(1) + '" preserveAspectRatio="none"' + (flip ? ' transform="translate(' + (2 * x + w).toFixed(1) + ' 0) scale(-1 1)"' : '') + '/>';
-      };
-      if (has("shorts")) under += im("img/worn-shorts.webp", cx - tw * 0.64, tBot - 8, tw * 1.28, lh * 0.44);
-      if (has("shirt")) under += im("img/worn-shirt.webp", cx - tw * 0.92, tTop - 8, tw * 1.84, th * 0.95);
-      if (has("chest")) under += im("img/worn-chest.webp", cx - tw * 0.6, tTop - 4, tw * 1.2, th * 0.82);
-      if (under) under += beltSvg;
-      if (has("boots")) [[cx - gap / 2 - legW * 0.48, true], [cx + gap / 2 + legW * 0.48, false]].forEach(function (ft) {
-        const w = legW * 1.2, h = Math.min(w * (A.boots || 2), 46);
-        over += im("img/worn-boots.webp", ft[0] - w / 2, fy + 8 - h, w, h, ft[1]);
-      });
-      const glove = ["mma", "boxing", "sparring"].find(has);
-      if (glove) handsAt.forEach(function (hd) {
-        const w = aw * 2.3, h = w * (A[glove] || 1.4);
-        over += im("img/worn-" + glove + ".webp", hd[0] - w / 2, hd[1] - h / 2, w, h, hd[2] < 0);
-      });
-      if (has("headgear")) {
-        const h = 173 * AH, w = h / (A.headgear || 1.11), t = hy - 30 * AH - 0.40 * h;
-        const id = "bdfc" + (++clipN);
-        defs = '<defs><clipPath id="' + id + '"><ellipse cx="100" cy="' + (hy + 12) + '" rx="34" ry="40"/></clipPath></defs>';
-        over += im("img/worn-headgear.webp", 100 - w / 2, t, w, h) +
-          '<g transform="translate(100 ' + hy + ') scale(' + AH + ') translate(-100 -' + hy + ')"><g clip-path="url(#' + id + ')">' + head + face + '</g></g>';
-      }
-      if (has("mouthguard") && beltSvg) gTop += im("img/gear-mouthguard.webp", cx + tw / 2 - 14, tBot - 18, 26, 26);
-    }
+    const under = "", over = "", gTop = "", defs = "";
     return '<svg viewBox="0 0 200 320" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Custom champion">' + defs +
       '<g transform="translate(0 ' + oy + ')">' + body + under + headGroup + over + gTop + '</g></svg>';
   }

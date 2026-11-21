@@ -95,7 +95,7 @@ BD.Boss = (function () {
     const eq = BD.Badges.equipped(p);
     return 3 + (eq.indexOf("headgear") !== -1 ? 1 : 0) + (eq.indexOf("chest") !== -1 ? 1 : 0);
   }
-  function gloves(p) { return BD.Badges.equipped(p).some(function (g) { return BD.GearFit.handSlot(g); }); }
+  function gloves(p) { return BD.Badges.equipped(p).some(function (g) { return ["sparring", "boxing", "mma"].indexOf(g) !== -1; }); }
 
   function start() {
     const p = BD.Store.current(); if (!p) return;

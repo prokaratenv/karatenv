@@ -32,33 +32,19 @@ BD.UI = (function () {
 
   function fighterOf(p) { return p.avatar || BD.Cast.defaultFighter(p); }
   /* The student's character: a cast member, or the fighter they built. */
-  function fighterArt(p, mode) {
+  function fighterArt(p, mode, outfit) {
     const g = BD.Rank.dojoGrade(p);
-    if (fighterOf(p) === "custom") return BD.Builder.svg(p.custom, BD.beltOf(p).color, mode, BD.Cast.ageBand(g), mode === "face" ? null : BD.Badges.equipped(p));
+    if (fighterOf(p) === "custom") return BD.Builder.svg(p.custom, BD.beltOf(p).color, mode, BD.Cast.ageBand(g));
     if (mode === "face") return '<img src="' + BD.Cast.face(fighterOf(p)) + '" alt="' + esc(BD.Cast.name(fighterOf(p))) + '">';
-    return champArt(fighterOf(p), BD.beltOf(p).color, g, BD.Badges.equipped(p));
+    return champArt(fighterOf(p), BD.beltOf(p).color, g, outfit || BD.Badges.outfit(p));
   }
-  /* A playable character wearing the belt the student has earned
-     (white-belt art + the belt area tinted to the belt color). */
-  function champArt(key, beltColor, grade, gear) {
-    const a = BD.Cast.art(key, grade);
+  /* A playable character wearing the belt the student has earned (white-belt
+     art + the belt area tinted) and, for the student characters, their outfit. */
+  function champArt(key, beltColor, grade, outfit) {
+    const a = BD.Cast.art(key, grade, outfit);
     const m = "url(" + (BD.MASKS && BD.MASKS[a.mask] ? BD.MASKS[a.mask] : "img/mask-" + a.mask + ".png") + ")";
-    const maskCss = '-webkit-mask-image:' + m + ';mask-image:' + m;
-    const fit = BD.GearFit.layers(a.mask, gear);
-    const pct = function (v) { return (v * 100).toFixed(2) + "%"; };
-    const lay = function (L) { return '<img class="g-layer' + (L.flip ? " flip" : "") + (L.cls ? " " + L.cls : "") + '" src="' + L.src + '" alt="" style="left:' + pct(L.l) + ';top:' + pct(L.t) + ';width:' + pct(L.w) + ';height:' + pct(L.h) + '">'; };
-    let html = '<span class="champ' + (a.band !== null ? " age-" + a.band : "") + (fit ? " geared" : "") + '" style="--belt:' + beltColor + '"><img src="' + a.src + '" alt="' + esc(BD.Cast.name(key)) + '">';
-    if (fit) {
-      html += fit.under.map(lay).join("");
-      if (fit.redrawBelt) html += '<img class="g-beltart" src="' + a.src + '" alt="" style="' + maskCss + '">';
-    }
-    html += '<i class="champ-belt" style="' + maskCss + '"></i>';
-    if (fit) {
-      html += fit.over.map(lay).join("");
-      if (fit.faceClip) { const c = fit.faceClip; html += '<img class="g-face" src="' + a.src + '" alt="" style="clip-path:ellipse(' + pct(c.rx) + ' ' + pct(c.ry) + ' at ' + pct(c.cx) + ' ' + pct(c.cy) + ')">'; }
-      html += fit.top.map(lay).join("");
-    }
-    return html + '</span>';
+    return '<span class="champ' + (a.band !== null ? " age-" + a.band : "") + '" style="--belt:' + beltColor + '"><img src="' + a.src + '" alt="' + esc(BD.Cast.name(key)) + '">' +
+      '<i class="champ-belt" style="-webkit-mask-image:' + m + ';mask-image:' + m + '"></i></span>';
   }
   /* Round portrait of the student's chosen character, ringed in their belt color. */
   function avatar(p, size) {
@@ -78,7 +64,7 @@ BD.UI = (function () {
     const myGrade = me ? BD.Rank.dojoGrade(me) : 3;
     const opt = function (k) {
       return '<button type="button" class="fighter-opt" role="radio" data-fighter="' + k + '" aria-checked="' + (k === selected) + '">' +
-        (big ? champArt(k, beltCol, myGrade, me ? BD.Badges.equipped(me) : []) : '<img src="' + BD.Cast.face(k) + '" alt="">') + BD.Cast.name(k) + '</button>';
+        (big ? champArt(k, beltCol, myGrade, me && BD.Cast.KIDS.indexOf(k) !== -1 && BD.Badges.outfitUnlocked(me, BD.Badges.OUTFITS.find(function (o) { return o.id === (me.outfit || "gi"); }) || BD.Badges.OUTFITS[0]) ? me.outfit : "gi") : '<img src="' + BD.Cast.face(k) + '" alt="">') + BD.Cast.name(k) + '</button>';
     };
     const kids = BD.Cast.FIGHTERS.slice(0, 6), teachers = BD.Cast.FIGHTERS.slice(6);
     const customCfg = big && me && me.custom ? me.custom : BD.Builder.DEFAULT;
@@ -736,7 +722,7 @@ BD.UI = (function () {
     players(); // always open on the welcome screen: Start here / Resume my training
   }
 
-  return { championHTML: function (p) { return fighterArt(p, "full"); }, refreshStage: refreshStage, fighterKey: function (p) { return fighterOf(p); }, beltDetails: beltDetails, testMode: testMode, stripeResult: stripeResult, back: back, setGrade: setGrade, syncGradeSelect: syncGradeSelect, refresh: refresh, sheet: sheet, sheetOpen: sheetOpen, show: show, esc: esc, home: home, players: players, results: results, gradePicker: gradePicker, init: init };
+  return { championHTML: function (p, outfit) { return fighterArt(p, "full", outfit); }, refreshStage: refreshStage, fighterKey: function (p) { return fighterOf(p); }, beltDetails: beltDetails, testMode: testMode, stripeResult: stripeResult, back: back, setGrade: setGrade, syncGradeSelect: syncGradeSelect, refresh: refresh, sheet: sheet, sheetOpen: sheetOpen, show: show, esc: esc, home: home, players: players, results: results, gradePicker: gradePicker, init: init };
 })();
 
 document.addEventListener("DOMContentLoaded", BD.UI.init);
