@@ -16,7 +16,12 @@ BD.Badges = (function () {
     chest: { name: "Sparring Chest Gear", img: "img/gear-chest.webp" },
     boxing: { name: "Boxing Gloves", img: "img/gear-boxing.webp" },
     mma: { name: "MMA Gloves", img: "img/gear-mma.webp" },
-    bag: { name: "Sparring Gear Bag", img: "img/gear-bag.webp" }
+    bag: { name: "Sparring Gear Bag", img: "img/gear-bag.webp" },
+    // weapons: for show only (performed in Weapons tournaments, never used against anyone)
+    nunchucks: { name: "Nunchucks", img: "img/weapon-nunchucks.webp", weapon: true },
+    kamas: { name: "Kamas", img: "img/weapon-kamas.webp", weapon: true },
+    bo: { name: "Bo Staff", img: "img/weapon-bo.webp", weapon: true },
+    sword: { name: "Wooden Sword", img: "img/weapon-sword.webp", weapon: true }
   };
 
   const weekAgo = function () { return Date.now() - 7 * 864e5; };
@@ -32,7 +37,9 @@ BD.Badges = (function () {
       return Math.max(best, n);
     }, 0);
   };
-  const reachedOrange = function (p) { return Object.keys(p.rank || {}).some(function (g) { return p.rank[g] && (p.rank[g].belt >= 2 || p.rank[g].mastered); }); };
+  /* Reached a belt (0 White … 8 Black) in any grade. */
+  const reached = function (p, belt) { return Object.keys(p.rank || {}).some(function (g) { return p.rank[g] && (p.rank[g].belt >= belt || p.rank[g].mastered); }); };
+  const reachedOrange = function (p) { return reached(p, 2); };
 
   /* The gear path, in the order kids earn it (sparring starts at Orange Belt, like class). */
   const BADGES = [
@@ -46,9 +53,17 @@ BD.Badges = (function () {
     { id: "yellow-3", name: "Yellow Belt · 3 Stripes", how: "Earn 3 stripes on your Yellow Belt.", gear: "headgear", test: function (p) { return yellowStripes(p) >= 3; } },
     { id: "yellow-4", name: "Yellow Belt · 4 Stripes", how: "Earn all 4 stripes on your Yellow Belt.", gear: "chest", test: function (p) { return yellowStripes(p) >= 4; } },
     { id: "orange-spar", name: "Ready to Spar!", how: "Graduate from Yellow to Orange Belt. That's when sparring starts at Engage!", gear: null, unlocks: "sparring", test: reachedOrange },
-    { id: "xp-1000-boxing", name: "Hard Worker", how: "Bonus: earn 1,000 XP.", gear: "boxing", test: function (p) { return (p.xp || 0) >= 1000; } }
+    { id: "blue-nunchucks", name: "Blue Belt", how: "Reach Blue Belt.", gear: "nunchucks", test: function (p) { return reached(p, 3); } },
+    { id: "green-boxing", name: "Green Belt", how: "Reach Green Belt.", gear: "boxing", test: function (p) { return reached(p, 4); } },
+    { id: "green-judo", name: "Judo Moves", how: "Reach Green Belt. Every 5 right in a row becomes a judo throw in battles and sparring!", gear: null, skill: "judo", test: function (p) { return reached(p, 4); } },
+    { id: "purple-kamas", name: "Purple Belt", how: "Reach Purple Belt.", gear: "kamas", test: function (p) { return reached(p, 5); } },
+    { id: "brown-bo", name: "Brown Belt", how: "Reach Brown Belt.", gear: "bo", test: function (p) { return reached(p, 6); } },
+    { id: "red-sword", name: "Red Belt", how: "Reach Red Belt.", gear: "sword", test: function (p) { return reached(p, 7); } }
   ];
-  const GEAR_BADGES = BADGES.filter(function (b) { return b.gear; });
+  const GEAR_BADGES = BADGES.filter(function (b) { return b.gear && !GEAR[b.gear].weapon; });
+  const WEAPON_BADGES = BADGES.filter(function (b) { return b.gear && GEAR[b.gear].weapon; });
+  function hasSkill(p, skill) { return BADGES.some(function (b) { return b.skill === skill && p.badges && p.badges[b.id]; }); }
+  function weapons(p) { return WEAPON_BADGES.filter(function (b) { return (p.gear || []).indexOf(b.gear) !== -1; }).map(function (b) { return b.gear; }); }
 
   /* OUTFITS — what the champion actually wears. Each outfit is drawn as its
      own picture (so the gear really fits). An outfit unlocks only when EVERY
@@ -89,7 +104,7 @@ BD.Badges = (function () {
         const opened = OUTFITS.filter(function (o) { return before.indexOf(o.id) === -1 && outfitUnlocked(p, o); });
         if (opened.length) p.outfit = opened[opened.length - 1].id;
         // gear a student already had from the old unlock rules is recorded quietly (no repeat celebration)
-        if (newGear || opened.length) fresh.push(Object.assign({ outfit: opened.length ? opened[opened.length - 1] : null }, b));
+        if (newGear || opened.length || b.skill) fresh.push(Object.assign({ outfit: opened.length ? opened[opened.length - 1] : null }, b));
       }
     });
     if (fresh.length) BD.Store.save(p);
@@ -126,6 +141,15 @@ BD.Badges = (function () {
           '<img src="' + g.img + '" alt="">' +
           '<strong>' + g.name + '</strong>' +
           '<span class="locker-badge">' + (got ? "🏅 " + esc(b.name) : "🔒 " + esc(b.how)) + '</span></div>';
+      }).join("") + '</div>' +
+      '<h4 class="label">Weapons · for show</h4><p class="muted small">Weapons are for show only. Perform with them in Weapons tournaments; they\'re never used against anyone or any boss.</p>' +
+      '<div class="locker">' + WEAPON_BADGES.map(function (b) {
+        const got = hasGear(p, b.gear), g = GEAR[b.gear];
+        return '<div class="locker-item' + (got ? " got" : " locked") + '"><img src="' + g.img + '" alt=""><strong>' + g.name + '</strong><span class="locker-badge">' + (got ? "🏅 " + esc(b.name) : "🔒 " + esc(b.how)) + '</span></div>';
+      }).join("") + '</div>' +
+      '<h4 class="label">Skills</h4><div class="locker">' + BADGES.filter(function (b) { return b.skill; }).map(function (b) {
+        const got = !!(p.badges && p.badges[b.id]);
+        return '<div class="locker-item skill' + (got ? " got" : " locked") + '"><span class="skill-icon" aria-hidden="true">🥋</span><strong>' + esc(b.name) + '</strong><span class="locker-badge">' + (got ? "🏅 Unlocked: every 5 right in a row is a judo throw" : "🔒 " + esc(b.how)) + '</span></div>';
       }).join("") + '</div>';
   }
   function openLocker() {
@@ -144,6 +168,21 @@ BD.Badges = (function () {
   function celebrate(list, done) {
     if (!list || !list.length) { if (done) done(); return; }
     const b = list[0], g = GEAR[b.gear];
+    const nextBtns = function () {
+      document.getElementById("unlockNext").onclick = function () { celebrate(list.slice(1), done); if (list.length === 1) document.getElementById("infoClose").click(); };
+      document.getElementById("unlockLocker").onclick = function () { openLocker(); };
+    };
+    if (b.skill) {
+      BD.UI.sheet("New skill: Judo Moves!", '<div class="unlock"><div class="chest-prize">🥋</div><h3>Judo Moves unlocked!</h3><p>🏅 <strong>' + esc(b.name) + '</strong>: ' + esc(b.how) + '</p>' +
+        '<div class="res-actions"><button type="button" class="btn btn-primary" id="unlockNext">' + (list.length > 1 ? "Next unlock" : "Hajime!") + '</button><button type="button" class="btn btn-quiet" id="unlockLocker">Open my locker</button></div></div>');
+      BD.Sound.belt(); BD.confetti(120); nextBtns(); return;
+    }
+    if (g && g.weapon) {
+      BD.UI.sheet("New weapon unlocked!", '<div class="unlock"><img class="unlock-img" src="' + g.img + '" alt=""><h3>' + g.name + '</h3><p>🏅 <strong>' + esc(b.name) + '</strong>: ' + esc(b.how) + '</p>' +
+        '<p class="muted">Weapons are for show: perform a form with it in a Weapons tournament. It\'s never used against anyone or any boss.</p>' +
+        '<div class="res-actions"><button type="button" class="btn btn-primary" id="unlockNext">' + (list.length > 1 ? "Next unlock" : "Awesome!") + '</button><button type="button" class="btn btn-quiet" id="unlockLocker">Open my locker</button></div></div>');
+      BD.Sound.belt(); BD.confetti(120); nextBtns(); return;
+    }
     if (!g) { // the Orange Belt milestone: the full sparring outfit
       const p = BD.Store.current(), o = b.outfit || outfitById(b.unlocks);
       BD.UI.sheet("Ready to spar!",
@@ -176,5 +215,5 @@ BD.Badges = (function () {
   }
 
   function gearName(b) { return b.gear ? GEAR[b.gear].name : b.name; }
-  return { gearName: gearName, GEAR_BADGES: GEAR_BADGES, GEAR: GEAR, BADGES: BADGES, OUTFITS: OUTFITS, outfit: outfit, outfitUnlocked: outfitUnlocked, check: check, award: award, earned: earned, equipped: equipped, rack: rack, openLocker: openLocker };
+  return { hasSkill: hasSkill, weapons: weapons, reached: reached, yellowStripes: yellowStripes, WEAPON_BADGES: WEAPON_BADGES, gearName: gearName, GEAR_BADGES: GEAR_BADGES, GEAR: GEAR, BADGES: BADGES, OUTFITS: OUTFITS, outfit: outfit, outfitUnlocked: outfitUnlocked, check: check, award: award, earned: earned, equipped: equipped, rack: rack, openLocker: openLocker };
 })();

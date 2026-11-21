@@ -52,11 +52,31 @@ The home screen is kept simple. From top to bottom:
 | Sparring Headgear | Yellow Belt with 3 stripes |
 | Sparring Chest Gear | Yellow Belt with 4 stripes |
 | **Full Sparring Gear outfit** | The Yellow → Orange Belt graduation, when sparring starts in class |
-| Boxing Gloves (bonus) | Earning 1,000 XP |
+| Nunchucks (for show) | Blue Belt |
+| Boxing Gloves | Green Belt |
+| **Judo Moves** (skill) | Green Belt: every 5 right in a row is a judo throw in boss battles (−3) and sparring (+2) |
+| Kamas (for show) | Purple Belt |
+| Bo Staff (for show) | Brown Belt |
+| Wooden Sword (for show) | Red Belt |
 
   "Yellow Belt" counts in any grade, and a student past Yellow has all four. Gear earned under the earlier rules is kept, with no repeat celebration.
+- **Weapons are for show only.** They're shown in the locker and performed in Weapons tournaments, and they're never used against anyone or any boss.
 - **Works on phones, tablets and computers:** the layout adjusts for phone, iPad (portrait and landscape) and desktop browsers.
 - **Champions grow up with the grade.** Kimmy, Billy, Tommy, Mackenzie and Rylan look about 5 in Pre-K/K, 7 in 1st–2nd, 10 in 3rd–5th and 13 in 6th–8th, based on the grade they're training. Built champions get younger proportions too. Instructors and Zumi stay the same.
+
+## Tournaments
+
+Tap **🏆 Tournaments** on the home screen. Each one is a single-elimination bracket of **6 to 12** competitors (computer opponents with nicknames). Byes go into round 2 when the numbers are uneven, and you can enter as many as you like.
+
+| Type | Opens at | How you compete |
+|---|---|---|
+| **Kata** | Yellow Belt with 2 stripes | The opponent performs first; then you get answers right in a row, up to 15. The longer your run, the higher the judges' score (5.0 to 10.0). Beat their run to win. A tie goes to one sudden-death question. |
+| **Sparring** | Orange Belt | Head to head, first to 5 points. Answer before your opponent's clock runs out. A wrong answer freezes you for a moment, like Partner Challenge. With Judo Moves, every 5 in a row is a judo throw (+2). The final plays the Iron Tower music. |
+| **Weapons** | Green Belt | A kata performed with a weapon you've earned. The questions lean a little harder. |
+
+- **Medals and XP:** Gold **+10 XP**, Silver **+7.5**, Bronze **+5** (both semifinal losers get bronze). **Double XP on Saturdays and Sundays.** Medals are counted on the home card and in the tournament hub.
+- Opponents get a little tougher each round. Questions mix every subject at the dojo grade and belt.
+- **To spar a friend instead,** use **Partner Challenge** (two players, one screen); there's a button for it in the tournament hub.
 
 ## Boss Battles, Partner Challenge and the champion in every game
 
@@ -403,6 +423,7 @@ learning-games/
   js/badges.js           badges and the gear locker
   js/parent.js           parent dashboard, PIN and weekly share card
   js/dojo.js             weekly Dojo Challenge
+  js/tournament.js       tournaments: kata, sparring and weapons brackets, medals
   js/school.js           School Words (parents' weekly spelling list)
   js/quest.js            Adventure Map, daily quest, chests, stickers, streak shields
   js/leads.js            parent newsletter / free-class sign-up

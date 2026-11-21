@@ -97,7 +97,7 @@ BD.Store = (function () {
      synced record can't inject anything into the page. */
   function sanitize(p) {
     const FIGHTER_KEYS = ["kimmy", "billy", "tommy", "mackenzie", "rylan", "zumi", "cd", "michele", "bridgette", "kyra", "lauryn", "custom"];
-    const GEAR_KEYS = ["mouthguard", "shorts", "shirt", "sparring", "boots", "headgear", "chest", "boxing", "mma", "bag"];
+    const GEAR_KEYS = ["mouthguard", "shorts", "shirt", "sparring", "boots", "headgear", "chest", "boxing", "mma", "bag", "nunchucks", "kamas", "bo", "sword"];
     const gradeOk = function (g, dflt) { g = Number(g); return isFinite(g) ? Math.max(-1, Math.min(8, Math.round(g))) : dflt; };
     if (typeof p.id !== "string" || !/^[a-z0-9]{4,40}$/i.test(p.id)) p.id = "p" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
     p.name = String(p.name == null ? "" : p.name).replace(/[\u0000-\u001f\u007f<>]/g, "").trim().slice(0, 20) || "Champion";
@@ -117,6 +117,7 @@ BD.Store = (function () {
     if (p.nick !== undefined && (typeof p.nick !== "string" || !(BD.Dojo ? BD.Dojo.nickOk(p.nick, p.name) : /^[A-Za-z]+ [A-Za-z]+ [1-9][0-9]?$/.test(p.nick)))) delete p.nick;
     if (BD.School) BD.School.sanitize(p); else if (p.school && typeof p.school !== "object") delete p.school;
     if (BD.Quest) BD.Quest.sanitize(p);
+    if (BD.Tourney) BD.Tourney.sanitize(p); else if (p.medals !== undefined && !Array.isArray(p.medals)) delete p.medals;
     return p;
   }
   function newPlayer(name, grade) {

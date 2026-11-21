@@ -81,7 +81,7 @@ BD.Boss = (function () {
     const b = bossFor(p), w = wins(p, b.grade);
     BD.UI.sheet("Boss ladder · " + BD.gradeLabel(b.grade),
       '<div class="boss-intro"><img src="' + b.boss.img + '" alt=""><div><p class="boss-k">' + label(b) + '</p><h3>' + esc(b.boss.name) + '</h3><p class="muted">' + esc(b.boss.title) + '</p><p class="boss-quote">“' + esc(b.boss.hi) + '”</p></div></div>' +
-      '<p class="muted small">' + b.boss.hits + ' hits to win. You have ' + hearts(p) + ' hearts' + (hearts(p) > 3 ? ' (your gear adds extra!)' : '') + '. Gloves power up every 3rd hit in a row.</p>' +
+      '<p class="muted small">' + b.boss.hits + ' hits to win. You have ' + hearts(p) + ' hearts' + (hearts(p) > 3 ? ' (your gear adds extra!)' : '') + (gloves(p) ? '. Your gloves power up every 3rd hit in a row' : '') + (BD.Badges.hasSkill(p, "judo") ? '. 🥋 Every 5th hit in a row is a judo throw (−3)' : '') + '. Weapons are for show, never for fighting.</p>' +
       '<div class="res-actions"><button type="button" class="btn btn-primary btn-big" id="bossFight">Fight ' + esc(b.boss.name) + '!</button></div>' +
       '<h4 class="label">The ladder</h4><ol class="boss-ladder">' + BOSSES.map(function (x, i) {
         if (x.secret && b.idx !== 9 && w.indexOf(9) === -1) return '<li class="locked secret"><span class="belt-swatch" style="--belt:#17171C"></span><img src="' + x.img + '" alt=""><span>??? Secret boss</span><em>🔒</em></li>';
@@ -100,7 +100,7 @@ BD.Boss = (function () {
   function start() {
     const p = BD.Store.current(); if (!p) return;
     const b = bossFor(p);
-    S = { grade: b.grade, belt: b.belt, idx: b.idx, boss: b.boss, hp: b.boss.hits, max: b.boss.hits, hearts: hearts(p), maxHearts: hearts(p), streak: 0, gloves: gloves(p), right: 0, asked: 0, busy: false };
+    S = { grade: b.grade, belt: b.belt, idx: b.idx, boss: b.boss, hp: b.boss.hits, max: b.boss.hits, hearts: hearts(p), maxHearts: hearts(p), streak: 0, gloves: gloves(p), judo: BD.Badges.hasSkill(p, "judo"), right: 0, asked: 0, busy: false };
     $("bossName").textContent = b.boss.name;
     $("bossImg").src = b.boss.img; $("bossImg").alt = b.boss.name;
     $("bossTitle").textContent = (b.boss.secret ? "Final Boss · " : "") + BD.gradeLabel(b.grade) + " · " + BD.BELTS[b.belt].name + " Belt";
@@ -144,13 +144,14 @@ BD.Boss = (function () {
     const arena = $("bossArena");
     if (v === S.q.answer) {
       S.right++; S.streak++;
-      const power = S.gloves && S.streak % 3 === 0;
-      const dmg = power ? 2 : 1;
+      const judo = S.judo && S.streak % 5 === 0;
+      const power = !judo && S.gloves && S.streak % 3 === 0;
+      const dmg = judo ? 3 : power ? 2 : 1;
       S.hp -= dmg;
       BD.Sound.right();
       arena.classList.remove("boss-hit", "boss-strike"); void arena.offsetWidth; arena.classList.add("boss-hit");
-      pop(power ? "POWER PUNCH! −2" : "−1", "dmg");
-      $("bossSay").textContent = power ? "Oof! Those gloves pack a punch!" : ["Ow!", "Hey!", "Lucky shot!", "Not bad!", "Whoa!"][Math.floor(Math.random() * 5)];
+      pop(judo ? "JUDO THROW! −3" : power ? "POWER PUNCH! −2" : "−1", "dmg");
+      $("bossSay").textContent = judo ? "Whoa! What a judo throw!" : power ? "Oof! Those gloves pack a punch!" : ["Ow!", "Hey!", "Lucky shot!", "Not bad!", "Whoa!"][Math.floor(Math.random() * 5)];
     } else {
       S.streak = 0; S.hearts--;
       BD.Sound.wrong();
