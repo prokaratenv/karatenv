@@ -15,7 +15,39 @@ BD.Family = (function () {
   const endpoint = function () { const u = (BD.CONFIG || {}).accountEndpoint; return typeof u === "string" && /^(https:\/\/|http:\/\/localhost[:/])[^\s"<>]+$/i.test(u) ? u : ""; };
 
   let acct = read();
-  if (acct && (typeof acct.token !== "string" || !/^[a-f0-9]{32}\.[a-f0-9]{64}$/.test(acct.token))) { acct = null; write(null); }
+  // Older links without an encryption key sign in again once (nothing readable is kept on the server).
+  if (acct && (typeof acct.token !== "string" || !/^[a-f0-9]{32}\.[a-f0-9]{64}$/.test(acct.token) || typeof acct.k !== "string")) { acct = null; write(null); }
+
+  /* ---------- end-to-end encryption ----------
+     Each student is encrypted on the device (AES-GCM) before it's sent, with a
+     key made from the parent's email and a random per-family salt (PBKDF2).
+     The server only ever holds scrambled data; it never gets the key or the email. */
+  const b64 = function (buf) { let s = ""; new Uint8Array(buf).forEach(function (c) { s += String.fromCharCode(c); }); return btoa(s); };
+  const unb64 = function (str) { const s = atob(str), a = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) a[i] = s.charCodeAt(i); return a; };
+  let keyObj = null;
+  async function deriveKey(email, salt) {
+    const base = await crypto.subtle.importKey("raw", new TextEncoder().encode("brain-dojo-family-v1:" + email), "PBKDF2", false, ["deriveKey"]);
+    const k = await crypto.subtle.deriveKey({ name: "PBKDF2", salt: new TextEncoder().encode(salt), iterations: 310000, hash: "SHA-256" }, base, { name: "AES-GCM", length: 256 }, true, ["encrypt", "decrypt"]);
+    return b64(await crypto.subtle.exportKey("raw", k));
+  }
+  async function key() {
+    if (!keyObj) keyObj = await crypto.subtle.importKey("raw", unb64(acct.k), { name: "AES-GCM" }, false, ["encrypt", "decrypt"]);
+    return keyObj;
+  }
+  async function seal(p) {
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const ct = await crypto.subtle.encrypt({ name: "AES-GCM", iv: iv }, await key(), new TextEncoder().encode(JSON.stringify(p)));
+    const out = new Uint8Array(12 + ct.byteLength); out.set(iv, 0); out.set(new Uint8Array(ct), 12);
+    return { id: p.id, updatedAt: p.updatedAt || 0, enc: b64(out) };
+  }
+  async function open(rp) {
+    try {
+      const all = unb64(rp.enc);
+      const pt = await crypto.subtle.decrypt({ name: "AES-GCM", iv: all.slice(0, 12) }, await key(), all.slice(12));
+      const p = JSON.parse(new TextDecoder().decode(pt));
+      return p && p.id === rp.id ? p : null; // a copy can't be swapped onto another student
+    } catch (e) { return null; }
+  }
   let status = "off", timer = null, flushing = false, pollTimer = null;
   const pending = new Map();      // player id -> player
   let removed = [];               // [{ id, at }]
@@ -29,7 +61,7 @@ BD.Family = (function () {
   function setStatus(s) {
     status = s;
     const el = $("syncStatus"); if (!el || !linked()) return;
-    const LABEL = { syncing: "Syncing to " + masked(acct.email) + "…", synced: "Synced to " + masked(acct.email) + " · every linked device", offline: "Offline: saving on this device, will sync when back online" };
+    const LABEL = { syncing: "Syncing to " + acct.hint + "…", synced: "Synced to " + acct.hint + " · every linked device", offline: "Offline: saving on this device, will sync when back online" };
     if (LABEL[s]) { el.dataset.state = s === "synced" ? "synced" : s === "offline" ? "offline" : "saving"; el.textContent = LABEL[s]; }
   }
 
@@ -46,25 +78,27 @@ BD.Family = (function () {
   }
 
   /* Bring the account's copy in: newer students replace older ones, removed ones go. */
-  function apply(res) {
+  async function apply(res) {
     if (!res || !res.ok) return;
     const remoteIds = {};
     (Array.isArray(res.removed) ? res.removed : []).forEach(function (r) {
       const p = r && BD.Store.get(r.id);
       if (p && (p.updatedAt || 0) <= (Number(r.at) || 0) && !pending.has(p.id)) BD.Store.applyRemoteRemoval(p.id);
     });
-    (Array.isArray(res.players) ? res.players : []).forEach(function (rp) {
-      if (!rp || typeof rp !== "object" || typeof rp.id !== "string") return;
+    for (const rp of (Array.isArray(res.players) ? res.players : [])) {
+      if (!rp || typeof rp !== "object" || typeof rp.id !== "string" || typeof rp.enc !== "string") continue;
       remoteIds[rp.id] = rp.updatedAt || 0;
       const local = BD.Store.get(rp.id);
-      if (!local || (rp.updatedAt || 0) > (local.updatedAt || 0)) BD.Store.applyRemote(rp);
-    });
+      if (local && (rp.updatedAt || 0) <= (local.updatedAt || 0)) continue;
+      const p = await open(rp);
+      if (p) BD.Store.applyRemote(Object.assign(p, { updatedAt: rp.updatedAt || 0 }));
+    }
     // anything newer here (or only here) goes up
     BD.Store.players().forEach(function (p) { if (!(p.id in remoteIds) || (p.updatedAt || 0) > remoteIds[p.id]) pending.set(p.id, p); });
     if (pending.size) schedule(300);
   }
   function signedOut() {
-    acct = null; write(null); pending.clear(); removed = [];
+    acct = null; keyObj = null; write(null); pending.clear(); removed = [];
     const el = $("syncStatus"); if (el) { el.dataset.state = "local"; el.textContent = "Saved on this device"; }
     refreshUI();
   }
@@ -75,22 +109,23 @@ BD.Family = (function () {
     const res = await call("pull", { token: acct.token });
     if (res.error === "signed_out") return signedOut();
     if (!res.ok) return setStatus("offline");
-    apply(res); setStatus(pending.size ? "syncing" : "synced");
+    await apply(res); setStatus(pending.size ? "syncing" : "synced");
   }
   function schedule(ms) { clearTimeout(timer); timer = setTimeout(flush, ms === undefined ? 2000 : ms); }
   async function flush() {
     if (!linked() || (!pending.size && !removed.length)) return;
     if (flushing) return schedule();
     flushing = true; setStatus("syncing");
-    const sent = Array.from(pending.values()).map(function (p) { return { p: p, at: p.updatedAt || 0, json: JSON.parse(JSON.stringify(p)) }; });
+    const sent = [];
+    for (const p of Array.from(pending.values())) sent.push({ p: p, at: p.updatedAt || 0, sealed: await seal(p) });
     const gone = removed.slice();
-    const res = await call("push", { token: acct.token, players: sent.map(function (x) { return x.json; }), removed: gone });
+    const res = await call("push", { token: acct.token, players: sent.map(function (x) { return x.sealed; }), removed: gone });
     flushing = false;
     if (res.error === "signed_out") return signedOut();
     if (!res.ok) { setStatus("offline"); schedule(res.error === "too_big" ? 600000 : 15000); return; }
     sent.forEach(function (x) { if (pending.get(x.p.id) === x.p && (x.p.updatedAt || 0) <= x.at) pending.delete(x.p.id); });
     removed = removed.filter(function (r) { return gone.indexOf(r) === -1; });
-    apply(res);
+    await apply(res);
     setStatus(pending.size || removed.length ? "syncing" : "synced");
   }
 
@@ -103,11 +138,11 @@ BD.Family = (function () {
   function openSignIn(done) {
     BD.UI.sheet("Sign in with a parent's email",
       '<div class="lead-form"><p>Link this device to your <strong>family account</strong> so each student\'s belts, stripes and points show up on <strong>every phone, iPad or computer</strong> they use. No codes to copy.</p>' +
-      '<label class="lf"><span>Parent or guardian email</span><input id="faEmail" type="email" autocomplete="email" inputmode="email" maxlength="254" value="' + esc((acct && acct.email) || "") + '"></label>' +
-      '<label class="lf-check lf-adult"><input type="checkbox" id="faAgree"> <span>I\'m the parent or guardian (18+). I agree that Brain Dojo may store my children\'s first names and Brain Dojo progress with my email to sync it across our devices, as described in the <button type="button" class="link-btn" id="faTerms">Terms &amp; Privacy</button>.</span></label>' +
+      '<label class="lf"><span>Parent or guardian email</span><input id="faEmail" type="email" autocomplete="email" inputmode="email" maxlength="254"></label>' +
+      '<label class="lf-check lf-adult"><input type="checkbox" id="faAgree"> <span>I\'m the parent or guardian (18+). I agree that my children\'s Brain Dojo profiles may be stored, <strong>encrypted on this device first</strong> so no one else can read them, to sync them across our devices, as described in the <button type="button" class="link-btn" id="faTerms">Terms &amp; Privacy</button>.</span></label>' +
       '<p class="lf-msg" id="faMsg" aria-live="polite"></p>' +
       '<div class="res-actions"><button type="button" class="btn btn-primary btn-big" id="faSend">Email me a code</button></div>' +
-      '<p class="muted small">We\'ll email a 6-digit code. It\'s only used to link devices to your family. It doesn\'t sign you up for marketing emails.</p></div>');
+      '<p class="muted small">We\'ll email a 6-digit code. Your email isn\'t saved by the family account: it only sends the code and makes your family\'s private lock. It doesn\'t sign you up for marketing emails.</p></div>');
     const msg = function (t, good) { $("faMsg").textContent = t; $("faMsg").className = "lf-msg" + (good ? " good" : ""); };
     $("faTerms").onclick = function () { const em = $("faEmail").value; BD.Leads.openTerms(function () { openSignIn(done); $("faEmail").value = em; }); };
     $("faSend").onclick = async function () {
@@ -138,9 +173,11 @@ BD.Family = (function () {
       const res = await call("verify", { email: email, code: code, device: deviceLabel() });
       busy = false; $("faGo").disabled = false;
       if (!res.ok) return msg(res.error === "expired" ? "That code expired. Tap below to get a new one." : res.error === "network" ? "Can't reach the family account. Try again." : "That code isn't right." + (res.left ? " " + res.left + " tries left." : ""));
-      acct = { token: res.token, email: email, at: new Date().toISOString() }; write(acct);
+      if (!/^[a-f0-9]{32}$/.test(res.salt || "") || !(window.crypto && crypto.subtle)) { busy = false; return msg("This browser can't lock the data safely. Please update it and try again."); }
+      // only a short hint of the email is kept on the device; the email itself becomes the lock's key
+      acct = { token: res.token, hint: masked(email), k: await deriveKey(email, res.salt), at: new Date().toISOString() }; keyObj = null; write(acct);
       const before = BD.Store.players().length;
-      apply(res);
+      await apply(res);
       await flush();
       const n = BD.Store.players().length;
       BD.Sound.right(); BD.confetti(70);
@@ -162,7 +199,7 @@ BD.Family = (function () {
   function cardHTML() {
     if (!enabled()) return "";
     if (!linked()) return '<div class="family-card"><span class="lead-icon" aria-hidden="true">🔗</span><div><strong>Use Brain Dojo on every device</strong><p class="muted small">Link this device to your email so your kids\' progress shows on any phone, iPad or computer they use.</p></div><button type="button" class="btn btn-gold" id="faOpen">Sign in with email</button></div>';
-    return '<div class="family-card linked"><span class="lead-icon" aria-hidden="true">🔗</span><div><strong>Family account: ' + esc(masked(acct.email)) + ' ✓</strong><p class="muted small">This device syncs automatically. To add another device, open Brain Dojo there and sign in with the same email.</p></div>' +
+    return '<div class="family-card linked"><span class="lead-icon" aria-hidden="true">🔗</span><div><strong>Family account: ' + esc(acct.hint) + ' ✓</strong><p class="muted small">This device syncs automatically. To add another device, open Brain Dojo there and sign in with the same email.</p></div>' +
       '<div class="family-actions"><button type="button" class="btn btn-small btn-quiet" id="faSignOut">Sign out this device</button><button type="button" class="btn btn-small btn-quiet" id="faMore">More</button></div></div>';
   }
   function bindCard(after) {
@@ -174,7 +211,7 @@ BD.Family = (function () {
       if (after) after();
     };
     if ($("faMore")) $("faMore").onclick = function () {
-      BD.UI.sheet("Family account", '<p>Linked to <strong>' + esc(acct.email) + '</strong>.</p>' +
+      BD.UI.sheet("Family account", '<p>Linked to <strong>' + esc(acct.hint) + '</strong>.</p>' +
         '<div class="res-actions" style="justify-content:flex-start"><button type="button" class="btn btn-quiet" id="faAll">Sign out all devices</button></div>' +
         '<p class="muted small">Every device will need the email code again. Students stay in the family account.</p>' +
         '<h4 class="label">Delete family data</h4><p class="muted small">Deletes the family account and the copy of your students\' progress stored with it. Students stay on this device until you remove them.</p>' +
@@ -191,7 +228,7 @@ BD.Family = (function () {
 
   function welcome() {
     const w = $("welcomeFamily");
-    if (w) { w.hidden = !enabled(); w.innerHTML = linked() ? "🔗 Linked to " + esc(masked(acct.email)) + " · progress syncs to every device" : "🔗 <strong>Already training on another device?</strong> Sign in with a parent's email ›"; w.disabled = linked(); w.classList.toggle("linked", linked()); }
+    if (w) { w.hidden = !enabled(); w.innerHTML = linked() ? "🔗 Linked to " + esc(acct.hint) + " · progress syncs to every device" : "🔗 <strong>Already training on another device?</strong> Sign in with a parent's email ›"; w.disabled = linked(); w.classList.toggle("linked", linked()); }
   }
   function refreshUI() { welcome(); if (BD.UI && BD.UI.refresh) BD.UI.refresh(); }
   function startPolling() {

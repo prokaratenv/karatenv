@@ -1162,3 +1162,5 @@ body.duel-on .topbar, body.duel-on .footer { visibility: hidden; }
 .family-link.linked { cursor: default; opacity: .9; }
 .code-input { letter-spacing: .3em; width: 9.5em; }
 .welcome-cta + .family-link { margin: 12px auto 4px; }
+.lf-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+@media (max-width: 420px) { .lf-row { grid-template-columns: 1fr; } }

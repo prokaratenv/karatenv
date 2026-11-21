@@ -3,9 +3,15 @@
  * student's progress follows them to every device.
  *
  * How it works: a parent types their email, gets a 6-digit code from your
- * Gmail, and types it in. That device is then linked to the family. Each
- * family's students are kept as one private file in a "Brain Dojo Family
- * Data" folder in your Google Drive. Nothing is shared publicly.
+ * Gmail, and types it in. That device is then linked to the family.
+ *
+ * Privacy by design: this script never stores an email address, a child's
+ * name or any readable progress. Each device encrypts every student before
+ * sending it (with a key made from the parent's email, which never leaves
+ * the device as a key), so each family's file in the "Brain Dojo Family
+ * Data" folder holds only: an anonymous family number, scrambled student
+ * data, and fingerprints of the linked devices' keys. The email is used once
+ * to send the code and is not saved.
  *
  * Setup (about 5 minutes, free):
  *  1. Go to script.google.com → New project. Name it "Brain Dojo Family Sync".
@@ -33,7 +39,7 @@ function doPost(e) {
     switch (String(req.action)) {
       case "request": return reply(requestCode(req));
       case "verify": return reply(verifyCode(req));
-      case "pull": return reply(withFamily(req, function (fam) { return { ok: true, players: fam.players, removed: fam.removed }; }));
+      case "pull": return reply(withFamily(req, function (fam) { return { ok: true, players: fam.players.filter(validPlayer), removed: fam.removed }; }));
       case "push": return reply(push(req));
       case "signout": return reply(signOut(req, false));
       case "signoutAll": return reply(signOut(req, true));
@@ -54,7 +60,14 @@ function cleanEmail(x) {
   var s = String(x || "").trim().toLowerCase();
   return /^[^\s@<>()[\]\\,;:"]{1,64}@[a-z0-9.-]{1,190}\.[a-z]{2,24}$/.test(s) ? s : null;
 }
-function familyId(email) { return sha("bd-family:" + email).slice(0, 32); }
+/* A secret made once for this script, so family numbers can't be matched to emails. */
+function pepper() {
+  var props = PropertiesService.getScriptProperties(), p = props.getProperty("PEPPER");
+  if (!p) { p = Utilities.getUuid() + Utilities.getUuid(); props.setProperty("PEPPER", p); }
+  return p;
+}
+function familyId(email) { return sha("bd-family:" + pepper() + ":" + email).slice(0, 32); }
+function newSalt() { return sha(Utilities.getUuid() + Utilities.getUuid()).slice(0, 32); }
 function folder() {
   var it = DriveApp.getFoldersByName(FOLDER);
   return it.hasNext() ? it.next() : DriveApp.createFolder(FOLDER);
@@ -113,11 +126,12 @@ function verifyCode(req) {
   var secret = Utilities.getUuid().replace(/-/g, "") + Utilities.getUuid().replace(/-/g, "");
   return locked(function () {
     var file = fileFor(fid, true), d = load(file);
-    d.email = email;
+    delete d.email; // never kept
+    if (!/^[a-f0-9]{32}$/.test(d.salt || "")) d.salt = newSalt(); // random per family, used for the device-side encryption key
     d.devices.push({ h: sha(secret), label: String(req.device || "Device").replace(/[^\w .,'()-]/g, "").slice(0, 40), at: new Date().toISOString() });
     d.devices = d.devices.slice(-MAX_DEVICES);
     save(file, d);
-    return { ok: true, token: fid + "." + secret, players: d.players, removed: d.removed };
+    return { ok: true, token: fid + "." + secret, salt: d.salt, players: d.players.filter(validPlayer), removed: d.removed };
   });
 }
 
@@ -134,7 +148,12 @@ function withFamily(req, fn) {
   var a = auth(req);
   return a ? fn(a.d, a) : { ok: false, error: "signed_out" };
 }
-function validPlayer(p) { return p && typeof p === "object" && typeof p.id === "string" && /^[a-z0-9]{4,40}$/i.test(p.id) && typeof p.name === "string"; }
+/* Only encrypted students are kept: { id, updatedAt, enc }. Anything readable is refused. */
+function validPlayer(p) {
+  return p && typeof p === "object" && typeof p.id === "string" && /^[a-z0-9]{4,40}$/i.test(p.id) &&
+    typeof p.enc === "string" && /^[A-Za-z0-9+/=]{24,1400000}$/.test(p.enc) && Object.keys(p).every(function (k) { return k === "id" || k === "updatedAt" || k === "enc"; });
+}
+function slim(p) { return { id: p.id, updatedAt: Math.max(0, Number(p.updatedAt) || 0), enc: p.enc }; }
 /* Newest copy of each student wins; removals are remembered so they don't come back. */
 function push(req) {
   return locked(function () {
@@ -152,11 +171,11 @@ function push(req) {
       if (!validPlayer(p)) return;
       var gone = d.removed.filter(function (x) { return x.id === p.id; })[0];
       if (gone && (p.updatedAt || 0) <= gone.at) return;
-      if (!byId[p.id] || (p.updatedAt || 0) > (byId[p.id].updatedAt || 0)) byId[p.id] = p;
+      if (!byId[p.id] || (p.updatedAt || 0) > (byId[p.id].updatedAt || 0)) byId[p.id] = slim(p);
       if (gone) d.removed = d.removed.filter(function (x) { return x.id !== p.id; });
     });
-    var list = Object.keys(byId).map(function (k) { return byId[k]; }).slice(0, MAX_PLAYERS);
-    var next = { email: d.email, players: list, removed: d.removed, devices: d.devices };
+    var list = Object.keys(byId).map(function (k) { return byId[k]; }).filter(validPlayer).slice(0, MAX_PLAYERS);
+    var next = { salt: d.salt, players: list, removed: d.removed, devices: d.devices };
     if (JSON.stringify(next).length > MAX_BYTES) return { ok: false, error: "too_big" };
     save(a.file, next);
     return { ok: true, players: list, removed: d.removed };
