@@ -173,7 +173,7 @@ BD.Family = (function () {
       const res = await call("verify", { email: email, code: code, device: deviceLabel() });
       busy = false; $("faGo").disabled = false;
       if (!res.ok) return msg(res.error === "expired" ? "That code expired. Tap below to get a new one." : res.error === "network" ? "Can't reach the family account. Try again." : "That code isn't right." + (res.left ? " " + res.left + " tries left." : ""));
-      if (!/^[a-f0-9]{32}$/.test(res.salt || "") || !(window.crypto && crypto.subtle)) { busy = false; return msg("This browser can't lock the data safely. Please update it and try again."); }
+      if (!/^[a-f0-9]{32}$/.test(res.salt || "") || !(window.crypto && crypto.subtle)) { busy = false; return msg(!(window.crypto && crypto.subtle) ? "This browser can't lock the data safely. Please update it and try again." : "The family account service needs an update. Please let Engage know, and try again later."); }
       // only a short hint of the email is kept on the device; the email itself becomes the lock's key
       acct = { token: res.token, hint: masked(email), k: await deriveKey(email, res.salt), at: new Date().toISOString() }; keyObj = null; write(acct);
       const before = BD.Store.players().length;
