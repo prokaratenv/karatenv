@@ -37,20 +37,21 @@ BD.Rank = (function () {
   }
   function belt(p, grade) { return BD.BELTS[rec(p, grade === undefined ? dojoGrade(p) : grade).belt]; }
   function stripeCount(r) { return REQUIRED.filter(function (k) { return r.stripes[k]; }).length; }
+  function gradBonus(r) { return Math.round(GRAD_XP * beltXP(r) / (PRACTICE_MAX * REQUIRED.length)); }
   function beltXP(r) { return REQUIRED.reduce(function (a, k) { return a + Math.min(PRACTICE_MAX, r.xp[k] || 0); }, 0); }
 
   /* Practice XP for a subject at a grade, capped at 100 per stripe.
-     Once the stripe is earned its XP is locked: passing the test adds nothing,
-     and practice after it adds nothing. So practicing up to 100 before the test pays. */
+     Points come only from doing the work: stripe tests add no XP. Practice
+     stays open after a stripe is earned, until they move up a belt. */
   function practice(p, gameKey, grade, amount) {
     const key = BY_GAME[gameKey] || gameKey;
     const r = rec(p, grade);
-    const before = r.xp[key] || 0, locked = !!r.stripes[key];
-    const gained = locked ? 0 : Math.max(0, Math.min(PRACTICE_MAX - before, Math.round(amount)));
+    const before = r.xp[key] || 0, locked = false;
+    const gained = Math.max(0, Math.min(PRACTICE_MAX - before, Math.round(amount)));
     r.xp[key] = before + gained;
     BD.addXP(p, gained);
     BD.Store.save(p);
-    return { subject: key, grade: grade, gained: gained, earned: Math.round(amount), now: r.xp[key], max: PRACTICE_MAX, maxed: r.xp[key] >= PRACTICE_MAX, hasStripe: locked, locked: locked, belt: BD.BELTS[r.belt] };
+    return { subject: key, grade: grade, gained: gained, earned: Math.round(amount), now: r.xp[key], max: PRACTICE_MAX, maxed: r.xp[key] >= PRACTICE_MAX, hasStripe: !!r.stripes[key], locked: locked, belt: BD.BELTS[r.belt] };
   }
 
   /* Record a stripe test. Returns what happened, including graduation. */
@@ -60,19 +61,20 @@ BD.Rank = (function () {
     if (!subject(key)) throw new Error("Unknown stripe: " + key);
     const r = rec(p, grade);
     const out = { subject: key, grade: grade, pct: pct, passed: pct >= PASS, beltBefore: r.belt, graduated: null, already: !!r.stripes[key] };
-    out.xpLocked = Math.min(PRACTICE_MAX, r.xp[key] || 0);
     if (out.passed && !r.stripes[key]) {
-      r.locked = r.locked || {}; r.locked[key] = out.xpLocked; // the XP this stripe was earned with
       p.stripeLog = (p.stripeLog || []).concat({ subject: key, grade: grade, date: new Date().toISOString() }).slice(-300);
     }
     if (out.passed) r.stripes[key] = true;
     if (out.passed && !r.mastered && REQUIRED.every(function (k) { return r.stripes[k]; })) {
       const from = r.belt;
       r.grads.push({ belt: from, date: new Date().toISOString() });
-      BD.addXP(p, GRAD_XP);
+      // The graduation bonus is earned by practice: a quarter of the belt's practice XP
+      // (all 400 practiced = the full +100; tests alone = +0).
+      const bonus = gradBonus(r);
+      BD.addXP(p, bonus);
       if (from < BD.BELTS.length - 1) { r.belt = from + 1; r.stripes = {}; r.xp = {}; }
       else { r.mastered = true; }
-      out.graduated = { from: BD.BELTS[from], to: BD.BELTS[r.belt], mastered: r.mastered, grade: grade };
+      out.graduated = { from: BD.BELTS[from], to: BD.BELTS[r.belt], mastered: r.mastered, grade: grade, bonus: bonus };
     }
     out.belt = BD.BELTS[r.belt];
     out.stripes = Object.assign({}, r.stripes);
@@ -146,7 +148,7 @@ BD.Rank = (function () {
 
   return {
     bank: bank, hintsAllowed: hintsAllowed, PASS: PASS, PRACTICE_MAX: PRACTICE_MAX, GRAD_XP: GRAD_XP, SUBJECTS: SUBJECTS, REQUIRED: REQUIRED, BY_GAME: BY_GAME,
-    subject: subject, rec: rec, dojoGrade: dojoGrade, belt: belt, stripeCount: stripeCount, beltXP: beltXP,
+    subject: subject, gradBonus: gradBonus, rec: rec, dojoGrade: dojoGrade, belt: belt, stripeCount: stripeCount, beltXP: beltXP,
     practice: practice, testDone: testDone, itemGrade: itemGrade, levelNote: levelNote, beltSVG: beltSVG, planItems: planItems
   };
 })();

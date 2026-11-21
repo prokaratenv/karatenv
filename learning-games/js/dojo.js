@@ -108,7 +108,7 @@ BD.Dojo = (function () {
       (b.rows.length ? '<ol class="dojo-list">' + b.rows.map(function (r) {
         return '<li' + (r.me ? ' class="me"' : '') + '><span class="belt-swatch" style="--belt:' + r.color + '"></span><span class="dl-name">' + BD.UI.esc(r.name) + '</span><span class="dl-belt">' + BD.UI.esc(r.belt) + '</span><span class="dl-n">' + r.xp.toLocaleString() + ' XP</span></li>';
       }).join("") + '</ol>' : '<p class="muted">No one has joined yet this week. Be the first!</p>') +
-      '<p class="muted small">XP comes from practice (up to 100 per stripe, and only before the stripe is earned), graduations (+100), bosses, challenges and daily chests. Tip: practice to 100 before each stripe test! Only first names and belts are shown. Parents can join or leave in the Parent corner.</p>');
+      '<p class="muted small">XP comes from doing the work: practice (up to 100 per stripe), graduation bonuses earned by that practice (up to +100), bosses, challenges and daily chests. Stripe tests alone give no points. Only first names and belts are shown. Parents can join or leave in the Parent corner.</p>');
   }
 
   /* Parent corner toggle. */

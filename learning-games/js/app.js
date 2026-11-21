@@ -134,7 +134,7 @@ BD.UI = (function () {
       '<div class="bd-belt">' + BD.Rank.beltSVG(r.belt, r.stripes) + '</div>' +
       '<h3 class="bd-name">' + BD.gradeLabel(g) + ' · ' + belt.name + ' Belt</h3>' +
       '<p class="bd-next">' + BD.Rank.stripeCount(r) + ' of 4 stripes · ' + nextLine + '</p>' +
-      '<p class="bd-xp">Belt XP <strong>' + BD.Rank.beltXP(r) + '</strong> / 500 <span class="muted">(100 per stripe from practice + 100 for graduating)</span></p>' +
+      '<p class="bd-xp">Belt XP <strong>' + BD.Rank.beltXP(r) + '</strong> / 500 <span class="muted">(up to 100 per stripe from practice + a graduation bonus of up to 100, earned by that practice)</span></p>' +
       '<div class="table-wrap"><table class="grid bd-table"><thead><tr><th>Stripe</th><th>Status</th><th>Practice XP</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
       '<h4 class="label">Belt path</h4>' + ladder +
       '<h4 class="label">Graduations</h4>' + grads +
@@ -169,10 +169,14 @@ BD.UI = (function () {
     const what = { math: "20 problems", reading: "8 sentences to fix", spelling: "10 words to spell", comprehension: "2 stories with 6 questions", spanish: "10 Spanish words" }[key];
     sheet(sj.label + " stripe test",
       '<p><strong>' + BD.gradeLabel(g) + ' · ' + BD.BELTS[r.belt].name + ' Belt.</strong> ' + what + '. No hints. Score <strong>' + BD.Rank.PASS + '%</strong> or better to earn your ' + sj.label + ' stripe.</p>' +
-      (Math.min(100, r.xp[key] || 0) < 100 ?
-        '<div class="xp-warn"><strong>⚠️ You have ' + Math.min(100, r.xp[key] || 0) + ' of 100 practice XP for this stripe.</strong><p>When you earn the stripe, its XP locks at ' + Math.min(100, r.xp[key] || 0) + '. The test doesn\'t add points. Practice first to collect up to ' + (100 - Math.min(100, r.xp[key] || 0)) + ' more XP for your score and the leaderboard!</p></div>' :
-        '<p class="muted">All 100 practice XP earned for this stripe. You can take the test any time, and try again as often as you need.</p>') +
-      '<div class="res-actions">' + (Math.min(100, r.xp[key] || 0) < 100 ? '<button type="button" class="btn btn-primary btn-big" id="testPractice">Practice first</button><button type="button" class="btn btn-quiet" id="testGo">Take the test now</button>' :
+      (function () {
+        const x = Math.min(100, r.xp[key] || 0), last = !r.stripes[key] && BD.Rank.stripeCount(r) === 3 && !sj.optional;
+        if (x >= 100 && !last) return '<p class="muted">All 100 practice XP earned for this stripe. You can take the test any time, and try again as often as you need.</p>';
+        if (last) return '<div class="xp-warn"><strong>🎓 This is your last stripe: passing it graduates you!</strong><p>Your graduation bonus comes from practice: right now it would be <strong>+' + BD.Rank.gradBonus(r) + ' XP</strong> of 100. ' +
+          (BD.Rank.beltXP(r) < 400 ? 'Practice XP you haven\'t earned on this belt (' + (400 - BD.Rank.beltXP(r)) + ' left) is gone once you move up. Practice first to grow your bonus and climb the leaderboard!' : 'You did all the practice. Full bonus!') + '</p></div>';
+        return '<div class="xp-warn"><strong>⚠️ The test doesn\'t give points. Practice does.</strong><p>You have ' + x + ' of 100 practice XP for this stripe. You can still practice after you earn it, until you move up a belt. Doing the work is what climbs the leaderboard.</p></div>';
+      })() +
+      '<div class="res-actions">' + ((r.xp[key] || 0) < 100 || (!r.stripes[key] && BD.Rank.stripeCount(r) === 3 && BD.Rank.beltXP(r) < 400) ? '<button type="button" class="btn btn-primary btn-big" id="testPractice">Practice first</button><button type="button" class="btn btn-quiet" id="testGo">Take the test now</button>' :
         '<button type="button" class="btn btn-primary btn-big" id="testGo">Start the test</button><button type="button" class="btn btn-quiet" id="testPractice">Practice more</button>') + '</div>');
     $("testGo").onclick = function () { closeSheet(); launchStripe(key, true); };
     $("testPractice").onclick = function () { closeSheet(); launchStripe(key, false); };
@@ -196,7 +200,7 @@ BD.UI = (function () {
     const res = BD.Rank.testDone(p, o.subject, o.grade, o.pct);
     lastStripe = o;
     const sj = BD.Rank.subject(o.subject);
-    BD.Store.recordSession(p, { game: "test-" + o.subject, grade: o.grade, correct: o.pct, total: 100, xp: res.graduated ? BD.Rank.GRAD_XP : 0 });
+    BD.Store.recordSession(p, { game: "test-" + o.subject, grade: o.grade, correct: o.pct, total: 100, xp: res.graduated ? res.graduated.bonus : 0 });
     $("stripeSub").textContent = sj.label + " stripe test · " + BD.gradeLabel(o.grade);
     $("stripeTitle").textContent = res.passed ? (res.already ? "Stripe kept strong!" : sj.label + " stripe earned!") : "Not yet. Keep training!";
     $("stripeScore").textContent = o.score + " · " + o.pct + "%" + (res.passed ? "" : " (need " + BD.Rank.PASS + "%)");
@@ -228,7 +232,7 @@ BD.UI = (function () {
     $("gradBelt").innerHTML = BD.Rank.beltSVG(BD.BELTS.indexOf(gr.to), gr.mastered ? BD.Rank.REQUIRED.reduce(function (a, k) { a[k] = true; return a; }, {}) : {});
     $("gradBelt").style.setProperty("--belt", gr.to.color);
     $("gradSay").textContent = "Zumi: " + BD.Cast.line("win") + " Bow in to your new belt!";
-    $("gradXP").textContent = "+" + BD.Rank.GRAD_XP + " XP graduation bonus";
+    $("gradXP").textContent = gr.bonus ? "+" + gr.bonus + " XP graduation bonus" + (gr.bonus < BD.Rank.GRAD_XP ? " (practice every stripe to 100 for the full +100)" : " · full bonus for doing all the practice!") : "No graduation bonus this time: it comes from practice. Practice each stripe to 100 on your next belt for +100!";
     $("gradNextGrade").hidden = !(gr.mastered && gr.grade < BD.MAX_GRADE);
     $("gradNextGrade").onclick = function () { p.dojoGrade = gr.grade + 1; BD.Store.save(p); home(); };
     $("gradCert").onclick = function () { BD.Certificate.open(p, { to: gr.to, grade: gr.grade, mastered: gr.mastered, date: new Date().toISOString() }); };
@@ -470,7 +474,7 @@ BD.UI = (function () {
       '<span>' + (rk.gained ? "+" + rk.gained + " XP · " : "") + rk.now + " / 100 XP on your " + BD.gradeLabel(rk.grade) + " " + rk.belt.name + " Belt" +
       (rk.locked ? "" : rk.earned > rk.gained ? " (this stripe's practice is maxed at 100, so extra XP doesn't add up)" : "") + '</span>' +
       '<div class="xp-track"><div class="xp-fill" style="width:' + rk.now + '%"></div></div>' +
-      (rk.hasStripe ? '<span class="muted">You already have this stripe, so its XP is locked at ' + rk.now + '. Practice a stripe you don\'t have yet to earn more points.</span>' : '<button type="button" class="btn btn-small btn-primary" id="resStripeTest">' + (rk.maxed ? "All 100 XP! Take the " + sjr.label + " stripe test" : "Take the " + sjr.label + " stripe test (XP locks at " + rk.now + ")") + '</button>' + (rk.maxed ? "" : '<span class="muted small">Keep practicing to collect up to ' + (100 - rk.now) + ' more XP first.</span>')) +
+      (rk.hasStripe ? '<span class="muted">You already have this stripe. Practice still earns XP for it (up to 100) until you move up a belt.</span>' : '<button type="button" class="btn btn-small btn-primary" id="resStripeTest">' + (rk.maxed ? "All 100 XP! Take the " + sjr.label + " stripe test" : "Take the " + sjr.label + " stripe test") + '</button>' + (rk.maxed ? "" : '<span class="muted small">Tests don\'t give points. ' + (100 - rk.now) + ' more practice XP is waiting for this stripe.</span>')) +
       '</div></div>' : "";
     if ($("resStripeTest")) $("resStripeTest").onclick = function () { p.dojoGrade = rk.grade; BD.Store.save(p); confirmTest(rk.subject); };
     $("resFailed").hidden = !o.failed;
@@ -647,7 +651,7 @@ BD.UI = (function () {
     $("parentHow").addEventListener("click", function () {
       sheet("How Brain Dojo works",
         '<h4 class="label">Belts and stripes</h4><p>Each grade has its own belt path: White, Yellow, Orange, Blue, Green, Purple, Brown, Red, Black. A belt needs 4 stripes (Math, Reading, Spelling, Comprehension), each earned by scoring 85% on a stripe test. The 4th stripe graduates them to the next belt. Spanish is a bonus stripe.</p>' +
-        '<h4 class="label">Practice and hints</h4><p>Practice earns up to 100 XP per stripe, but only before that stripe is earned: passing the test adds no XP and locks the stripe\'s XP where it is (practice to 56, pass the test, and it stays 56). So kids practice up to 100 before testing. Graduating to the next belt adds 100 XP. The Dojo leaderboard ranks XP earned this week. White through Purple belts can use hints. Brown, Red and Black belts work without them. Pre-K to 1st grade hear instructions read aloud.</p>' +
+        '<h4 class="label">Practice and hints</h4><p>Points come from doing the work. Practice earns up to 100 XP per stripe; stripe tests add no XP (practice to 56, pass the test, and it stays 56). They can keep practicing a stripe after earning it, until they move up a belt. Graduating adds a bonus earned by practice: a quarter of the belt\'s practice XP (all 400 = +100; tests only = +0). The Dojo leaderboard ranks XP earned this week, so practice beats rushing tests. White through Purple belts can use hints. Brown, Red and Black belts work without them. Pre-K to 1st grade hear instructions read aloud.</p>' +
         '<h4 class="label">Badges and gear</h4><p>Badges for streaks, perfect rounds, stripes and belts unlock real Engage gear for their champion, from a mouthguard to MMA gloves.</p>' +
         '<h4 class="label">Saving</h4><p>Progress saves automatically, even mid-round. Opened from the shared link while signed in to Claude, it is kept in that Claude account and follows you to any device. Otherwise it stays in this browser. Use <strong>Back up progress</strong> to get a save code that moves a student to another device or restores them if the browser is cleared.</p>' +
         '<h4 class="label">Parent PIN</h4><p>The Parent corner is protected by your PIN so kids can\'t reset or remove progress. Forgot it? Tap Forgot PIN and answer the grown-up math question.</p>');
