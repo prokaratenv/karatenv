@@ -177,6 +177,7 @@ BD.Quest = (function () {
       STICKERS.map(function (s, i) { const got = p.stickers.indexOf(i) !== -1; return '<span class="sticker' + (got ? " got" : "") + '" title="' + (got ? s[1] : "Not found yet") + '">' + (got ? s[0] : "?") + '</span>'; }).join("") + '</div>' +
       '<p class="muted small">Finish your daily quest to open a mystery chest: bonus XP plus a sticker or a 🛡️ streak shield (you have ' + p.shields + ' of ' + MAX_SHIELDS + ').</p>';
     BD.UI.sheet("Adventure Map", html);
+    if (BD.Music) BD.Music.scene("map");
     if ($("mapBoss")) $("mapBoss").onclick = function () { BD.Boss.open(); };
     setTimeout(function () { const h = $("mapHere"); if (h && h.scrollIntoView) h.scrollIntoView({ block: "center" }); }, 80);
   }

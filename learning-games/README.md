@@ -21,6 +21,15 @@ In **Math Dojo**, the top of the screen has **⚡ Daily Flashcards**: big button
 - The buttons show ✓ once a skill's bonus is earned today. Extra sets still count as practice XP for the Math stripe (up to its 100 cap), just without another bonus. Everything resets at midnight.
 - Bonus XP counts toward total XP and the weekly leaderboard. A low flashcard score never locks a level.
 
+## The home screen
+
+The home screen is kept simple. From top to bottom:
+1. **Champion + Start training:** one big button that runs Sensei's best next step (school words first when there's a list, then stripe practice). Tap the champion to change them, or tap **Gear locker**.
+2. **Today:** three tiles: ⭐ **Today's quest**, ⚡ **Daily Flashcards** (pick + − × ÷, with today's bonus shown) and 🗺️ **Adventure Map**.
+3. **My belt:** one line with the belt, stripes and belt XP. Tap **Stripes & tests** to open the stripe rows with Practice and Stripe test buttons, and the Dojo grade picker. The app remembers whether it's open.
+4. **Play:** one tile per game (coach, name, grade), plus a 📝 **School Words** tile when a parent has added a list. Tap a tile to play. Each game's grade is changed inside the game, from the grade menu at the top.
+5. **Challenges:** the belt boss, Partner Challenge and the Dojo Challenge leaderboard.
+
 ## Start training, read aloud and certificates
 
 - **Start training:** the big button on the home screen starts whatever Sensei suggests next (the stripe closest to done, a test they're ready for, or their weakest skill). Underneath, a 🔥 streak counts the days in a row they've trained.
@@ -44,7 +53,7 @@ In **Math Dojo**, the top of the screen has **⚡ Daily Flashcards**: big button
 - **PIN:** the first visit asks for a 4-digit parent PIN, so kids can't reset or remove progress. Forgot it? A grown-up math question lets you set a new one.
 - **Dashboard:** for each child: this week (days, rounds, questions, streak), belt progress, what they're strong at and what to work on, a tip to try at home, last week's recap (highlighted on Mondays) and badges. The detailed tables are under **See details** and only show grades they've played.
 - **Share this week:** makes a progress card picture to text to family or an Engage instructor.
-- **Dojo Challenge:** a weekly team goal (3,000 right answers) plus a **leaderboard ranked by XP earned this week** (practice, graduation bonuses, Daily Flashcards, bosses, Partner Challenges and daily chests) for everyone using the shared link. Stripe tests alone give no points, so doing the practice is how to climb it. Parents opt each child in; other families see only a **first initial** (like "M."), belt and weekly points. Needs the shared Claude link while signed in, with Contributor access or above (everyone in your Claude organization; view-only visitors can see the board but not add to it).
+- **Dojo Challenge and leaderboard:** a weekly team goal (3,000 right answers) and a **leaderboard ranked by XP earned this week** (practice, graduation bonuses, Daily Flashcards, bosses, Partner Challenges and daily chests). Stripe tests alone give no points, so doing the practice is how to climb it. **Anyone can see the board; no names are ever shown.** Each student appears as a **nickname** they build from kid-safe word lists (Word 1 + Word 2 + a number, like "Swift Panda 27", with a 🎲 Surprise me button) or as a first initial. Words that match, contain, start like or nearly spell the student's real name are grayed out and refused (a student named Wolfgang can't be "Swift Wolf"). Students pick or change it from the board (tap the Dojo Challenge card). A parent puts each child on the board in the Parent corner. On your own website that requires signing in with a parent's email; the board runs through `tools/family-sync.gs` and stores only nickname or initial, belt and weekly points. On the Claude link it needs Contributor access.
 
 ## School Words (from your child's teacher)
 
@@ -79,6 +88,31 @@ Until the report is unlocked, the Parent corner still shows **Back up progress**
 4. Add actions: **Create/Update Contact**, **Add Tags** (from `tags`: Brain Dojo, Parent Progress Report, Parent Handbook, plus Free Class Offers / SMS Opt-In / Engage Member / Prospect), then **Add to Workflow:** your Parent Handbook email series. Only send texts to contacts tagged SMS Opt-In.
 
 You can also add a Google Sheet backup (steps in `tools/lead-sheet.gs`) as a second URL in the same list. The report is only locked where a sign-up can actually be delivered: with `leadEndpoints` empty (and on the Claude link for visitors who can't save there), the report stays open, so parents are never locked out. On the Claude link, the owner is never locked out and sees **Download sign-ups (CSV)**. If a parent is offline, the sign-up is sent the next time Brain Dojo opens.
+
+## Music and sound
+
+Brain Dojo has its own soundtrack, composed for it and played by small synthesizers in code. There are no audio files, so it loads instantly and works offline.
+
+| Piece | Where it plays |
+|---|---|
+| **Morning Bow** | Welcome, home and parent screens: calm koto and soft pad |
+| **Path of Belts** | The Adventure Map: a bright flute adventure |
+| **Quiet Mind** | While answering questions: very soft, no melody, so it doesn't distract |
+| **Rival Stance** | Boss battles and Partner Challenge: taiko drums and a driving bass |
+| **Iron Tower** | The Black Belt boss and Final Boss Master Young: faster and heavier |
+| **Victory fanfare** | Wins, stripes and graduations |
+
+- Music starts quietly after the first tap (browsers require a tap first). It gets softer while a voice reads aloud, and pauses when the app is in the background.
+- The top-bar **🔊 Sound** button opens the Sound menu, which has **Music on/off**, **Music volume**, and **Sound effects & voice on/off** (dings, cheers and read-aloud). Settings are remembered on each device.
+
+## Offline play
+
+On your own website, Brain Dojo keeps itself on the device after the first visit, so it opens and plays with **no internet**.
+- The app's core files are saved right away, and the character pictures download quietly in the background a few seconds later. Fonts are kept too.
+- Offline, kids can play every game, the map, bosses and flashcards, and everything saves on the device. The footer shows "Offline · playing and saving on this device."
+- When the internet comes back, family sync and sign-ups send automatically. Ask Sensei and other AI extras are only available on the Claude link anyway.
+- **Updates:** after changing any app file, run `python3 tools/build-sw.py`. It refreshes `sw.js` with a new version, so devices pick up the update on their next visit.
+- On iPhone and iPad, Share → **Add to Home Screen** opens it full screen like an app. The top bar stays clear of the clock and battery icons.
 
 ## Scratch paper
 
@@ -357,6 +391,8 @@ learning-games/
   js/quest.js            Adventure Map, daily quest, chests, stickers, streak shields
   js/leads.js            parent newsletter / free-class sign-up
   js/config.js           studio settings (sign-up and family account URLs)
+  js/music.js            the soundtrack (synthesized in code) and music settings
+  sw.js                  offline support (built by tools/build-sw.py)
   js/family.js           family accounts: email sign-in and sync across devices
   tools/family-sync.gs   Google Apps Script backend for family accounts
   tools/lead-sheet.gs    Google Sheet script that collects sign-ups

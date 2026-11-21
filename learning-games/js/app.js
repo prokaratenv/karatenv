@@ -17,6 +17,7 @@ BD.UI = (function () {
     }
     if (id === "screen-players" || id === "screen-home") trail.length = 0; // home is the top
     currentScreen = id;
+    if (BD.Music) BD.Music.forScreen(id);
     document.body.classList.toggle("on-players", id === "screen-players");
     if (id !== "screen-results") BD.confetti.stop();
     document.querySelectorAll(".screen").forEach(function (s) { s.hidden = s.id !== id; });
@@ -386,8 +387,11 @@ BD.UI = (function () {
     $("homeSpanishGrade").innerHTML = gradePicker("spanishGradePick", p.spanishGrade, !!retry.spanish);
     const hasSchool = BD.School.has(p);
     $("homeSchool").hidden = !hasSchool;
-    $("homeSchool").innerHTML = hasSchool ? '<p class="eyebrow">This week\'s school words · ' + BD.School.masteredCount(p) + '/' + BD.School.words(p).length + ' mastered</p>' +
-      '<div class="school-btns"><button type="button" class="btn btn-small btn-gold" data-school="practice">📝 Practice school words</button><button type="button" class="btn btn-small btn-quiet" data-school="test">Word test</button></div>' : "";
+    $("homeSchool").innerHTML = hasSchool ? '<button type="button" class="gt-inner" data-school="practice"><span class="gt-emoji" aria-hidden="true">📝</span><span class="gt-name">School Words</span><span class="gt-grade">' + BD.School.masteredCount(p) + ' of ' + BD.School.words(p).length + ' mastered</span></button>' +
+      '<button type="button" class="gt-test" data-school="test">Word test</button>' : "";
+    [["gtMath", "mathGrade"], ["gtSent", "sentenceGrade"], ["gtRead", "readingGrade"], ["gtSpell", "spellingGrade"], ["gtSpanish", "spanishGrade"]].forEach(function (x) { $(x[0]).textContent = BD.gradeLabel(p[x[1]]); });
+    $("flashCard").innerHTML = BD.MathGame.flashTile(p);
+    beltSummary(p);
     const notes = [];
     if (retry.math) notes.push("<strong>Math Dojo:</strong> redo " + BD.gradeLabel(retry.math.grade) + " " + retry.math.ops.map(function (o) { return BD.MathGame.OPS[o].sym; }).join(" ") + " and score " + BD.MathGame.PASS + "% to unlock other levels.");
     if (retry.sentence) notes.push("<strong>Fix-It Sentences:</strong> redo " + BD.gradeLabel(retry.sentence.grade) + " and fix " + BD.SentenceGame.PASS + "% to unlock other grades.");
@@ -396,6 +400,15 @@ BD.UI = (function () {
     renderPlan(p);
     BD.Quest.render(p);
     show("screen-home");
+  }
+
+  /* The one-line belt summary; tapping it opens stripes, practice and tests. */
+  function beltSummary(p) {
+    const g = BD.Rank.dojoGrade(p), r = BD.Rank.rec(p, g), sc = BD.Rank.stripeCount(r);
+    $("beltSummary").innerHTML = '<span class="bs-belt">' + BD.Rank.beltSVG(r.belt, r.stripes) + '</span>' +
+      '<span class="bs-txt"><strong>' + BD.gradeLabel(g) + ' · ' + BD.BELTS[r.belt].name + ' Belt</strong><span class="muted small">' + (r.mastered ? "Grade mastered!" : sc + " of 4 stripes · " + BD.Rank.beltXP(r) + " / 500 belt XP") + '</span></span>' +
+      '<span class="bs-open">Stripes &amp; tests <span aria-hidden="true">›</span></span>';
+    try { $("beltFold").open = sessionStorage.getItem("bd.beltOpen") === "1"; } catch (e) { /* default closed */ }
   }
 
   /* Gear the champion is wearing, under the home stage. */
@@ -412,7 +425,7 @@ BD.UI = (function () {
     planItems = BD.Coach.plan(p);
     const first = nextStep(p);
     $("startNext").textContent = first ? "Next: " + first.title : "";
-    $("homePlan").hidden = !planItems.length;
+    $("homePlan").hidden = true; // Start training runs Sensei's top pick; the list stays off the home screen to keep it simple
     $("homePlanList").innerHTML = planItems.map(function (it, i) {
       return '<button type="button" class="plan-item plan-' + it.kind + '" data-plan="' + i + '"><strong>' + esc(it.title) + '</strong><span>' + esc(it.sub) + '</span></button>';
     }).join("");
@@ -621,9 +634,7 @@ BD.UI = (function () {
     });
     $("playerChip").addEventListener("click", players);
     $("brandHome").addEventListener("click", function () { BD.Store.current() ? home() : players(); });
-    $("muteBtn").addEventListener("click", function () {
-      BD.Store.muted = !BD.Store.muted; syncMute();
-    });
+    $("muteBtn").addEventListener("click", soundMenu);
     $("parentBtn").addEventListener("click", function () { BD.Parent.gate(parent); });
     $("parentBack").addEventListener("click", back);
     [["homeMathGrade", "math"], ["homeSentGrade", "sentence"], ["homeReadGrade", "reading"], ["homeSpellGrade", "spelling"], ["homeSpanishGrade", "spanish"]].forEach(function (pair) {
@@ -649,6 +660,8 @@ BD.UI = (function () {
     $("startTraining").addEventListener("click", startTraining);
     $("gearBtn").addEventListener("click", function () { BD.Badges.openLocker(); });
     $("dojoCard").addEventListener("click", function () { BD.Dojo.openBoard(); });
+    $("flashCard").addEventListener("click", function () { BD.MathGame.openFlash(); });
+    $("beltFold").addEventListener("toggle", function () { try { sessionStorage.setItem("bd.beltOpen", $("beltFold").open ? "1" : "0"); } catch (e) { /* ignore */ } });
     $("parentHow").addEventListener("click", function () {
       sheet("How Brain Dojo works",
         '<h4 class="label">Belts and stripes</h4><p>Each grade has its own belt path: White, Yellow, Orange, Blue, Green, Purple, Brown, Red, Black. A belt needs 4 stripes (Math, Reading, Spelling, Comprehension), each earned by scoring 85% on a stripe test. The 4th stripe graduates them to the next belt. Spanish is a bonus stripe.</p>' +
@@ -727,6 +740,26 @@ BD.UI = (function () {
     BD.Quest.bind();
     BD.Leads.bind();
   }
+  /* OFFLINE: keep the app on the device (own website only; not inside Claude). */
+  function offline() {
+    const ok = "serviceWorker" in navigator && (location.protocol === "https:" || /^(localhost|127\.0\.0\.1)$/.test(location.hostname)) && !(window.claude && window.claude.use);
+    if (ok) {
+      navigator.serviceWorker.register("sw.js").then(function (reg) {
+        // once settled, fetch the rest of the pictures in the background
+        setTimeout(function () { const w = reg.active || reg.waiting || reg.installing; if (w) w.postMessage({ type: "warm" }); }, 8000);
+      }).catch(function () { /* plays online only */ });
+    }
+    const note = function () {
+      document.body.classList.toggle("is-offline", !navigator.onLine);
+      const el = $("syncStatus"); if (!el || (BD.Family && BD.Family.linked())) return;
+      if (!navigator.onLine) { el.dataset.state = "offline"; el.textContent = "Offline · playing and saving on this device"; }
+      else if (el.dataset.state === "offline") { el.dataset.state = BD.Sync && BD.Sync.connected() ? "synced" : "local"; el.textContent = BD.Sync && BD.Sync.connected() ? BD.Sync.label() : "Saved on this device"; }
+    };
+    window.addEventListener("online", function () { note(); if (BD.Sync && BD.Sync.flushNow) BD.Sync.flushNow(); });
+    window.addEventListener("offline", note);
+    note();
+  }
+
   /* A simple pop-up sheet for lessons and rule books. */
   function sheet(title, html) {
     $("infoBody").onclick = null;
@@ -736,13 +769,31 @@ BD.UI = (function () {
     document.body.classList.add("sheet-lock");
     setTimeout(function () { $("infoClose").focus(); }, 50);
   }
-  function closeSheet() { $("infoSheet").hidden = true; if ($("senseiSheet").hidden) document.body.classList.remove("sheet-lock"); }
+  function closeSheet() { if (BD.Music) BD.Music.back(); $("infoSheet").hidden = true; if ($("senseiSheet").hidden) document.body.classList.remove("sheet-lock"); }
   function sheetOpen() { return !$("infoSheet").hidden || !$("senseiSheet").hidden; }
 
   function syncMute() {
     document.body.classList.toggle("no-speech", !BD.Speech.available || BD.Store.muted);
-    $("muteBtn").textContent = BD.Store.muted ? "Sound off" : "Sound on";
-    $("muteBtn").setAttribute("aria-pressed", String(!BD.Store.muted));
+    const m = BD.Music.prefs().music, fx = !BD.Store.muted;
+    $("muteBtn").textContent = m && fx ? "🔊 Sound" : m || fx ? "🔉 Sound" : "🔇 Sound";
+    $("muteBtn").setAttribute("aria-label", "Sound settings: music " + (m ? "on" : "off") + ", sound effects " + (fx ? "on" : "off"));
+  }
+  /* Sound menu: music on/off and volume, sound effects (and read-aloud voice) on/off. */
+  function soundMenu() {
+    const draw = function () {
+      const m = BD.Music.prefs(), fx = !BD.Store.muted;
+      sheet("Sound",
+        '<div class="sound-menu">' +
+        '<label class="sound-row"><span><strong>🎵 Music</strong><span class="muted small">Calm music in the dojo, adventure on the map, boss music in battles.</span></span>' +
+        '<input type="checkbox" class="switch" id="sndMusic"' + (m.music ? " checked" : "") + '></label>' +
+        '<label class="sound-vol' + (m.music ? "" : " off") + '"><span>Music volume</span><input type="range" id="sndVol" min="5" max="100" step="5" value="' + m.vol + '"' + (m.music ? "" : " disabled") + '></label>' +
+        '<label class="sound-row"><span><strong>🔔 Sound effects &amp; voice</strong><span class="muted small">Dings, cheers and read-aloud instructions.</span></span>' +
+        '<input type="checkbox" class="switch" id="sndFx"' + (fx ? " checked" : "") + '></label></div>');
+      $("sndMusic").onchange = function () { BD.Music.set({ music: this.checked }); syncMute(); draw(); };
+      $("sndVol").oninput = function () { BD.Music.set({ vol: Number(this.value) }); };
+      $("sndFx").onchange = function () { BD.Store.muted = !this.checked; if (BD.Store.muted) BD.Speech.stop(); else BD.Sound.tap(); syncMute(); };
+    };
+    draw();
   }
 
   function init() {
@@ -752,6 +803,7 @@ BD.UI = (function () {
     BD.Dojo.init();
     players(); // always open on the welcome screen: Start here / Resume my training
     BD.Family.init();
+    offline();
   }
 
   return { championHTML: function (p, outfit) { return fighterArt(p, "full", outfit); }, refreshStage: refreshStage, fighterKey: function (p) { return fighterOf(p); }, beltDetails: beltDetails, testMode: testMode, stripeResult: stripeResult, back: back, setGrade: setGrade, syncGradeSelect: syncGradeSelect, refresh: refresh, sheet: sheet, sheetOpen: sheetOpen, show: show, esc: esc, home: home, players: players, results: results, gradePicker: gradePicker, init: init };

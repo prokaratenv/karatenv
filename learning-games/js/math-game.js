@@ -539,5 +539,26 @@ BD.MathGame = (function () {
 
   function bankNow() { if (S && !S.done) BD.Rank.bank(S, "math"); }
 
-  return { FLASH_BONUS: FLASH_BONUS, flashToday: flashToday, bankNow: bankNow, opsFor: opsFor, stop: stop, start: start, openSetup: openSetup, bind: bind, makeProblem: makeProblem, LEVELS: LEVELS, OPS: OPS, show: show, PASS: PASS };
+  /* Home screen: the Daily Flashcards tile and its picker. */
+  function flashTile(p) {
+    const done = flashToday(p).ops.length * FLASH_BONUS, max = opsFor(p.mathGrade).length * FLASH_BONUS;
+    return '<span class="tile-icon" aria-hidden="true">⚡</span><span class="quest-txt"><span class="boss-k">Daily Flashcards</span><strong>' + (done >= max ? "All done today!" : "+ − × ÷ quick sets") + '</strong>' +
+      '<span class="quest-bar"><span style="width:' + Math.round(100 * done / Math.max(1, max)) + '%"></span></span><span class="boss-sub">Bonus today: +' + done + ' of +' + max + '</span></span>';
+  }
+  function openFlash() {
+    const p = BD.Store.current(); if (!p) return;
+    const done = flashToday(p).ops, allowed = opsFor(p.mathGrade), retry = p.retry && p.retry.math;
+    BD.UI.sheet("⚡ Daily Flashcards",
+      '<p class="muted">' + FLASH_CARDS + ' quick cards of one skill at ' + BD.gradeLabel(p.mathGrade) + '. Finish a set with 70% or better for a <strong>+' + FLASH_BONUS + ' bonus</strong>, once per skill each day.</p>' +
+      '<div class="flash-grid" id="flashPickHome">' + Object.keys(OPS).map(function (k) {
+        const ok = allowed.indexOf(k) !== -1 && !retry, got = done.indexOf(k) !== -1;
+        return '<button type="button" class="flash-btn' + (got ? " done" : "") + '" data-flash="' + k + '"' + (ok ? "" : " disabled") + '><span class="op-sym">' + OPS[k].sym + '</span><span class="flash-name">' + OPS[k].label + '</span><span class="flash-state">' + (allowed.indexOf(k) === -1 ? "Starts in 2nd grade" : got ? "✓ Bonus earned" : "+" + FLASH_BONUS + " bonus") + '</span></button>';
+      }).join("") + '</div>');
+    document.getElementById("flashPickHome").onclick = function (e) {
+      const b = e.target.closest("[data-flash]"); if (!b || b.disabled) return;
+      document.getElementById("infoClose").click(); BD.Sound.tap(); start("flash", [b.dataset.flash]);
+    };
+  }
+
+  return { flashTile: flashTile, openFlash: openFlash, FLASH_BONUS: FLASH_BONUS, flashToday: flashToday, bankNow: bankNow, opsFor: opsFor, stop: stop, start: start, openSetup: openSetup, bind: bind, makeProblem: makeProblem, LEVELS: LEVELS, OPS: OPS, show: show, PASS: PASS };
 })();

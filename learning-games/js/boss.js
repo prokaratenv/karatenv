@@ -108,6 +108,7 @@ BD.Boss = (function () {
     $("bossSay").textContent = b.boss.hi;
     $("bossOver").hidden = true;
     BD.UI.show("screen-boss");
+    if (BD.Music) BD.Music.scene(b.boss.final || b.boss.secret ? "final" : "boss");
     BD.Mini.fill($("screen-boss"));
     hud();
     // the transformation, the first time Final Boss Master Young appears

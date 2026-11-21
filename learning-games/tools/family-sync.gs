@@ -45,6 +45,8 @@ function doPost(e) {
       case "signout": return reply(signOut(req, false));
       case "signoutAll": return reply(signOut(req, true));
       case "delete": return reply(deleteFamily(req));
+      case "board": return reply(board(req));
+      case "boardPost": return reply(boardPost(req));
       default: return reply({ ok: false, error: "bad_request" });
     }
   } catch (err) {
@@ -187,10 +189,44 @@ function signOut(req, all) {
     return { ok: true };
   });
 }
+/* ---------- Dojo leaderboard (no names: nicknames from word lists, or an initial) ---------- */
+var ADJ = ["Swift","Brave","Mighty","Clever","Lucky","Golden","Silent","Rapid","Fierce","Happy","Cosmic","Thunder","Shadow","Turbo","Super","Steady","Bright","Wild","Calm","Jolly","Iron","Blazing","Frosty","Sunny"];
+var ANIMAL = ["Panda","Tiger","Dragon","Falcon","Fox","Owl","Bear","Wolf","Shark","Eagle","Lion","Turtle","Cobra","Crane","Raccoon","Otter","Hawk","Rhino","Koala","Phoenix","Ninja","Comet","Rocket","Storm"];
+var BELTS = ["White","Yellow","Orange","Blue","Green","Purple","Brown","Red","Black"];
+function nickOk(s) { var m = /^([A-Za-z]+) ([A-Za-z]+) ([1-9][0-9]?)$/.exec(String(s || "")); return !!(m && ADJ.indexOf(m[1]) !== -1 && ANIMAL.indexOf(m[2]) !== -1); }
+function initialOk(s) { return /^[A-Z]\.$/.test(String(s || "")); }
+function weekKey() { var d = new Date(); d.setUTCHours(0, 0, 0, 0); d.setUTCDate(d.getUTCDate() - (d.getUTCDay() + 6) % 7); return d.toISOString().slice(0, 10); }
+function boardFile() { var f = folder(), it = f.getFilesByName("leaderboard.json"); return it.hasNext() ? it.next() : f.createFile("leaderboard.json", "{}", "application/json"); }
+function boardData(file) { var d = {}; try { d = JSON.parse(file.getBlob().getDataAsString()) || {}; } catch (e) { d = {}; } if (d.week !== weekKey()) d = { week: weekKey(), rows: {} }; d.rows = d.rows || {}; return d; }
+function board(req) {
+  var d = boardData(boardFile()), mine = null, t = String(req.token || "").match(/^([a-f0-9]{32})\./);
+  if (t) mine = t[1];
+  var rows = Object.keys(d.rows).map(function (k) { var r = d.rows[k]; return { name: r.name, belt: r.belt, xp: r.xp, reps: r.reps, me: !!(mine && k.indexOf(mine + ":") === 0) }; });
+  rows.sort(function (a, b) { return (b.xp - a.xp) || (b.reps - a.reps); });
+  return { ok: true, week: d.week, rows: rows.slice(0, 100), total: rows.reduce(function (a, r) { return a + (r.reps || 0); }, 0), count: rows.length };
+}
+function boardPost(req) {
+  return locked(function () {
+    var a = auth(req); if (!a) return { ok: false, error: "signed_out" };
+    var fid = String(req.token).slice(0, 32), file = boardFile(), d = boardData(file);
+    Object.keys(d.rows).forEach(function (k) { if (k.indexOf(fid + ":") === 0) delete d.rows[k]; });
+    (Array.isArray(req.players) ? req.players : []).slice(0, 6).forEach(function (p) {
+      var sid = String(p && p.sid || ""), name = String(p && p.name || "");
+      if (!/^[a-f0-9]{16}$/.test(sid) || !(nickOk(name) || initialOk(name)) || BELTS.indexOf(p.belt) === -1) return;
+      d.rows[fid + ":" + sid] = { name: name, belt: p.belt, xp: Math.max(0, Math.min(10000, Math.round(Number(p.xp) * 2 || 0) / 2)), reps: Math.max(0, Math.min(1500, Math.round(Number(p.reps) || 0))) };
+    });
+    file.setContent(JSON.stringify(d));
+    return { ok: true };
+  });
+}
+
 function deleteFamily(req) {
   return locked(function () {
     var a = auth(req); if (!a) return { ok: false, error: "signed_out" };
     a.file.setTrashed(true);
+    var fid = String(req.token).slice(0, 32), bf = boardFile(), bd = boardData(bf);
+    Object.keys(bd.rows).forEach(function (k) { if (k.indexOf(fid + ":") === 0) delete bd.rows[k]; });
+    bf.setContent(JSON.stringify(bd));
     return { ok: true };
   });
 }

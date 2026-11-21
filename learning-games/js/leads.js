@@ -14,7 +14,7 @@ BD.Leads = (function () {
   const $ = function (id) { return document.getElementById(id); };
   const esc = function (s) { return BD.UI.esc(s); };
   const DONE_KEY = "brainDojo.signedUp", PENDING_KEY = "brainDojo.leadPending";
-  const TERMS_VERSION = "2026-11-22";
+  const TERMS_VERSION = "2026-11-23";
   const read = function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } };
   const write = function (k, v) { try { if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) { /* blocked */ } };
   const cfg = function () { return BD.CONFIG || {}; };
@@ -101,7 +101,7 @@ BD.Leads = (function () {
       '<h4 class="label">How we use it</h4><p>When you unlock the free Parent Progress Report, you\'re added to ' + s + '\'s free <strong>Parent Handbook</strong> email series: tips on focus, confidence, respect and habits at home, plus news from our school. If you check the box, we\'ll also send free trial class offers, events and specials. If you opt in to texts, we\'ll text class reminders and offers. Message frequency varies; message and data rates may apply. Reply STOP to stop texts or HELP for help.</p>' +
       '<h4 class="label">Your choices</h4><p>Every email has an unsubscribe link, and you can leave any time. Unsubscribing doesn\'t lock the report on this device. Texts are never required.</p>' +
       '<h4 class="label">Family account (optional)</h4><p>If you sign in with your email to use Brain Dojo on several devices, your children\'s profiles (first name and Brain Dojo progress) are <strong>encrypted on your device before they\'re sent</strong>, using a key made from your email. We store only that scrambled data, an anonymous family number and fingerprints of your linked devices. We don\'t store your email address or your children\'s names in readable form, and we can\'t read your family\'s data. Your email is used only to send the 6-digit sign-in code, which isn\'t marketing. You can sign out any device, or delete your family data from the Parent corner at any time.</p>' +
-      '<h4 class="label">Leaderboard (optional)</h4><p>If you add your child to the Dojo Challenge, other families see only a first initial, belt color and weekly points.</p>' +
+      '<h4 class="label">Leaderboard (optional)</h4><p>If you add your child to the Dojo Challenge (you\'ll need to sign in with your email), other families see only a nickname your child builds from our kid-safe word lists (like "Swift Panda 27", never close to their real name) or a first initial, plus their belt color and weekly points. No names are ever stored or shown.</p>' +
       '<h4 class="label">We never sell it</h4><p>We don\'t sell, rent or share your information with other companies for their marketing. It\'s kept in our customer system (for example, GoHighLevel) only to send what you asked for.</p>' +
       '<h4 class="label">Kids\' privacy</h4><p>Brain Dojo is for kids, so the sign-up is behind the parent PIN and only a parent or guardian 18 or older may sign up. If you think a child gave us information, contact us and we\'ll delete it.</p>' +
       '<h4 class="label">Questions or deletion requests</h4><p>Contact ' + s + (site ? ' at <a href="' + site + '" target="_blank" rel="noopener noreferrer">' + site.replace(/^https?:\/\//, "") + '</a>' : '') + '. Brain Dojo is a free learning game for practice at home and doesn\'t replace your child\'s school or teacher.</p></div>';

@@ -248,7 +248,7 @@ BD.Family = (function () {
   }
 
   return {
-    init: init, welcome: welcome, enabled: enabled, linked: linked, cardHTML: cardHTML, bindCard: bindCard, openSignIn: openSignIn, refreshUI: refreshUI,
+    init: init, welcome: welcome, enabled: enabled, token: function () { return linked() ? acct.token : null; }, call: call, linked: linked, cardHTML: cardHTML, bindCard: bindCard, openSignIn: openSignIn, refreshUI: refreshUI,
     queue: function (p) { if (!linked() || !p) return; pending.set(p.id, p); schedule(); },
     remove: function (id) { if (!linked()) return; pending.delete(id); removed.push({ id: id, at: Date.now() }); schedule(0); },
     flushNow: flush, pull: pull, status: function () { return status; }

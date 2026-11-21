@@ -1164,3 +1164,71 @@ body.duel-on .topbar, body.duel-on .footer { visibility: hidden; }
 .welcome-cta + .family-link { margin: 12px auto 4px; }
 .lf-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 @media (max-width: 420px) { .lf-row { grid-template-columns: 1fr; } }
+
+/* ---------- Sound menu ---------- */
+.sound-menu { display: grid; gap: 12px; }
+.sound-row { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 14px; border-radius: 16px; border: 1px solid var(--line); background: var(--surface-2); cursor: pointer; }
+.sound-row > span { display: grid; gap: 3px; }
+.sound-vol { display: grid; gap: 6px; padding: 0 14px; font-weight: 700; }
+.sound-vol.off { opacity: .45; }
+.sound-vol input { width: 100%; accent-color: var(--teal); min-height: 32px; }
+.switch { appearance: none; -webkit-appearance: none; flex: none; width: 56px; height: 32px; border-radius: 999px; background: #3A4A66; position: relative; cursor: pointer; transition: background .2s; margin: 0; }
+.switch::after { content: ""; position: absolute; top: 3px; left: 3px; width: 26px; height: 26px; border-radius: 50%; background: #fff; transition: transform .2s; box-shadow: 0 1px 3px rgba(0,0,0,.4); }
+.switch:checked { background: var(--green); }
+.switch:checked::after { transform: translateX(24px); }
+.switch:focus-visible { outline: 3px solid var(--teal); outline-offset: 2px; }
+
+/* ---------- iPhone/iPad notch and status bar ----------
+   Opened from the home screen, the app runs full screen under the clock and
+   battery icons; keep the top bar and pop-up sheets clear of them. */
+.app { padding-top: calc(10px + env(safe-area-inset-top, 0px)); }
+.sheet { max-height: calc(88vh - env(safe-area-inset-top, 0px)); max-height: calc(88dvh - env(safe-area-inset-top, 0px)); }
+.sheet-backdrop { padding-top: env(safe-area-inset-top, 0px); }
+.duel-arena { padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px); }
+
+/* ---------- Leaderboard nicknames ---------- */
+.nick-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 12px; padding: 10px 12px; border-radius: 14px; border: 1px solid rgba(224,186,119,.5); background: rgba(224,186,119,.08); }
+.nick-preview { text-align: center; font-family: var(--font-display); font-weight: 900; font-style: italic; font-size: clamp(1.3rem, 5vw, 1.8rem); color: var(--gold-2); padding: 10px; border-radius: 16px; background: var(--surface-2); border: 1px solid var(--line); }
+.nick-pick { display: grid; grid-template-columns: 1fr 1fr .7fr; gap: 10px; }
+@media (max-width: 460px) { .nick-pick { grid-template-columns: 1fr 1fr; } }
+.nick-pick label { display: grid; gap: 4px; font-weight: 700; font-size: .85rem; }
+.nick-pick select { min-height: 46px; border-radius: 12px; border: 1px solid var(--line); background: var(--mat); color: var(--ink); padding: 8px 10px; font: inherit; font-size: 1rem; }
+.nick-pick option:disabled { color: #6B7A93; }
+
+/* ---------- Simpler home screen ---------- */
+.home-label { margin: 22px 2px 10px; font-family: var(--font-display); font-size: .78rem; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: var(--teal); }
+.today-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+@media (max-width: 640px) { .today-row { grid-template-columns: 1fr; gap: 8px; } }
+.tile-card { display: flex; align-items: center; gap: 12px; text-align: left; padding: 12px 14px; border-radius: 18px; border: 1px solid var(--line); background: linear-gradient(120deg, #1F3358, #172846); color: var(--ink); cursor: pointer; font: inherit; min-width: 0; }
+.tile-card:hover { border-color: var(--gold-2); }
+.flash-card { border-color: rgba(224,186,119,.45); }
+.tile-icon { font-size: 1.9rem; flex: none; }
+@media (max-width: 640px) { .quest-card, .map-card, .tile-card { padding: 10px 12px; } .quest-icon, .tile-icon { font-size: 1.6rem; } .map-mini { width: 42px; height: 42px; font-size: 1.3rem; } }
+
+.belt-fold { margin-top: 22px; border-radius: 20px; border: 1px solid var(--line); background: var(--surface); overflow: hidden; }
+.belt-fold[open] { border-color: var(--teal); }
+.belt-sum { list-style: none; display: flex; align-items: center; gap: 12px; padding: 10px 14px; cursor: pointer; }
+.belt-sum::-webkit-details-marker { display: none; }
+.bs-belt { flex: none; width: 92px; }
+.bs-belt svg { width: 100%; height: auto; display: block; }
+.bs-txt { flex: 1; display: grid; gap: 2px; min-width: 0; }
+.bs-txt strong { font-family: var(--font-display); font-style: italic; font-weight: 900; text-transform: uppercase; font-size: 1rem; line-height: 1.15; }
+.bs-open { flex: none; font-weight: 800; font-size: .85rem; color: var(--teal); white-space: nowrap; }
+.belt-fold[open] .bs-open span { display: inline-block; transform: rotate(90deg); }
+.belt-fold .belt-panel { margin: 0; border: 0; border-top: 1px solid var(--line); border-radius: 0; }
+@media (max-width: 420px) { .bs-belt { width: 70px; } .bs-open { font-size: 0; } .bs-open span { font-size: 1.4rem; } }
+
+.play-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(108px, 1fr)); gap: 10px; }
+@media (max-width: 340px) { .play-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.game-tile { position: relative; display: grid; justify-items: center; align-content: start; gap: 6px; padding: 14px 8px 12px; border-radius: 18px; border: 1px solid var(--line); border-top: 4px solid var(--tile, var(--teal)); background: var(--surface); color: var(--ink); font: inherit; cursor: pointer; text-align: center; min-width: 0; }
+.game-tile:hover { border-color: var(--tile, var(--teal)); transform: translateY(-1px); }
+.game-tile img { width: 64px; height: 64px; border-radius: 50%; object-fit: cover; border: 2px solid var(--tile, var(--teal)); background: var(--surface-2); }
+.gt-name { font-family: var(--font-display); font-weight: 900; font-style: italic; text-transform: uppercase; font-size: .9rem; line-height: 1.1; }
+.gt-grade { font-size: .8rem; color: var(--muted); font-weight: 700; }
+.tile-math { --tile: #4F6CEE; } .tile-sent { --tile: #9C8CFF; } .tile-read { --tile: #5CBFC1; } .tile-spell { --tile: #E0BA77; } .tile-spanish { --tile: #FF7A6B; } .tile-school { --tile: #65D94A; }
+.tile-school { padding: 0; }
+.gt-inner { display: grid; justify-items: center; gap: 6px; width: 100%; padding: 14px 8px 4px; background: none; border: 0; color: inherit; font: inherit; cursor: pointer; }
+.gt-emoji { display: grid; place-items: center; width: 64px; height: 64px; border-radius: 50%; font-size: 2rem; background: rgba(101,217,74,.12); border: 2px solid var(--tile); }
+.gt-test { margin: 2px 0 10px; padding: 4px 12px; border-radius: 999px; border: 1px solid var(--line); background: rgba(255,255,255,.05); color: var(--teal); font: inherit; font-size: .78rem; font-weight: 800; cursor: pointer; }
+#screen-home .fun-row { margin: 0; }
+#screen-home .dojo-card { margin-top: 10px; }
