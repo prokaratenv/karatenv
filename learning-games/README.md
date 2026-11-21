@@ -22,7 +22,7 @@ Free math, writing, reading, spelling and Spanish practice from Pre-K through 8t
 
 ## Badges, gear and growing up
 
-- **Badges unlock real Engage gear** for the student's champion, in this order: Mouthguard (first round), Black Training Shorts (3-day streak), Engage Black Training Shirt (first stripe), Sparring Gloves (perfect round), Sparring Boots (all four subjects in one week), Sparring Headgear (first new belt), Sparring Chest Gear (7-day streak), Boxing Gloves (1,000 XP), MMA Gloves (3 belts). Gear shows under the champion on the home screen; the **Gear locker** shows every badge and lets them wear or stash each item.
+- **Badges unlock real Engage gear** for the student's champion, in this order: Mouthguard (first round), Black Training Shorts (3-day streak), Engage Black Training Shirt (first stripe), Sparring Gloves (perfect round), Sparring Boots (all four subjects in one week), Sparring Headgear (first new belt), Sparring Chest Gear (7-day streak), Boxing Gloves (1,000 XP), MMA Gloves (3 belts). Equipped gear is drawn **on the champion** (home screen, gear locker, character picker, certificates and the weekly card): headgear with the face showing through, chest gear, shirt, shorts, gloves, boots, and the mouthguard clipped to the belt. The belt color stays on top. Only one pair of gloves is worn at a time: a new pair goes on and the old one comes off. The **Gear locker** shows the champion, every badge, and lets them put each item on or take it off. Built champions wear the same gear.
 - **Champions grow up with the grade.** Kimmy, Billy, Tommy, Mackenzie and Rylan look about 5 in Pre-K/K, 7 in 1st–2nd, 10 in 3rd–5th and 13 in 6th–8th, based on the grade they're training. Built champions get younger proportions too. Instructors and Zumi stay the same.
 
 ## Parent corner
@@ -261,5 +261,6 @@ learning-games/
   js/parent.js           parent dashboard, PIN and weekly share card
   js/dojo.js             weekly Dojo Challenge
   js/scratch.js          scratch paper for math
+  js/gearfit.js          where gear sits on each character
   js/app.js              home, results and parent screens
 ```

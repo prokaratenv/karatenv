@@ -849,3 +849,15 @@ body.no-speech .say-btn { display: none; }
 .scratch-keys .keypad { margin: 0 auto; gap: 6px; }
 .scratch-keys .key { min-height: 46px; font-size: 1.4rem; }
 .scratch-keys .key-go { font-size: 1.1rem; }
+
+/* Gear on the champion */
+.champ .g-layer, .champ .g-beltart, .champ .g-face { position: absolute; display: block; max-width: none; max-height: none; pointer-events: none; }
+.champ .g-layer { object-fit: fill; filter: drop-shadow(0 1px 1px rgba(0,0,0,.35)); }
+.champ .g-layer.flip { transform: scaleX(-1); }
+.champ .g-beltart, .champ .g-face { left: 0; top: 0; width: 100%; height: 100%; mask-size: 100% 100%; -webkit-mask-size: 100% 100%; mask-repeat: no-repeat; -webkit-mask-repeat: no-repeat; }
+.champ .champ-belt { z-index: 0; }
+.locker-model { display: grid; justify-items: center; padding: 8px 0 4px; }
+.locker-model .champ img:first-child { max-height: 220px; }
+.champ img.g-layer { max-width: none !important; max-height: none !important; }
+.champ img.g-beltart, .champ img.g-face { width: 100% !important; height: 100% !important; max-width: none !important; max-height: none !important; }
+.champ .g-layer.mg { opacity: .92; filter: none; }

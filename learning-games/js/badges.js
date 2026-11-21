@@ -50,7 +50,11 @@ BD.Badges = (function () {
     BADGES.forEach(function (b) {
       if (p.badges[b.id]) return;
       let ok = false; try { ok = b.test(p); } catch (e) { ok = false; }
-      if (ok) { p.badges[b.id] = new Date().toISOString(); if (p.gear.indexOf(b.gear) === -1) p.gear.push(b.gear); fresh.push(b); }
+      if (ok) {
+        p.badges[b.id] = new Date().toISOString(); if (p.gear.indexOf(b.gear) === -1) p.gear.push(b.gear); fresh.push(b);
+        // new gloves go on; any other pair comes off
+        if (BD.GearFit && BD.GearFit.handSlot(b.gear)) { p.gearHidden = (p.gearHidden || []).filter(function (g) { return g !== b.gear; }); BD.GearFit.HANDS.forEach(function (g) { if (g !== b.gear && p.gearHidden.indexOf(g) === -1) p.gearHidden.push(g); }); }
+      }
     });
     if (fresh.length) BD.Store.save(p);
     return fresh;
@@ -72,7 +76,8 @@ BD.Badges = (function () {
   const esc = function (s) { return BD.UI.esc(s); };
   function lockerHTML(p) {
     const have = earned(p).length, hide = hidden(p);
-    return '<p class="muted">' + have + ' of ' + BADGES.length + ' badges earned. Each badge unlocks real Engage gear for your champion. Tap gear you have to wear it or take it off.</p>' +
+    return '<div class="locker-model">' + BD.UI.championHTML(p) + '</div>' +
+      '<p class="muted">' + have + ' of ' + BADGES.length + ' badges earned. Each badge unlocks real Engage gear for your champion. Tap gear you have to put it on or take it off. Gloves: one pair at a time.</p>' +
       '<div class="locker">' + BADGES.map(function (b) {
         const got = p.badges && p.badges[b.id], g = GEAR[b.gear], on = got && hide.indexOf(b.gear) === -1;
         return '<button type="button" class="locker-item' + (got ? " got" : " locked") + (on ? " on" : "") + '"' + (got ? ' data-gear="' + b.gear + '" aria-pressed="' + !!on + '"' : ' disabled') + '>' +
@@ -91,6 +96,8 @@ BD.Badges = (function () {
       const b = e.target.closest("[data-gear]"); if (!b) return;
       const g = b.dataset.gear, h = p.gearHidden = p.gearHidden || [];
       const i = h.indexOf(g); if (i === -1) h.push(g); else h.splice(i, 1);
+      // one pair of gloves at a time
+      if (i !== -1 && BD.GearFit.handSlot(g)) BD.GearFit.HANDS.forEach(function (o) { if (o !== g && h.indexOf(o) === -1) h.push(o); });
       BD.Store.save(p); BD.Sound.tap();
       document.getElementById("infoBody").innerHTML = lockerHTML(p);
       if (BD.UI.refreshStage) BD.UI.refreshStage();
