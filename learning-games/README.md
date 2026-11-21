@@ -107,13 +107,13 @@ On your own website, families can link every device with a parent's email instea
 3. From then on, **every save syncs automatically** (a couple of seconds after each answer, when the app is closed or hidden, and every 2 minutes while open). Any device signed in with the same email shows the same students, belts, stripes and points. Adding or removing a student carries over too. The footer says "Synced to p•••@example.com".
 4. In the Parent corner, parents can **Sign out this device**, **Sign out all devices**, or **Delete family data**.
 
-**How it's built (free, in your Google account):** `tools/family-sync.gs` is a small Google Apps Script web app. Each family is one private JSON file in a "Brain Dojo Family Data" folder in your Google Drive, and the sign-in codes are sent from your Gmail.
+**How it's built (free, in your Google account):** `tools/family-sync.gs` is a small Google Apps Script web app. Each family is one private JSON file in a "Brain Dojo Family Data" folder in your Google Drive, and the sign-in codes are sent from your Gmail, from the address in `FROM_EMAIL` (set to info@engagelma.com). That address must be listed under Gmail Settings → Accounts → **Send mail as** for the Google account that deploys the script.
 
 **Setup (about 5 minutes):**
 1. Go to script.google.com and create a new project.
 2. Paste in `family-sync.gs` and save.
 3. Deploy it as a web app: Execute as **Me**, Who has access **Anyone**.
-4. Allow the permissions it asks for (the Drive files it creates, and sending email as you).
+4. Allow the permissions it asks for (the Drive files it creates, and sending email from your Gmail).
 5. Paste the `/exec` URL into `js/config.js` as `accountEndpoint`.
 
 Until that's set, the sign-in options stay hidden.

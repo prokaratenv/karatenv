@@ -23,6 +23,7 @@
  */
 var STUDIO = "Engage Lifestyle Martial Arts";
 var FOLDER = "Brain Dojo Family Data";
+var FROM_EMAIL = "info@engagelma.com"; // must be a "Send mail as" address in the deploying account's Gmail
 var MAX_PLAYERS = 10, MAX_BYTES = 1500000, MAX_DEVICES = 20;
 var CODE_MINUTES = 10, CODES_PER_HOUR = 5, TRIES = 5;
 
@@ -88,13 +89,10 @@ function requestCode(req) {
   cache.put("sent:" + fid, String(sent + 1), 3600);
   var code = String(Math.floor(100000 + Math.random() * 900000));
   cache.put("code:" + fid, JSON.stringify({ h: sha(fid + ":" + code), tries: 0 }), CODE_MINUTES * 60);
-  MailApp.sendEmail({
-    to: email,
-    subject: "Your Brain Dojo sign-in code: " + code,
-    body: "Your Brain Dojo sign-in code is " + code + "\n\nType it on the device you want to link. It works for " + CODE_MINUTES + " minutes.\n\n" +
+  GmailApp.sendEmail(email, "Your Brain Dojo sign-in code: " + code,
+    "Your Brain Dojo sign-in code is " + code + "\n\nType it on the device you want to link. It works for " + CODE_MINUTES + " minutes.\n\n" +
       "Didn't ask for this? You can ignore this email; nothing changes without the code.\n\n— Brain Dojo by " + STUDIO,
-    name: "Brain Dojo by " + STUDIO
-  });
+    { name: "Brain Dojo by " + STUDIO, from: FROM_EMAIL, replyTo: FROM_EMAIL });
   return { ok: true };
 }
 function verifyCode(req) {
