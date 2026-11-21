@@ -8,6 +8,9 @@ BD.CONFIG = {
   leadEndpoints: [
     // "https://services.leadconnectorhq.com/hooks/XXXX/webhook-trigger/YYYY",
   ],
+  /* accountEndpoint: the Family Sync web app URL (tools/family-sync.gs). With it,
+     parents sign in with their email and progress follows students to any device. */
+  accountEndpoint: "",
   studioName: "Engage Lifestyle Martial Arts",
   studioSite: "https://engagemartialarts.com"
 };

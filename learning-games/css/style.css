@@ -1153,3 +1153,12 @@ body.duel-on .topbar, body.duel-on .footer { visibility: hidden; }
 .flash-btn.done { border-color: var(--good); background: var(--good-bg); }
 .flash-btn.done .flash-state { color: #CFF7C2; }
 .flash-btn:disabled { opacity: .45; cursor: not-allowed; }
+.family-card { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 14px; margin: 0 0 14px; padding: 14px 16px; border-radius: 18px; border: 1px solid var(--teal); background: linear-gradient(120deg, rgba(92,191,193,.16), rgba(92,191,193,.04)); }
+.family-card > div { flex: 1 1 220px; min-width: 0; }
+.family-card p { margin: 4px 0 0; }
+.family-actions { display: flex; flex-wrap: wrap; gap: 8px; flex: 0 1 auto !important; }
+.family-link { border-color: rgba(92,191,193,.6); background: rgba(92,191,193,.1); }
+.family-link strong { color: var(--teal); }
+.family-link.linked { cursor: default; opacity: .9; }
+.code-input { letter-spacing: .3em; width: 9.5em; }
+.welcome-cta + .family-link { margin: 12px auto 4px; }

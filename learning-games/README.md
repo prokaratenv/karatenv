@@ -99,6 +99,38 @@ The game is a plain website: everything in this `learning-games` folder (index.h
 
 Hosted on its own, these Claude-only extras are turned off automatically: Ask Sensei, Sensei's written feedback on Story Scrolls (the built-in checker is used instead), new AI-written sentences and stories (the built-in banks keep going), saving to a Claude account, and the Dojo Challenge board. Progress stays in each browser; use **Back up progress** save codes to move a student between devices.
 
+## Family accounts: progress on every device (sign in with a parent's email)
+
+On your own website, families can link every device with a parent's email instead of copying save codes:
+1. On any device, the welcome screen shows **"Already training on another device? Sign in with a parent's email."** The Parent corner also has a **Use Brain Dojo on every device** card.
+2. The parent types their email and checks the consent box, and a **6-digit code** arrives by email. They type it in, and the device is linked. Students on the account appear right away.
+3. From then on, **every save syncs automatically** (a couple of seconds after each answer, when the app is closed or hidden, and every 2 minutes while open). Any device signed in with the same email shows the same students, belts, stripes and points. Adding or removing a student carries over too. The footer says "Synced to p•••@example.com".
+4. In the Parent corner, parents can **Sign out this device**, **Sign out all devices**, or **Delete family data**.
+
+**How it's built (free, in your Google account):** `tools/family-sync.gs` is a small Google Apps Script web app. Each family is one private JSON file in a "Brain Dojo Family Data" folder in your Google Drive, and the sign-in codes are sent from your Gmail.
+
+**Setup (about 5 minutes):**
+1. Go to script.google.com and create a new project.
+2. Paste in `family-sync.gs` and save.
+3. Deploy it as a web app: Execute as **Me**, Who has access **Anyone**.
+4. Allow the permissions it asks for (the Drive files it creates, and sending email as you).
+5. Paste the `/exec` URL into `js/config.js` as `accountEndpoint`.
+
+Until that's set, the sign-in options stay hidden.
+
+**Safety:**
+- Codes expire in 10 minutes, allow 5 tries, and are limited to 5 per email per hour.
+- Each linked device gets its own long random key. Only a fingerprint of it is stored, and signing out deletes it.
+- The email code isn't marketing and doesn't join any list.
+- Everything coming back from the account is checked field by field before it's shown, like save codes.
+- If two devices change the same student while offline, the most recent copy of that student wins.
+
+**Limits:**
+- Gmail sends about 100 code emails a day on a regular Google account (about 1,500 on Google Workspace).
+- Each family holds up to 10 students.
+
+On the Claude link, the Claude-account sync described below is used instead.
+
 ## Saving progress
 
 - Progress saves automatically after every answer that earns XP. If a child taps Back, switches apps or closes the page in the middle of a round, the XP they've earned so far is kept.
@@ -317,7 +349,9 @@ learning-games/
   js/school.js           School Words (parents' weekly spelling list)
   js/quest.js            Adventure Map, daily quest, chests, stickers, streak shields
   js/leads.js            parent newsletter / free-class sign-up
-  js/config.js           studio settings (sign-up destination)
+  js/config.js           studio settings (sign-up and family account URLs)
+  js/family.js           family accounts: email sign-in and sync across devices
+  tools/family-sync.gs   Google Apps Script backend for family accounts
   tools/lead-sheet.gs    Google Sheet script that collects sign-ups
   js/scratch.js          scratch paper for math
   js/quick.js            quick tap-to-answer questions from every subject

@@ -137,7 +137,7 @@ BD.Store = (function () {
   /* Save a student (default: the one playing). */
   function save(p) {
     p = p || current();
-    if (p) { p.updatedAt = Date.now(); if (BD.Sync) BD.Sync.queue(p); }
+    if (p) { p.updatedAt = Date.now(); if (BD.Sync) BD.Sync.queue(p); if (BD.Family) BD.Family.queue(p); }
     persist();
   }
 
@@ -159,6 +159,7 @@ BD.Store = (function () {
       if (state.currentId === id) state.currentId = null;
       persist();
       if (BD.Sync) BD.Sync.remove(id);
+      if (BD.Family) BD.Family.remove(id);
     },
     resetPlayer: function (id) {
       const p = this.get(id); if (!p) return;

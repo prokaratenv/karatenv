@@ -349,6 +349,7 @@ BD.UI = (function () {
     $("newGrade").value = "3";
     fighterPicker("newFighter", newFighter, false);
     BD.Leads.welcomeLink();
+    BD.Family.welcome();
     show("screen-players");
   }
 
@@ -522,7 +523,7 @@ BD.UI = (function () {
   }
   function parent() {
     const list = BD.Store.players();
-    $("parentLead").innerHTML = BD.Leads.ownerHTML(); $("parentLead").hidden = !$("parentLead").innerHTML; BD.Leads.bindOwner();
+    $("parentLead").innerHTML = BD.Family.cardHTML() + BD.Leads.ownerHTML(); $("parentLead").hidden = !$("parentLead").innerHTML; BD.Leads.bindOwner(); BD.Family.bindCard(parent);
     if (list.length && BD.Leads.locked()) {
       // The report unlocks with a free parent sign-up (students play free regardless).
       BD.Leads.renderUnlock($("parentBody"), parent);
@@ -750,6 +751,7 @@ BD.UI = (function () {
     BD.Sync.init();
     BD.Dojo.init();
     players(); // always open on the welcome screen: Start here / Resume my training
+    BD.Family.init();
   }
 
   return { championHTML: function (p, outfit) { return fighterArt(p, "full", outfit); }, refreshStage: refreshStage, fighterKey: function (p) { return fighterOf(p); }, beltDetails: beltDetails, testMode: testMode, stripeResult: stripeResult, back: back, setGrade: setGrade, syncGradeSelect: syncGradeSelect, refresh: refresh, sheet: sheet, sheetOpen: sheetOpen, show: show, esc: esc, home: home, players: players, results: results, gradePicker: gradePicker, init: init };
