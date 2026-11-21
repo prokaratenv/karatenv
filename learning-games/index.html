@@ -73,6 +73,7 @@
         </div>
       </form>
       <p class="restore-line"><button type="button" class="btn btn-quiet btn-small" id="restoreBtn">Restore a student</button> <span class="muted small">Have a save code from another device? Bring your belts back.</span></p>
+      <button type="button" class="lead-link" id="welcomeLead" hidden>👪 <strong>Parents:</strong> free parent tips &amp; a free trial class at Engage ›</button>
     </section>
 
     <!-- Dojo home -->
@@ -94,6 +95,10 @@
           </button>
           <p class="muted" id="homeToday"></p>
         </div>
+      </div>
+      <div class="quest-row">
+        <button type="button" class="quest-card" id="questCard"></button>
+        <button type="button" class="map-card" id="mapCard"></button>
       </div>
       <div class="fun-row">
         <button type="button" class="boss-card" id="bossCard"></button>
@@ -163,6 +168,7 @@
             <p>Missing letters, spot the misspelling, fix it, unscramble and listen-and-spell. Quiet mode works without sound.</p>
             <p class="eyebrow">Spelling grade level</p>
             <div id="homeSpellGrade"></div>
+            <div class="school-cta" id="homeSchool" hidden></div>
             <button type="button" class="btn btn-primary btn-big" id="playSpell">Play Spelling Bee</button>
           </div>
         </article>
@@ -485,6 +491,7 @@
         <h1>Parent corner</h1>
       </div>
       <p class="muted parent-intro">A quick look at each child's week. Progress saves automatically. <button type="button" class="link-btn" id="parentHow">How saving, belts and badges work</button></p>
+      <div id="parentLead" hidden></div>
       <div id="parentBody"></div>
     </section>
   </main>
@@ -563,6 +570,7 @@
 <script src="data/reading-bank.js"></script>
 <script src="data/spanish-bank.js"></script>
 <script src="data/spelling-bank.js"></script>
+<script src="js/config.js"></script>
 <script src="js/storage.js"></script>
 <script src="js/cast.js"></script>
 <script src="js/masks.js"></script>
@@ -574,6 +582,7 @@
 <script src="js/sentence-gen.js"></script>
 <script src="js/reading-game.js"></script>
 <script src="js/word-quiz.js"></script>
+<script src="js/school.js"></script>
 <script src="js/sync.js"></script>
 <script src="js/sensei.js"></script>
 <script src="js/math-game.js"></script>
@@ -588,6 +597,8 @@
 <script src="js/certificate.js"></script>
 <script src="js/parent.js"></script>
 <script src="js/dojo.js"></script>
+<script src="js/quest.js"></script>
+<script src="js/leads.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>

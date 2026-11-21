@@ -272,14 +272,17 @@ BD.WordQuiz = (function () {
 
   /* ---------- play ---------- */
   /* stripe = { grade, belt, test } when started from the belt panel. */
-  function start(game, stripe) {
+  /* school = "practice" or "test" for this week's school spelling words. */
+  function start(game, stripe, school) {
     const g = GAMES[game], p = BD.Store.current();
+    if (school && !(BD.School && BD.School.has(p))) school = null;
+    if (school) stripe = null;
     if (stripe) p[g.field] = stripe.grade;
     else if (p.retry && p.retry[game]) p[g.field] = p.retry[game].grade;
     const grade = p[g.field];
-    W = { game: game, g: g, grade: grade, items: stripe ? g.beltRound(p, grade, stripe.belt) : g.round(p, grade), i: 0, xp: 0, correct: 0, firstTry: 0, answered: 0, streak: 0, best: 0, missed: [], stripe: stripe || null, test: !!(stripe && stripe.test) };
+    W = { game: game, g: g, grade: grade, school: school || null, noRetry: school === "test", items: school ? BD.School.round(p, school === "test", grade) : stripe ? g.beltRound(p, grade, stripe.belt) : g.round(p, grade), i: 0, xp: 0, correct: 0, firstTry: 0, answered: 0, streak: 0, best: 0, missed: [], stripe: stripe || null, test: !!(stripe && stripe.test) };
     const label = BD.Rank.subject(BD.Rank.BY_GAME[game]).label;
-    BD.UI.testMode("screen-word-play", W.test ? label + " stripe test" : stripe ? label + " stripe practice · " + BD.BELTS[stripe.belt].name + " Belt" : "", !BD.Rank.hintsAllowed(BD.Store.current(), grade));
+    BD.UI.testMode("screen-word-play", W.test ? label + " stripe test" : stripe ? label + " stripe practice · " + BD.BELTS[stripe.belt].name + " Belt" : school === "test" ? "School word test" : "", !BD.Rank.hintsAllowed(BD.Store.current(), grade));
     $("wordCoachFace").src = BD.Cast.face(g.coach);
     $("wordCoachName").textContent = BD.Cast.name(g.coach);
     BD.UI.syncGradeSelect("wordGradeSel", game);
@@ -312,9 +315,9 @@ BD.WordQuiz = (function () {
       $("wordInput").value = ""; $("wordInput").readOnly = false;
       $("wordInput").placeholder = q.typedSpell ? "Type the word" : "Type the Spanish word";
       $("wordCheck").hidden = false; $("wordCheck").disabled = false;
-      W.noHints = !BD.Rank.hintsAllowed(BD.Store.current(), W.grade);
+      W.noHints = !BD.Rank.hintsAllowed(BD.Store.current(), W.grade) || W.noRetry;
       showTiles(q.tilesAlways || (q.tilesFirst && !W.noHints));
-      $("wordTilesBtn").hidden = !q.typedSpell || q.tilesFirst || q.tilesAlways;
+      $("wordTilesBtn").hidden = !q.typedSpell || q.tilesFirst || q.tilesAlways || W.noRetry;
       setTimeout(function () { $("wordInput").focus(); }, 60);
     } else {
       $("wordChoices").innerHTML = q.choices.map(function (c, i) {
@@ -348,7 +351,7 @@ BD.WordQuiz = (function () {
     const verdict = judge(value);
     W.tries++;
     const typed = !q.choices;
-    if (verdict === "wrong" && typed && W.tries < 2 && !W.test) {
+    if (verdict === "wrong" && typed && W.tries < 2 && !W.test && !W.noRetry) {
       BD.Sound.wrong(); BD.Cast.say("wordSay", "wrong");
       $("wordFeedback").className = "word-feedback try-again";
       $("wordFeedback").innerHTML = "<p>Not quite. Try once more!</p>" + (q.typedSpell ? letterDiff(value, q.answer) : "");
@@ -357,6 +360,7 @@ BD.WordQuiz = (function () {
     }
     W.done = true; W.answered++;
     const ok = verdict !== "wrong";
+    if (W.school && q.word) BD.School.mark(p, q.word, ok && W.tries === 1);
     const st = ((p.wordStats[W.game] = p.wordStats[W.game] || {})[W.grade] = (p.wordStats[W.game][W.grade] || { r: 0, w: 0 }));
     const missKey = q.id;
     const bucket = (p.wordMissed[W.game] = p.wordMissed[W.game] || {});
@@ -374,8 +378,8 @@ BD.WordQuiz = (function () {
     } else {
       W.streak = 0; st.w++; W.missed.push(q);
       bucket[missKey] = { grade: W.grade, misses: Math.min(3, ((bucket[missKey] && bucket[missKey].misses) || 0) + 2), topic: q.topic, es: q.es, word: q.word };
-      if (!q.retry && !W.test) W.items.splice(Math.min(W.i + 3, W.items.length), 0,
-        W.game === "spelling" ? Object.assign(makeSpelling(q.src, W.grade, styleBag(W.grade, isQuiet(p))(q.mode)), { retry: true }) : Object.assign({}, q, { retry: true }));
+      if (!q.retry && !W.test && !W.noRetry) W.items.splice(Math.min(W.i + 3, W.items.length), 0,
+        W.game === "spelling" ? Object.assign(makeSpelling(q.src, W.grade, styleBag(W.grade, isQuiet(p))(q.mode)), { retry: true, school: q.school, label: q.label }) : Object.assign({}, q, { retry: true }));
       BD.Sound.wrong(); BD.Cast.say("wordSay", "wrong");
       $("wordFeedback").className = "word-feedback revealed";
       $("wordFeedback").innerHTML = '<p>The answer is <strong>' + BD.UI.esc(q.answer) + '</strong>.</p><p>' + BD.UI.esc(q.explain) + '</p>' +
@@ -478,23 +482,27 @@ BD.WordQuiz = (function () {
     }
     const stripeAgain = W.stripe ? { grade: grade, belt: BD.Rank.rec(p, grade).belt, test: false } : null;
     if (acc === 100 && W.answered >= 8) W.xp += 25;
-    const failed = acc < PASS;
+    const school = W.school;
+    const failed = !school && acc < PASS;
     p.retry = p.retry || {};
-    const wasRetry = !!p.retry[game];
-    p.retry[game] = failed ? { grade: grade } : null;
+    const wasRetry = !school && !!p.retry[game];
+    if (!school) p.retry[game] = failed ? { grade: grade } : null;
+    if (school === "test") BD.School.recordTest(p, W.correct, W.answered);
     if (game === "spelling") {
       const seen = p.seenWords.spelling = p.seenWords.spelling || [];
       W.items.forEach(function (q) { if (q.word && seen.indexOf(q.word) === -1) seen.push(q.word); });
       p.seenWords.spelling = seen.slice(-300);
     }
     const belt = BD.Rank.practice(p, game, grade, W.xp - (W.banked || 0)); W.banked = W.xp;
-    BD.Store.recordSession(p, { game: game, grade: grade, correct: W.correct, total: W.answered, xp: W.xp });
+    BD.Store.recordSession(p, Object.assign({ game: game, grade: grade, correct: W.correct, total: W.answered, xp: W.xp }, school ? { school: school } : {}));
     const missed = [];
     W.missed.forEach(function (q) { if (!missed.some(function (m) { return m.id === q.id; })) missed.push(q); });
-    const ready = !failed && acc >= 90 && grade < BD.MAX_GRADE;
+    const ready = !school && !failed && acc >= 90 && grade < BD.MAX_GRADE;
+    const nm = school ? BD.School.masteredCount(p) + " of " + BD.School.words(p).length + " school words mastered" : "";
     BD.UI.results({
-      title: failed ? "Let's train this again" : wasRetry ? "Level passed!" : acc >= 90 ? (game === "spanish" ? "¡Excelente!" : "Spelling champion!") : "Strong work!",
-      subtitle: g.title + " · " + BD.gradeLabel(grade),
+      title: school === "test" ? "Word test: " + W.correct + " / " + W.answered + (acc === 100 ? " · perfect!" : acc >= 80 ? " · great job!" : "") : school ? (acc >= 90 ? "School words: crushed it!" : "School words practiced!") :
+        failed ? "Let's train this again" : wasRetry ? "Level passed!" : acc >= 90 ? (game === "spanish" ? "¡Excelente!" : "Spelling champion!") : "Strong work!",
+      subtitle: school ? "Spelling Bee · this week's school words · " + nm : g.title + " · " + BD.gradeLabel(grade),
       failed: failed ? "You got " + acc + "%. You need " + PASS + "% to pass " + BD.gradeLabel(grade) + ". Look over the words below, then try a new round." : null,
       passedRetry: wasRetry && !failed ? "You passed with " + acc + "%. All grade levels are unlocked again." : null,
       stats: [["Correct", W.correct + " / " + W.answered], ["First try", W.firstTry], ["Best streak", W.best], ["XP earned", "+" + W.xp]],
@@ -503,8 +511,8 @@ BD.WordQuiz = (function () {
         (game === "spelling" ? '<p class="muted small">Tip: say the word slowly, clap each part, then write it three times.</p>' : '<p class="muted small">Tip: say each word out loud. Tap Hear it to copy the sound.</p>') + '</div>' : "",
       listTitle: "", list: [],
       levelUp: ready ? { text: "You got " + acc + "% at " + BD.gradeLabel(grade) + ". Ready for " + BD.gradeLabel(grade + 1) + "?", action: function () { p[g.field] = grade + 1; BD.Store.save(p); start(game); } } : null,
-      again: function () { start(game, stripeAgain); },
-      againLabel: failed ? "Redo this level" : "Play again",
+      again: function () { start(game, stripeAgain, school); },
+      againLabel: school === "test" ? "Take the test again" : failed ? "Redo this level" : "Play again",
       setup: null
     });
   }
@@ -565,5 +573,5 @@ BD.WordQuiz = (function () {
 
   function peek() { return W && W.items[W.i]; }
 
-  return { bankNow: bankNow, isQuiet: isQuiet, misspellings: misspellings, makeSpelling: makeSpelling, peek: peek, start: start, stop: stop, bind: bind, planItems: planItems, PASS: PASS, GAMES: GAMES, plain: plain };
+  return { styleBag: styleBag, STYLE_INFO: STYLE_INFO, bankNow: bankNow, isQuiet: isQuiet, misspellings: misspellings, makeSpelling: makeSpelling, peek: peek, start: start, stop: stop, bind: bind, planItems: planItems, PASS: PASS, GAMES: GAMES, plain: plain };
 })();

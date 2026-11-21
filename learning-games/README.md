@@ -39,6 +39,35 @@ Free math, writing, reading, spelling and Spanish practice from Pre-K through 8t
 - **Share this week:** makes a progress card picture to text to family or an Engage instructor.
 - **Dojo Challenge:** a weekly team goal (3,000 right answers) for everyone using the shared link. Parents opt each child in; other families see only a first name, belt and weekly count. Needs the shared Claude link while signed in, with Contributor access or above (everyone in your Claude organization; view-only visitors can see the board but not add to it).
 
+## School Words (from your child's teacher)
+
+In **Parents**, tap **Add this week's words** and type or paste the spelling list from school (up to 25 words). On the Claude link you can also **📷 read a photo of the list**. The words become:
+- **Practice** in Spelling Bee (every challenge style; quiet mode works). The shakiest words come first. Each word gets a real sentence: from the built-in word bank, written by Sensei on the Claude link, or a simple one otherwise.
+- **A word test:** every word once, no second tries or hints. Listen-and-spell when sound is on; silent styles in quiet mode.
+- A **School words** button on the Spelling Bee card, and Sensei's plan puts them first until they're mastered.
+
+Parents see each word color-coded (mastered, practicing, missed last time) and the last test score. A word counts as mastered after 2 right answers with the latest one right. Typing a new list starts a new week (stats for repeated words carry over).
+
+## Adventure Map, daily quest and streak shields
+
+- **Adventure Map:** one region per belt at the dojo grade: Rascal's Forest, Hoot's Library, Blaze Canyon, Glacier Peaks, Bamboo Grove, Shadow Village, Agent Bridgette's HQ, Star Force Station and the Iron Tower. The champion (in their outfit) stands in the current region, stripes light the path, cleared regions show ✓, beaten bosses show 🏆, and the regions ahead stay hidden.
+- **Daily quest:** one short goal each day (about 5 minutes), such as finish 2 rounds, answer 25 questions, score 90% in a round, play a certain game, fight the belt boss or practice school words. The same quest stays all day.
+- **Mystery chest:** finishing the quest opens a chest with 20 to 50 bonus XP plus a sticker for the **sticker book** (24 to collect) or a **🛡️ streak shield**.
+- **Streak shields** (hold up to 2): if a day is missed, a shield fills it in so the streak doesn't break. The home screen says when a shield saved the streak.
+
+## Parent sign-ups (newsletter and free-class leads)
+
+Parents can join the Engage parent newsletter and/or free trial class offers from:
+- **Parents corner:** a "Free parent tips & a free trial class" card at the top, behind the parent PIN.
+- **Welcome screen:** a "Parents:" link, behind a grown-up math check.
+
+**Kid-safe (COPPA):** the form is only reached by a grown-up, asks them to confirm they're a parent or guardian 18+, and nothing is pre-checked. They pick exactly what they want. It collects only the parent's first name, email, optional mobile, member yes/no and the child's grade, never anything about the child. The consent wording is saved with each sign-up, and a hidden bot trap plus a speed check stop spam.
+
+**Where sign-ups go:**
+- **Your own website:** set `leadEndpoint` in `js/config.js`. The easy free option is a Google Sheet: follow the steps at the top of `tools/lead-sheet.gs` (about 5 minutes), then paste the web app URL into `js/config.js`. Each sign-up becomes a row. Your email system or Zapier can watch that sheet and add each parent to the newsletter or a lead campaign. A CRM's inbound webhook URL (GoHighLevel, for example) also works: fields arrive as form data named date, name, email, phone, member, newsletter, offers, childGrades, consent and source.
+- **The Claude link:** sign-ups from signed-in visitors with Contributor access are saved to a private list only the owner can read. The owner sees **Download sign-ups (CSV)** in Parents. Visitors who aren't signed in can't save there, so for public marketing, use your own website with `leadEndpoint` set.
+- With no destination available, the sign-up card and link stay hidden. If a parent is offline, the sign-up is sent the next time Brain Dojo opens.
+
 ## Scratch paper
 
 In Math Dojo, **Scratch paper** opens a sheet of graph paper to work a problem out with a finger, stylus or mouse. The problem stays pinned at the top and the keypad sits underneath, so they can type the answer without closing it; Check closes the paper and shows the result. Three pen colors, eraser, undo and clear. A fresh page starts with each new problem. It's allowed on stripe tests too (it's paper, not a hint). Nothing drawn is saved or sent anywhere.
@@ -46,7 +75,7 @@ In Math Dojo, **Scratch paper** opens a sheet of graph paper to work a problem o
 ## Safety and security
 
 - **Only the owner can change the app.** The shared link is view-only: visitors can use the games but can't edit the page. Updates come only from the owner's Claude account (and this repository).
-- **Shared data is locked down.** Database rules allow writing in just two places: each signed-in family's own private folder, and their own single Dojo Challenge entry. Everything else is owner-only. Dojo entries from other families are checked before they're shown: first names only, letters only, a rude-word filter (anything flagged shows as "Champion"), real belt names and colors only, and weekly counts capped at 1,500.
+- **Shared data is locked down.** Database rules allow writing in just three places: each signed-in family's own private folder, their own single Dojo Challenge entry, and their own parent sign-up (readable only by the owner). Everything else is owner-only. Dojo entries from other families are checked before they're shown: first names only, letters only, a rude-word filter (anything flagged shows as "Champion"), real belt names and colors only, and weekly counts capped at 1,500.
 - **No code can be slipped in.** Everything typed by kids, written by AI or loaded from a save code is escaped before it's shown, and every student record (loaded, synced or restored) is checked field by field. A doctored save code can't run anything.
 - **Kid-safe AI.** Sensei only helps with schoolwork, never asks for personal details or shares links, refuses unsafe topics, sends a child who says they're hurt or unsafe to a trusted grown-up, and ignores attempts to change its rules.
 - **Hidden from search engines and AI crawlers.** The pages carry noindex/nofollow/noarchive tags (link previews in texts still work), and the Claude link has a long random address that is only found if someone shares it.
@@ -273,6 +302,11 @@ learning-games/
   js/badges.js           badges and the gear locker
   js/parent.js           parent dashboard, PIN and weekly share card
   js/dojo.js             weekly Dojo Challenge
+  js/school.js           School Words (parents' weekly spelling list)
+  js/quest.js            Adventure Map, daily quest, chests, stickers, streak shields
+  js/leads.js            parent newsletter / free-class sign-up
+  js/config.js           studio settings (sign-up destination)
+  tools/lead-sheet.gs    Google Sheet script that collects sign-ups
   js/scratch.js          scratch paper for math
   js/quick.js            quick tap-to-answer questions from every subject
   js/boss.js             boss battles

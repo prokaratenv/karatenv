@@ -33,7 +33,7 @@ BD.beltOf = function (p) { return BD.Rank ? BD.Rank.belt(p) : BD.BELTS[0]; };
 /* Days in a row with practice, counting today (or up to yesterday if they
    haven't trained yet today, so the streak isn't lost before they play). */
 BD.streak = function (p) {
-  const days = new Set(p.days || []);
+  const days = new Set((p.days || []).concat(p.shielded || [])); // a streak shield fills a missed day
   const key = function (d) { return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); };
   const d = new Date();
   const today = days.has(key(d));
@@ -98,6 +98,8 @@ BD.Store = (function () {
     if (p.badges && typeof p.badges === "object") Object.keys(p.badges).forEach(function (k) { if (!/^[a-z0-9-]{2,30}$/.test(k) || typeof p.badges[k] !== "string") delete p.badges[k]; });
     p.dojoOptIn = !!p.dojoOptIn;
     if (["gi", "training", "sparring", "boxing", "mma"].indexOf(p.outfit) === -1) p.outfit = "gi";
+    if (BD.School) BD.School.sanitize(p); else if (p.school && typeof p.school !== "object") delete p.school;
+    if (BD.Quest) BD.Quest.sanitize(p);
     return p;
   }
   function newPlayer(name, grade) {

@@ -341,6 +341,7 @@ BD.UI = (function () {
     $("newGrade").innerHTML = BD.GRADES.map(function (g) { return '<option value="' + g + '">' + BD.gradeLabel(g) + '</option>'; }).join("");
     $("newGrade").value = "3";
     fighterPicker("newFighter", newFighter, false);
+    BD.Leads.welcomeLink();
     show("screen-players");
   }
 
@@ -358,8 +359,9 @@ BD.UI = (function () {
     setTimeout(function () { if (currentScreen === "screen-home" && !sheetOpen()) BD.Badges.award(BD.Store.current(), refreshStage); }, 500);
     $("homeBelt").innerHTML = rankPanel(p);
     $("homeToday").textContent = todays ? todays + (todays === 1 ? " round" : " rounds") + " completed today" : "No rounds yet today";
+    const saved = BD.Quest.protect(p);
     const st = BD.streak(p);
-    $("homeStreak").innerHTML = st.days >= 1
+    $("homeStreak").innerHTML = saved ? '<span class="flame" aria-hidden="true">🛡️</span> Your streak shield saved your ' + st.days + '-day streak!' : st.days >= 1
       ? '<span class="flame" aria-hidden="true">🔥</span> ' + st.days + "-day streak" + (st.today ? "" : ' <span class="muted">· train today to keep it!</span>')
       : '<span class="flame" aria-hidden="true">🔥</span> Start a streak today!';
     $("homeStreak").classList.toggle("lit", st.today);
@@ -374,12 +376,17 @@ BD.UI = (function () {
     if (retry.spanish) p.spanishGrade = retry.spanish.grade;
     $("homeSpellGrade").innerHTML = gradePicker("spellGradePick", p.spellingGrade, !!retry.spelling);
     $("homeSpanishGrade").innerHTML = gradePicker("spanishGradePick", p.spanishGrade, !!retry.spanish);
+    const hasSchool = BD.School.has(p);
+    $("homeSchool").hidden = !hasSchool;
+    $("homeSchool").innerHTML = hasSchool ? '<p class="eyebrow">This week\'s school words · ' + BD.School.masteredCount(p) + '/' + BD.School.words(p).length + ' mastered</p>' +
+      '<div class="school-btns"><button type="button" class="btn btn-small btn-gold" data-school="practice">📝 Practice school words</button><button type="button" class="btn btn-small btn-quiet" data-school="test">Word test</button></div>' : "";
     const notes = [];
     if (retry.math) notes.push("<strong>Math Dojo:</strong> redo " + BD.gradeLabel(retry.math.grade) + " " + retry.math.ops.map(function (o) { return BD.MathGame.OPS[o].sym; }).join(" ") + " and score " + BD.MathGame.PASS + "% to unlock other levels.");
     if (retry.sentence) notes.push("<strong>Fix-It Sentences:</strong> redo " + BD.gradeLabel(retry.sentence.grade) + " and fix " + BD.SentenceGame.PASS + "% to unlock other grades.");
     $("homeRedo").innerHTML = notes.map(function (n) { return "<p>" + n + "</p>"; }).join("");
     $("homeRedo").hidden = true; // redo items are shown in Sensei's plan instead
     renderPlan(p);
+    BD.Quest.render(p);
     show("screen-home");
   }
 
@@ -431,6 +438,8 @@ BD.UI = (function () {
     else if (it.kind === "spanishRetry" || it.kind === "spellingRetry") BD.WordQuiz.start(it.game);
     else if (it.kind === "stripeTest") confirmTest(it.subject);
     else if (it.kind === "stripePractice") launchStripe(it.subject, false);
+    else if (it.kind === "school") BD.WordQuiz.start("spelling", null, "practice");
+    else if (it.kind === "schoolTest") BD.WordQuiz.start("spelling", null, "test");
   }
 
   /* Re-draw when progress arrives from another device. */
@@ -506,6 +515,7 @@ BD.UI = (function () {
   }
   function parent() {
     const list = BD.Store.players();
+    BD.Leads.parentCard($("parentLead"));
     if (!list.length) { $("parentBody").innerHTML = '<p class="muted">No students yet.</p>'; show("screen-parent"); return; }
     $("parentBody").innerHTML = list.map(function (p) {
       const belt = BD.beltOf(p);
@@ -546,6 +556,7 @@ BD.UI = (function () {
       return '<article class="report">' +
         '<header class="report-head">' + avatar(p, "lg") + '<div><h3>' + esc(p.name) + '</h3><p class="muted">' + belt.name + ' Belt · ' + p.xp.toLocaleString() + ' XP · practiced ' + p.days.length + (p.days.length === 1 ? " day" : " days") + '</p></div></header>' +
         BD.Parent.card(p) +
+        BD.School.parentHTML(p) +
         (redoList(p).length ? '<div class="redo-note"><strong>Redo needed</strong><p>' + redoList(p).join(", ") +
           '. Scored under ' + BD.MathGame.PASS + '%, so this level stays locked in until they pass it.</p><button type="button" class="btn btn-small" data-act="clearRedo">Unlock all levels</button></div>' : '') +
         '<div class="pd-actions" data-id="' + p.id + '"><button type="button" class="btn btn-primary" data-act="share">Share this week</button>' +
@@ -633,6 +644,7 @@ BD.UI = (function () {
     $("playRead").addEventListener("click", function () { BD.Reading.start(); });
     $("playSpell").addEventListener("click", function () { BD.WordQuiz.start("spelling"); });
     $("playSpanish").addEventListener("click", function () { BD.WordQuiz.start("spanish"); });
+    $("homeSchool").addEventListener("click", function (e) { const b = e.target.closest("[data-school]"); if (b) BD.WordQuiz.start("spelling", null, b.dataset.school); });
     $("homePlanList").addEventListener("click", function (e) {
       const b = e.target.closest("[data-plan]"); if (b && planItems[Number(b.dataset.plan)]) runPlan(planItems[Number(b.dataset.plan)]);
     });
@@ -650,6 +662,7 @@ BD.UI = (function () {
         pl.retry = {}; BD.Store.save(pl); parent(); return;
       }
       if (b.dataset.act === "backup") { BD.Backup.openBackup(p); return; }
+      if (b.dataset.act === "school") { BD.School.openEditor(p, parent); return; }
       if (b.dataset.act === "share") { BD.Parent.share(p); return; }
       if (b.dataset.act === "challenge") { if (BD.Dojo) BD.Dojo.toggle(p, parent); return; }
       if (b.dataset.act === "reset" || b.dataset.act === "remove") {
@@ -695,6 +708,8 @@ BD.UI = (function () {
       BD.Sound.right(); closeFighter(); home();
     });
     BD.Builder.bind();
+    BD.Quest.bind();
+    BD.Leads.bind();
   }
   /* A simple pop-up sheet for lessons and rule books. */
   function sheet(title, html) {

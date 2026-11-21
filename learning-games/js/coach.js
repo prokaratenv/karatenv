@@ -84,6 +84,7 @@ BD.Coach = (function () {
     if (BD.Reading) items.push.apply(items, BD.Reading.planItems(p));
     if (BD.WordQuiz) items.unshift.apply(items, BD.WordQuiz.planItems(p));
     if (BD.Rank) items.unshift.apply(items, BD.Rank.planItems(p));
+    if (BD.School) items.unshift.apply(items, BD.School.planItems(p));
     // redo items first, then one suggestion per game
     return items.slice(0, 4);
   }
