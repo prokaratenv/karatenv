@@ -50,21 +50,29 @@ BD.Boss = (function () {
     { name: "Shadow", title: "the Ninja Cat", img: "img/boss-5.webp", hits: 12, hi: "You can't hit what you can't see!", lose: "Meow! You found me. Well done." },
     { name: "Agent Bridgette", title: "Secret Agent", img: "img/boss-6.webp", hits: 13, hi: "Mission: stop you. Ready, champion?", lose: "Mission failed... because you're amazing!", instructor: true },
     { name: "Star Force Mrs. Young", title: "Cosmic Hero", img: "img/boss-7.webp", hits: 14, hi: "Show me the power of a true Engage champion!", lose: "You shine brighter than the stars!", instructor: true },
-    { name: "Iron Master Young", title: "the Final Boss", img: "img/boss-8.webp", hits: 16, hi: "So you made it to the top. Bow in, champion. Let's see your best!", lose: "Incredible! You beat the Final Boss. I'm proud of you!", instructor: true, final: true }
+    { name: "Iron Master Young", title: "the Final Boss", img: "img/boss-8.webp", hits: 16, hi: "So you made it to the top. Bow in, champion. Let's see your best!", lose: "Incredible! You beat the Final Boss... or did you?", instructor: true, final: true },
+    // secret: unlocked by beating Iron Master Young
+    { name: "Overlord Young", title: "the Ultimate Boss", img: "img/boss-9.webp", hits: 18, hi: "You thought you won? Behold... my ULTIMATE form!", lose: "Impossible! You are the true master of this dojo!", instructor: true, secret: true }
   ];
   const XP = 50;
   let S = null;
 
   function wins(p, grade) { p.bossWins = p.bossWins || {}; return p.bossWins[grade] = p.bossWins[grade] || []; }
-  function bossFor(p) { const g = BD.Rank.dojoGrade(p); return { grade: g, belt: BD.Rank.rec(p, g).belt, boss: BOSSES[BD.Rank.rec(p, g).belt] }; }
+  /* The boss for the belt; at Black Belt, beating Iron Master Young unlocks Overlord Young. */
+  function bossFor(p) {
+    const g = BD.Rank.dojoGrade(p), belt = BD.Rank.rec(p, g).belt;
+    const idx = belt === 8 && wins(p, g).indexOf(8) !== -1 ? 9 : belt;
+    return { grade: g, belt: belt, idx: idx, boss: BOSSES[idx] };
+  }
+  const label = function (b) { return b.boss.secret ? "👑 Secret Ultimate Boss" : b.boss.final ? "🔥 Final Boss" : "🥊 " + BD.BELTS[b.belt].name + " Belt Boss"; };
 
   /* Home card. */
   function card(p) {
     const el = $("bossCard"); if (!el || !p) return;
-    const b = bossFor(p), beat = wins(p, b.grade).indexOf(b.belt) !== -1;
+    const b = bossFor(p), beat = wins(p, b.grade).indexOf(b.idx) !== -1;
     el.innerHTML = '<img class="boss-thumb" src="' + b.boss.img + '" alt="">' +
-      '<span class="boss-txt"><span class="boss-k">' + (b.boss.final ? "🔥 Final Boss" : "🥊 " + BD.BELTS[b.belt].name + " Belt Boss") + '</span>' +
-      '<strong>' + esc(b.boss.name) + '</strong><span class="boss-sub">' + (beat ? "Defeated ✓ · tap for a rematch" : "Beat " + (b.boss.instructor ? "them" : "this boss") + " for a trophy and +" + XP + " XP") + '</span></span>';
+      '<span class="boss-txt"><span class="boss-k">' + label(b) + '</span>' +
+      '<strong>' + esc(b.boss.name) + '</strong><span class="boss-sub">' + (beat ? "Defeated ✓ · tap for a rematch" : "Beat " + (b.boss.instructor ? "them" : "this boss") + " for a trophy and +" + prize(b.boss) + " XP") + '</span></span>';
   }
 
   /* The ladder + fight button. */
@@ -72,12 +80,13 @@ BD.Boss = (function () {
     const p = BD.Store.current(); if (!p) return;
     const b = bossFor(p), w = wins(p, b.grade);
     BD.UI.sheet("Boss ladder · " + BD.gradeLabel(b.grade),
-      '<div class="boss-intro"><img src="' + b.boss.img + '" alt=""><div><p class="boss-k">' + BD.BELTS[b.belt].name + ' Belt Boss</p><h3>' + esc(b.boss.name) + '</h3><p class="muted">' + esc(b.boss.title) + '</p><p class="boss-quote">“' + esc(b.boss.hi) + '”</p></div></div>' +
+      '<div class="boss-intro"><img src="' + b.boss.img + '" alt=""><div><p class="boss-k">' + label(b) + '</p><h3>' + esc(b.boss.name) + '</h3><p class="muted">' + esc(b.boss.title) + '</p><p class="boss-quote">“' + esc(b.boss.hi) + '”</p></div></div>' +
       '<p class="muted small">' + b.boss.hits + ' hits to win. You have ' + hearts(p) + ' hearts' + (hearts(p) > 3 ? ' (your gear adds extra!)' : '') + '. Gloves power up every 3rd hit in a row.</p>' +
       '<div class="res-actions"><button type="button" class="btn btn-primary btn-big" id="bossFight">Fight ' + esc(b.boss.name) + '!</button></div>' +
       '<h4 class="label">The ladder</h4><ol class="boss-ladder">' + BOSSES.map(function (x, i) {
-        const st = w.indexOf(i) !== -1 ? "beat" : i === b.belt ? "now" : i > b.belt ? "locked" : "";
-        return '<li class="' + st + '"><span class="belt-swatch" style="--belt:' + BD.BELTS[i].color + '"></span><img src="' + x.img + '" alt=""><span>' + (st === "locked" ? "???" : esc(x.name)) + '</span><em>' + (st === "beat" ? "✓" : st === "now" ? "Now" : st === "locked" ? "🔒" : "") + '</em></li>';
+        if (x.secret && b.idx !== 9 && w.indexOf(9) === -1) return '<li class="locked secret"><span class="belt-swatch" style="--belt:#17171C"></span><img src="' + x.img + '" alt=""><span>??? Secret boss</span><em>🔒</em></li>';
+        const st = w.indexOf(i) !== -1 ? "beat" : i === b.idx ? "now" : i > b.idx ? "locked" : "";
+        return '<li class="' + st + (x.secret ? " secret" : "") + '"><span class="belt-swatch" style="--belt:' + BD.BELTS[Math.min(8, i)].color + '"></span><img src="' + x.img + '" alt=""><span>' + (st === "locked" ? "???" : esc(x.name)) + '</span><em>' + (st === "beat" ? "✓" : st === "now" ? "Now" : st === "locked" ? "🔒" : "") + '</em></li>';
       }).join("") + '</ol>');
     $("bossFight").onclick = function () { $("infoClose").click(); start(); };
   }
@@ -91,17 +100,28 @@ BD.Boss = (function () {
   function start() {
     const p = BD.Store.current(); if (!p) return;
     const b = bossFor(p);
-    S = { grade: b.grade, belt: b.belt, boss: b.boss, hp: b.boss.hits, max: b.boss.hits, hearts: hearts(p), maxHearts: hearts(p), streak: 0, gloves: gloves(p), right: 0, asked: 0, busy: false };
+    S = { grade: b.grade, belt: b.belt, idx: b.idx, boss: b.boss, hp: b.boss.hits, max: b.boss.hits, hearts: hearts(p), maxHearts: hearts(p), streak: 0, gloves: gloves(p), right: 0, asked: 0, busy: false };
     $("bossName").textContent = b.boss.name;
     $("bossImg").src = b.boss.img; $("bossImg").alt = b.boss.name;
-    $("bossTitle").textContent = (b.boss.final ? "Final Boss · " : "") + BD.gradeLabel(b.grade) + " · " + BD.BELTS[b.belt].name + " Belt";
+    $("bossTitle").textContent = (b.boss.secret ? "Ultimate Boss · " : b.boss.final ? "Final Boss · " : "") + BD.gradeLabel(b.grade) + " · " + BD.BELTS[b.belt].name + " Belt";
+    $("bossArena").classList.toggle("ultimate", !!b.boss.secret);
     $("bossSay").textContent = b.boss.hi;
     $("bossOver").hidden = true;
     BD.UI.show("screen-boss");
     BD.Mini.fill($("screen-boss"));
     hud();
+    // the transformation, the first time Overlord Young appears
+    if (b.boss.secret && wins(p, b.grade).indexOf(9) === -1) return morph(next);
     next();
   }
+  function morph(then) {
+    const m = $("bossMorph");
+    $("bossQ").innerHTML = "";
+    m.hidden = false; m.classList.remove("go"); void m.offsetWidth; m.classList.add("go");
+    BD.Sound.belt();
+    setTimeout(function () { m.hidden = true; if (S) then(); }, 3200);
+  }
+  function prize(boss) { return boss.secret ? 100 : XP; }
   function hud() {
     $("bossHp").style.width = Math.max(0, 100 * S.hp / S.max) + "%";
     $("bossHpNum").textContent = Math.max(0, S.hp) + " / " + S.max;
@@ -146,15 +166,18 @@ BD.Boss = (function () {
     }, v === S.q.answer ? 750 : 1500);
   }
   function end(won) {
-    const p = BD.Store.current(), boss = S.boss, w = wins(p, S.grade), first = won && w.indexOf(S.belt) === -1;
-    if (first) { w.push(S.belt); p.xp = (p.xp || 0) + XP; }
-    BD.Store.recordSession(p, { game: "boss", grade: S.grade, correct: S.right, total: S.asked, xp: first ? XP : 0, boss: boss.name, won: won });
+    const p = BD.Store.current(), boss = S.boss, w = wins(p, S.grade), first = won && w.indexOf(S.idx) === -1;
+    if (first) { w.push(S.idx); p.xp = (p.xp || 0) + prize(boss); }
+    BD.Store.recordSession(p, { game: "boss", grade: S.grade, correct: S.right, total: S.asked, xp: first ? prize(boss) : 0, boss: boss.name, won: won });
     $("bossOver").hidden = false;
-    $("bossOverTitle").textContent = won ? (boss.final ? "You beat the Final Boss!" : "You beat " + boss.name + "!") : boss.name + " wins this round";
+    $("bossOverTitle").textContent = won ? (boss.secret ? "You beat the Ultimate Boss!" : boss.final ? "You beat the Final Boss!" : "You beat " + boss.name + "!") : boss.name + " wins this round";
     $("bossOverSay").textContent = "“" + (won ? boss.lose : "Train hard and come back. I'll be waiting!") + "”";
-    $("bossOverPrize").textContent = won ? (first ? "🏆 Boss trophy + " + XP + " XP" : "🏆 Rematch won!") : "You landed " + (S.max - Math.max(0, S.hp)) + " of " + S.max + " hits. So close!";
-    $("bossAgain").textContent = won ? "Rematch" : "Try again";
-    if (won) { BD.Sound.belt(); BD.confetti(boss.final ? 280 : 160); BD.Mini.react("bow"); } else BD.Sound.wrong();
+    $("bossOverPrize").textContent = won ? (first ? (boss.secret ? "👑 Ultimate trophy + " : "🏆 Boss trophy + ") + prize(boss) + " XP" : "🏆 Rematch won!") : "You landed " + (S.max - Math.max(0, S.hp)) + " of " + S.max + " hits. So close!";
+    // beating Iron Master Young the first time: he's not done yet...
+    const twist = won && first && boss.final;
+    $("bossAgain").textContent = twist ? "⚡ Wait... something's happening!" : won ? "Rematch" : "Try again";
+    $("bossOver").classList.toggle("twist", twist);
+    if (won) { BD.Sound.belt(); BD.confetti(boss.final || boss.secret ? 280 : 160); BD.Mini.react("bow"); } else BD.Sound.wrong();
     S = null;
     if (won) setTimeout(function () { BD.Badges.award(BD.Store.current()); }, 1600);
   }
