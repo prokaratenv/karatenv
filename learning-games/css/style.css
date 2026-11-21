@@ -974,7 +974,7 @@ body.no-speech .say-btn { display: none; }
 body.duel-on .topbar, body.duel-on .footer { visibility: hidden; }
 .fun-row { margin: 14px 0; }
 
-/* Secret boss: Overlord Young */
+/* Secret boss: Final Boss Master Young */
 .boss-arena.ultimate { background: radial-gradient(120% 80% at 50% 100%, rgba(150,80,255,.35), transparent 60%), linear-gradient(180deg, #1A0B2E, #0A0F22); box-shadow: inset 0 0 40px rgba(150,80,255,.35); }
 .boss-arena.ultimate .ba-hp i { background: linear-gradient(90deg, #9B5CFF, #FF5CD6); }
 .boss-ladder li.secret { background: linear-gradient(90deg, rgba(150,80,255,.25), rgba(13,24,48,.6)); }
