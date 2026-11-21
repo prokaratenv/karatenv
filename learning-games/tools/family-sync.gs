@@ -104,11 +104,26 @@ function requestCode(req) {
   cache.put("sent:" + fid, String(sent + 1), 3600);
   var code = String(Math.floor(100000 + Math.random() * 900000));
   cache.put("code:" + fid, JSON.stringify({ h: sha(fid + ":" + code), tries: 0 }), CODE_MINUTES * 60);
-  GmailApp.sendEmail(email, "Your Brain Dojo sign-in code: " + code,
+  GmailApp.sendEmail(email, CODE_SUBJECT + ": " + code,
     "Your Brain Dojo sign-in code is " + code + "\n\nType it on the device you want to link. It works for " + CODE_MINUTES + " minutes.\n\n" +
       "Didn't ask for this? You can ignore this email; nothing changes without the code.\n\n— Brain Dojo by " + STUDIO,
     { name: "Brain Dojo by " + STUDIO, from: FROM_EMAIL, replyTo: FROM_EMAIL });
+  trashSentCodes();
   return { ok: true };
+}
+/* Privacy: don't keep parents' addresses in the Sent folder. Moves our own
+   sign-in code emails to the trash (Gmail empties it after 30 days). A
+   parent's reply is left alone. Runs after each send and each sign-in, so
+   anything Gmail hadn't indexed yet is caught on the next one. */
+var CODE_SUBJECT = "Your Brain Dojo sign-in code";
+function trashSentCodes() {
+  try {
+    GmailApp.search('in:sent subject:"' + CODE_SUBJECT + '"', 0, 100).forEach(function (t) {
+      t.getMessages().forEach(function (m) {
+        if (m.getSubject().indexOf(CODE_SUBJECT) === 0 && !m.isInTrash()) m.moveToTrash();
+      });
+    });
+  } catch (e) { /* never block sign-in over cleanup */ }
 }
 function verifyCode(req) {
   var email = cleanEmail(req.email), code = String(req.code || "").replace(/\D/g, "");
@@ -123,6 +138,7 @@ function verifyCode(req) {
     return { ok: false, error: "code", left: TRIES - c.tries };
   }
   cache.remove("code:" + fid);
+  trashSentCodes();
   var secret = Utilities.getUuid().replace(/-/g, "") + Utilities.getUuid().replace(/-/g, "");
   return locked(function () {
     var file = fileFor(fid, true), d = load(file);

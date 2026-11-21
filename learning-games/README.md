@@ -141,7 +141,7 @@ On your own website, families can link every device with a parent's email instea
 3. From then on, **every save syncs automatically** (a couple of seconds after each answer, when the app is closed or hidden, and every 2 minutes while open). Any device signed in with the same email shows the same students, belts, stripes and points. Adding or removing a student carries over too. The footer says "Synced to p•••@example.com".
 4. In the Parent corner, parents can **Sign out this device**, **Sign out all devices**, or **Delete family data**.
 
-**Privacy by design (no personal data on file):** each device **encrypts every student profile before it's sent** (AES-256-GCM). The key is made on the device from the parent's email plus a random per-family salt (PBKDF2, 310,000 rounds). The server never receives the key and **never stores an email address**: the email is used once to send the sign-in code. Each family file in your Drive holds only:
+**Privacy by design (no personal data on file):** each device **encrypts every student profile before it's sent** (AES-256-GCM). The key is made on the device from the parent's email plus a random per-family salt (PBKDF2, 310,000 rounds). The server never receives the key and **never stores an email address**: the email is used once to send the sign-in code. The script then moves its own sent code emails to the Gmail trash (emptied after 30 days), so parents' addresses don't pile up in the Sent folder. Each family file in your Drive holds only:
 - an anonymous family number (made with a secret only the script knows, so it can't be matched to an email)
 - scrambled student data
 - fingerprints of the linked devices' keys
