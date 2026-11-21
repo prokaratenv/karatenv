@@ -10,7 +10,7 @@
  * New sign-ups appear in the sheet. Your CRM or Zapier can watch the sheet
  * to add each parent to your newsletter or lead campaign.
  */
-var FIELDS = ["date", "first_name", "email", "phone", "sms_consent", "member", "handbook", "offers", "tags", "consent", "terms_version", "source"];
+var FIELDS = ["date", "first_name", "last_name", "email", "phone", "sms_consent", "member", "handbook", "offers", "tags", "consent", "terms_version", "source"];
 
 function doPost(e) {
   var p = (e && e.parameter) || {};

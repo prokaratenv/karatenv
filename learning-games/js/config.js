@@ -17,3 +17,6 @@ BD.CONFIG = {
   studioName: "Engage Lifestyle Martial Arts",
   studioSite: "https://engagemartialarts.com"
 };
+/* Inside Claude (the claude.ai link), progress syncs through the Claude account
+   and sign-ups go to the owner-only list, so the outside services stay off there. */
+if (window.claude && typeof window.claude.use === "function") { BD.CONFIG.leadEndpoints = []; BD.CONFIG.accountEndpoint = ""; }

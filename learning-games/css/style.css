@@ -1171,3 +1171,5 @@ body.duel-on .topbar, body.duel-on .footer { visibility: hidden; }
 #fsCode { font-family: ui-monospace, Menlo, Consolas, monospace; letter-spacing: .05em; text-transform: uppercase; }
 @media print { body.sheet-lock > *:not(#infoSheet) { display: none !important; } #infoSheet .res-actions, #infoSheet .lf-check, #infoSheet button { display: none !important; } }
 .welcome-cta + .family-link { margin: 12px auto 4px; }
+.lf-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+@media (max-width: 420px) { .lf-row { grid-template-columns: 1fr; } }
