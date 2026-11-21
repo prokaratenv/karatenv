@@ -1,0 +1,23 @@
+{
+  "name": "Brain Dojo by Engage",
+  "short_name": "Brain Dojo",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0D1830",
+  "theme_color": "#0D1830",
+  "icons": [
+    {
+      "src": "img/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    },
+    {
+      "src": "img/app-icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

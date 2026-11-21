@@ -51,6 +51,12 @@ In Math Dojo, **Scratch paper** opens a sheet of graph paper to work a problem o
 - **Hidden from search engines and AI crawlers.** The pages carry noindex/nofollow/noarchive tags (link previews in texts still work), and the Claude link has a long random address that is only found if someone shares it.
 - **No secrets** (API keys, passwords) are stored in the app or this repository.
 
+## Hosting it on your own website
+
+The game is a plain website: everything in this `learning-games` folder (index.html, css, js, data, img, manifest.webmanifest). Put the folder on any web host (your website's file manager, GitHub Pages, Cloudflare Pages, Netlify) and it opens in a normal browser with no Claude banner or sign-in. "Add to Home Screen" opens it full screen like an app, with the Brain Dojo icon.
+
+Hosted on its own, these Claude-only extras are turned off automatically: Ask Sensei, Sensei's written feedback on Story Scrolls (the built-in checker is used instead), new AI-written sentences and stories (the built-in banks keep going), saving to a Claude account, and the Dojo Challenge board. Progress stays in each browser; use **Back up progress** save codes to move a student between devices.
+
 ## Saving progress
 
 - Progress saves automatically after every answer that earns XP. If a child taps Back, switches apps or closes the page in the middle of a round, the XP they've earned so far is kept.
