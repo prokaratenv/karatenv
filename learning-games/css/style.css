@@ -1012,3 +1012,9 @@ body.duel-on .topbar, body.duel-on .footer { visibility: hidden; }
 .duel-card > span:last-child { min-width: 0; }
 .duel-card strong { display: block; font-size: clamp(.78rem, 3.4vw, 1rem); overflow-wrap: anywhere; }
 .duel-icon { font-size: 1.35rem; flex: 0 0 auto; }
+/* Partner Challenge card: icon on top, whole words only */
+.duel-card { flex-direction: column; justify-content: center; text-align: center; gap: 4px; padding: 10px 8px; }
+.duel-card > span:last-child { display: grid; gap: 2px; justify-items: center; }
+.duel-card strong { overflow-wrap: normal; word-break: keep-all; hyphens: none; font-size: clamp(.82rem, 3.6vw, 1.05rem); line-height: 1.05; }
+.duel-card .boss-sub { font-size: .78rem; }
+.duel-icon { font-size: 1.5rem; line-height: 1; }
