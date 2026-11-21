@@ -174,7 +174,7 @@ BD.Boss = (function () {
     $("bossOverSay").textContent = "“" + (won ? boss.lose : "Train hard and come back. I'll be waiting!") + "”";
     $("bossOverPrize").textContent = won ? (first ? (boss.secret ? "👑 Ultimate trophy + " : "🏆 Boss trophy + ") + prize(boss) + " XP" : "🏆 Rematch won!") : "You landed " + (S.max - Math.max(0, S.hp)) + " of " + S.max + " hits. So close!";
     // beating Iron Master Young the first time: he's not done yet...
-    const twist = won && first && boss.final;
+    const twist = !!(won && first && boss.final);
     $("bossAgain").textContent = twist ? "⚡ Wait... something's happening!" : won ? "Rematch" : "Try again";
     $("bossOver").classList.toggle("twist", twist);
     if (won) { BD.Sound.belt(); BD.confetti(boss.final || boss.secret ? 280 : 160); BD.Mini.react("bow"); } else BD.Sound.wrong();
