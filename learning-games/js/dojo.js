@@ -19,6 +19,8 @@ BD.Dojo = (function () {
     if (!w || BLOCK.some(function (b) { return low.indexOf(b) !== -1 && !(b === "ass" && /^(cass|bass|tass|jass|vass|lass|kass)/.test(low)) && !(b === "die" && /^(dieg|dier|diet)/.test(low)) && !(b === "hell" && /^(hellen|helle|shell)/.test(low)); })) return "Champion";
     return w.charAt(0).toUpperCase() + w.slice(1);
   }
+  /* What other families see: a first initial only (privacy: no names leave the device). */
+  function initial(n) { const f = firstName(n); return f === "Champion" ? "Champion" : f.charAt(0).toUpperCase() + "."; }
   /* Entries come from other families: keep only what the board needs, checked. */
   const BELT_BY_NAME = {};
   function cleanEntry(e) {
@@ -30,7 +32,7 @@ BD.Dojo = (function () {
         const b = BELT_BY_NAME[pl && pl.belt] || BD.BELTS[0];
         const reps = Math.max(0, Math.min(1500, Math.round(Number(pl && pl.reps) || 0))); // no one answers 1,500+ in a week
         const xp = Math.max(0, Math.min(10000, Math.round((Number(pl && pl.xp) || 0) * 2) / 2));
-        return { name: firstName(pl && pl.name), belt: b.name, color: b.color, reps: reps, xp: xp };
+        return { name: initial(pl && pl.name), belt: b.name, color: b.color, reps: reps, xp: xp };
       })
     };
   }
@@ -61,7 +63,7 @@ BD.Dojo = (function () {
     const ws = BD.Parent.weekStart(), now = Date.now() + 864e5;
     return BD.Store.players().filter(function (p) { return p.dojoOptIn; }).map(function (p) {
       const w = BD.Parent.weekStats(p, ws, now), belt = BD.beltOf(p);
-      return { name: firstName(p.name), belt: belt.name, reps: Math.min(1500, w.correct), xp: Math.min(10000, BD.xpSince(p, ws)) };
+      return { name: initial(p.name), belt: belt.name, reps: Math.min(1500, w.correct), xp: Math.min(10000, BD.xpSince(p, ws)) };
     });
   }
   function push() {
@@ -108,7 +110,7 @@ BD.Dojo = (function () {
       (b.rows.length ? '<ol class="dojo-list">' + b.rows.map(function (r) {
         return '<li' + (r.me ? ' class="me"' : '') + '><span class="belt-swatch" style="--belt:' + r.color + '"></span><span class="dl-name">' + BD.UI.esc(r.name) + '</span><span class="dl-belt">' + BD.UI.esc(r.belt) + '</span><span class="dl-n">' + r.xp.toLocaleString() + ' XP</span></li>';
       }).join("") + '</ol>' : '<p class="muted">No one has joined yet this week. Be the first!</p>') +
-      '<p class="muted small">XP comes from doing the work: practice (up to 100 per stripe), graduation bonuses earned by that practice (up to +100), Daily Flashcards (up to +10 a day), bosses, challenges and daily chests. Stripe tests alone give no points. Only first names and belts are shown. Parents can join or leave in the Parent corner.</p>');
+      '<p class="muted small">XP comes from doing the work: practice (up to 100 per stripe), graduation bonuses earned by that practice (up to +100), Daily Flashcards (up to +10 a day), bosses, challenges and daily chests. Stripe tests alone give no points. Only first initials and belts are shown. Parents can join or leave in the Parent corner.</p>');
   }
 
   /* Parent corner toggle. */
@@ -120,7 +122,7 @@ BD.Dojo = (function () {
     if (p.dojoOptIn) { p.dojoOptIn = false; BD.Store.save(p); push(); if (after) after(); return; }
     BD.UI.sheet("Join the Dojo Challenge?",
       '<p>' + BD.UI.esc(p.name) + '\'s right answers will count toward the whole dojo\'s weekly goal.</p>' +
-      '<p>Other families will see only the first name <strong>' + BD.UI.esc(firstName(p.name)) + '</strong>, their belt and their weekly count. No last names, photos or other details. You can leave any time.</p>' +
+      '<p>Other families will see only the first initial <strong>' + BD.UI.esc(initial(p.name)) + '</strong>, their belt and their weekly points. No names, photos or other details. You can leave any time.</p>' +
       '<div class="res-actions"><button type="button" class="btn btn-primary" id="dojoYes">Join</button><button type="button" class="btn btn-quiet" id="dojoNo">Not now</button></div>');
     $("dojoYes").onclick = function () { p.dojoOptIn = true; BD.Store.save(p); push(); $("infoClose").click(); if (after) after(); };
     $("dojoNo").onclick = function () { $("infoClose").click(); };

@@ -1,11 +1,12 @@
 /* PARENT REPORT SIGN-UP — students always play free with no sign-up.
    In the Parent corner, a grown-up unlocks the free Parent Progress Report
-   once (per device) with their first name and email. Signing up also
+   once (per device) with their first and last name and email. Signing up also
    enrolls them in Engage's free Parent Handbook email series (GoHighLevel),
    as the form and the Terms say. Optional extras: free-class offers and
    text messages (each its own unchecked box).
    Kid-safe (COPPA): only reached behind the parent PIN, the grown-up
-   confirms they're 18+, nothing is collected about the child except grade.
+   confirms they're 18+, and nothing about any child is sent: no names,
+   grades, ages or progress. Only the parent's own details and opt-ins.
    Sign-ups go to every URL in BD.CONFIG.leadEndpoints (GoHighLevel inbound
    webhook, Google Sheet) and, on the Claude link, an owner-only list. */
 window.BD = window.BD || {};
@@ -14,7 +15,7 @@ BD.Leads = (function () {
   const $ = function (id) { return document.getElementById(id); };
   const esc = function (s) { return BD.UI.esc(s); };
   const DONE_KEY = "brainDojo.signedUp", PENDING_KEY = "brainDojo.leadPending";
-  const TERMS_VERSION = "2026-11-21";
+  const TERMS_VERSION = "2026-11-22";
   const read = function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } };
   const write = function (k, v) { try { if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) { /* blocked */ } };
   const cfg = function () { return BD.CONFIG || {}; };
@@ -44,21 +45,21 @@ BD.Leads = (function () {
   /* ---------- checks ---------- */
   const EMAIL_RE = /^[^\s@<>()[\]\\,;:"]{1,64}@[A-Za-z0-9.-]{1,190}\.[A-Za-z]{2,24}$/;
   function cleanLead(f) {
-    const name = String(f.name || "").replace(/[\u0000-\u001f\u007f<>{}[\]\\`"=]/g, "").trim().slice(0, 40);
+    const clean = function (v) { return String(v || "").replace(/[\u0000-\u001f\u007f<>{}[\]\\`"=]/g, "").trim().slice(0, 40); };
+    const name = clean(f.name), last = clean(f.last);
     const email = String(f.email || "").trim().toLowerCase().slice(0, 254);
     const phone = String(f.phone || "").replace(/[^\d+()\- .]/g, "").trim().slice(0, 20);
     if (!name) return { error: "Please add your first name." };
+    if (!last) return { error: "Please add your last name." };
     if (!EMAIL_RE.test(email)) return { error: "Please check your email address." };
     if (f.sms && phone.replace(/\D/g, "").length < 10) return { error: "Add your mobile number for texts, or uncheck the text box." };
     if (!f.sms && f.phone && String(f.phone).trim()) return { error: "To get texts, check the text message box (or clear the number)." };
     if (!f.adult) return { error: "Please confirm you're a parent or guardian, 18 or older, and agree to the Terms." };
-    const kids = BD.Store.players().map(function (p) { return BD.gradeLabel(BD.Rank.dojoGrade(p)); });
     const tags = ["Brain Dojo", "Parent Progress Report", "Parent Handbook"].concat(f.offers ? ["Free Class Offers"] : [], f.sms ? ["SMS Opt-In"] : [], f.member === "yes" ? ["Engage Member"] : ["Prospect"]);
     return { lead: {
-      source: "Brain Dojo", first_name: name, email: email, phone: f.sms ? phone : "",
+      source: "Brain Dojo", first_name: name, last_name: last, email: email, phone: f.sms ? phone : "",
       member: f.member === "yes" ? "Engage member" : "Not a member yet",
       handbook: true, offers: !!f.offers, sms_consent: !!f.sms,
-      child_grades: kids.filter(function (g, i) { return kids.indexOf(g) === i; }).join(", ").slice(0, 80),
       tags: tags.join(","),
       consent: "Parent/guardian 18+ agreed to the Brain Dojo Terms (" + TERMS_VERSION + ") and to emails from " + studio() + ", including the free Parent Handbook series" +
         (f.offers ? ", plus free class offers and events" : "") + (f.sms ? ", plus text messages to the number given" : "") + ". Unsubscribe any time.",
@@ -97,12 +98,13 @@ BD.Leads = (function () {
     return '<div class="terms">' +
       '<p class="muted small">Version ' + TERMS_VERSION + '</p>' +
       '<h4 class="label">Free for students</h4><p>Brain Dojo is free. Students can play every game without anyone signing up. Only the Parent Progress Report asks for a parent\'s email.</p>' +
-      '<h4 class="label">What we collect</h4><p>From the parent or guardian only: first name, email, whether your family trains at ' + s + ', the grade level(s) your child practices, and, only if you choose texts, a mobile number. We never ask children for personal information. Your child\'s names, answers and progress stay on this device (or your own Claude account), not in our email system.</p>' +
+      '<h4 class="label">What we collect</h4><p>From the parent or guardian only, and only if you unlock the Parent Progress Report: first and last name, email, whether your family trains at ' + s + ', and, only if you choose texts, a mobile number. <strong>We don\'t collect any information about your children</strong>: no names, grades, ages, answers or progress. That stays on your devices.</p>' +
       '<h4 class="label">How we use it</h4><p>When you unlock the free Parent Progress Report, you\'re added to ' + s + '\'s free <strong>Parent Handbook</strong> email series: tips on focus, confidence, respect and habits at home, plus news from our school. If you check the box, we\'ll also send free trial class offers, events and specials. If you opt in to texts, we\'ll text class reminders and offers. Message frequency varies; message and data rates may apply. Reply STOP to stop texts or HELP for help.</p>' +
       '<h4 class="label">Your choices</h4><p>Every email has an unsubscribe link, and you can leave any time. Unsubscribing doesn\'t lock the report on this device. Texts are never required.</p>' +
-      '<h4 class="label">Family account (optional)</h4><p>If you sign in with your email to use Brain Dojo on several devices, we store your email and your children\'s first names and Brain Dojo progress (belts, points, answers practiced) in ' + s + '\'s private Google Drive, only to sync it between your devices. The sign-in code email isn\'t marketing. You can sign out any device, or delete your family data from the Parent corner at any time.</p>' +
+      '<h4 class="label">Family Sync (optional)</h4><p>Family Sync keeps progress on all your devices without an email or account. Your device makes a private Family Sync Code and locks (encrypts) your students\' names and progress with it <strong>before</strong> anything leaves the device. We only store that locked copy, under a fingerprint of the code, with no email, name or device details attached. ' + s + ' can\'t read it, reset the code or recover it. If you lose the code and every linked device, the synced copy can\'t be recovered. You can turn Family Sync off on any device, or delete the synced copy, from the Parent corner at any time.</p>' +
+      '<h4 class="label">Leaderboard (optional)</h4><p>If you add your child to the Dojo Challenge, other families see only a first initial, belt color and weekly points.</p>' +
       '<h4 class="label">We never sell it</h4><p>We don\'t sell, rent or share your information with other companies for their marketing. It\'s kept in our customer system (for example, GoHighLevel) only to send what you asked for.</p>' +
-      '<h4 class="label">Kids\' privacy</h4><p>Brain Dojo is for kids, so the sign-up is behind the parent PIN and only a parent or guardian 18 or older may sign up. If you think a child gave us information, contact us and we\'ll delete it.</p>' +
+      '<h4 class="label">Kids\' privacy</h4><p>Brain Dojo is for kids, so we don\'t collect personal information from or about children. Students play without signing up. Their names and progress stay on your devices (locked with your code if you use Family Sync). The Parent Report sign-up is behind the parent PIN, and only a parent or guardian 18 or older may sign up. If you think a child gave us information, contact us and we\'ll delete it.</p>' +
       '<h4 class="label">Questions or deletion requests</h4><p>Contact ' + s + (site ? ' at <a href="' + site + '" target="_blank" rel="noopener noreferrer">' + site.replace(/^https?:\/\//, "") + '</a>' : '') + '. Brain Dojo is a free learning game for practice at home and doesn\'t replace your child\'s school or teacher.</p></div>';
   }
   function openTerms(back) {
@@ -118,7 +120,8 @@ BD.Leads = (function () {
       '<p>See each child\'s week, belt progress, strengths, what to work on and tips to try at home, and share a weekly progress card. Free, one time on this device.</p></div></div>' +
       '<ul class="ur-gets"><li>📊 Parent Progress Report for every child</li><li>📘 Engage\'s free <strong>Parent Handbook</strong> email series</li><li>📝 School Words and weekly progress cards</li></ul>' +
       '<div class="lead-form">' +
-      '<label class="lf"><span>Your first name</span><input id="lfName" type="text" autocomplete="given-name" maxlength="40" required></label>' +
+      '<div class="lf-row"><label class="lf"><span>Your first name</span><input id="lfName" type="text" autocomplete="given-name" maxlength="40" required></label>' +
+      '<label class="lf"><span>Your last name</span><input id="lfLast" type="text" autocomplete="family-name" maxlength="40" required></label></div>' +
       '<label class="lf"><span>Email</span><input id="lfEmail" type="email" autocomplete="email" inputmode="email" maxlength="254" required></label>' +
       '<label class="lf hp" aria-hidden="true"><span>Company</span><input id="lfCompany" type="text" tabindex="-1" autocomplete="off"></label>' +
       '<fieldset class="lf-set"><legend>Does your child train at ' + esc(studio().split(" ")[0]) + '?</legend>' +
@@ -140,14 +143,14 @@ BD.Leads = (function () {
     openedAt = Date.now();
     el.innerHTML = formHTML();
     const saved = {};
-    const keep = function () { ["lfName", "lfEmail", "lfPhone"].forEach(function (id) { saved[id] = $(id) ? $(id).value : ""; }); };
+    const keep = function () { ["lfName", "lfLast", "lfEmail", "lfPhone"].forEach(function (id) { saved[id] = $(id) ? $(id).value : ""; }); };
     $("lfSms").onchange = function () { $("lfPhoneRow").hidden = !$("lfSms").checked; if ($("lfSms").checked) $("lfPhone").focus(); };
     $("lfTerms").onclick = function (e) { e.preventDefault(); keep(); openTerms(function () { $("infoClose").click(); }); };
     $("lfGo").onclick = async function () {
       const msg = function (t, good) { $("lfMsg").textContent = t; $("lfMsg").className = "lf-msg" + (good ? " good" : ""); };
       if ($("lfCompany").value || Date.now() - openedAt < 2500) { msg("One moment… tap again.", true); openedAt = Date.now() - 2500 + 800; return; }
       const memberEl = document.querySelector('input[name="lfMember"]:checked');
-      const c = cleanLead({ name: $("lfName").value, email: $("lfEmail").value, phone: $("lfSms").checked ? $("lfPhone").value : "", sms: $("lfSms").checked, member: memberEl ? memberEl.value : "no", offers: $("lfOffers").checked, adult: $("lfAdult").checked });
+      const c = cleanLead({ name: $("lfName").value, last: $("lfLast").value, email: $("lfEmail").value, phone: $("lfSms").checked ? $("lfPhone").value : "", sms: $("lfSms").checked, member: memberEl ? memberEl.value : "no", offers: $("lfOffers").checked, adult: $("lfAdult").checked });
       if (c.error) { msg(c.error); return; }
       $("lfGo").disabled = true; msg("Unlocking…", true);
       const ok = await send(c.lead);
@@ -172,9 +175,9 @@ BD.Leads = (function () {
     let rows = [];
     try { const snap = await db.collection("leads").get(); rows = snap.docs.map(function (d) { return d.data() || {}; }); }
     catch (e) { $("leadCount").textContent = "Couldn't read the list here."; return; }
-    const cols = ["date", "first_name", "email", "phone", "sms_consent", "member", "handbook", "offers", "child_grades", "tags", "consent", "terms_version", "source"];
+    const cols = ["date", "first_name", "last_name", "email", "phone", "sms_consent", "member", "handbook", "offers", "tags", "consent", "terms_version", "source"];
     const cell = function (v) { v = String(v == null ? "" : v); if (/^[=+\-@\t\r]/.test(v)) v = "'" + v; return '"' + v.replace(/"/g, '""') + '"'; };
-    const csv = [cols.join(",")].concat(rows.map(function (r) { return cols.map(function (c) { return cell(r[c] !== undefined ? r[c] : c === "first_name" ? r.name : c === "child_grades" ? r.childGrades : ""); }).join(","); })).join("\r\n");
+    const csv = [cols.join(",")].concat(rows.map(function (r) { return cols.map(function (c) { return cell(r[c] !== undefined ? r[c] : c === "first_name" ? r.name : ""); }).join(","); })).join("\r\n");
     $("leadCount").textContent = rows.length + (rows.length === 1 ? " sign-up" : " sign-ups");
     const blob = new Blob([csv], { type: "text/csv" }), name = "brain-dojo-signups-" + BD.today() + ".csv";
     let dl = null; try { dl = await window.claude.use("downloads"); } catch (e) { dl = null; }

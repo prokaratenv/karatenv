@@ -44,7 +44,7 @@ In **Math Dojo**, the top of the screen has **⚡ Daily Flashcards**: big button
 - **PIN:** the first visit asks for a 4-digit parent PIN, so kids can't reset or remove progress. Forgot it? A grown-up math question lets you set a new one.
 - **Dashboard:** for each child: this week (days, rounds, questions, streak), belt progress, what they're strong at and what to work on, a tip to try at home, last week's recap (highlighted on Mondays) and badges. The detailed tables are under **See details** and only show grades they've played.
 - **Share this week:** makes a progress card picture to text to family or an Engage instructor.
-- **Dojo Challenge:** a weekly team goal (3,000 right answers) plus a **leaderboard ranked by XP earned this week** (practice, graduation bonuses, Daily Flashcards, bosses, Partner Challenges and daily chests). Stripe tests alone give no points, so doing the practice is how to climb it. for everyone using the shared link. Parents opt each child in; other families see only a first name, belt and weekly count. Needs the shared Claude link while signed in, with Contributor access or above (everyone in your Claude organization; view-only visitors can see the board but not add to it).
+- **Dojo Challenge:** a weekly team goal (3,000 right answers) plus a **leaderboard ranked by XP earned this week** (practice, graduation bonuses, Daily Flashcards, bosses, Partner Challenges and daily chests) for everyone using the shared link. Stripe tests alone give no points, so doing the practice is how to climb it. Parents opt each child in; other families see only a **first initial** (like "M."), belt and weekly points. Needs the shared Claude link while signed in, with Contributor access or above (everyone in your Claude organization; view-only visitors can see the board but not add to it).
 
 ## School Words (from your child's teacher)
 
@@ -64,18 +64,18 @@ Parents see each word color-coded (mastered, practicing, missed last time) and t
 
 ## Parent Progress Report sign-up (GoHighLevel leads)
 
-**Students always play free, with no sign-up.** In the Parent corner (behind the parent PIN), a grown-up unlocks the free **Parent Progress Report** once per device with their first name and email. The report includes the weekly dashboard, School Words, the progress card and details. Signing up automatically adds them to Engage's free **Parent Handbook** email series in GoHighLevel. Optional extras, each its own unchecked box:
+**Students always play free, with no sign-up.** In the Parent corner (behind the parent PIN), a grown-up unlocks the free **Parent Progress Report** once per device with their first and last name and email. The report includes the weekly dashboard, School Words, the progress card and details. Signing up automatically adds them to Engage's free **Parent Handbook** email series in GoHighLevel. Optional extras, each its own unchecked box:
 - free trial class offers, events and specials
 - text messages (the mobile number field only appears when this is checked)
 
 Until the report is unlocked, the Parent corner still shows **Back up progress** for each student, so progress is never held hostage. A "Parents: unlock your free Parent Progress Report" link on the welcome screen opens the PIN-protected Parent corner.
 
-**Terms and consent:** the form requires a "parent or guardian 18+ and I agree to the Terms & Privacy" box, and shows the disclosure next to the button: emails including the Parent Handbook series, unsubscribe any time, texts only by opt-in with STOP/HELP wording, never sold, nothing collected from children. **Terms & Privacy** opens the full terms. Each sign-up records the consent wording and the terms version. Kid-safe (COPPA): it's behind the parent PIN, adult-confirmed, and it collects only the parent's details and the child's grade. Have your own attorney review the terms wording.
+**Terms and consent:** the form requires a "parent or guardian 18+ and I agree to the Terms & Privacy" box, and shows the disclosure next to the button: emails including the Parent Handbook series, unsubscribe any time, texts only by opt-in with STOP/HELP wording, never sold, nothing collected from children. **Terms & Privacy** opens the full terms. Each sign-up records the consent wording and the terms version. Kid-safe (COPPA): it's behind the parent PIN, adult-confirmed, and it sends only the parent's own details (first and last name, email, member yes/no and, only with text opt-in, mobile number) and opt-ins. Nothing about any child (no names, grades, ages or progress) is sent. Have your own attorney review the terms wording.
 
 **Connecting GoHighLevel:**
 1. In GoHighLevel, create a Workflow with the trigger **Inbound Webhook**. Copy its URL.
 2. Paste the URL into the `leadEndpoints` list in `js/config.js` (in quotes).
-3. Open Brain Dojo, unlock the report once as a test, then in the workflow trigger click **Fetch sample request** and map the fields: `first_name`, `email`, `phone`, `tags`, `member`, `offers`, `sms_consent`, `child_grades`, `consent`, `terms_version`.
+3. Open Brain Dojo, unlock the report once as a test, then in the workflow trigger click **Fetch sample request** and map the fields: `first_name`, `last_name`, `email`, `phone`, `tags`, `member`, `offers`, `sms_consent`, `consent`, `terms_version`.
 4. Add actions: **Create/Update Contact**, **Add Tags** (from `tags`: Brain Dojo, Parent Progress Report, Parent Handbook, plus Free Class Offers / SMS Opt-In / Engage Member / Prospect), then **Add to Workflow:** your Parent Handbook email series. Only send texts to contacts tagged SMS Opt-In.
 
 You can also add a Google Sheet backup (steps in `tools/lead-sheet.gs`) as a second URL in the same list. The report is only locked where a sign-up can actually be delivered: with `leadEndpoints` empty (and on the Claude link for visitors who can't save there), the report stays open, so parents are never locked out. On the Claude link, the owner is never locked out and sees **Download sign-ups (CSV)**. If a parent is offline, the sign-up is sent the next time Brain Dojo opens.
@@ -87,7 +87,7 @@ In Math Dojo, **Scratch paper** opens a sheet of graph paper to work a problem o
 ## Safety and security
 
 - **Only the owner can change the app.** The shared link is view-only: visitors can use the games but can't edit the page. Updates come only from the owner's Claude account (and this repository).
-- **Shared data is locked down.** Database rules allow writing in just three places: each signed-in family's own private folder, their own single Dojo Challenge entry, and their own Parent report sign-up (readable only by the owner). Everything else is owner-only. Dojo entries from other families are checked before they're shown: first names only, letters only, a rude-word filter (anything flagged shows as "Champion"), real belt names and colors only, and weekly counts capped at 1,500.
+- **Shared data is locked down.** Database rules allow writing in just three places: each signed-in family's own private folder, their own single Dojo Challenge entry, and their own Parent report sign-up (readable only by the owner). Everything else is owner-only. Dojo entries from other families are checked before they're shown: first initials only, letters only, a rude-word filter (anything flagged shows as "Champion"), real belt names and colors only, and weekly counts capped at 1,500.
 - **No code can be slipped in.** Everything typed by kids, written by AI or loaded from a save code is escaped before it's shown, and every student record (loaded, synced or restored) is checked field by field. A doctored save code can't run anything.
 - **Kid-safe AI.** Sensei only helps with schoolwork, never asks for personal details or shares links, refuses unsafe topics, sends a child who says they're hurt or unsafe to a trusted grown-up, and ignores attempts to change its rules.
 - **Hidden from search engines and AI crawlers.** The pages carry noindex/nofollow/noarchive tags (link previews in texts still work), and the Claude link has a long random address that is only found if someone shares it.
@@ -99,35 +99,32 @@ The game is a plain website: everything in this `learning-games` folder (index.h
 
 Hosted on its own, these Claude-only extras are turned off automatically: Ask Sensei, Sensei's written feedback on Story Scrolls (the built-in checker is used instead), new AI-written sentences and stories (the built-in banks keep going), saving to a Claude account, and the Dojo Challenge board. Progress stays in each browser; use **Back up progress** save codes to move a student between devices.
 
-## Family accounts: progress on every device (sign in with a parent's email)
+## Family Sync: progress on every device, with no personal data kept
 
-On your own website, families can link every device with a parent's email instead of copying save codes:
-1. On any device, the welcome screen shows **"Already training on another device? Sign in with a parent's email."** The Parent corner also has a **Use Brain Dojo on every device** card.
-2. The parent types their email and checks the consent box, and a **6-digit code** arrives by email. They type it in, and the device is linked. Students on the account appear right away.
-3. From then on, **every save syncs automatically** (a couple of seconds after each answer, when the app is closed or hidden, and every 2 minutes while open). Any device signed in with the same email shows the same students, belts, stripes and points. Adding or removing a student carries over too. The footer says "Synced to p•••@example.com".
-4. In the Parent corner, parents can **Sign out this device**, **Sign out all devices**, or **Delete family data**.
+On your own website, families can keep every device in step without an email or account, and the studio never holds any child's information:
+1. In the Parent corner (behind the parent PIN), the **Use Brain Dojo on every device** card has **Turn on Family Sync**. The device makes a private **Family Sync Code** (26 letters and numbers, shown with a QR code and a link).
+2. Before sync turns on, the parent sees a warning and checks a box: *Engage can't see, reset or recover this code. If you lose it and every linked device, the synced progress is gone.* They can copy, print or screenshot the code.
+3. On another device, they scan the QR with the camera, open the link, or tap **Already training on another device? Link with your Family Sync Code** on the welcome screen and type the code.
+4. From then on, **every save syncs automatically** (a couple of seconds after each answer, when the app is closed or hidden, and every 2 minutes while open). Adding or removing a student carries over too.
+5. In the Parent corner, a linked device has **Show code** (to link more devices), **Turn off on this device**, and **Delete synced data**.
 
-**How it's built (free, in your Google account):** `tools/family-sync.gs` is a small Google Apps Script web app. Each family is one private JSON file in a "Brain Dojo Family Data" folder in your Google Drive, and the sign-in codes are sent from your Gmail, from the address in `FROM_EMAIL` (set to info@engagelma.com). That address must be listed under Gmail Settings → Accounts → **Send mail as** for the Google account that deploys the script.
+**What's stored (and what isn't):** students' names and progress are encrypted on the device (AES-256-GCM, key derived from the code with HKDF) before upload. `tools/family-sync.gs` only keeps that locked blob in a "Brain Dojo Sync (encrypted)" folder in your Google Drive, filed under a fingerprint of the code. No email, no names, no device details. Nobody at the studio can read it or recover a lost code.
 
 **Setup (about 5 minutes):**
 1. Go to script.google.com and create a new project.
 2. Paste in `family-sync.gs` and save.
 3. Deploy it as a web app: Execute as **Me**, Who has access **Anyone**.
-4. Allow the permissions it asks for (the Drive files it creates, and sending email from your Gmail).
+4. Allow the permission it asks for (the Drive files it creates).
 5. Paste the `/exec` URL into `js/config.js` as `accountEndpoint`.
 
-Until that's set, the sign-in options stay hidden.
+Until that's set, the Family Sync options stay hidden.
 
-**Safety:**
-- Codes expire in 10 minutes, allow 5 tries, and are limited to 5 per email per hour.
-- Each linked device gets its own long random key. Only a fingerprint of it is stored, and signing out deletes it.
-- The email code isn't marketing and doesn't join any list.
-- Everything coming back from the account is checked field by field before it's shown, like save codes.
-- If two devices change the same student while offline, the most recent copy of that student wins.
-
-**Limits:**
-- Gmail sends about 100 code emails a day on a regular Google account (about 1,500 on Google Workspace).
-- Each family holds up to 10 students.
+**Safety and limits:**
+- The code is 128 random bits, so it can't be guessed. Only a separate fingerprint of it reaches the server, and the encryption key never does.
+- Two devices saving at once is handled: the second one merges the first one's changes and saves again. If both changed the same student, the most recent copy of that student wins.
+- Everything coming back is checked field by field before it's shown, like save codes.
+- Each family holds up to 12 students, about 1.5 MB.
+- Lose the code and every linked device and the synced copy can't be recovered. **Back up progress** still saves a file copy any time.
 
 On the Claude link, the Claude-account sync described below is used instead.
 
@@ -350,7 +347,8 @@ learning-games/
   js/quest.js            Adventure Map, daily quest, chests, stickers, streak shields
   js/leads.js            parent newsletter / free-class sign-up
   js/config.js           studio settings (sign-up and family account URLs)
-  js/family.js           family accounts: email sign-in and sync across devices
+  js/family.js           Family Sync: encrypted, code-based sync across devices
+  js/vendor/qrcode.js    QR code generator (MIT, Kazuhiko Arase)
   tools/family-sync.gs   Google Apps Script backend for family accounts
   tools/lead-sheet.gs    Google Sheet script that collects sign-ups
   js/scratch.js          scratch paper for math
