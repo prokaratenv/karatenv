@@ -515,7 +515,15 @@ BD.UI = (function () {
   }
   function parent() {
     const list = BD.Store.players();
-    BD.Leads.parentCard($("parentLead"));
+    $("parentLead").innerHTML = BD.Leads.ownerHTML(); $("parentLead").hidden = !$("parentLead").innerHTML; BD.Leads.bindOwner();
+    if (list.length && BD.Leads.locked()) {
+      // The report unlocks with a free parent sign-up (students play free regardless).
+      BD.Leads.renderUnlock($("parentBody"), parent);
+      $("parentBody").insertAdjacentHTML("beforeend", '<div class="ur-manage"><h4 class="label">Manage students</h4>' + list.map(function (p) {
+        return '<div class="report-actions" data-id="' + p.id + '">' + avatar(p, "sm") + '<strong>' + esc(p.name) + '</strong><button type="button" class="btn btn-small btn-quiet" data-act="backup">Back up progress</button></div>';
+      }).join("") + '</div>');
+      show("screen-parent"); return;
+    }
     if (!list.length) { $("parentBody").innerHTML = '<p class="muted">No students yet.</p>'; show("screen-parent"); return; }
     $("parentBody").innerHTML = list.map(function (p) {
       const belt = BD.beltOf(p);

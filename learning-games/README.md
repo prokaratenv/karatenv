@@ -55,18 +55,23 @@ Parents see each word color-coded (mastered, practicing, missed last time) and t
 - **Mystery chest:** finishing the quest opens a chest with 20 to 50 bonus XP plus a sticker for the **sticker book** (24 to collect) or a **🛡️ streak shield**.
 - **Streak shields** (hold up to 2): if a day is missed, a shield fills it in so the streak doesn't break. The home screen says when a shield saved the streak.
 
-## Parent sign-ups (newsletter and free-class leads)
+## Parent Progress Report sign-up (GoHighLevel leads)
 
-Parents can join the Engage parent newsletter and/or free trial class offers from:
-- **Parents corner:** a "Free parent tips & a free trial class" card at the top, behind the parent PIN.
-- **Welcome screen:** a "Parents:" link, behind a grown-up math check.
+**Students always play free, with no sign-up.** In the Parent corner (behind the parent PIN), a grown-up unlocks the free **Parent Progress Report** once per device with their first name and email. The report includes the weekly dashboard, School Words, the progress card and details. Signing up automatically adds them to Engage's free **Parent Handbook** email series in GoHighLevel. Optional extras, each its own unchecked box:
+- free trial class offers, events and specials
+- text messages (the mobile number field only appears when this is checked)
 
-**Kid-safe (COPPA):** the form is only reached by a grown-up, asks them to confirm they're a parent or guardian 18+, and nothing is pre-checked. They pick exactly what they want. It collects only the parent's first name, email, optional mobile, member yes/no and the child's grade, never anything about the child. The consent wording is saved with each sign-up, and a hidden bot trap plus a speed check stop spam.
+Until the report is unlocked, the Parent corner still shows **Back up progress** for each student, so progress is never held hostage. A "Parents: unlock your free Parent Progress Report" link on the welcome screen opens the PIN-protected Parent corner.
 
-**Where sign-ups go:**
-- **Your own website:** set `leadEndpoint` in `js/config.js`. The easy free option is a Google Sheet: follow the steps at the top of `tools/lead-sheet.gs` (about 5 minutes), then paste the web app URL into `js/config.js`. Each sign-up becomes a row. Your email system or Zapier can watch that sheet and add each parent to the newsletter or a lead campaign. A CRM's inbound webhook URL (GoHighLevel, for example) also works: fields arrive as form data named date, name, email, phone, member, newsletter, offers, childGrades, consent and source.
-- **The Claude link:** sign-ups from signed-in visitors with Contributor access are saved to a private list only the owner can read. The owner sees **Download sign-ups (CSV)** in Parents. Visitors who aren't signed in can't save there, so for public marketing, use your own website with `leadEndpoint` set.
-- With no destination available, the sign-up card and link stay hidden. If a parent is offline, the sign-up is sent the next time Brain Dojo opens.
+**Terms and consent:** the form requires a "parent or guardian 18+ and I agree to the Terms & Privacy" box, and shows the disclosure next to the button: emails including the Parent Handbook series, unsubscribe any time, texts only by opt-in with STOP/HELP wording, never sold, nothing collected from children. **Terms & Privacy** opens the full terms. Each sign-up records the consent wording and the terms version. Kid-safe (COPPA): it's behind the parent PIN, adult-confirmed, and it collects only the parent's details and the child's grade. Have your own attorney review the terms wording.
+
+**Connecting GoHighLevel:**
+1. In GoHighLevel, create a Workflow with the trigger **Inbound Webhook**. Copy its URL.
+2. Paste the URL into the `leadEndpoints` list in `js/config.js` (in quotes).
+3. Open Brain Dojo, unlock the report once as a test, then in the workflow trigger click **Fetch sample request** and map the fields: `first_name`, `email`, `phone`, `tags`, `member`, `offers`, `sms_consent`, `child_grades`, `consent`, `terms_version`.
+4. Add actions: **Create/Update Contact**, **Add Tags** (from `tags`: Brain Dojo, Parent Progress Report, Parent Handbook, plus Free Class Offers / SMS Opt-In / Engage Member / Prospect), then **Add to Workflow:** your Parent Handbook email series. Only send texts to contacts tagged SMS Opt-In.
+
+You can also add a Google Sheet backup (steps in `tools/lead-sheet.gs`) as a second URL in the same list. The report is only locked where a sign-up can actually be delivered: with `leadEndpoints` empty (and on the Claude link for visitors who can't save there), the report stays open, so parents are never locked out. On the Claude link, the owner is never locked out and sees **Download sign-ups (CSV)**. If a parent is offline, the sign-up is sent the next time Brain Dojo opens.
 
 ## Scratch paper
 
@@ -75,7 +80,7 @@ In Math Dojo, **Scratch paper** opens a sheet of graph paper to work a problem o
 ## Safety and security
 
 - **Only the owner can change the app.** The shared link is view-only: visitors can use the games but can't edit the page. Updates come only from the owner's Claude account (and this repository).
-- **Shared data is locked down.** Database rules allow writing in just three places: each signed-in family's own private folder, their own single Dojo Challenge entry, and their own parent sign-up (readable only by the owner). Everything else is owner-only. Dojo entries from other families are checked before they're shown: first names only, letters only, a rude-word filter (anything flagged shows as "Champion"), real belt names and colors only, and weekly counts capped at 1,500.
+- **Shared data is locked down.** Database rules allow writing in just three places: each signed-in family's own private folder, their own single Dojo Challenge entry, and their own Parent report sign-up (readable only by the owner). Everything else is owner-only. Dojo entries from other families are checked before they're shown: first names only, letters only, a rude-word filter (anything flagged shows as "Champion"), real belt names and colors only, and weekly counts capped at 1,500.
 - **No code can be slipped in.** Everything typed by kids, written by AI or loaded from a save code is escaped before it's shown, and every student record (loaded, synced or restored) is checked field by field. A doctored save code can't run anything.
 - **Kid-safe AI.** Sensei only helps with schoolwork, never asks for personal details or shares links, refuses unsafe topics, sends a child who says they're hurt or unsafe to a trusted grown-up, and ignores attempts to change its rules.
 - **Hidden from search engines and AI crawlers.** The pages carry noindex/nofollow/noarchive tags (link previews in texts still work), and the Claude link has a long random address that is only found if someone shares it.

@@ -6,11 +6,11 @@
  *  2. Extensions → Apps Script. Delete what's there and paste this whole file. Save.
  *  3. Deploy → New deployment → type "Web app".
  *       Execute as: Me.   Who has access: Anyone.   → Deploy, and allow access.
- *  4. Copy the Web app URL (ends in /exec) into js/config.js as leadEndpoint.
+ *  4. Copy the Web app URL (ends in /exec) into the leadEndpoints list in js/config.js.
  * New sign-ups appear in the sheet. Your CRM or Zapier can watch the sheet
  * to add each parent to your newsletter or lead campaign.
  */
-var FIELDS = ["date", "name", "email", "phone", "member", "newsletter", "offers", "childGrades", "consent", "source"];
+var FIELDS = ["date", "first_name", "email", "phone", "sms_consent", "member", "handbook", "offers", "child_grades", "tags", "consent", "terms_version", "source"];
 
 function doPost(e) {
   var p = (e && e.parameter) || {};

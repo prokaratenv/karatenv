@@ -1123,3 +1123,17 @@ body.duel-on .topbar, body.duel-on .footer { visibility: hidden; }
 .lf-adult { border-color: rgba(224,186,119,.5); }
 .lf-msg { min-height: 1.2em; color: var(--bad); font-weight: 700; }
 .lf-msg.good { color: var(--teal); }
+.unlock-report { max-width: 640px; margin: 0 auto 18px; padding: 18px; border-radius: 22px; border: 1px solid var(--gold-2); background: linear-gradient(160deg, rgba(224,186,119,.14), rgba(19,34,61,.9) 45%); }
+.ur-head { display: flex; gap: 14px; align-items: flex-start; }
+.ur-head h2 { margin: 0 0 6px; font-family: var(--font-display); font-style: italic; font-weight: 900; text-transform: uppercase; font-size: clamp(1.2rem, 4.6vw, 1.6rem); line-height: 1.1; }
+.ur-head p { margin: 0; }
+.ur-icon { font-size: 2.4rem; flex: none; }
+.ur-gets { list-style: none; padding: 0; margin: 14px 0; display: grid; gap: 6px; font-weight: 700; }
+.lf-adult span { line-height: 1.35; }
+.lf-fine { line-height: 1.45; }
+.center { text-align: center; }
+.ur-manage { max-width: 640px; margin: 0 auto; }
+.ur-manage .report-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 8px 0; }
+.terms h4 { margin: 14px 0 4px; }
+.terms p { margin: 0; line-height: 1.5; }
+.terms a { color: var(--teal); }
