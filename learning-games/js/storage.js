@@ -16,6 +16,8 @@ BD.BELTS = [
   { name: "Red", color: "#D63A2F" },
   { name: "Black", color: "#17171C" }
 ];
+/* High Rank Uniform collar stripe: the belt color, or gold at Black Belt. */
+BD.collarColor = function (beltColor) { return String(beltColor).toUpperCase() === BD.BELTS[8].color.toUpperCase() ? "#F2C230" : beltColor; };
 BD.GRADES = [-1, 0, 1, 2, 3, 4, 5, 6, 7, 8]; // -1 = Pre-K, 0 = Kindergarten
 BD.MIN_GRADE = -1;
 BD.MAX_GRADE = 8;

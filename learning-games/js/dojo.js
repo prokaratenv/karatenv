@@ -61,7 +61,7 @@ BD.Dojo = (function () {
 
   /* On your own website the board runs through the family account script:
      anyone can see it; signed-in families with the parent's OK appear on it. */
-  let web = false, webRows = [], webTotal = 0, webTimer = null;
+  let web = false, webRows = [], webTotal = 0, webTimer = null, webCh = false;
   function webOn() { return !!(BD.Family && BD.Family.enabled()) && !(window.claude && window.claude.use); }
   async function webLoad() {
     const res = await BD.Family.call("board", { token: BD.Family.token() || "" });
@@ -69,8 +69,13 @@ BD.Dojo = (function () {
     BD.BELTS.forEach(function (b) { BELT_BY_NAME[b.name] = b; });
     webRows = (Array.isArray(res.rows) ? res.rows : []).map(function (r) {
       const e = cleanEntry({ week: weekId(), players: [r] }); const x = e && e.players[0];
-      return x ? Object.assign(x, { me: !!r.me }) : null;
+      if (!x) return null;
+      x.me = !!r.me;
+      if (typeof r.h === "string" && /^[a-f0-9]{16}$/.test(r.h)) x.h = r.h;
+      if (x.me && typeof r.sid === "string" && /^[a-f0-9]{16}$/.test(r.sid)) x.sid = r.sid;
+      return x;
     }).filter(Boolean);
+    webCh = res.challenges === true; // the deployed script knows friend challenges
     webTotal = Math.max(0, Math.min(10000000, Number(res.total) || 0));
     render();
   }
@@ -158,15 +163,21 @@ BD.Dojo = (function () {
   function openBoard() {
     if (!ready) return;
     const b = board(), p = BD.Store.current();
+    const canCh = !!(p && BD.Challenge && BD.Challenge.canSend(p));
     BD.UI.sheet("Dojo Challenge",
       (p ? '<div class="nick-bar"><span>Your leaderboard name: <strong>' + BD.UI.esc(display(p)) + '</strong>' + (p.dojoOptIn ? '' : ' <span class="muted small">(not on the board yet: ask a parent)</span>') + '</span><button type="button" class="btn btn-small btn-gold" id="nickPick">' + (p.nick ? "Change nickname" : "Pick a nickname") + '</button></div>' : '') +
       '<p><strong>' + b.total.toLocaleString() + '</strong> of <strong>' + b.goal.toLocaleString() + '</strong> right answers this week (team goal). Resets every Monday.</p>' +
       '<h4 class="label">Leaderboard · XP this week</h4>' +
       (b.rows.length ? '<ol class="dojo-list">' + b.rows.map(function (r) {
-        return '<li' + (r.me ? ' class="me"' : '') + '><span class="belt-swatch" style="--belt:' + r.color + '"></span><span class="dl-name">' + BD.UI.esc(r.name) + '</span><span class="dl-belt">' + BD.UI.esc(r.belt) + '</span><span class="dl-n">' + r.xp.toLocaleString() + ' XP</span></li>';
+        return '<li' + (r.me ? ' class="me"' : '') + '><span class="belt-swatch" style="--belt:' + r.color + '"></span><span class="dl-name">' + BD.UI.esc(r.name) + '</span><span class="dl-belt">' + BD.UI.esc(r.belt) + '</span><span class="dl-n">' + r.xp.toLocaleString() + ' XP</span>' +
+          (canCh && !r.me && r.h ? '<button type="button" class="btn btn-small btn-quiet dl-ch" data-ch="' + r.h + '" aria-label="Challenge ' + BD.UI.esc(r.name) + '">⚔️ Challenge</button>' : '') + '</li>';
       }).join("") + '</ol>' : '<p class="muted">No one has joined yet this week. Be the first!</p>') +
+      (BD.Challenge ? BD.Challenge.boardNote(p, canCh) : '') +
       '<p class="muted small">XP comes from doing the work: practice (up to 100 per stripe), graduation bonuses earned by that practice (up to +100), Daily Flashcards (up to +10 a day), bosses, challenges and daily chests. Stripe tests alone give no points. No names are ever shown: only nicknames (or first initials) and belts. Parents can join or leave in the Parent corner.</p>');
     if ($("nickPick")) $("nickPick").onclick = function () { pickNick(p, openBoard); };
+    document.querySelectorAll("#infoBody [data-ch]").forEach(function (btn) {
+      btn.onclick = function () { const r = b.rows.find(function (x) { return x.h === btn.dataset.ch; }); if (r) BD.Challenge.send(p, r); };
+    });
   }
 
   /* The nickname picker: words from kid-safe lists, never close to the real name. */
@@ -215,5 +226,5 @@ BD.Dojo = (function () {
     $("dojoNo").onclick = function () { $("infoClose").click(); };
   }
 
-  return { nickOk: nickOk, randomNick: randomNick, pickNick: pickNick, display: display, init: init, push: push, render: render, openBoard: openBoard, toggle: toggle, board: board, ready: function () { return ready; } };
+  return { sid: sid, web: function () { return web; }, webChallenges: function () { return web && webCh; }, myRow: function (p) { const id = sid(p.id); return webRows.find(function (r) { return r.me && r.sid === id; }) || null; }, reload: function () { return web ? webLoad() : Promise.resolve(); }, nickOk: nickOk, randomNick: randomNick, pickNick: pickNick, display: display, init: init, push: push, render: render, openBoard: openBoard, toggle: toggle, board: board, ready: function () { return ready; } };
 })();

@@ -43,9 +43,12 @@ BD.UI = (function () {
      art + the belt area tinted) and, for the student characters, their outfit. */
   function champArt(key, beltColor, grade, outfit) {
     const a = BD.Cast.art(key, grade, outfit);
-    const m = "url(" + (BD.MASKS && BD.MASKS[a.mask] ? BD.MASKS[a.mask] : "img/mask-" + a.mask + ".png") + ")";
+    const url = function (k) { return "url(" + (BD.MASKS && BD.MASKS[k] ? BD.MASKS[k] : "img/mask-" + k + ".png") + ")"; };
+    const layer = function (k, color) { const m = url(k); return '<i class="champ-belt" style="' + (color ? "background:" + color + ";" : "") + '-webkit-mask-image:' + m + ';mask-image:' + m + '"></i>'; };
+    // High Rank Uniform: the collar stripe has its own layer (belt color; gold at Black Belt)
+    const collar = a.collar ? layer(a.collar, BD.collarColor(beltColor)) : "";
     return '<span class="champ' + (a.band !== null ? " age-" + a.band : "") + '" style="--belt:' + beltColor + '"><img src="' + a.src + '" alt="' + esc(BD.Cast.name(key)) + '">' +
-      '<i class="champ-belt" style="-webkit-mask-image:' + m + ';mask-image:' + m + '"></i></span>';
+      layer(a.mask) + collar + '</span>';
   }
   /* Round portrait of the student's chosen character, ringed in their belt color. */
   function avatar(p, size) {
@@ -798,7 +801,7 @@ BD.UI = (function () {
     offline();
   }
 
-  return { championHTML: function (p, outfit) { return fighterArt(p, "full", outfit); }, refreshStage: refreshStage, fighterKey: function (p) { return fighterOf(p); }, beltDetails: beltDetails, testMode: testMode, stripeResult: stripeResult, back: back, setGrade: setGrade, syncGradeSelect: syncGradeSelect, refresh: refresh, sheet: sheet, sheetOpen: sheetOpen, show: show, esc: esc, home: home, players: players, results: results, gradePicker: gradePicker, init: init };
+  return { champArt: champArt, championHTML: function (p, outfit) { return fighterArt(p, "full", outfit); }, refreshStage: refreshStage, fighterKey: function (p) { return fighterOf(p); }, beltDetails: beltDetails, testMode: testMode, stripeResult: stripeResult, back: back, setGrade: setGrade, syncGradeSelect: syncGradeSelect, refresh: refresh, sheet: sheet, sheetOpen: sheetOpen, show: show, esc: esc, home: home, players: players, results: results, gradePicker: gradePicker, init: init };
 })();
 
 document.addEventListener("DOMContentLoaded", BD.UI.init);

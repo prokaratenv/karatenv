@@ -36,19 +36,23 @@ BD.Certificate = (function () {
     if (key === "custom") return load(svgSrc(await inlineImages(BD.Builder.svg(p.custom, beltColor, "full", band, BD.Badges.outfit(p)))));
     const a = BD.Cast.art(key, BD.Rank.dojoGrade(p), BD.Badges.outfit(p));
     const img = await load(a.src);
-    const mask = await load(BD.MASKS && BD.MASKS[a.mask] ? BD.MASKS[a.mask] : "img/mask-" + a.mask + ".png");
+    const src = function (k) { return BD.MASKS && BD.MASKS[k] ? BD.MASKS[k] : "img/mask-" + k + ".png"; };
+    const mask = await load(src(a.mask));
+    const collar = a.collar ? await load(src(a.collar)) : null;
     if (!img) return null;
     const c = document.createElement("canvas"); c.width = img.naturalWidth; c.height = img.naturalHeight;
     const x = c.getContext("2d");
     x.drawImage(img, 0, 0);
-    if (mask) {
+    const tint = function (mk, color) {
       const m = document.createElement("canvas"); m.width = c.width; m.height = c.height;
       const mx = m.getContext("2d");
-      mx.drawImage(mask, 0, 0, c.width, c.height);
-      mx.globalCompositeOperation = "source-in"; mx.fillStyle = beltColor; mx.fillRect(0, 0, c.width, c.height);
+      mx.drawImage(mk, 0, 0, c.width, c.height);
+      mx.globalCompositeOperation = "source-in"; mx.fillStyle = color; mx.fillRect(0, 0, c.width, c.height);
       x.globalCompositeOperation = "multiply"; x.drawImage(m, 0, 0);
-      x.globalCompositeOperation = "destination-in"; x.drawImage(img, 0, 0); // keep the original outline
-    }
+    };
+    if (mask) tint(mask, beltColor);
+    if (collar) tint(collar, BD.collarColor(beltColor));
+    if (mask || collar) { x.globalCompositeOperation = "destination-in"; x.drawImage(img, 0, 0); } // keep the original outline
     return c;
   }
 

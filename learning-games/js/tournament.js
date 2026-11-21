@@ -32,6 +32,7 @@ BD.Tourney = (function () {
   }
   function medals(p) { return Array.isArray(p.medals) ? p.medals : []; }
   function sanitize(p) {
+    if (p.chDone !== undefined) p.chDone = Array.isArray(p.chDone) ? p.chDone.filter(function (x) { return typeof x === "string" && /^[a-f0-9]{12}$/.test(x); }).slice(-60) : [];
     p.medals = medals(p).filter(function (m) { return m && TYPES[m.t] && MEDAL_XP[m.m] && typeof m.d === "string" && /^\d{4}-\d\d-\d\dT/.test(m.d); })
       .slice(-300).map(function (m) { return { t: m.t, m: m.m, d: m.d.slice(0, 30) }; });
   }
@@ -43,9 +44,10 @@ BD.Tourney = (function () {
     const any = Object.keys(TYPES).some(function (t) { return open(p, t); });
     el.innerHTML = '<span class="duel-icon" aria-hidden="true">🏆</span><span><strong>Tournaments</strong><span class="boss-sub">' +
       (any ? (count(p, "gold") + count(p, "silver") + count(p, "bronze") ? "🥇" + count(p, "gold") + " 🥈" + count(p, "silver") + " 🥉" + count(p, "bronze") : "Kata · Sparring · Weapons") : "Opens at Yellow Belt · 2 stripes") +
-      (isWeekend() ? " · 2× XP today!" : "") + '</span></span>';
+      (isWeekend() ? " · 2× XP today!" : "") + (BD.Challenge ? esc(BD.Challenge.homeLine(p)) : "") + '</span></span>';
+    if (BD.Challenge && BD.Challenge.on() && !card.busy) { card.busy = true; BD.Challenge.refresh().then(function () { card.busy = false; const n = BD.Store.current(); if (n && n.id === p.id && el.isConnected) { const sub = el.querySelector(".boss-sub"); if (sub && sub.textContent.indexOf("⚔️") === -1 && BD.Challenge.homeLine(n)) sub.textContent += BD.Challenge.homeLine(n); } }); }
   }
-  function hub() {
+  function hub(opts) {
     const p = BD.Store.current(); if (!p) return;
     stopMatch(); T = null;
     $("tnTitle").textContent = "🏆 Tournaments";
@@ -54,6 +56,7 @@ BD.Tourney = (function () {
       '<p class="tn-prizes">🥇 Gold <strong>+' + MEDAL_XP.gold * (isWeekend() ? 2 : 1) + ' XP</strong> · 🥈 Silver <strong>+' + MEDAL_XP.silver * (isWeekend() ? 2 : 1) + '</strong> · 🥉 Bronze <strong>+' + MEDAL_XP.bronze * (isWeekend() ? 2 : 1) + '</strong>' +
       (isWeekend() ? ' <span class="tn-weekend">🎉 Weekend: double XP!</span>' : ' <span class="muted small">(double XP on weekends)</span>') + '</p>' +
       '<p class="tn-case">Your medals: 🥇 ' + count(p, "gold") + ' · 🥈 ' + count(p, "silver") + ' · 🥉 ' + count(p, "bronze") + '</p></div>' +
+      (BD.Challenge ? BD.Challenge.hubSection(p) : '') +
       '<div class="tn-types">' + Object.keys(TYPES).map(function (t) {
         const o = TYPES[t], ok = open(p, t);
         return '<button type="button" class="tn-type' + (ok ? "" : " locked") + '" data-tn="' + t + '"' + (ok ? "" : " disabled") + '>' +
@@ -61,20 +64,22 @@ BD.Tourney = (function () {
           '<em>' + (ok ? "Enter" : "🔒 Opens at " + o.opens + (t === "weapons" && BD.Badges.reached(p, 4) ? " (earn a weapon)" : "")) + '</em></button>';
       }).join("") + '</div>' +
       '<div class="tn-friend"><span>Want to spar a friend instead? Two players, one screen.</span><button type="button" class="btn btn-small btn-quiet" id="tnFriend">⚔️ Partner Challenge</button></div>';
-    $("tnBody").onclick = function (e) {
+    if (BD.Challenge && BD.Challenge.on() && opts !== true) BD.Challenge.refresh(true).then(function () { if (!T && !M && !$("screen-tourney").hidden && BD.Store.current() === p) hub(true); });
+    $("tnBody").onclick = async function (e) {
+      if (BD.Challenge && await BD.Challenge.hubClick(e)) return;
       const b = e.target.closest("[data-tn]"); if (b && !b.disabled) { BD.Sound.tap(); return b.dataset.tn === "weapons" ? pickWeapon() : enter(b.dataset.tn); }
       if (e.target.closest("#tnFriend")) $("duelCard").click();
     };
     BD.UI.show("screen-tourney");
     if (BD.Music) BD.Music.scene("map");
   }
-  function pickWeapon() {
+  function pickWeapon(then) {
     const p = BD.Store.current(), list = BD.Badges.weapons(p);
     $("tnBody").innerHTML = '<div class="tn-head"><h2>Choose your weapon</h2><p class="muted">Weapons are for show: you perform a form with it for the judges. They\'re never used against anyone.</p></div>' +
       '<div class="tn-weapons">' + list.map(function (w) { const g = BD.Badges.GEAR[w]; return '<button type="button" class="tn-weapon" data-w="' + w + '"><img src="' + g.img + '" alt=""><strong>' + esc(g.name) + '</strong></button>'; }).join("") + '</div>' +
       '<div class="res-actions"><button type="button" class="btn btn-quiet" id="tnBackHub">‹ Back</button></div>';
     $("tnBody").onclick = function (e) {
-      const b = e.target.closest("[data-w]"); if (b) { BD.Sound.tap(); return enter("weapons", b.dataset.w); }
+      const b = e.target.closest("[data-w]"); if (b) { BD.Sound.tap(); return then ? then(b.dataset.w) : enter("weapons", b.dataset.w); }
       if (e.target.closest("#tnBackHub")) hub();
     };
   }
@@ -188,8 +193,8 @@ BD.Tourney = (function () {
     M.q = q(); M.busy = false;
     $("tnBody").innerHTML = '<div class="tn-kata"><div class="tn-run">' + (weapon ? '<img class="tn-wimg sm" src="' + weapon.img + '" alt="">' : '<span class="mini-champ" data-mini></span>') +
       '<div><span class="tn-k">In a row</span><strong id="tnRun">' + M.streak + '</strong><span class="tn-k">/ ' + KATA_MAX + '</span></div>' +
-      '<div><span class="tn-k">To beat</span><strong>' + M.target + '</strong></div></div>' +
-      '<div class="tn-meter"><i style="width:' + (100 * M.streak / KATA_MAX) + '%"></i><b style="left:' + (100 * M.target / KATA_MAX) + '%"></b></div>' +
+      (M.target === null ? '<div><span class="tn-k">Judges</span><strong>' + judges(M.streak) + '</strong></div></div>' : '<div><span class="tn-k">To beat</span><strong>' + M.target + '</strong></div></div>') +
+      '<div class="tn-meter"><i style="width:' + (100 * M.streak / KATA_MAX) + '%"></i>' + (M.target === null ? '' : '<b style="left:' + (100 * M.target / KATA_MAX) + '%"></b>') + '</div>' +
       '<div class="qq-card"><div id="tnQ"></div></div></div>';
     if (BD.Mini && !weapon) BD.Mini.fill($("tnBody"));
     BD.QuickUI.render($("tnQ"), M.q, kataPick, { read: true, grade: T.grade });
@@ -205,6 +210,7 @@ BD.Tourney = (function () {
     } else { BD.Sound.wrong(); later(kataEnd, 1300); }
   }
   function kataEnd() {
+    if (T.ch) return chFinish(M.streak);
     const mine = M.streak, target = M.target;
     if (mine === target) return suddenDeath(mine);
     const won = mine > target;
@@ -284,6 +290,82 @@ BD.Tourney = (function () {
     $("tnBody").onclick = function (e) { if (e.target.closest("#tnCont")) done(won, scoreText); };
   }
 
+  /* ---------- weekend friend challenge: your own round, scored ---------- */
+  const CH_SECS = 60;
+  function challenge(c, weapon) {
+    const p = BD.Store.current(); if (!p || !open(p, c.type)) return hub();
+    if (c.type === "weapons" && !weapon) return pickWeapon(function (w) { challenge(c, w); });
+    stopMatch();
+    T = { type: c.type, weapon: weapon || null, ch: c, rounds: [], r: 0, grade: BD.Rank.dojoGrade(p), belt: BD.Rank.rec(p, BD.Rank.dojoGrade(p)).belt, right: 0, asked: 0 };
+    M = { opp: { name: c.other }, lvl: 0.5, streak: 0, best: 0, timers: [], target: null };
+    const o = TYPES[c.type], w = T.weapon ? BD.Badges.GEAR[T.weapon] : null;
+    $("tnTitle").textContent = "⚔️ " + o.name.replace(" Tournament", "") + " vs " + c.other;
+    $("tnBody").innerHTML = '<div class="tn-perf">' + (w ? '<img class="tn-wimg" src="' + w.img + '" alt="">' : '') +
+      '<h2>Friend challenge: ' + esc(c.other) + '</h2>' +
+      (c.type === "sparring" ? '<p>One ' + CH_SECS + '-second round: score as many points as you can. A miss freezes you for a moment.' + (BD.Badges.hasSkill(p, "judo") ? ' 🥋 5 in a row = judo throw (+2)!' : '') + '</p>'
+        : '<p>Perform your ' + (w ? w.name.toLowerCase() + ' form' : 'kata') + ': as many right in a row as you can, up to ' + KATA_MAX + '. One miss ends the form.</p>') +
+      '<p class="muted">' + esc(c.other) + ' plays their own round. The higher score wins: 🥇 +' + MEDAL_XP.gold * 2 + ' XP, 🥈 +' + MEDAL_XP.silver * 2 + ' XP. You get one try!</p>' +
+      '<div class="res-actions"><button type="button" class="btn btn-primary btn-big" id="tnBegin">Bow in and begin</button><button type="button" class="btn btn-quiet" id="tnBackHub">Not yet</button></div></div>';
+    $("tnBody").onclick = function (e) {
+      if (e.target.closest("#tnBackHub")) { stopMatch(); T = null; return hub(); }
+      if (!e.target.closest("#tnBegin")) return;
+      BD.Sound.tap(); M.started = true;
+      if (c.type === "sparring") { M.you = 0; M.judo = BD.Badges.hasSkill(p, "judo"); M.ends = Date.now() + CH_SECS * 1000; if (BD.Music) BD.Music.scene("boss"); later(function () { chFinish(M.you); }, CH_SECS * 1000); chSparQ(); }
+      else { if (BD.Music) BD.Music.scene("focus"); kataQ(); }
+    };
+    BD.UI.show("screen-tourney");
+  }
+  function chSparQ() {
+    if (!M) return;
+    M.q = q(); M.busy = false; M.frozen = false;
+    const left = Math.max(0, (M.ends - Date.now()) / 1000);
+    $("tnBody").innerHTML = '<div class="tn-spar"><div class="tn-board"><div class="tn-side you"><span class="mini-champ" data-mini></span><strong>' + esc(BD.Dojo.display(BD.Store.current())) + '</strong><b id="tnYou">' + M.you + '</b></div>' +
+      '<span class="tn-vs">⏱</span><div class="tn-side them"><strong>Time</strong><span class="tn-clock"><i id="tnClock"></i></span></div></div>' +
+      '<p class="tn-say" id="tnSay">Score as many points as you can!</p><div class="qq-card"><div id="tnQ"></div></div></div>';
+    if (BD.Mini) BD.Mini.fill($("tnBody"));
+    BD.QuickUI.render($("tnQ"), M.q, chSparPick, { read: false, grade: T.grade });
+    const clock = $("tnClock"); clock.style.transition = "none"; clock.style.width = (100 - 100 * left / CH_SECS) + "%"; void clock.offsetWidth;
+    clock.style.transition = "width " + left + "s linear"; clock.style.width = "100%";
+  }
+  function chSparPick(v) {
+    if (!M || M.busy || M.frozen) return;
+    T.asked++;
+    if (v === M.q.answer) {
+      M.busy = true; T.right++; M.streak++;
+      const judo = M.judo && M.streak % 5 === 0;
+      M.you += judo ? 2 : 1;
+      BD.QuickUI.mark($("tnQ"), M.q, v); BD.Sound.right(); if (BD.Mini) BD.Mini.react("kick");
+      say(judo ? "🥋 JUDO THROW! +2" : "Point!"); if ($("tnYou")) $("tnYou").textContent = M.you;
+      later(chSparQ, 600);
+    } else {
+      M.streak = 0; M.frozen = true; BD.Sound.wrong(); if (BD.Mini) BD.Mini.react("oops");
+      const btn = document.querySelector('#tnQ .qq-choice[data-i="' + M.q.choices.indexOf(v) + '"]'); if (btn) { btn.classList.add("is-wrong"); btn.disabled = true; }
+      say("Missed! Frozen for a moment…");
+      later(function () { if (M) { M.frozen = false; say("Back in!"); } }, 1300);
+    }
+  }
+  async function chFinish(score) {
+    if (!M || !T || !T.ch) return;
+    const c = T.ch, type = T.type, grade = T.grade, right = T.right, asked = T.asked;
+    stopMatch();
+    $("tnBody").innerHTML = '<div class="tn-perf"><h2>' + (type === "sparring" ? "Time! " + score + " points" : score + " in a row · judges' score " + judges(score)) + '</h2><p class="muted">Sending your score…</p></div>';
+    const r = await BD.Challenge.submit(c, score);
+    const p = BD.Store.current(), o = r.outcome, medal = o === "won" ? "gold" : o ? "silver" : "", xp = medal ? MEDAL_XP[medal] * 2 : 0;
+    BD.Store.recordSession(p, { game: "tournament", grade: grade, correct: right, total: asked, xp: xp, mode: type, medal: medal });
+    T = null;
+    $("tnTitle").textContent = "⚔️ Friend challenge";
+    const head = type === "sparring" ? "You scored " + score + " points!" : "You performed " + score + " in a row!";
+    $("tnBody").innerHTML = '<div class="tn-result"><div class="tn-medal" aria-hidden="true">' + (medal === "gold" ? "🥇" : medal ? "🥈" : "⚔️") + '</div><h2>' + esc(head) + '</h2>' +
+      (!r.ok ? '<p class="muted">' + esc(r.error === "limit" ? "That's the weekend limit of 3 scored challenges, so this score wasn't sent." : r.error === "closed" ? "This challenge has ended, so the score wasn't sent." : "We couldn't send your score. Check the internet; ask a grown-up for help if it keeps happening.") + '</p>'
+        : o ? '<p>' + esc(c.other) + ': ' + r.c.their + '. ' + (o === "won" ? "You win! 🥇" : o === "tie" ? "It's a tie! 🥈" : "Great match! 🥈") + '</p><p class="chest-xp">+' + xp + ' XP (weekend double!)</p>'
+        : '<p>When ' + esc(c.other) + ' plays, your medal shows up under Tournaments. Winner 🥇 +' + MEDAL_XP.gold * 2 + ' XP, the other 🥈 +' + MEDAL_XP.silver * 2 + ' XP.</p>') +
+      '<div class="res-actions"><button type="button" class="btn btn-primary" id="tnHub">Back to tournaments</button></div></div>';
+    if (medal) { BD.Sound.belt(); BD.confetti(medal === "gold" ? 200 : 100); } else BD.Sound.win();
+    $("tnBody").onclick = function (e) { if (e.target.closest("#tnHub")) hub(); };
+    if (BD.Music) BD.Music.scene("map");
+    setTimeout(function () { BD.Badges.award(BD.Store.current()); }, 1500);
+  }
+
   /* ---------- results ---------- */
   function result() {
     const p = BD.Store.current(), last = T.rounds.length - 1, fin = T.rounds[last][0];
@@ -314,10 +396,12 @@ BD.Tourney = (function () {
 
   function bind() {
     if ($("tourneyCard")) $("tourneyCard").addEventListener("click", hub);
-    $("tnQuit").addEventListener("click", function () { if (M || T) { stopMatch(); T = null; hub(); } else BD.UI.home(); });
+    $("tnQuit").addEventListener("click", function () {
+      if (T && T.ch && M && M.started) return chFinish(T.type === "sparring" ? M.you : M.streak); // one try: leaving mid-round keeps the score so far
+      if (M || T) { stopMatch(); T = null; hub(); } else BD.UI.home(); });
   }
 
   BD.Store.players().forEach(sanitize); // saves loaded before this file
 
-  return { open: open, card: card, hub: hub, enter: enter, sanitize: sanitize, bind: bind, isWeekend: isWeekend, MEDAL_XP: MEDAL_XP, state: function () { return { T: T, M: M }; }, stop: function () { stopMatch(); T = null; } };
+  return { TYPES: TYPES, challenge: challenge, open: open, card: card, hub: hub, enter: enter, sanitize: sanitize, bind: bind, isWeekend: isWeekend, MEDAL_XP: MEDAL_XP, state: function () { return { T: T, M: M }; }, stop: function () { stopMatch(); T = null; } };
 })();

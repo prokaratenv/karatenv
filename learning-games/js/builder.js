@@ -63,7 +63,7 @@ BD.Builder = (function () {
     const oy = 306 - (124 + th + lh + 10); // keep feet on the ground
     const tTop = 124, tBot = tTop + th, cx = 100;
     const gi = c.uniform === "white" ? "#F2F2F0" : "#1F1E26"; // spar: black pants
-    const giEdge = highRank ? (beltColor || "#3A3946") : c.uniform === "white" ? "#C9CBD3" : "#3A3946";
+    const giEdge = highRank ? BD.collarColor(beltColor || "#3A3946") : c.uniform === "white" ? "#C9CBD3" : "#3A3946";
     const spar = c.uniform === "spar";
     const shirt = c.uniform === "shirt" || spar;
     const pants = !(c.uniform === "shirt");

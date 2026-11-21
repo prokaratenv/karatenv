@@ -54,7 +54,7 @@ The home screen is kept simple. From top to bottom:
 | **Full Sparring Gear outfit** | The Yellow → Orange Belt graduation, when sparring starts in class |
 | Boxing Gloves | Green Belt |
 | Nunchucks (for show) | Green Belt |
-| **High Rank Uniform** | Green Belt: a black gi with the collar stripe and belt in the student's belt color (green, purple, brown, red). Built champions get it too. |
+| **High Rank Uniform** | Green Belt: a black gi with the collar stripe and belt in the student's belt color (green, purple, brown, red); at **Black Belt** the collar stripe is **gold**. Built champions get it too. |
 | **Judo Moves** (skill) | Green Belt: every 5 right in a row is a judo throw in boss battles (−3) and sparring (+2) |
 | Kamas (for show) | Purple Belt |
 | Bo Staff (for show) | Brown Belt |
@@ -78,6 +78,18 @@ Tap **🏆 Tournaments** on the home screen. Each one is a single-elimination br
 - **Medals and XP:** Gold **+10 XP**, Silver **+7.5**, Bronze **+5** (both semifinal losers get bronze). **Double XP on Saturdays and Sundays.** Medals are counted on the home card and in the tournament hub.
 - Opponents get a little tougher each round. Questions mix every subject at the dojo grade and belt.
 - **To spar a friend instead,** use **Partner Challenge** (two players, one screen); there's a button for it in the tournament hub.
+- Computer tournaments are open every day.
+
+### Weekend friend challenges (from the leaderboard)
+
+On the website, a student who is on the Dojo leaderboard can tap **⚔️ Challenge** next to another student and pick Kata, Sparring or Weapons (only the types the challenger has opened).
+- **When:** challenges can be sent any day. They're **played Saturday 12:00 am through Sunday 11:59 pm** (the device's local time), then they end. Before Saturday the challenge shows "Opens Saturday".
+- **Accepting:** the challenged student sees "⚔️ friend challenge!" on the Tournaments card on the home screen and **Accept** / **Not this time** at the top of the Tournaments screen. If that tournament type isn't open for them yet, they're told kindly which belt opens it.
+- **Playing:** each student plays **one round on their own device at their own grade**. Kata and Weapons: right answers in a row (up to 15). Sparring: points scored in a 60-second round (a miss freezes you for a moment; judo throws count +2). Leaving in the middle keeps the score so far. Neither student sees the other's score until they've played.
+- **Medals:** higher score wins **🥇 Gold +20 XP**; the other gets **🥈 Silver +15 XP**; a tie is silver for both (weekend double XP). If the other student never plays, the one who did gets silver after Sunday.
+- **Fair play:** one challenge per pair of students per weekend, up to 5 sent and **3 scored challenges per student per weekend**, and no challenging your own family.
+- **Privacy:** only nicknames (or initials) and belts are shown. The script stores nickname, belt, type and scores under anonymous numbers, and clears challenges a few days after the weekend.
+- It needs the updated `tools/family-sync.gs` (see "Updating the family script" below). Until it's redeployed, the Challenge buttons stay hidden. On the Claude link, the board says friend challenges are available at brain.engagelma.com.
 
 ## Boss Battles, Partner Challenge and the champion in every game
 
@@ -195,6 +207,14 @@ The script refuses any readable student data. Kids' first names exist in readabl
 5. Paste the `/exec` URL into `js/config.js` as `accountEndpoint`.
 
 Until that's set, the sign-in options stay hidden.
+
+**Updating the family script (after a new version of `tools/family-sync.gs`, such as friend challenges):** keep the same URL so nothing else changes.
+1. Open script.google.com and the **Brain Dojo Family Sync** project.
+2. Select all of the code in the editor, delete it, paste in the whole new `tools/family-sync.gs`, and click **Save**.
+3. Click **Deploy → Manage deployments**.
+4. Click the pencil (**Edit**) on the existing web app deployment.
+5. Under **Version**, choose **New version**, then click **Deploy**. (If Google asks for permissions again, allow them.)
+6. The `/exec` URL stays the same, so `js/config.js` doesn't change. Don't use "New deployment": that makes a new URL.
 
 **Safety:**
 - Codes expire in 10 minutes, allow 5 tries, and are limited to 5 per email per hour.
@@ -425,6 +445,7 @@ learning-games/
   js/parent.js           parent dashboard, PIN and weekly share card
   js/dojo.js             weekly Dojo Challenge
   js/tournament.js       tournaments: kata, sparring and weapons brackets, medals
+  js/challenge.js        weekend friend challenges from the leaderboard
   js/school.js           School Words (parents' weekly spelling list)
   js/quest.js            Adventure Map, daily quest, chests, stickers, streak shields
   js/leads.js            parent newsletter / free-class sign-up

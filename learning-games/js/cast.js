@@ -57,7 +57,7 @@ BD.Cast = (function () {
   function art(key, grade, outfit) {
     if (KIDS.indexOf(key) === -1) return { src: "img/wb-" + key + ".webp", mask: key, band: null };
     const b = ageBand(grade === undefined ? 3 : grade);
-    if (outfit && outfit !== "gi") return { src: "img/fit-" + key + "-" + b + "-" + outfit + ".webp", mask: key + "-" + b + "-" + outfit, band: b };
+    if (outfit && outfit !== "gi") return { src: "img/fit-" + key + "-" + b + "-" + outfit + ".webp", mask: key + "-" + b + "-" + outfit, collar: outfit === "highrank" ? key + "-" + b + "-hrcollar" : null, band: b };
     return { src: "img/age-" + key + "-" + b + ".webp", mask: key + "-" + b, band: b };
   }
 

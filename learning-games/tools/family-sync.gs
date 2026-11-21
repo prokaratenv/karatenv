@@ -13,6 +13,9 @@
  * data, and fingerprints of the linked devices' keys. The email is used once
  * to send the code and is not saved.
  *
+ * Updating: paste this file over the old code, Save, then Deploy → Manage
+ * deployments → Edit (pencil) → Version: New version → Deploy. Same URL.
+ *
  * Setup (about 5 minutes, free):
  *  1. Go to script.google.com → New project. Name it "Brain Dojo Family Sync".
  *  2. Delete what's there and paste this whole file. Save.
@@ -47,6 +50,10 @@ function doPost(e) {
       case "delete": return reply(deleteFamily(req));
       case "board": return reply(board(req));
       case "boardPost": return reply(boardPost(req));
+      case "chList": return reply(chList(req));
+      case "chSend": return reply(chSend(req));
+      case "chRespond": return reply(chRespond(req));
+      case "chScore": return reply(chScore(req));
       default: return reply({ ok: false, error: "bad_request" });
     }
   } catch (err) {
@@ -201,9 +208,9 @@ function boardData(file) { var d = {}; try { d = JSON.parse(file.getBlob().getDa
 function board(req) {
   var d = boardData(boardFile()), mine = null, t = String(req.token || "").match(/^([a-f0-9]{32})\./);
   if (t) mine = t[1];
-  var rows = Object.keys(d.rows).map(function (k) { var r = d.rows[k]; return { name: r.name, belt: r.belt, xp: r.xp, reps: r.reps, me: !!(mine && k.indexOf(mine + ":") === 0) }; });
+  var rows = Object.keys(d.rows).map(function (k) { var r = d.rows[k], me = !!(mine && k.indexOf(mine + ":") === 0), o = { name: r.name, belt: r.belt, xp: r.xp, reps: r.reps, me: me, h: handle(k) }; if (me) o.sid = k.slice(33); return o; });
   rows.sort(function (a, b) { return (b.xp - a.xp) || (b.reps - a.reps); });
-  return { ok: true, week: d.week, rows: rows.slice(0, 100), total: rows.reduce(function (a, r) { return a + (r.reps || 0); }, 0), count: rows.length };
+  return { ok: true, week: d.week, rows: rows.slice(0, 100), total: rows.reduce(function (a, r) { return a + (r.reps || 0); }, 0), count: rows.length, challenges: true };
 }
 function boardPost(req) {
   return locked(function () {
@@ -220,6 +227,79 @@ function boardPost(req) {
   });
 }
 
+/* ---------- Weekend friend challenges (from the leaderboard; nicknames only) ----------
+   A student on the leaderboard challenges another to a kata, sparring or weapons
+   match for a weekend (wk = that Saturday's date). Each plays their own run on
+   their own device, at their own grade; the higher score wins. Played Saturday
+   and Sunday only, then cleared. One challenge per pair per weekend; at most 3
+   scored challenges per student per weekend; no names or emails are kept. */
+var CH_TYPES = ["kata", "sparring", "weapons"], CH_SCORED = 3, CH_SENT = 5, CH_INBOX = 10;
+function handle(rowKey) { return sha("bd-ch:" + pepper() + ":" + rowKey).slice(0, 16); }
+function dayNum(s) { return Math.floor(Date.parse(s + "T00:00:00Z") / 864e5); }
+function todayNum() { return Math.floor(Date.now() / 864e5); }
+function wkOk(wk) { return /^\d{4}-\d\d-\d\d$/.test(String(wk)) && new Date(wk + "T00:00:00Z").getUTCDay() === 6 && dayNum(wk) - todayNum() <= 7 && todayNum() - dayNum(wk) <= 2; }
+function chFile() { var f = folder(), it = f.getFilesByName("challenges.json"); return it.hasNext() ? it.next() : f.createFile("challenges.json", "{}", "application/json"); }
+function chData(file) {
+  var d = {}; try { d = JSON.parse(file.getBlob().getDataAsString()) || {}; } catch (e) { d = {}; }
+  d.list = (Array.isArray(d.list) ? d.list : []).filter(function (c) { return c && todayNum() - dayNum(c.wk) <= 3; }); // gone after the weekend
+  return d;
+}
+function chMe(req) {
+  var a = auth(req); if (!a) return null;
+  var sid = String(req.sid || ""); if (!/^[a-f0-9]{16}$/.test(sid)) return null;
+  return { fid: String(req.token).slice(0, 32), key: String(req.token).slice(0, 32) + ":" + sid };
+}
+function chView(c, fid) {
+  var a = c.a.indexOf(fid + ":") === 0, mine = a ? c.sa : c.sb, theirs = a ? c.sb : c.sa;
+  return { id: c.id, wk: c.wk, type: c.type, st: c.st, from: a, sid: (a ? c.a : c.b).slice(33), other: a ? c.bn : c.an, otherBelt: a ? c.bb : c.ab,
+    my: mine, their: mine === null ? null : theirs, theyPlayed: theirs !== null };
+}
+function chList(req) {
+  var a = auth(req); if (!a) return { ok: false, error: "signed_out" };
+  var fid = String(req.token).slice(0, 32), d = chData(chFile());
+  return { ok: true, list: d.list.filter(function (c) { return c.a.indexOf(fid + ":") === 0 || c.b.indexOf(fid + ":") === 0; }).map(function (c) { return chView(c, fid); }) };
+}
+function chSend(req) {
+  return locked(function () {
+    var me = chMe(req); if (!me) return { ok: false, error: "signed_out" };
+    if (CH_TYPES.indexOf(req.type) === -1 || !wkOk(req.wk)) return { ok: false, error: "bad_request" };
+    var bd = boardData(boardFile()), mine = bd.rows[me.key]; if (!mine) return { ok: false, error: "not_on_board" };
+    var to = null; Object.keys(bd.rows).forEach(function (k) { if (handle(k) === String(req.to)) to = k; });
+    if (!to || to.indexOf(me.fid + ":") === 0) return { ok: false, error: "bad_request" };
+    var file = chFile(), d = chData(file), wk = String(req.wk), same = function (c) { return c.wk === wk; };
+    if (d.list.some(function (c) { return same(c) && ((c.a === me.key && c.b === to) || (c.a === to && c.b === me.key)); })) return { ok: false, error: "already" };
+    if (d.list.filter(function (c) { return same(c) && c.a === me.key; }).length >= CH_SENT) return { ok: false, error: "limit" };
+    if (d.list.filter(function (c) { return same(c) && c.b === to && c.st === "pending"; }).length >= CH_INBOX) return { ok: false, error: "busy" };
+    var c = { id: sha(Utilities.getUuid()).slice(0, 12), wk: wk, type: req.type, a: me.key, b: to, an: mine.name, ab: mine.belt, bn: bd.rows[to].name, bb: bd.rows[to].belt, st: "pending", sa: null, sb: null, at: Date.now() };
+    d.list.push(c); file.setContent(JSON.stringify(d));
+    return { ok: true, challenge: chView(c, me.fid) };
+  });
+}
+function chRespond(req) {
+  return locked(function () {
+    var me = chMe(req); if (!me) return { ok: false, error: "signed_out" };
+    var file = chFile(), d = chData(file), c = d.list.filter(function (x) { return x.id === String(req.id); })[0];
+    if (!c || c.b !== me.key || c.st !== "pending") return { ok: false, error: "bad_request" };
+    c.st = req.accept === true ? "accepted" : "declined";
+    file.setContent(JSON.stringify(d));
+    return { ok: true, challenge: chView(c, me.fid) };
+  });
+}
+function chScore(req) {
+  return locked(function () {
+    var me = chMe(req); if (!me) return { ok: false, error: "signed_out" };
+    var file = chFile(), d = chData(file), c = d.list.filter(function (x) { return x.id === String(req.id); })[0];
+    if (!c || c.st !== "accepted" || (c.a !== me.key && c.b !== me.key)) return { ok: false, error: "bad_request" };
+    var n = todayNum() - dayNum(c.wk); if (n < -1 || n > 2) return { ok: false, error: "closed" }; // Saturday and Sunday (with time-zone slack)
+    var side = c.a === me.key ? "sa" : "sb"; if (c[side] !== null) return { ok: false, error: "already" };
+    var scored = d.list.filter(function (x) { return x.wk === c.wk && ((x.a === me.key && x.sa !== null) || (x.b === me.key && x.sb !== null)); }).length;
+    if (scored >= CH_SCORED) return { ok: false, error: "limit" };
+    c[side] = Math.max(0, Math.min(40, Math.round(Number(req.score) || 0)));
+    file.setContent(JSON.stringify(d));
+    return { ok: true, challenge: chView(c, me.fid) };
+  });
+}
+
 function deleteFamily(req) {
   return locked(function () {
     var a = auth(req); if (!a) return { ok: false, error: "signed_out" };
@@ -227,6 +307,9 @@ function deleteFamily(req) {
     var fid = String(req.token).slice(0, 32), bf = boardFile(), bd = boardData(bf);
     Object.keys(bd.rows).forEach(function (k) { if (k.indexOf(fid + ":") === 0) delete bd.rows[k]; });
     bf.setContent(JSON.stringify(bd));
+    var cf = chFile(), cd = chData(cf);
+    cd.list = cd.list.filter(function (c) { return c.a.indexOf(fid + ":") !== 0 && c.b.indexOf(fid + ":") !== 0; });
+    cf.setContent(JSON.stringify(cd));
     return { ok: true };
   });
 }
