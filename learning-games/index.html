@@ -83,6 +83,10 @@
           <p class="muted" id="homeToday"></p>
         </div>
       </div>
+      <div class="fun-row">
+        <button type="button" class="boss-card" id="bossCard"></button>
+        <button type="button" class="duel-card" id="duelCard"><span class="duel-icon" aria-hidden="true">⚔️</span><span><strong>Dojo Duel</strong><span class="boss-sub">2 players · one screen</span></span></button>
+      </div>
       <div class="belt-panel" id="homeBelt"></div>
       <div class="redo-note" id="homeRedo" hidden></div>
       <section class="plan" id="homePlan" hidden>
@@ -193,6 +197,7 @@
       <div class="coach-row compact">
         <img class="coach-face" src="img/face-cd.webp" alt="">
         <div class="coach-say"><span class="coach-name">Master Young</span><p id="mathSay">Bow in. Let's train!</p></div>
+        <span class="mini-champ" data-mini></span>
       </div>
       <div class="flashcard" id="mathCard">
         <button type="button" class="say-btn" id="mathRead" aria-label="Read it to me" title="Read it to me"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
@@ -227,6 +232,7 @@
       <div class="coach-row compact">
         <img class="coach-face" src="img/face-michele.webp" alt="">
         <div class="coach-say"><span class="coach-name">Master Mrs. Young</span><p id="sentSay">Find every mistake. You've got sharp eyes!</p></div>
+        <span class="mini-champ" data-mini></span>
       </div>
       <div class="sent-card" id="sentCard">
         <button type="button" class="say-btn" id="sentRead" aria-label="Read it to me" title="Read it to me"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
@@ -260,6 +266,7 @@
       <div class="coach-row compact">
         <img class="coach-face" src="img/face-kyra.webp" alt="">
         <div class="coach-say"><span class="coach-name">Ms. Kyra</span><p id="readSay">Read it once for fun, then again for clues.</p></div>
+        <span class="mini-champ" data-mini></span>
       </div>
       <article class="passage">
         <div class="passage-head"><h2 id="readTitle"></h2><button type="button" class="btn btn-small listen-btn" id="readListen">Read it to me</button></div>
@@ -294,6 +301,7 @@
       <div class="coach-row compact">
         <img class="coach-face" id="wordCoachFace" src="img/face-lauryn.webp" alt="">
         <div class="coach-say"><span class="coach-name" id="wordCoachName"></span><p id="wordSay"></p></div>
+        <span class="mini-champ" data-mini></span>
       </div>
       <div class="word-card" id="wordCard">
         <button type="button" class="say-btn" id="wordRead" aria-label="Read it to me" title="Read it to me"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
@@ -317,6 +325,61 @@
         </div>
         <div class="word-feedback" id="wordFeedback" aria-live="polite"></div>
         <button type="button" class="btn btn-primary" id="wordNext" hidden>Next</button>
+      </div>
+    </section>
+
+    <!-- Boss battle -->
+    <section class="screen play" id="screen-boss" hidden>
+      <div class="playbar">
+        <button type="button" class="btn btn-quiet btn-small" id="bossQuit">‹ Back</button>
+        <span class="meter" id="bossTitle"></span>
+      </div>
+      <div class="boss-arena" id="bossArena">
+        <div class="ba-side ba-me">
+          <div class="ba-hearts" id="bossHearts" aria-label="Your hearts"></div>
+          <span class="mini-champ ba-champ" data-mini></span>
+        </div>
+        <div class="ba-pop-wrap"><span class="boss-pop" id="bossPop"></span></div>
+        <div class="ba-side ba-boss">
+          <p class="ba-name" id="bossName"></p>
+          <div class="ba-hp"><i id="bossHp"></i><span id="bossHpNum"></span></div>
+          <img class="ba-boss-img" id="bossImg" src="" alt="">
+        </div>
+        <p class="ba-say" id="bossSay"></p>
+      </div>
+      <div class="qq-card" id="bossQWrap">
+        <button type="button" class="say-btn" id="bossRead" aria-label="Read it to me" title="Read it to me"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+        <div id="bossQ"></div>
+      </div>
+      <div class="boss-over" id="bossOver" hidden>
+        <h2 id="bossOverTitle"></h2>
+        <p class="boss-quote" id="bossOverSay"></p>
+        <p class="boss-prize" id="bossOverPrize"></p>
+        <div class="res-actions"><button type="button" class="btn btn-primary btn-big" id="bossAgain">Rematch</button><button type="button" class="btn btn-quiet" id="bossHome">Back to my dojo</button></div>
+      </div>
+    </section>
+
+    <!-- Dojo duel -->
+    <section class="screen play" id="screen-duel" hidden>
+      <div class="duel-arena" id="duelArena">
+        <div class="duel-half p1" id="duelHalf1">
+          <div class="duel-head"><span class="duel-name" id="duelName1"></span><span class="duel-score" id="duelScore1"></span></div>
+          <div class="duel-bar"><i id="duelBar1"></i></div>
+          <div class="duel-q" id="duelQ1"></div>
+          <div class="duel-freeze">Frozen!</div>
+        </div>
+        <div class="duel-mid"><button type="button" class="btn btn-quiet btn-small" id="duelQuit">‹ Quit</button><span>⚔️ Dojo Duel</span></div>
+        <div class="duel-half p2" id="duelHalf2">
+          <div class="duel-head"><span class="duel-name" id="duelName2"></span><span class="duel-score" id="duelScore2"></span></div>
+          <div class="duel-bar"><i id="duelBar2"></i></div>
+          <div class="duel-q" id="duelQ2"></div>
+          <div class="duel-freeze">Frozen!</div>
+        </div>
+        <div class="duel-over" id="duelOver" hidden>
+          <h2 id="duelOverTitle"></h2>
+          <p id="duelOverSub"></p>
+          <div class="res-actions"><button type="button" class="btn btn-primary btn-big" id="duelAgain">Rematch</button><button type="button" class="btn btn-quiet" id="duelHome">Done</button></div>
+        </div>
       </div>
     </section>
 
@@ -367,6 +430,7 @@
         <img class="host-img" id="resHost" src="img/zumi.webp" alt="" width="396" height="760">
         <div class="host-text">
           <p class="eyebrow" id="resSubtitle"></p>
+          <span class="mini-champ res-mini" data-mini></span>
           <h1 id="resTitle"></h1>
           <p class="say" id="resSay"></p>
         </div>
@@ -498,7 +562,11 @@
 <script src="js/sentence-game.js"></script>
 <script src="js/scratch.js"></script>
 <script src="js/gearfit.js"></script>
+<script src="js/quick.js"></script>
+<script src="js/boss.js"></script>
+<script src="js/duel.js"></script>
 <script src="js/badges.js"></script>
+<script src="js/mini.js"></script>
 <script src="js/backup.js"></script>
 <script src="js/certificate.js"></script>
 <script src="js/parent.js"></script>

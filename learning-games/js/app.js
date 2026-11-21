@@ -20,6 +20,7 @@ BD.UI = (function () {
     document.body.classList.toggle("on-players", id === "screen-players");
     if (id !== "screen-results") BD.confetti.stop();
     document.querySelectorAll(".screen").forEach(function (s) { s.hidden = s.id !== id; });
+    if (BD.Mini && $(id).querySelector("[data-mini]")) BD.Mini.fill($(id));
     const p = BD.Store.current();
     $("playerChip").hidden = !p || id === "screen-players";
     if (p) {
@@ -263,6 +264,8 @@ BD.UI = (function () {
     if (BD.SentenceGame.stop) BD.SentenceGame.stop();
     if (BD.Reading.stop) BD.Reading.stop();
     if (BD.WordQuiz.stop) BD.WordQuiz.stop();
+    if (BD.Boss) BD.Boss.stop();
+    if (BD.Duel) BD.Duel.stop();
   }
   function back() {
     BD.Sound.tap();
@@ -340,6 +343,7 @@ BD.UI = (function () {
     $("homeFighter").innerHTML = fighterArt(p, "full");
     refreshStage();
     BD.Dojo.render();
+    BD.Boss.card(p);
     setTimeout(function () { if (currentScreen === "screen-home" && !sheetOpen()) BD.Badges.award(BD.Store.current(), refreshStage); }, 500);
     $("homeBelt").innerHTML = rankPanel(p);
     $("homeToday").textContent = todays ? todays + (todays === 1 ? " round" : " rounds") + " completed today" : "No rounds yet today";
@@ -464,6 +468,7 @@ BD.UI = (function () {
     $("resSetup").hidden = !o.setup;
     show("screen-results");
     BD.Dojo.push();
+    setTimeout(function () { BD.Mini.react("bow"); }, 350);
     setTimeout(function () { if (currentScreen === "screen-results" && !sheetOpen()) BD.Badges.award(BD.Store.current()); }, 1400);
     if (quiet) { /* returning with Back: no fanfare */ }
     else if (!o.failed) { BD.Sound.win(); BD.confetti(80); }
@@ -505,7 +510,7 @@ BD.UI = (function () {
       const tricky = Object.values(p.tricky).sort(function (a, b) { return b.misses - a.misses; }).slice(0, 16);
       const recent = p.sessions.slice(0, 8).map(function (s) {
         const d = new Date(s.date);
-        const what = s.game === "spelling" ? "Spelling Bee" : s.game === "spanish" ? "Spanish Dojo" : s.game === "reading" ? "Story Scrolls" : s.game === "math" ? "Math · " + (s.mode === "clock" ? "Speed" : "Practice") + " · " + s.ops.map(function (o) { return BD.MathGame.OPS[o].sym; }).join("") : "Sentences";
+        const what = s.game === "boss" ? "Boss Battle · " + (s.boss || "") + (s.won ? " (won)" : "") : s.game === "duel" ? "Dojo Duel vs " + (s.vs || "") + (s.won ? " (won)" : "") : String(s.game).indexOf("test-") === 0 ? "Stripe test" : s.game === "spelling" ? "Spelling Bee" : s.game === "spanish" ? "Spanish Dojo" : s.game === "reading" ? "Story Scrolls" : s.game === "math" ? "Math · " + (s.mode === "clock" ? "Speed" : "Practice") + " · " + s.ops.map(function (o) { return BD.MathGame.OPS[o].sym; }).join("") : "Sentences";
         return '<tr><td>' + d.toLocaleDateString(undefined, { month: "short", day: "numeric" }) + '</td><td>' + what + '</td><td>' + BD.gradeShort(s.grade) + '</td><td>' + s.correct + "/" + s.total + '</td><td>+' + s.xp + '</td></tr>';
       }).join("");
       const readRow = '<tr><th scope="row">Story Scrolls</th>' + cols.map(function (g) {
@@ -647,6 +652,8 @@ BD.UI = (function () {
     $("infoSheet").addEventListener("click", function (e) { if (e.target === $("infoSheet")) closeSheet(); });
     document.addEventListener("keydown", function (e) { if (e.key === "Escape" && !$("infoSheet").hidden) closeSheet(); });
     BD.Scratch.bind();
+    BD.Boss.bind();
+    BD.Duel.bind();
     BD.MathGame.bind();
     BD.SentenceGame.bind();
     BD.Reading.bind();
