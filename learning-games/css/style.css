@@ -1308,3 +1308,37 @@ body.duel-on .topbar, body.duel-on .footer { visibility: hidden; }
 .ch-btns { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
 .ch-soon { font-weight: 800; color: var(--gold-2); }
 @media (max-width: 420px) { .ch-row { grid-template-columns: 1fr; } }
+
+/* ---------- Engage Teams (Leadership, Athlete, Black Belt Club) ---------- */
+.team-card { display: flex; align-items: center; gap: 12px; width: 100%; margin-top: 10px; min-height: 64px; padding: 10px 14px; border-radius: 18px; border: 1px solid rgba(139, 75, 224, .55); background: linear-gradient(120deg, #2A1846, #1A1F3D); color: var(--ink); text-align: left; font: inherit; cursor: pointer; }
+.team-card[hidden] { display: none; }
+.team-card strong { display: block; font-family: var(--font-display); font-weight: 900; font-style: italic; text-transform: uppercase; line-height: 1.1; }
+.team-card .boss-sub { display: block; }
+.team-patches { display: flex; gap: 4px; flex: none; }
+.team-e { display: inline-grid; place-items: center; flex: none; width: 30px; height: 30px; border-radius: 50%; background: #15151C; border: 2px solid currentColor; font-family: var(--font-display); font-weight: 900; font-style: italic; font-size: 1rem; line-height: 1; vertical-align: middle; }
+.team-leadership { color: #B07CFF; }
+.team-athlete { color: #3FD07F; }
+.team-bbc { color: #fff; border-color: transparent; background: linear-gradient(135deg, #F5C518, #F28C28, #2FA866, #2F6FD6, #7B4BC4, #D63A2F); }
+.chest-prize .team-e { width: 72px; height: 72px; font-size: 2.2rem; border-width: 3px; }
+.team-block { padding: 12px; border-radius: 14px; background: rgba(255, 255, 255, .04); border: 1px solid rgba(255, 255, 255, .1); margin: 10px 0; }
+.team-block.in { border-color: rgba(224, 186, 119, .45); }
+.team-block.locked { opacity: .62; }
+.team-block h4 { display: flex; align-items: center; gap: 8px; margin: 0 0 6px; flex-wrap: wrap; }
+.team-block p { margin: 6px 0; }
+.team-actions { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0; }
+.team-ok { color: #5BD08A; font-weight: 700; font-size: .85em; }
+.team-pd .pd-k { display: inline-flex; align-items: center; gap: 6px; }
+.team-pd .team-e { width: 24px; height: 24px; font-size: .8rem; }
+.lesson h3 { margin: 6px 0 10px; }
+.lesson .eyebrow { display: flex; align-items: center; gap: 8px; }
+.lesson .eyebrow .team-e { width: 24px; height: 24px; font-size: .8rem; }
+.lesson .coach-row { display: flex; gap: 10px; align-items: flex-start; }
+.lesson .coach-face { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; flex: none; }
+.lesson .coach-say { margin: 0; }
+.lesson-moment { background: rgba(224, 186, 119, .1); border-left: 3px solid var(--gold-2, #E0BA77); padding: 8px 10px; border-radius: 8px; }
+.lesson-opts { display: grid; gap: 8px; margin: 10px 0; }
+.lesson-opt { text-align: left; padding: 12px 14px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, .2); background: rgba(255, 255, 255, .06); color: var(--ink); font: inherit; cursor: pointer; min-height: 48px; }
+.lesson-opt.right { border-color: #5BD08A; background: rgba(91, 208, 138, .2); }
+.lesson-opt.wrong { opacity: .5; text-decoration: line-through; }
+.lesson-note { min-height: 1.4em; }
+.xp-pop { font-family: var(--font-display); font-weight: 900; font-size: 1.6rem; color: var(--gold-2, #E0BA77); margin: 4px 0; }

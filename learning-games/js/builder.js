@@ -47,9 +47,21 @@ BD.Builder = (function () {
   let clipN = 0;
   /* outfit: "gi" (their own uniform), "training", "sparring", "boxing" or "mma"
      — the same outfits the student characters wear, drawn to fit this body. */
-  function svg(cfg, beltColor, mode, age, outfit) {
+  /* The Engage E, drawn (white, or the student's team color / gradient). */
+  function emark(x, y, w, h, fill) {
+    return '<g transform="translate(' + x + ' ' + y + ') scale(' + (w / 240) + ' ' + (h / 136) + ')" fill="' + fill + '">' +
+      '<rect x="8" y="0" width="172" height="30" rx="15"/><rect x="0" y="54" width="140" height="30" rx="15"/><rect x="26" y="106" width="214" height="30" rx="15"/>' +
+      '<rect x="40" y="10" width="34" height="112"/><circle cx="214" cy="15" r="14"/></g>';
+  }
+  function svg(cfg, beltColor, mode, age, outfit, logoColor) {
     const c = clean(cfg);
-    let fit = ["training", "sparring", "boxing", "mma", "highrank"].indexOf(outfit) !== -1 ? outfit : "gi";
+    let fit = ["training", "sparring", "boxing", "mma", "highrank", "leadership", "athlete", "bbc"].indexOf(outfit) !== -1 ? outfit : "gi";
+    const teamFit = ["leadership", "athlete", "bbc"].indexOf(fit) !== -1 ? fit : null;
+    if (teamFit) fit = "training"; // team shirt and shorts, with team trim
+    const grad = logoColor && logoColor.indexOf("gradient") !== -1;
+    const eFill = !logoColor ? "#F2F2F0" : grad ? "url(#bdTeamGrad)" : logoColor;
+    const trim = teamFit === "bbc" ? "url(#bdTeamGrad)" : teamFit && BD.Teams ? BD.Teams.byId(teamFit).color : null;
+    const defs = grad || teamFit === "bbc" ? '<defs><linearGradient id="bdTeamGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F5C518"/><stop offset=".2" stop-color="#F28C28"/><stop offset=".4" stop-color="#2FA866"/><stop offset=".6" stop-color="#2F6FD6"/><stop offset=".8" stop-color="#7B4BC4"/><stop offset="1" stop-color="#D63A2F"/></linearGradient></defs>' : "";
     const highRank = fit === "highrank";
     if (highRank) { fit = "gi"; c.uniform = "black"; } // black gi with a belt-colored collar
     if (fit !== "gi") c.uniform = fit === "sparring" ? "spar" : "shirt";
@@ -77,7 +89,7 @@ BD.Builder = (function () {
       const shortsH = lh * 0.42;
       body += '<path d="M' + (cx - tw * 0.48) + ' ' + (tBot - 4) + 'h' + (tw * 0.96) + 'l2 ' + shortsH + 'h' + (-(legW + 2)) + 'l-' + (gap / 2) + ' -' + (shortsH * 0.55) + 'l-' + (gap / 2) + ' ' + (shortsH * 0.55) + 'h' + (-(legW + 2)) + 'z" fill="#15151C" stroke="' + ink + '" stroke-width="2"/>';
       // white trim on the shorts
-      body += '<path d="M' + (cx - tw * 0.48 - 1) + ' ' + (tBot + shortsH - 6) + 'h' + (legW + 3) + ' M' + (cx + tw * 0.48 + 1) + ' ' + (tBot + shortsH - 6) + 'h' + (-(legW + 3)) + '" stroke="#F2F2F0" stroke-width="2.5"/>';
+      body += '<path d="M' + (cx - tw * 0.48 - 1) + ' ' + (tBot + shortsH - 6) + 'h' + (legW + 3) + ' M' + (cx + tw * 0.48 + 1) + ' ' + (tBot + shortsH - 6) + 'h' + (-(legW + 3)) + '" stroke="' + (trim || "#F2F2F0") + '" stroke-width="' + (trim ? 3.5 : 2.5) + '"/>';
       legs.push('<rect x="' + (cx - gap / 2 - legW * 0.78) + '" y="' + (tBot + shortsH - 4) + '" width="' + (legW * 0.62) + '" height="' + (lh - shortsH + 2) + '" rx="8" fill="' + skin + '" stroke="' + ink + '" stroke-width="2"/>');
       legs.push('<rect x="' + (cx + gap / 2 + legW * 0.16) + '" y="' + (tBot + shortsH - 4) + '" width="' + (legW * 0.62) + '" height="' + (lh - shortsH + 2) + '" rx="8" fill="' + skin + '" stroke="' + ink + '" stroke-width="2"/>');
     } else {
@@ -103,6 +115,7 @@ BD.Builder = (function () {
       if (shirt) {
         body += '<rect x="' + ax + '" y="' + (tTop + 4) + '" width="' + aw + '" height="' + ah + '" rx="' + (aw / 2) + '" fill="' + skin + '" stroke="' + ink + '" stroke-width="2"/>';
         body += '<rect x="' + (ax - 2) + '" y="' + (tTop + 2) + '" width="' + (aw + 4) + '" height="' + (ah * 0.34) + '" rx="7" fill="' + top + '" stroke="' + ink + '" stroke-width="2"/>';
+        if (trim) body += '<rect x="' + (ax - 2) + '" y="' + (tTop + ah * 0.34 - 3) + '" width="' + (aw + 4) + '" height="5" rx="2.5" fill="' + trim + '"/>';
       } else {
         body += '<rect x="' + ax + '" y="' + (tTop + 4) + '" width="' + aw + '" height="' + (ah * 0.86) + '" rx="' + (aw / 2) + '" fill="' + gi + '" stroke="' + ink + '" stroke-width="2"/>';
       }
@@ -117,14 +130,20 @@ BD.Builder = (function () {
       if (spar) {
         body += '<rect x="' + (cx - tw * 0.42) + '" y="' + (tTop + 6) + '" width="' + (tw * 0.84) + '" height="' + (th * 0.7) + '" rx="14" fill="#1A1A21" stroke="#F2F2F0" stroke-width="2.5"/>' +
           '<path d="M' + (cx - tw * 0.3) + ' ' + (tTop + th * 0.42) + 'h' + (tw * 0.6) + '" stroke="rgba(255,255,255,.25)" stroke-width="2"/>';
-        body += '<image href="img/engage-mark.webp" x="' + (cx - 14) + '" y="' + (tTop + th * 0.16) + '" width="28" height="16"/>';
-      } else body += '<image href="img/engage-mark.webp" x="' + (cx + tw * 0.08) + '" y="' + (tTop + th * 0.18) + '" width="20" height="11"/>';
+        body += emark(cx - 14, tTop + th * 0.16, 28, 16, "#F2F2F0");
+      } else {
+        body += emark(cx + tw * 0.08, tTop + th * 0.18, 20, 11, eFill);
+        if (trim) { // team trim: collar ring, sleeve cuffs, a chest stripe
+          body += '<path d="M' + (cx - 12) + ' ' + tTop + ' Q' + cx + ' ' + (tTop + 12) + ' ' + (cx + 12) + ' ' + tTop + '" fill="none" stroke="' + trim + '" stroke-width="3.5"/>';
+          body += '<rect x="' + (cx - tw * 0.36) + '" y="' + (tTop + th * 0.42) + '" width="' + (tw * 0.72) + '" height="6" rx="3" fill="' + trim + '"/>';
+        }
+      }
     } else {
       // crossed lapels
       body += '<path d="M' + (cx - 13) + ' ' + tTop + ' L' + (cx + 10) + ' ' + (tTop + th * 0.62) + '" stroke="' + giEdge + '" stroke-width="' + (highRank ? 7 : 5) + '" stroke-linecap="round"/>';
       body += '<path d="M' + (cx + 13) + ' ' + tTop + ' L' + (cx - 4) + ' ' + (tTop + th * 0.4) + '" stroke="' + giEdge + '" stroke-width="' + (highRank ? 7 : 5) + '" stroke-linecap="round"/>';
       body += '<path d="M' + (cx - 11) + ' ' + tTop + ' L' + cx + ' ' + (tTop + 13) + ' L' + (cx + 11) + ' ' + tTop + 'z" fill="' + skin + '"/>';
-      body += '<image href="img/engage-mark.webp" x="' + (cx + tw * 0.12) + '" y="' + (tTop + 14) + '" width="17" height="10"/>';
+      body += emark(cx + tw * 0.12, tTop + 14, 17, 10, eFill);
     }
     if (c.uniform !== "shirt" || fit !== "gi") {
       // belt in the color they've earned (outfits wear it too, like the student characters)
@@ -193,16 +212,16 @@ BD.Builder = (function () {
       if (["spiky", "curly", "bun"].indexOf(st) !== -1) { front = '<path d="M60 80 Q62 52 100 50 Q138 52 140 80 Q128 64 100 62 Q72 64 60 80 Z" fill="' + hair + '"/>'; if (st !== "curly") back = st === "bun" ? "" : back; else back = ""; }
       face += '<path fill-rule="evenodd" d="M100 22 C152 22 158 64 156 92 C154 124 136 140 100 142 C64 140 46 124 44 92 C42 64 48 22 100 22 Z M100 50 C132 50 142 70 142 92 C142 118 124 134 100 134 C76 134 58 118 58 92 C58 70 68 50 100 50 Z" fill="#18181E" stroke="' + ink + '" stroke-width="2"/>' +
         '<path d="M70 38 Q100 26 130 38" stroke="rgba(255,255,255,.3)" stroke-width="3" fill="none" stroke-linecap="round"/>' +
-        '<image href="img/engage-mark.webp" x="89" y="33" width="22" height="13"/>';
+        '<g>' + emark(89, 33, 22, 13, "#F2F2F0") + '</g>';
     }
     const headGroup = mode === "face" ? back + ears + head + front + face :
       '<g transform="translate(100 ' + hy + ') scale(' + AH + ') translate(-100 -' + hy + ')">' + back + ears + head + front + face + '</g>';
     if (mode === "face") {
-      return '<svg viewBox="30 12 140 140" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Custom champion">' +
+      return '<svg viewBox="30 12 140 140" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Custom champion">' + defs +
         '<rect x="30" y="12" width="140" height="140" fill="#24406A"/>' +
         '<g>' + body.replace(/<image[^>]*>/g, "") + '</g>' + headGroup + '</svg>';
     }
-    const under = "", over = "", gTop = "", defs = "";
+    const under = "", over = "", gTop = "";
     return '<svg viewBox="0 0 200 320" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Custom champion">' + defs +
       '<g transform="translate(0 ' + oy + ')">' + body + under + headGroup + over + gTop + '</g></svg>';
   }

@@ -35,20 +35,31 @@ BD.UI = (function () {
   /* The student's character: a cast member, or the fighter they built. */
   function fighterArt(p, mode, outfit) {
     const g = BD.Rank.dojoGrade(p);
-    if (fighterOf(p) === "custom") return BD.Builder.svg(p.custom, BD.beltOf(p).color, mode, BD.Cast.ageBand(g), outfit || BD.Badges.outfit(p));
+    const fit = outfit || BD.Badges.outfit(p), logo = BD.Teams ? BD.Teams.logo(p, fit) : null;
+    if (fighterOf(p) === "custom") return BD.Builder.svg(p.custom, BD.beltOf(p).color, mode, BD.Cast.ageBand(g), fit, logo);
     if (mode === "face") return '<img src="' + BD.Cast.face(fighterOf(p)) + '" alt="' + esc(BD.Cast.name(fighterOf(p))) + '">';
-    return champArt(fighterOf(p), BD.beltOf(p).color, g, outfit || BD.Badges.outfit(p));
+    return champArt(fighterOf(p), BD.beltOf(p).color, g, fit, logo);
   }
   /* A playable character wearing the belt the student has earned (white-belt
      art + the belt area tinted) and, for the student characters, their outfit. */
-  function champArt(key, beltColor, grade, outfit) {
+  function champArt(key, beltColor, grade, outfit, logoColor) {
     const a = BD.Cast.art(key, grade, outfit);
     const url = function (k) { return "url(" + (BD.MASKS && BD.MASKS[k] ? BD.MASKS[k] : "img/mask-" + k + ".png") + ")"; };
     const layer = function (k, color) { const m = url(k); return '<i class="champ-belt" style="' + (color ? "background:" + color + ";" : "") + '-webkit-mask-image:' + m + ';mask-image:' + m + '"></i>'; };
+    // Engage Teams: the chest E in the team color (white E otherwise; gold is for instructors)
+    let logo = "";
+    if (a.logo && logoColor) {
+      const box = BD.LOGO_BOX && BD.LOGO_BOX[a.logo], m = url(a.logo);
+      if (String(logoColor).indexOf("gradient") !== -1 && box) { // fit the gradient to the E itself
+        const w = Math.max(0.01, box[2] - box[0]), h = Math.max(0.01, box[3] - box[1]);
+        const pos = function (a0, s) { return (s >= 0.999 ? 0 : a0 / (1 - s) * 100).toFixed(2) + "%"; };
+        logo = '<i class="champ-belt" style="background:' + logoColor + ';background-size:' + (w * 100).toFixed(2) + '% ' + (h * 100).toFixed(2) + '%;background-position:' + pos(box[0], w) + ' ' + pos(box[1], h) + ';background-repeat:no-repeat;-webkit-mask-image:' + m + ';mask-image:' + m + '"></i>';
+      } else logo = layer(a.logo, logoColor);
+    }
     // High Rank Uniform: the collar stripe has its own layer (belt color; gold at Black Belt)
     const collar = a.collar ? layer(a.collar, BD.collarColor(beltColor)) : "";
     return '<span class="champ' + (a.band !== null ? " age-" + a.band : "") + '" style="--belt:' + beltColor + '"><img src="' + a.src + '" alt="' + esc(BD.Cast.name(key)) + '">' +
-      layer(a.mask) + collar + '</span>';
+      layer(a.mask) + collar + logo + '</span>';
   }
   /* Round portrait of the student's chosen character, ringed in their belt color. */
   function avatar(p, size) {
@@ -369,6 +380,7 @@ BD.UI = (function () {
     BD.Dojo.render();
     BD.Boss.card(p);
     BD.Tourney.card(p);
+    if (BD.Teams) BD.Teams.card(p);
     setTimeout(function () { if (currentScreen === "screen-home" && !sheetOpen()) BD.Badges.award(BD.Store.current(), refreshStage); }, 500);
     $("homeBelt").innerHTML = rankPanel(p);
     $("homeToday").textContent = todays ? todays + (todays === 1 ? " round" : " rounds") + " completed today" : "No rounds yet today";
@@ -554,7 +566,7 @@ BD.UI = (function () {
       const tricky = Object.values(p.tricky).sort(function (a, b) { return b.misses - a.misses; }).slice(0, 16);
       const recent = p.sessions.slice(0, 8).map(function (s) {
         const d = new Date(s.date);
-        const what = s.game === "boss" ? "Boss Battle · " + (s.boss || "") + (s.won ? " (won)" : "") : s.game === "duel" ? "Partner Challenge vs " + (s.vs || "") + (s.won ? " (won)" : "") : String(s.game).indexOf("test-") === 0 ? "Stripe test" : s.game === "spelling" ? "Spelling Bee" : s.game === "spanish" ? "Spanish Dojo" : s.game === "reading" ? "Story Scrolls" : s.game === "math" ? "Math · " + (s.mode === "clock" ? "Speed" : "Practice") + " · " + s.ops.map(function (o) { return BD.MathGame.OPS[o].sym; }).join("") : "Sentences";
+        const what = s.game === "team" ? "Team lesson · " + ((BD.Teams.byId(s.mode) || {}).name || "") : s.game === "tournament" ? "Tournament · " + (s.mode || "") + (s.medal ? " (" + s.medal + ")" : "") : s.game === "boss" ? "Boss Battle · " + (s.boss || "") + (s.won ? " (won)" : "") : s.game === "duel" ? "Partner Challenge vs " + (s.vs || "") + (s.won ? " (won)" : "") : String(s.game).indexOf("test-") === 0 ? "Stripe test" : s.game === "spelling" ? "Spelling Bee" : s.game === "spanish" ? "Spanish Dojo" : s.game === "reading" ? "Story Scrolls" : s.game === "math" ? "Math · " + (s.mode === "clock" ? "Speed" : "Practice") + " · " + s.ops.map(function (o) { return BD.MathGame.OPS[o].sym; }).join("") : "Sentences";
         return '<tr><td>' + d.toLocaleDateString(undefined, { month: "short", day: "numeric" }) + '</td><td>' + what + '</td><td>' + BD.gradeShort(s.grade) + '</td><td>' + s.correct + "/" + s.total + '</td><td>+' + s.xp + '</td></tr>';
       }).join("");
       const readRow = '<tr><th scope="row">Story Scrolls</th>' + cols.map(function (g) {
@@ -580,6 +592,7 @@ BD.UI = (function () {
         '<header class="report-head">' + avatar(p, "lg") + '<div><h3>' + esc(p.name) + '</h3><p class="muted">' + belt.name + ' Belt · ' + p.xp.toLocaleString() + ' XP · practiced ' + p.days.length + (p.days.length === 1 ? " day" : " days") + '</p></div></header>' +
         BD.Parent.card(p) +
         BD.School.parentHTML(p) +
+        (BD.Teams ? BD.Teams.parentHTML(p) : "") +
         (redoList(p).length ? '<div class="redo-note"><strong>Redo needed</strong><p>' + redoList(p).join(", ") +
           '. Scored under ' + BD.MathGame.PASS + '%, so this level stays locked in until they pass it.</p><button type="button" class="btn btn-small" data-act="clearRedo">Unlock all levels</button></div>' : '') +
         '<div class="pd-actions" data-id="' + p.id + '"><button type="button" class="btn btn-primary" data-act="share">Share this week</button>' +
@@ -706,6 +719,7 @@ BD.UI = (function () {
     BD.Boss.bind();
     BD.Duel.bind();
     BD.Tourney.bind();
+    if (BD.Teams) BD.Teams.bind();
     BD.MathGame.bind();
     BD.SentenceGame.bind();
     BD.Reading.bind();

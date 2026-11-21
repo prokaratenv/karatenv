@@ -75,12 +75,17 @@ BD.Badges = (function () {
     { id: "sparring", name: "Sparring Gear", gear: ["mouthguard", "shirt", "sparring", "headgear", "chest", "boots"], badge: "orange-spar" },
     { id: "boxing", name: "Boxing", gear: ["mouthguard", "shirt", "shorts", "boxing"] },
     { id: "mma", name: "MMA", gear: ["mouthguard", "shirt", "shorts", "mma"] },
-    { id: "highrank", name: "High Rank Uniform", gear: [], badge: "green-highrank" }
+    { id: "highrank", name: "High Rank Uniform", gear: [], badge: "green-highrank", lockText: "Unlocks at Green Belt" },
+    // team shirt and shorts: join the team (Engage Teams, from Orange, Green and Brown Belt)
+    { id: "leadership", name: "Leadership Team", gear: [], team: "leadership", lockText: "Join the Leadership Team (Orange Belt)" },
+    { id: "athlete", name: "Athlete Team", gear: [], team: "athlete", lockText: "Join the Athlete Team (Green Belt)" },
+    { id: "bbc", name: "Black Belt Club", gear: [], team: "bbc", lockText: "Join the Black Belt Club (Brown Belt)" }
   ];
+  OUTFITS[2].lockText = "Unlocks at Orange Belt";
   OUTFITS.forEach(function (o) { o.needs = o.gear; });
   const outfitById = function (id) { return OUTFITS.find(function (o) { return o.id === id; }) || OUTFITS[0]; };
   function hasGear(p, g) { return (p.gear || []).indexOf(g) !== -1; }
-  function outfitUnlocked(p, o) { return o.needs.every(function (g) { return hasGear(p, g); }) && (!o.badge || !!(p.badges && p.badges[o.badge])); }
+  function outfitUnlocked(p, o) { return o.needs.every(function (g) { return hasGear(p, g); }) && (!o.badge || !!(p.badges && p.badges[o.badge])) && (!o.team || (BD.Teams && BD.Teams.joined(p, o.team))); }
   /* Outfits are drawn for the student characters (Kimmy, Billy, Tommy, Mackenzie,
      Rylan) and for champions students build themselves. */
   function canWearOutfits(p) { const k = BD.UI.fighterKey(p); return k === "custom" || BD.Cast.KIDS.indexOf(k) !== -1; }
@@ -129,12 +134,12 @@ BD.Badges = (function () {
       '<div class="outfits">' + OUTFITS.map(function (o) {
         const open = outfitUnlocked(p, o), on = now === o.id;
         const missing = o.needs.filter(function (g) { return !hasGear(p, g); }).map(function (g) { return GEAR[g].name; })
-          .concat(o.badge && !(p.badges && p.badges[o.badge]) ? [o.id === "highrank" ? "Green Belt" : "Orange Belt graduation"] : []);
+          .concat(o.badge && !(p.badges && p.badges[o.badge]) ? [o.id === "highrank" ? "Green Belt" : "Orange Belt graduation"] : []).concat(o.team && !(BD.Teams && BD.Teams.joined(p, o.team)) ? [BD.Teams.byId(o.team).name] : []);
         return '<button type="button" class="outfit' + (on ? " on" : "") + (open && kid ? "" : " locked") + '"' + (open && kid ? ' data-outfit="' + o.id + '" aria-pressed="' + on + '"' : ' disabled') + '>' +
           '<span class="outfit-art">' + BD.UI.championHTML(p, o.id) + '</span>' +
           '<strong>' + esc(o.name) + '</strong>' +
-          '<span class="locker-state">' + (on ? "Wearing" : open ? (kid ? "Tap to wear" : "Unlocked") : "🔒 " + (o.badge ? (o.id === "highrank" ? "Unlocks at Green Belt" : "Unlocks at Orange Belt") : (o.needs.length - missing.length) + " of " + o.needs.length + " pieces")) + '</span>' +
-          (open ? "" : '<span class="outfit-need">Still need: ' + esc(missing.join(", ")) + '</span>') + '</button>';
+          '<span class="locker-state">' + (on ? "Wearing" : open ? (kid ? "Tap to wear" : "Unlocked") : "🔒 " + (o.lockText || (o.needs.length - missing.length) + " of " + o.needs.length + " pieces")) + '</span>' +
+          (open || o.team ? "" : '<span class="outfit-need">Still need: ' + esc(missing.join(", ")) + '</span>') + '</button>';
       }).join("") + '</div>' +
       '<h4 class="label">Gear collection · ' + GEAR_BADGES.filter(function (b) { return hasGear(p, b.gear); }).length + ' of ' + GEAR_BADGES.length + '</h4>' +
       '<div class="locker">' + GEAR_BADGES.map(function (b) {
@@ -217,5 +222,5 @@ BD.Badges = (function () {
   }
 
   function gearName(b) { return b.gear ? GEAR[b.gear].name : b.name; }
-  return { hasSkill: hasSkill, weapons: weapons, reached: reached, yellowStripes: yellowStripes, WEAPON_BADGES: WEAPON_BADGES, gearName: gearName, GEAR_BADGES: GEAR_BADGES, GEAR: GEAR, BADGES: BADGES, OUTFITS: OUTFITS, outfit: outfit, outfitUnlocked: outfitUnlocked, check: check, award: award, earned: earned, equipped: equipped, rack: rack, openLocker: openLocker };
+  return { canWear: canWearOutfits, hasSkill: hasSkill, weapons: weapons, reached: reached, yellowStripes: yellowStripes, WEAPON_BADGES: WEAPON_BADGES, gearName: gearName, GEAR_BADGES: GEAR_BADGES, GEAR: GEAR, BADGES: BADGES, OUTFITS: OUTFITS, outfit: outfit, outfitUnlocked: outfitUnlocked, check: check, award: award, earned: earned, equipped: equipped, rack: rack, openLocker: openLocker };
 })();
