@@ -97,7 +97,7 @@ BD.Store = (function () {
      synced record can't inject anything into the page. */
   function sanitize(p) {
     const FIGHTER_KEYS = ["kimmy", "billy", "tommy", "mackenzie", "rylan", "zumi", "cd", "michele", "bridgette", "kyra", "lauryn", "custom"];
-    const GEAR_KEYS = ["mouthguard", "shorts", "shirt", "sparring", "boots", "headgear", "chest", "boxing", "mma"];
+    const GEAR_KEYS = ["mouthguard", "shorts", "shirt", "sparring", "boots", "headgear", "chest", "boxing", "mma", "bag"];
     const gradeOk = function (g, dflt) { g = Number(g); return isFinite(g) ? Math.max(-1, Math.min(8, Math.round(g))) : dflt; };
     if (typeof p.id !== "string" || !/^[a-z0-9]{4,40}$/i.test(p.id)) p.id = "p" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
     p.name = String(p.name == null ? "" : p.name).replace(/[\u0000-\u001f\u007f<>]/g, "").trim().slice(0, 20) || "Champion";

@@ -38,7 +38,23 @@ The home screen is kept simple. From top to bottom:
 
 ## Badges, gear and growing up
 
-- **Badges unlock real Engage gear** for the student's champion, in this order: Mouthguard (first round), Black Training Shorts (3-day streak), Engage Black Training Shirt (first stripe), Sparring Gloves (perfect round), Sparring Boots (all four subjects in one week), Sparring Headgear (first new belt), Sparring Chest Gear (7-day streak), Boxing Gloves (1,000 XP), MMA Gloves (3 belts). Gear unlocks **outfits**, and each outfit is its own drawing of the champion actually wearing it (for every student character at every age): **Karate Gi** (always), **Engage Training** (shirt + shorts), **Sparring Gear** (mouthguard, shirt, sparring gloves, headgear, chest gear, boots), **Boxing** (mouthguard, shirt, shorts, boxing gloves) and **MMA** (mouthguard, shirt, shorts, MMA gloves). An outfit unlocks only when **every** piece is earned, and contact outfits need the mouthguard, like real class; locked outfits show progress ("3 of 4 pieces") and what's still needed. When a badge completes an outfit the champion puts it on automatically. The **Gear locker** shows the champion, the five outfits (tap an unlocked one to wear it; locked ones say which gear is still needed) and the gear collection. The belt color is tinted onto every outfit, and the outfit shows on the home screen, picker, certificates, weekly card and mini champion. Outfits are drawn for Kimmy, Billy, Tommy, Mackenzie and Rylan, and **built champions wear them too**: the builder draws each outfit (headgear, chest gear, gloves, boots, shorts) to fit the champion's own height, build and age, with no extra pictures needed. Instructors and Zumi wear their gi.
+- **Badges unlock real Engage gear,** in the same order as at Engage:
+
+| Gear | How it's earned |
+|---|---|
+| Mouthguard | Signing up |
+| Engage Black Training Shirt | Training on 3 different days |
+| MMA Shorts | Training on 10 different days |
+| MMA Gloves | The first stripe |
+| Sparring Gear Bag | The first graduation |
+| Sparring Gloves | Yellow Belt with 1 stripe |
+| Sparring Boots | Yellow Belt with 2 stripes |
+| Sparring Headgear | Yellow Belt with 3 stripes |
+| Sparring Chest Gear | Yellow Belt with 4 stripes |
+| **Full Sparring Gear outfit** | The Yellow → Orange Belt graduation, when sparring starts in class |
+| Boxing Gloves (bonus) | Earning 1,000 XP |
+
+  "Yellow Belt" counts in any grade, and a student past Yellow has all four. Gear earned under the earlier rules is kept, with no repeat celebration.
 - **Works on phones, tablets and computers:** the layout adjusts for phone, iPad (portrait and landscape) and desktop browsers.
 - **Champions grow up with the grade.** Kimmy, Billy, Tommy, Mackenzie and Rylan look about 5 in Pre-K/K, 7 in 1st–2nd, 10 in 3rd–5th and 13 in 6th–8th, based on the grade they're training. Built champions get younger proportions too. Instructors and Zumi stay the same.
 

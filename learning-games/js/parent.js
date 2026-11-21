@@ -102,7 +102,7 @@ BD.Parent = (function () {
         (ins.weak ? 'Work on <strong>' + esc(ins.weak.label) + '</strong> (' + Math.round(ins.weak.r * 100) + '%).' : 'No weak spots right now.') + '</span></div>' : '') +
       (ins && ins.tip ? '<div class="pd-row pd-tip"><span class="pd-k">Try at home</span><span>' + esc(ins.tip) + '</span></div>' : '') +
       (!monday ? recap : "") +
-      '<div class="pd-row"><span class="pd-k">Badges</span><span>' + BD.Badges.earned(p).length + ' of ' + BD.Badges.BADGES.length + ' earned' + (BD.Badges.earned(p).length ? ' · newest: ' + esc(BD.Badges.GEAR[BD.Badges.earned(p).slice(-1)[0].gear].name) : '') + '</span></div>' +
+      '<div class="pd-row"><span class="pd-k">Badges</span><span>' + BD.Badges.earned(p).length + ' of ' + BD.Badges.BADGES.length + ' earned' + (BD.Badges.earned(p).length ? ' · newest: ' + esc(BD.Badges.gearName(BD.Badges.earned(p).slice(-1)[0])) : '') + '</span></div>' +
       '</div>';
   }
 
@@ -146,7 +146,7 @@ BD.Parent = (function () {
     if (st.days) { y += 82; stat("day streak 🔥", st.days, y); }
     x.textAlign = "center";
     y = 990;
-    const wins = tw.stripes.map(function (s) { return SUBJECT_NAMES[s.subject] + " stripe"; }).concat(tw.belts.map(function (b) { return b.to.name + " Belt"; })).concat(tw.badges.map(function (b) { return BD.Badges.GEAR[b.gear].name; }));
+    const wins = tw.stripes.map(function (s) { return SUBJECT_NAMES[s.subject] + " stripe"; }).concat(tw.belts.map(function (b) { return b.to.name + " Belt"; })).concat(tw.badges.map(function (b) { return BD.Badges.gearName(b); }));
     const wrap = function (text, yy, font, color, max) {
       x.font = font; x.fillStyle = color;
       const words = text.split(" "); let line = "";

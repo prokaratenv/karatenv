@@ -8,38 +8,47 @@ window.BD = window.BD || {};
 BD.Badges = (function () {
   const GEAR = {
     mouthguard: { name: "Mouthguard", img: "img/gear-mouthguard.webp" },
-    shorts: { name: "Black Training Shorts", img: "img/gear-shorts.webp" },
+    shorts: { name: "MMA Shorts", img: "img/gear-shorts.webp" },
     shirt: { name: "Engage Black Training Shirt", img: "img/gear-shirt.webp" },
     sparring: { name: "Sparring Gloves", img: "img/gear-sparring.webp" },
     boots: { name: "Sparring Boots", img: "img/gear-boots.webp" },
     headgear: { name: "Sparring Headgear", img: "img/gear-headgear.webp" },
     chest: { name: "Sparring Chest Gear", img: "img/gear-chest.webp" },
     boxing: { name: "Boxing Gloves", img: "img/gear-boxing.webp" },
-    mma: { name: "MMA Gloves", img: "img/gear-mma.webp" }
+    mma: { name: "MMA Gloves", img: "img/gear-mma.webp" },
+    bag: { name: "Sparring Gear Bag", img: "img/gear-bag.webp" }
   };
 
   const weekAgo = function () { return Date.now() - 7 * 864e5; };
   const belts = function (p) { return Object.keys(p.rank || {}).reduce(function (a, g) { return a + ((p.rank[g].grads || []).length); }, 0); };
   const stripes = function (p) { return (p.stripeLog || []).length || Object.keys(p.rank || {}).reduce(function (a, g) { return a + Object.keys(p.rank[g].stripes || {}).length; }, 0) + belts(p) * 4; };
 
-  /* In order: each one is a little harder than the last. */
+  const daysTrained = function (p) { return (p.days || []).length; };
+  /* Best Yellow Belt progress in any grade: stripes on Yellow, or 4 once past Yellow. */
+  const yellowStripes = function (p) {
+    return Object.keys(p.rank || {}).reduce(function (best, g) {
+      const r = p.rank[g]; if (!r) return best;
+      const n = r.belt > 1 || r.mastered ? 4 : r.belt === 1 ? BD.Rank.stripeCount(r) : 0;
+      return Math.max(best, n);
+    }, 0);
+  };
+  const reachedOrange = function (p) { return Object.keys(p.rank || {}).some(function (g) { return p.rank[g] && (p.rank[g].belt >= 2 || p.rank[g].mastered); }); };
+
+  /* The gear path, in the order kids earn it (sparring starts at Orange Belt, like class). */
   const BADGES = [
-    { id: "first-round", name: "First Bow", how: "Finish your first round.", gear: "mouthguard", test: function (p) { return (p.sessions || []).length >= 1; } },
-    { id: "streak-3", name: "On Fire", how: "Train 3 days in a row.", gear: "shorts", test: function (p) { return BD.streak(p).days >= 3; } },
-    { id: "first-stripe", name: "First Stripe", how: "Earn your first stripe.", gear: "shirt", test: function (p) { return stripes(p) >= 1; } },
-    { id: "perfect", name: "Flawless", how: "Get every answer right in a round of 8 or more.", gear: "sparring",
-      test: function (p) { return (p.sessions || []).some(function (s) { return s.total >= 8 && s.correct >= s.total; }); } },
-    { id: "all-rounder", name: "All-Rounder", how: "Practice Math, Fix-It, Spelling and Story Scrolls in one week.", gear: "boots",
-      test: function (p) {
-        const since = weekAgo(), games = new Set();
-        (p.sessions || []).forEach(function (s) { if (new Date(s.date).getTime() >= since) games.add(s.game); });
-        return ["math", "sentence", "spelling", "reading"].every(function (g) { return games.has(g); });
-      } },
-    { id: "graduate", name: "Graduate", how: "Earn a new belt.", gear: "headgear", test: function (p) { return belts(p) >= 1; } },
-    { id: "streak-7", name: "Iron Will", how: "Train 7 days in a row.", gear: "chest", test: function (p) { return BD.streak(p).days >= 7; } },
-    { id: "xp-1000", name: "Hard Worker", how: "Earn 1,000 XP.", gear: "boxing", test: function (p) { return (p.xp || 0) >= 1000; } },
-    { id: "belts-3", name: "Dojo Legend", how: "Earn 3 belts.", gear: "mma", test: function (p) { return belts(p) >= 3; } }
+    { id: "signup", name: "Welcome to the Dojo", how: "Sign up for Brain Dojo.", gear: "mouthguard", test: function () { return true; } },
+    { id: "days-3", name: "3 Days In", how: "Train on 3 different days.", gear: "shirt", test: function (p) { return daysTrained(p) >= 3; } },
+    { id: "days-10", name: "10 Days Strong", how: "Train on 10 different days.", gear: "shorts", test: function (p) { return daysTrained(p) >= 10; } },
+    { id: "stripe-1", name: "First Stripe", how: "Earn your first stripe.", gear: "mma", test: function (p) { return stripes(p) >= 1; } },
+    { id: "grad-1", name: "First Graduation", how: "Graduate to your next belt.", gear: "bag", test: function (p) { return belts(p) >= 1; } },
+    { id: "yellow-1", name: "Yellow Belt · 1 Stripe", how: "Earn 1 stripe on your Yellow Belt.", gear: "sparring", test: function (p) { return yellowStripes(p) >= 1; } },
+    { id: "yellow-2", name: "Yellow Belt · 2 Stripes", how: "Earn 2 stripes on your Yellow Belt.", gear: "boots", test: function (p) { return yellowStripes(p) >= 2; } },
+    { id: "yellow-3", name: "Yellow Belt · 3 Stripes", how: "Earn 3 stripes on your Yellow Belt.", gear: "headgear", test: function (p) { return yellowStripes(p) >= 3; } },
+    { id: "yellow-4", name: "Yellow Belt · 4 Stripes", how: "Earn all 4 stripes on your Yellow Belt.", gear: "chest", test: function (p) { return yellowStripes(p) >= 4; } },
+    { id: "orange-spar", name: "Ready to Spar!", how: "Graduate from Yellow to Orange Belt. That's when sparring starts at Engage!", gear: null, unlocks: "sparring", test: reachedOrange },
+    { id: "xp-1000-boxing", name: "Hard Worker", how: "Bonus: earn 1,000 XP.", gear: "boxing", test: function (p) { return (p.xp || 0) >= 1000; } }
   ];
+  const GEAR_BADGES = BADGES.filter(function (b) { return b.gear; });
 
   /* OUTFITS — what the champion actually wears. Each outfit is drawn as its
      own picture (so the gear really fits). An outfit unlocks only when EVERY
@@ -47,14 +56,14 @@ BD.Badges = (function () {
   const OUTFITS = [
     { id: "gi", name: "Karate Gi", gear: [] },
     { id: "training", name: "Engage Training", gear: ["shirt", "shorts"] },
-    { id: "sparring", name: "Sparring Gear", gear: ["mouthguard", "shirt", "sparring", "headgear", "chest", "boots"] },
+    { id: "sparring", name: "Sparring Gear", gear: ["mouthguard", "shirt", "sparring", "headgear", "chest", "boots"], badge: "orange-spar" },
     { id: "boxing", name: "Boxing", gear: ["mouthguard", "shirt", "shorts", "boxing"] },
     { id: "mma", name: "MMA", gear: ["mouthguard", "shirt", "shorts", "mma"] }
   ];
   OUTFITS.forEach(function (o) { o.needs = o.gear; });
   const outfitById = function (id) { return OUTFITS.find(function (o) { return o.id === id; }) || OUTFITS[0]; };
   function hasGear(p, g) { return (p.gear || []).indexOf(g) !== -1; }
-  function outfitUnlocked(p, o) { return o.needs.every(function (g) { return hasGear(p, g); }); }
+  function outfitUnlocked(p, o) { return o.needs.every(function (g) { return hasGear(p, g); }) && (!o.badge || !!(p.badges && p.badges[o.badge])); }
   /* Outfits are drawn for the student characters (Kimmy, Billy, Tommy, Mackenzie,
      Rylan) and for champions students build themselves. */
   function canWearOutfits(p) { const k = BD.UI.fighterKey(p); return k === "custom" || BD.Cast.KIDS.indexOf(k) !== -1; }
@@ -75,10 +84,12 @@ BD.Badges = (function () {
       let ok = false; try { ok = b.test(p); } catch (e) { ok = false; }
       if (ok) {
         const before = OUTFITS.filter(function (o) { return outfitUnlocked(p, o); }).map(function (o) { return o.id; });
-        p.badges[b.id] = new Date().toISOString(); if (p.gear.indexOf(b.gear) === -1) p.gear.push(b.gear);
+        const newGear = !!b.gear && p.gear.indexOf(b.gear) === -1;
+        p.badges[b.id] = new Date().toISOString(); if (newGear) p.gear.push(b.gear);
         const opened = OUTFITS.filter(function (o) { return before.indexOf(o.id) === -1 && outfitUnlocked(p, o); });
         if (opened.length) p.outfit = opened[opened.length - 1].id;
-        fresh.push(Object.assign({ outfit: opened.length ? opened[opened.length - 1] : null }, b));
+        // gear a student already had from the old unlock rules is recorded quietly (no repeat celebration)
+        if (newGear || opened.length) fresh.push(Object.assign({ outfit: opened.length ? opened[opened.length - 1] : null }, b));
       }
     });
     if (fresh.length) BD.Store.save(p);
@@ -93,23 +104,24 @@ BD.Badges = (function () {
   /* ---------- screens ---------- */
   const esc = function (s) { return BD.UI.esc(s); };
   function lockerHTML(p) {
-    const have = earned(p).length, now = outfit(p), kid = canWearOutfits(p);
+    const now = outfit(p), kid = canWearOutfits(p);
     return '<div class="locker-model">' + BD.UI.championHTML(p) + '</div>' +
       '<h4 class="label">Outfits</h4>' +
       (kid ? '<p class="muted small">Earn the gear to unlock each outfit. Tap one to wear it.</p>' :
         '<p class="muted small">Outfits are for the student champions (Kimmy, Billy, Tommy, Mackenzie, Rylan) and champions you build. Pick one of them to wear your gear.</p>') +
       '<div class="outfits">' + OUTFITS.map(function (o) {
         const open = outfitUnlocked(p, o), on = now === o.id;
-        const missing = o.needs.filter(function (g) { return !hasGear(p, g); }).map(function (g) { return GEAR[g].name; });
+        const missing = o.needs.filter(function (g) { return !hasGear(p, g); }).map(function (g) { return GEAR[g].name; })
+          .concat(o.badge && !(p.badges && p.badges[o.badge]) ? ["Orange Belt graduation"] : []);
         return '<button type="button" class="outfit' + (on ? " on" : "") + (open && kid ? "" : " locked") + '"' + (open && kid ? ' data-outfit="' + o.id + '" aria-pressed="' + on + '"' : ' disabled') + '>' +
           '<span class="outfit-art">' + BD.UI.championHTML(p, o.id) + '</span>' +
           '<strong>' + esc(o.name) + '</strong>' +
-          '<span class="locker-state">' + (on ? "Wearing" : open ? (kid ? "Tap to wear" : "Unlocked") : "🔒 " + (o.needs.length - missing.length) + " of " + o.needs.length + " pieces") + '</span>' +
+          '<span class="locker-state">' + (on ? "Wearing" : open ? (kid ? "Tap to wear" : "Unlocked") : "🔒 " + (o.badge ? "Unlocks at Orange Belt" : (o.needs.length - missing.length) + " of " + o.needs.length + " pieces")) + '</span>' +
           (open ? "" : '<span class="outfit-need">Still need: ' + esc(missing.join(", ")) + '</span>') + '</button>';
       }).join("") + '</div>' +
-      '<h4 class="label">Gear collection · ' + have + ' of ' + BADGES.length + '</h4>' +
-      '<div class="locker">' + BADGES.map(function (b) {
-        const got = p.badges && p.badges[b.id], g = GEAR[b.gear];
+      '<h4 class="label">Gear collection · ' + GEAR_BADGES.filter(function (b) { return hasGear(p, b.gear); }).length + ' of ' + GEAR_BADGES.length + '</h4>' +
+      '<div class="locker">' + GEAR_BADGES.map(function (b) {
+        const got = hasGear(p, b.gear), g = GEAR[b.gear];
         return '<div class="locker-item' + (got ? " got" : " locked") + '">' +
           '<img src="' + g.img + '" alt="">' +
           '<strong>' + g.name + '</strong>' +
@@ -132,6 +144,19 @@ BD.Badges = (function () {
   function celebrate(list, done) {
     if (!list || !list.length) { if (done) done(); return; }
     const b = list[0], g = GEAR[b.gear];
+    if (!g) { // the Orange Belt milestone: the full sparring outfit
+      const p = BD.Store.current(), o = b.outfit || outfitById(b.unlocks);
+      BD.UI.sheet("Ready to spar!",
+        '<div class="unlock">' + (canWearOutfits(p) ? '<div class="unlock-outfit">' + BD.UI.championHTML(p, o.id) + '</div>' : '') +
+        '<h3>Full Sparring Gear outfit unlocked!</h3><p>🏅 <strong>' + esc(b.name) + '</strong>: ' + esc(b.how) + '</p>' +
+        (canWearOutfits(p) && b.outfit ? '<p class="muted">Your champion is wearing it now.</p>' : '<p class="muted">Find it in your Gear locker.</p>') +
+        '<div class="res-actions"><button type="button" class="btn btn-primary" id="unlockNext">' + (list.length > 1 ? "Next unlock" : "Let\'s spar!") + '</button>' +
+        '<button type="button" class="btn btn-quiet" id="unlockLocker">Open my locker</button></div></div>');
+      BD.Sound.belt(); BD.confetti(160);
+      document.getElementById("unlockNext").onclick = function () { celebrate(list.slice(1), done); if (list.length === 1) document.getElementById("infoClose").click(); };
+      document.getElementById("unlockLocker").onclick = function () { openLocker(); };
+      return;
+    }
     BD.UI.sheet("New gear unlocked!",
       '<div class="unlock"><img class="unlock-img" src="' + g.img + '" alt="">' +
       '<h3>' + g.name + '</h3><p>🏅 <strong>' + esc(b.name) + '</strong> badge: ' + esc(b.how) + '</p>' +
@@ -150,5 +175,6 @@ BD.Badges = (function () {
     return fresh;
   }
 
-  return { GEAR: GEAR, BADGES: BADGES, OUTFITS: OUTFITS, outfit: outfit, outfitUnlocked: outfitUnlocked, check: check, award: award, earned: earned, equipped: equipped, rack: rack, openLocker: openLocker };
+  function gearName(b) { return b.gear ? GEAR[b.gear].name : b.name; }
+  return { gearName: gearName, GEAR_BADGES: GEAR_BADGES, GEAR: GEAR, BADGES: BADGES, OUTFITS: OUTFITS, outfit: outfit, outfitUnlocked: outfitUnlocked, check: check, award: award, earned: earned, equipped: equipped, rack: rack, openLocker: openLocker };
 })();

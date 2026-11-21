@@ -405,7 +405,8 @@ BD.UI = (function () {
     const p = BD.Store.current(); if (!p) return;
     const n = BD.Badges.earned(p).length;
     $("homeGear").innerHTML = "";
-    $("gearLabel").textContent = n ? "Gear locker · " + n + "/" + BD.Badges.BADGES.length : "Gear locker · earn gear!";
+    const gn = BD.Badges.GEAR_BADGES.filter(function (b) { return (p.gear || []).indexOf(b.gear) !== -1; }).length;
+    $("gearLabel").textContent = gn ? "Gear locker · " + gn + "/" + BD.Badges.GEAR_BADGES.length : "Gear locker · earn gear!";
   }
 
   /* ---------- Sensei's plan ---------- */
@@ -654,7 +655,7 @@ BD.UI = (function () {
       sheet("How Brain Dojo works",
         '<h4 class="label">Belts and stripes</h4><p>Each grade has its own belt path: White, Yellow, Orange, Blue, Green, Purple, Brown, Red, Black. A belt needs 4 stripes (Math, Reading, Spelling, Comprehension), each earned by scoring 85% on a stripe test. The 4th stripe graduates them to the next belt. Spanish is a bonus stripe.</p>' +
         '<h4 class="label">Practice and hints</h4><p>Points come from doing the work. Practice earns up to 100 XP per stripe; stripe tests add no XP (practice to 56, pass the test, and it stays 56). They can keep practicing a stripe after earning it, until they move up a belt. Graduating adds a bonus earned by practice: a quarter of the belt\'s practice XP (all 400 = +100; tests only = +0). The Dojo leaderboard ranks XP earned this week, so practice beats rushing tests. White through Purple belts can use hints. Brown, Red and Black belts work without them. Pre-K to 1st grade hear instructions read aloud.</p>' +
-        '<h4 class="label">Badges and gear</h4><p>Badges for streaks, perfect rounds, stripes and belts unlock real Engage gear for their champion, from a mouthguard to MMA gloves.</p>' +
+        '<h4 class="label">Badges and gear</h4><p>Gear unlocks the way it does at Engage: a mouthguard on sign-up, the Engage shirt after 3 days of training, MMA shorts after 10 days, MMA gloves with the first stripe, a sparring gear bag at the first graduation, then sparring gloves, boots, headgear and chest gear with each Yellow Belt stripe. The full Sparring Gear outfit unlocks at the Yellow to Orange Belt graduation, when sparring starts in class.</p>' +
         '<h4 class="label">Saving</h4><p>Progress saves automatically, even mid-round. Opened from the shared link while signed in to Claude, it is kept in that Claude account and follows you to any device. Otherwise it stays in this browser. Use <strong>Back up progress</strong> to get a save code that moves a student to another device or restores them if the browser is cleared.</p>' +
         '<h4 class="label">Parent PIN</h4><p>The Parent corner is protected by your PIN so kids can\'t reset or remove progress. Forgot it? Tap Forgot PIN and answer the grown-up math question.</p>');
     });
