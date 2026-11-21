@@ -8,7 +8,7 @@
    every third hit in a row. */
 window.BD = window.BD || {};
 
-/* Shared tap-to-answer question card (Boss Battles and Dojo Duels). */
+/* Shared tap-to-answer question card (Boss Battles and Partner Challenges). */
 BD.QuickUI = (function () {
   const esc = function (s) { return BD.UI.esc(s); };
   function render(el, q, onPick, opts) {
@@ -50,21 +50,21 @@ BD.Boss = (function () {
     { name: "Shadow", title: "the Ninja Cat", img: "img/boss-5.webp", hits: 12, hi: "You can't hit what you can't see!", lose: "Meow! You found me. Well done." },
     { name: "Agent Bridgette", title: "Secret Agent", img: "img/boss-6.webp", hits: 13, hi: "Mission: stop you. Ready, champion?", lose: "Mission failed... because you're amazing!", instructor: true },
     { name: "Star Force Mrs. Young", title: "Cosmic Hero", img: "img/boss-7.webp", hits: 14, hi: "Show me the power of a true Engage champion!", lose: "You shine brighter than the stars!", instructor: true },
-    { name: "Iron Master Young", title: "the Final Boss", img: "img/boss-8.webp", hits: 16, hi: "So you made it to the top. Bow in, champion. Let's see your best!", lose: "Incredible! You beat the Final Boss... or did you?", instructor: true, final: true },
+    { name: "Iron Master Young", title: "the Final Boss", img: "img/boss-8.webp", hits: 16, hi: "So you made it to the top. Bow in, champion. Let's see your best!", lose: "Incredible! You beat me... or did you?", instructor: true, final: true },
     // secret: unlocked by beating Iron Master Young
-    { name: "Overlord Young", title: "the Ultimate Boss", img: "img/boss-9.webp", hits: 18, hi: "You thought you won? Behold... my ULTIMATE form!", lose: "Impossible! You are the true master of this dojo!", instructor: true, secret: true }
+    { name: "Final Boss Master Young", title: "the true Final Boss", img: "img/boss-9.webp", hits: 18, hi: "You thought you won? Behold... my FINAL BOSS form!", lose: "Impossible! You are the true master of this dojo!", instructor: true, secret: true }
   ];
   const XP = 50;
   let S = null;
 
   function wins(p, grade) { p.bossWins = p.bossWins || {}; return p.bossWins[grade] = p.bossWins[grade] || []; }
-  /* The boss for the belt; at Black Belt, beating Iron Master Young unlocks Overlord Young. */
+  /* The boss for the belt; at Black Belt, beating Iron Master Young unlocks Final Boss Master Young. */
   function bossFor(p) {
     const g = BD.Rank.dojoGrade(p), belt = BD.Rank.rec(p, g).belt;
     const idx = belt === 8 && wins(p, g).indexOf(8) !== -1 ? 9 : belt;
     return { grade: g, belt: belt, idx: idx, boss: BOSSES[idx] };
   }
-  const label = function (b) { return b.boss.secret ? "👑 Secret Ultimate Boss" : b.boss.final ? "🔥 Final Boss" : "🥊 " + BD.BELTS[b.belt].name + " Belt Boss"; };
+  const label = function (b) { return b.boss.secret ? "👑 Final Boss" : b.boss.final ? "🔥 Black Belt Boss" : "🥊 " + BD.BELTS[b.belt].name + " Belt Boss"; };
 
   /* Home card. */
   function card(p) {
@@ -103,14 +103,14 @@ BD.Boss = (function () {
     S = { grade: b.grade, belt: b.belt, idx: b.idx, boss: b.boss, hp: b.boss.hits, max: b.boss.hits, hearts: hearts(p), maxHearts: hearts(p), streak: 0, gloves: gloves(p), right: 0, asked: 0, busy: false };
     $("bossName").textContent = b.boss.name;
     $("bossImg").src = b.boss.img; $("bossImg").alt = b.boss.name;
-    $("bossTitle").textContent = (b.boss.secret ? "Ultimate Boss · " : b.boss.final ? "Final Boss · " : "") + BD.gradeLabel(b.grade) + " · " + BD.BELTS[b.belt].name + " Belt";
+    $("bossTitle").textContent = (b.boss.secret ? "Final Boss · " : "") + BD.gradeLabel(b.grade) + " · " + BD.BELTS[b.belt].name + " Belt";
     $("bossArena").classList.toggle("ultimate", !!b.boss.secret);
     $("bossSay").textContent = b.boss.hi;
     $("bossOver").hidden = true;
     BD.UI.show("screen-boss");
     BD.Mini.fill($("screen-boss"));
     hud();
-    // the transformation, the first time Overlord Young appears
+    // the transformation, the first time Final Boss Master Young appears
     if (b.boss.secret && wins(p, b.grade).indexOf(9) === -1) return morph(next);
     next();
   }
@@ -170,9 +170,9 @@ BD.Boss = (function () {
     if (first) { w.push(S.idx); p.xp = (p.xp || 0) + prize(boss); }
     BD.Store.recordSession(p, { game: "boss", grade: S.grade, correct: S.right, total: S.asked, xp: first ? prize(boss) : 0, boss: boss.name, won: won });
     $("bossOver").hidden = false;
-    $("bossOverTitle").textContent = won ? (boss.secret ? "You beat the Ultimate Boss!" : boss.final ? "You beat the Final Boss!" : "You beat " + boss.name + "!") : boss.name + " wins this round";
+    $("bossOverTitle").textContent = won ? (boss.secret ? "You beat Final Boss Master Young!" : "You beat " + boss.name + "!") : boss.name + " wins this round";
     $("bossOverSay").textContent = "“" + (won ? boss.lose : "Train hard and come back. I'll be waiting!") + "”";
-    $("bossOverPrize").textContent = won ? (first ? (boss.secret ? "👑 Ultimate trophy + " : "🏆 Boss trophy + ") + prize(boss) + " XP" : "🏆 Rematch won!") : "You landed " + (S.max - Math.max(0, S.hp)) + " of " + S.max + " hits. So close!";
+    $("bossOverPrize").textContent = won ? (first ? (boss.secret ? "👑 Final Boss trophy + " : "🏆 Boss trophy + ") + prize(boss) + " XP" : "🏆 Rematch won!") : "You landed " + (S.max - Math.max(0, S.hp)) + " of " + S.max + " hits. So close!";
     // beating Iron Master Young the first time: he's not done yet...
     const twist = !!(won && first && boss.final);
     $("bossAgain").textContent = twist ? "⚡ Wait... something's happening!" : won ? "Rematch" : "Try again";

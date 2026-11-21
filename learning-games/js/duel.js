@@ -1,6 +1,6 @@
-/* DOJO DUEL — two players, one phone or tablet. The screen splits in two
+/* PARTNER CHALLENGE — two players, one phone or tablet. The screen splits in two
    (the top half flips to face the player across the table). Each player gets
-   questions at their own grade, so a 2nd grader can duel a 6th grader fairly.
+   questions at their own grade, so a 2nd grader can challenge a 6th grader fairly.
    First to the goal wins; a wrong answer freezes that player for a moment. */
 window.BD = window.BD || {};
 
@@ -19,7 +19,7 @@ BD.Duel = (function () {
     const me = BD.Store.current(), list = BD.Store.players();
     const other = list.find(function (p) { return !me || p.id !== me.id; });
     const grades = BD.GRADES.map(function (g) { return '<option value="' + g + '">' + BD.gradeLabel(g) + '</option>'; }).join("");
-    BD.UI.sheet("Dojo Duel",
+    BD.UI.sheet("Partner Challenge",
       '<p>Two players, one screen. Each player answers questions at <strong>their own grade</strong>. First to the goal wins. A wrong answer freezes you for a moment!</p>' +
       [1, 2].map(function (n) {
         const sel = n === 1 ? (me ? me.id : "guest") : (other ? other.id : "guest");
@@ -29,7 +29,7 @@ BD.Duel = (function () {
       }).join("") +
       '<div class="duel-pick"><span class="duel-tag">Goal</span><select id="duelGoal"><option value="5">First to 5</option><option value="10" selected>First to 10</option><option value="15">First to 15</option></select></div>' +
       '<label class="duel-face"><input type="checkbox" id="duelFlip" checked> Sitting across from each other (flip the top half)</label>' +
-      '<div class="res-actions"><button type="button" class="btn btn-primary btn-big" id="duelGo">Start the duel!</button></div>');
+      '<div class="res-actions"><button type="button" class="btn btn-primary btn-big" id="duelGo">Start the challenge!</button></div>');
     [1, 2].forEach(function (n) {
       $("duelGr" + n).value = "3";
       $("duelP" + n).onchange = function () { $("duelG" + n).hidden = this.value !== "guest"; };
@@ -91,7 +91,7 @@ BD.Duel = (function () {
     });
     $("duelOver").hidden = false;
     $("duelOver").classList.toggle("top-won", pl.n === 1);
-    $("duelOverTitle").textContent = pl.name + " wins the duel!";
+    $("duelOverTitle").textContent = pl.name + " wins the challenge!";
     $("duelOverSub").textContent = pl.score + " to " + loser.score + (pl.id ? " · +" + XP + " XP" : "") + ". Bow to your opponent!";
     BD.Sound.belt(); BD.confetti(180);
   }

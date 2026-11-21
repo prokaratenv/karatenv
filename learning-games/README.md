@@ -25,10 +25,10 @@ Free math, writing, reading, spelling and Spanish practice from Pre-K through 8t
 - **Badges unlock real Engage gear** for the student's champion, in this order: Mouthguard (first round), Black Training Shorts (3-day streak), Engage Black Training Shirt (first stripe), Sparring Gloves (perfect round), Sparring Boots (all four subjects in one week), Sparring Headgear (first new belt), Sparring Chest Gear (7-day streak), Boxing Gloves (1,000 XP), MMA Gloves (3 belts). Equipped gear is drawn **on the champion** (home screen, gear locker, character picker, certificates and the weekly card): headgear with the face showing through, chest gear, shirt, shorts, gloves, boots, and the mouthguard clipped to the belt. The belt color stays on top. Only one pair of gloves is worn at a time: a new pair goes on and the old one comes off. The **Gear locker** shows the champion, every badge, and lets them put each item on or take it off. Built champions wear the same gear.
 - **Champions grow up with the grade.** Kimmy, Billy, Tommy, Mackenzie and Rylan look about 5 in Pre-K/K, 7 in 1st–2nd, 10 in 3rd–5th and 13 in 6th–8th, based on the grade they're training. Built champions get younger proportions too. Instructors and Zumi stay the same.
 
-## Boss Battles, Dojo Duel and the champion in every game
+## Boss Battles, Partner Challenge and the champion in every game
 
-- **Boss Battles:** every belt in every grade has a boss to beat. Right answers are kicks that knock down the boss's health; a wrong answer lets the boss strike back and costs a heart. Questions mix math, spelling, reading (pick the correctly written sentence) and Spanish at the student's grade and belt. The ladder: Rascal the Raccoon Ninja (White), Professor Hoot (Yellow), Blaze the Fire Fox (Orange), Glacier the Polar Bear (Blue), Bamboo the Panda Master (Green), Shadow the Ninja Cat (Purple), then the Engage instructors: **Agent Bridgette** (Brown), **Star Force Mrs. Young** (Red) and the final boss, **Iron Master Young** (Black). Beat him and he transforms into the secret Ultimate Boss, **Overlord Young**, for one last fight (+100 XP and the Ultimate trophy). Beating a boss the first time earns a trophy and +50 XP. Gear helps: headgear and chest gear add a heart each, and gloves turn every 3rd hit in a row into a 2-damage power punch.
-- **Dojo Duel:** two players on one phone or tablet. The screen splits (the top half flips to face the player across the table), each player gets questions at their own grade, and the first to the goal wins. A wrong answer freezes that player for 1.5 seconds. Students who win get +20 XP. Guests can play too.
+- **Boss Battles:** every belt in every grade has a boss to beat. Right answers are kicks that knock down the boss's health; a wrong answer lets the boss strike back and costs a heart. Questions mix math, spelling, reading (pick the correctly written sentence) and Spanish at the student's grade and belt. The ladder: Rascal the Raccoon Ninja (White), Professor Hoot (Yellow), Blaze the Fire Fox (Orange), Glacier the Polar Bear (Blue), Bamboo the Panda Master (Green), Shadow the Ninja Cat (Purple), then the Engage instructors: **Agent Bridgette** (Brown), **Star Force Mrs. Young** (Red) and the final boss, **Iron Master Young** (Black). Beat him and he transforms into **Final Boss Master Young** for one last fight (+100 XP and the Final Boss trophy). Beating a boss the first time earns a trophy and +50 XP. Gear helps: headgear and chest gear add a heart each, and gloves turn every 3rd hit in a row into a 2-damage power punch.
+- **Partner Challenge:** two players on one phone or tablet. The screen splits (the top half flips to face the player across the table), each player gets questions at their own grade, and the first to the goal wins. A wrong answer freezes that player for 1.5 seconds. Students who win get +20 XP. Guests can play too.
 - **Champion in every game:** a small version of the student's champion, in their belt and gear, sits beside every game. It kicks on a right answer, shakes it off on a miss and bows at the end of a round.
 
 ## Parent corner
@@ -276,7 +276,7 @@ learning-games/
   js/gearfit.js          where gear sits on each character
   js/quick.js            quick tap-to-answer questions from every subject
   js/boss.js             boss battles
-  js/duel.js             two-player Dojo Duel
+  js/duel.js             two-player Partner Challenge
   js/mini.js             the champion beside every game
   js/app.js              home, results and parent screens
 ```

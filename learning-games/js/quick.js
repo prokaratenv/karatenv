@@ -1,5 +1,5 @@
 /* QUICK QUESTIONS — fast, tap-to-answer questions from every subject, used
-   by Boss Battles and Dojo Duels. Each has 2-4 choices.
+   by Boss Battles and Partner Challenges. Each has 2-4 choices.
    { kind, label, prompt, sub, html?, choices: [..], answer, say } */
 window.BD = window.BD || {};
 
