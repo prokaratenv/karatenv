@@ -29,7 +29,8 @@ BD.Dojo = (function () {
       players: e.players.slice(0, 6).map(function (pl) {
         const b = BELT_BY_NAME[pl && pl.belt] || BD.BELTS[0];
         const reps = Math.max(0, Math.min(1500, Math.round(Number(pl && pl.reps) || 0))); // no one answers 1,500+ in a week
-        return { name: firstName(pl && pl.name), belt: b.name, color: b.color, reps: reps };
+        const xp = Math.max(0, Math.min(10000, Math.round(Number(pl && pl.xp) || 0)));
+        return { name: firstName(pl && pl.name), belt: b.name, color: b.color, reps: reps, xp: xp };
       })
     };
   }
@@ -60,7 +61,7 @@ BD.Dojo = (function () {
     const ws = BD.Parent.weekStart(), now = Date.now() + 864e5;
     return BD.Store.players().filter(function (p) { return p.dojoOptIn; }).map(function (p) {
       const w = BD.Parent.weekStats(p, ws, now), belt = BD.beltOf(p);
-      return { name: firstName(p.name), belt: belt.name, reps: Math.min(1500, w.correct) };
+      return { name: firstName(p.name), belt: belt.name, reps: Math.min(1500, w.correct), xp: Math.min(10000, BD.xpSince(p, ws)) };
     });
   }
   function push() {
@@ -70,7 +71,7 @@ BD.Dojo = (function () {
       const doc = { week: weekId(), players: mine(), updatedAt: Date.now() };
       const was = entries[uid];
       if (!doc.players.length && !was) return;
-      if (was && JSON.stringify(was.players.map(function (x) { return [x.name, x.belt, x.reps]; })) === JSON.stringify(doc.players.map(function (x) { return [x.name, x.belt, x.reps]; })) && was.week === doc.week) return;
+      if (was && JSON.stringify(was.players.map(function (x) { return [x.name, x.belt, x.reps, x.xp]; })) === JSON.stringify(doc.players.map(function (x) { return [x.name, x.belt, x.reps, x.xp]; })) && was.week === doc.week) return;
       try { await col.doc(uid).set(doc); entries[uid] = cleanEntry(doc); render(); } catch (e) { /* can't write here: the board stays read-only */ }
     }, 1500);
   }
@@ -82,7 +83,7 @@ BD.Dojo = (function () {
       if (!e || e.week !== wk) return;
       (e.players || []).forEach(function (pl) { rows.push(Object.assign({ me: id === uid }, pl)); });
     });
-    rows.sort(function (a, b) { return b.reps - a.reps; });
+    rows.sort(function (a, b) { return (b.xp - a.xp) || (b.reps - a.reps); }); // leaderboard: points this week
     const total = rows.reduce(function (a, r) { return a + (r.reps || 0); }, 0);
     return { rows: rows, total: total, goal: GOAL };
   }
@@ -102,11 +103,12 @@ BD.Dojo = (function () {
     if (!ready) return;
     const b = board();
     BD.UI.sheet("Dojo Challenge",
-      '<p><strong>' + b.total.toLocaleString() + '</strong> of <strong>' + b.goal.toLocaleString() + '</strong> right answers this week. Resets every Monday.</p>' +
+      '<p><strong>' + b.total.toLocaleString() + '</strong> of <strong>' + b.goal.toLocaleString() + '</strong> right answers this week (team goal). Resets every Monday.</p>' +
+      '<h4 class="label">Leaderboard · XP this week</h4>' +
       (b.rows.length ? '<ol class="dojo-list">' + b.rows.map(function (r) {
-        return '<li' + (r.me ? ' class="me"' : '') + '><span class="belt-swatch" style="--belt:' + r.color + '"></span><span class="dl-name">' + BD.UI.esc(r.name) + '</span><span class="dl-belt">' + BD.UI.esc(r.belt) + '</span><span class="dl-n">' + r.reps.toLocaleString() + '</span></li>';
+        return '<li' + (r.me ? ' class="me"' : '') + '><span class="belt-swatch" style="--belt:' + r.color + '"></span><span class="dl-name">' + BD.UI.esc(r.name) + '</span><span class="dl-belt">' + BD.UI.esc(r.belt) + '</span><span class="dl-n">' + r.xp.toLocaleString() + ' XP</span></li>';
       }).join("") + '</ol>' : '<p class="muted">No one has joined yet this week. Be the first!</p>') +
-      '<p class="muted small">Only first names and belts are shown. Parents can join or leave in the Parent corner.</p>');
+      '<p class="muted small">XP comes from practice (up to 100 per stripe, and only before the stripe is earned), graduations (+100), bosses, challenges and daily chests. Tip: practice to 100 before each stripe test! Only first names and belts are shown. Parents can join or leave in the Parent corner.</p>');
   }
 
   /* Parent corner toggle. */

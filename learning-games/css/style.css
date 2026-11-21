@@ -1137,3 +1137,5 @@ body.duel-on .topbar, body.duel-on .footer { visibility: hidden; }
 .terms h4 { margin: 14px 0 4px; }
 .terms p { margin: 0; line-height: 1.5; }
 .terms a { color: var(--teal); }
+.xp-warn { margin: 10px 0; padding: 12px 14px; border-radius: 14px; border: 1px solid var(--warn); background: var(--warn-bg); }
+.xp-warn p { margin: 6px 0 0; }

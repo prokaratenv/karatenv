@@ -95,7 +95,7 @@ BD.Quest = (function () {
     const c = current(p);
     if (!c.done || c.claimed) return null;
     const xp = [20, 25, 30, 40, 50][Math.floor(Math.random() * 5)];
-    p.xp = (p.xp || 0) + xp;
+    BD.addXP(p, xp);
     p.quest.claimed = true; p.chests++;
     const missing = STICKERS.map(function (_, i) { return i; }).filter(function (i) { return p.stickers.indexOf(i) === -1; });
     let prize;

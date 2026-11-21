@@ -167,7 +167,7 @@ BD.Boss = (function () {
   }
   function end(won) {
     const p = BD.Store.current(), boss = S.boss, w = wins(p, S.grade), first = won && w.indexOf(S.idx) === -1;
-    if (first) { w.push(S.idx); p.xp = (p.xp || 0) + prize(boss); }
+    if (first) { w.push(S.idx); BD.addXP(p, prize(boss)); }
     BD.Store.recordSession(p, { game: "boss", grade: S.grade, correct: S.right, total: S.asked, xp: first ? prize(boss) : 0, boss: boss.name, won: won });
     $("bossOver").hidden = false;
     $("bossOverTitle").textContent = won ? (boss.secret ? "You beat Final Boss Master Young!" : "You beat " + boss.name + "!") : boss.name + " wins this round";

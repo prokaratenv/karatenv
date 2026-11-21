@@ -86,7 +86,7 @@ BD.Duel = (function () {
       if (!x.id) return;
       const p = BD.Store.get(x.id); if (!p) return;
       const won = x === pl;
-      if (won) { p.xp = (p.xp || 0) + XP; p.duelWins = (p.duelWins || 0) + 1; }
+      if (won) { BD.addXP(p, XP); p.duelWins = (p.duelWins || 0) + 1; }
       BD.Store.recordSession(p, { game: "duel", grade: x.grade, correct: x.right, total: x.asked, xp: won ? XP : 0, won: won, vs: (won ? loser : pl).name });
     });
     $("duelOver").hidden = false;
