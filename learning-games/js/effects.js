@@ -24,12 +24,14 @@ BD.Sound = (function () {
     o.start(t); o.stop(t + dur + 0.05);
   }
   function play(fn) { if (BD.Store.muted) return; try { fn(); } catch (e) { /* no audio */ } }
+  const music = function () { if (BD.Music) try { BD.Music.fanfare(); } catch (e) { /* no music */ } };
   return {
+    ctx: ac,
     right: function () { play(function () { tone(660, 0, 0.12, "triangle"); tone(990, 0.08, 0.18, "triangle"); }); },
     wrong: function () { play(function () { tone(196, 0, 0.22, "square", 0.06); }); },
     tap: function () { play(function () { tone(520, 0, 0.05, "sine", 0.05); }); },
-    win: function () { play(function () { [523, 659, 784, 1047].forEach(function (f, i) { tone(f, i * 0.11, 0.25, "triangle"); }); }); },
-    belt: function () { play(function () { [392, 523, 659, 784, 1047, 1319].forEach(function (f, i) { tone(f, i * 0.1, 0.35, "triangle", 0.2); }); }); }
+    win: function () { play(function () { [523, 659, 784, 1047].forEach(function (f, i) { tone(f, i * 0.11, 0.25, "triangle"); }); }); music(); },
+    belt: function () { play(function () { [392, 523, 659, 784, 1047, 1319].forEach(function (f, i) { tone(f, i * 0.1, 0.35, "triangle", 0.2); }); }); music(); }
   };
 })();
 

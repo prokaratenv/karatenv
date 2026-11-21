@@ -21,6 +21,15 @@ In **Math Dojo**, the top of the screen has **⚡ Daily Flashcards**: big button
 - The buttons show ✓ once a skill's bonus is earned today. Extra sets still count as practice XP for the Math stripe (up to its 100 cap), just without another bonus. Everything resets at midnight.
 - Bonus XP counts toward total XP and the weekly leaderboard. A low flashcard score never locks a level.
 
+## The home screen
+
+The home screen is kept simple. From top to bottom:
+1. **Champion + Start training:** one big button that runs Sensei's best next step (school words first when there's a list, then stripe practice). Tap the champion to change them, or tap **Gear locker**.
+2. **Today:** three tiles: ⭐ **Today's quest**, ⚡ **Daily Flashcards** (pick + − × ÷, with today's bonus shown) and 🗺️ **Adventure Map**.
+3. **My belt:** one line with the belt, stripes and belt XP. Tap **Stripes & tests** to open the stripe rows with Practice and Stripe test buttons, and the Dojo grade picker. The app remembers whether it's open.
+4. **Play:** one tile per game (coach, name, grade), plus a 📝 **School Words** tile when a parent has added a list. Tap a tile to play. Each game's grade is changed inside the game, from the grade menu at the top.
+5. **Challenges:** the belt boss, Partner Challenge and the Dojo Challenge leaderboard.
+
 ## Start training, read aloud and certificates
 
 - **Start training:** the big button on the home screen starts whatever Sensei suggests next (the stripe closest to done, a test they're ready for, or their weakest skill). Underneath, a 🔥 streak counts the days in a row they've trained.
@@ -44,7 +53,7 @@ In **Math Dojo**, the top of the screen has **⚡ Daily Flashcards**: big button
 - **PIN:** the first visit asks for a 4-digit parent PIN, so kids can't reset or remove progress. Forgot it? A grown-up math question lets you set a new one.
 - **Dashboard:** for each child: this week (days, rounds, questions, streak), belt progress, what they're strong at and what to work on, a tip to try at home, last week's recap (highlighted on Mondays) and badges. The detailed tables are under **See details** and only show grades they've played.
 - **Share this week:** makes a progress card picture to text to family or an Engage instructor.
-- **Dojo Challenge:** a weekly team goal (3,000 right answers) plus a **leaderboard ranked by XP earned this week** (practice, graduation bonuses, Daily Flashcards, bosses, Partner Challenges and daily chests) for everyone using the shared link. Stripe tests alone give no points, so doing the practice is how to climb it. Parents opt each child in; other families see only a **first initial** (like "M."), belt and weekly points. Needs the shared Claude link while signed in, with Contributor access or above (everyone in your Claude organization; view-only visitors can see the board but not add to it).
+- **Dojo Challenge and leaderboard:** a weekly team goal (3,000 right answers) and a **leaderboard ranked by XP earned this week** (practice, graduation bonuses, Daily Flashcards, bosses, Partner Challenges and daily chests). Stripe tests alone give no points, so doing the practice is how to climb it. **Anyone can see the board; no names are ever shown.** Each student appears as a **nickname** they build from kid-safe word lists (Word 1 + Word 2 + a number, like "Swift Panda 27", with a 🎲 Surprise me button) or as a first initial. Words that match, contain, start like or nearly spell the student's real name are grayed out and refused (a student named Wolfgang can't be "Swift Wolf"). Students pick or change it from the board (tap the Dojo Challenge card). A parent puts each child on the board in the Parent corner. On your own website that requires signing in with a parent's email; the board runs through `tools/family-sync.gs` and stores only nickname or initial, belt and weekly points. On the Claude link it needs Contributor access.
 
 ## School Words (from your child's teacher)
 
@@ -70,7 +79,7 @@ Parents see each word color-coded (mastered, practicing, missed last time) and t
 
 Until the report is unlocked, the Parent corner still shows **Back up progress** for each student, so progress is never held hostage. A "Parents: unlock your free Parent Progress Report" link on the welcome screen opens the PIN-protected Parent corner.
 
-**Terms and consent:** the form requires a "parent or guardian 18+ and I agree to the Terms & Privacy" box, and shows the disclosure next to the button: emails including the Parent Handbook series, unsubscribe any time, texts only by opt-in with STOP/HELP wording, never sold, nothing collected from children. **Terms & Privacy** opens the full terms. Each sign-up records the consent wording and the terms version. Kid-safe (COPPA): it's behind the parent PIN, adult-confirmed, and it sends only the parent's own details (first and last name, email, member yes/no and, only with text opt-in, mobile number) and opt-ins. Nothing about any child (no names, grades, ages or progress) is sent. Have your own attorney review the terms wording.
+**Terms and consent:** the form requires a "parent or guardian 18+ and I agree to the Terms & Privacy" box, and shows the disclosure next to the button: emails including the Parent Handbook series, unsubscribe any time, texts only by opt-in with STOP/HELP wording, never sold, nothing collected from children. **Terms & Privacy** opens the full terms. Each sign-up records the consent wording and the terms version. Kid-safe (COPPA): it's behind the parent PIN, adult-confirmed, and it collects **only the parent's** first and last name, email, member yes/no and (only with text opt-in) mobile number. Nothing about the child is sent to GoHighLevel. Have your own attorney review the terms wording.
 
 **Connecting GoHighLevel:**
 1. In GoHighLevel, create a Workflow with the trigger **Inbound Webhook**. Copy its URL.
@@ -79,6 +88,31 @@ Until the report is unlocked, the Parent corner still shows **Back up progress**
 4. Add actions: **Create/Update Contact**, **Add Tags** (from `tags`: Brain Dojo, Parent Progress Report, Parent Handbook, plus Free Class Offers / SMS Opt-In / Engage Member / Prospect), then **Add to Workflow:** your Parent Handbook email series. Only send texts to contacts tagged SMS Opt-In.
 
 You can also add a Google Sheet backup (steps in `tools/lead-sheet.gs`) as a second URL in the same list. The report is only locked where a sign-up can actually be delivered: with `leadEndpoints` empty (and on the Claude link for visitors who can't save there), the report stays open, so parents are never locked out. On the Claude link, the owner is never locked out and sees **Download sign-ups (CSV)**. If a parent is offline, the sign-up is sent the next time Brain Dojo opens.
+
+## Music and sound
+
+Brain Dojo has its own soundtrack, composed for it and played by small synthesizers in code. There are no audio files, so it loads instantly and works offline.
+
+| Piece | Where it plays |
+|---|---|
+| **Morning Bow** | Welcome, home and parent screens: calm koto and soft pad |
+| **Path of Belts** | The Adventure Map: a bright flute adventure |
+| **Quiet Mind** | While answering questions: very soft, no melody, so it doesn't distract |
+| **Rival Stance** | Boss battles and Partner Challenge: taiko drums and a driving bass |
+| **Iron Tower** | The Black Belt boss and Final Boss Master Young: faster and heavier |
+| **Victory fanfare** | Wins, stripes and graduations |
+
+- Music starts quietly after the first tap (browsers require a tap first). It gets softer while a voice reads aloud, and pauses when the app is in the background.
+- The top-bar **🔊 Sound** button opens the Sound menu, which has **Music on/off**, **Music volume**, and **Sound effects & voice on/off** (dings, cheers and read-aloud). Settings are remembered on each device.
+
+## Offline play
+
+On your own website, Brain Dojo keeps itself on the device after the first visit, so it opens and plays with **no internet**.
+- The app's core files are saved right away, and the character pictures download quietly in the background a few seconds later. Fonts are kept too.
+- Offline, kids can play every game, the map, bosses and flashcards, and everything saves on the device. The footer shows "Offline · playing and saving on this device."
+- When the internet comes back, family sync and sign-ups send automatically. Ask Sensei and other AI extras are only available on the Claude link anyway.
+- **Updates and browser caching:** engagelma.com tells browsers to keep scripts and styles for 4 hours, so `index.html` loads them with a version stamp (`?v=...`). After changing any app file, run `python3 tools/build-sw.py`. It re-stamps every script and style link with a fingerprint of the files, so families get the update right away instead of a mix of old and new files. It also refreshes `sw.js` with a new version, so devices with the offline copy pick up the update on their next visit.
+- On iPhone and iPad, Share → **Add to Home Screen** opens it full screen like an app. The top bar stays clear of the clock and battery icons.
 
 ## Scratch paper
 
@@ -95,38 +129,46 @@ In Math Dojo, **Scratch paper** opens a sheet of graph paper to work a problem o
 
 ## Hosting it on your own website
 
-**Updates and browser caching:** engagelma.com tells browsers to keep scripts and styles for 4 hours, so `index.html` loads them with a version stamp (`?v=20261121b`). When you change any file in `js/`, `css/` or `data/`, change that stamp in `index.html` (find and replace all) so families get the update right away.
-
 The game is a plain website: everything in this `learning-games` folder (index.html, css, js, data, img, manifest.webmanifest). Put the folder on any web host (your website's file manager, GitHub Pages, Cloudflare Pages, Netlify) and it opens in a normal browser with no Claude banner or sign-in. "Add to Home Screen" opens it full screen like an app, with the Brain Dojo icon.
 
 Hosted on its own, these Claude-only extras are turned off automatically: Ask Sensei, Sensei's written feedback on Story Scrolls (the built-in checker is used instead), new AI-written sentences and stories (the built-in banks keep going), saving to a Claude account, and the Dojo Challenge board. Progress stays in each browser; use **Back up progress** save codes to move a student between devices.
 
-## Family Sync: progress on every device, with no personal data kept
+## Family accounts: progress on every device (sign in with a parent's email)
 
-On your own website, families can keep every device in step without an email or account, and the studio never holds any child's information:
-1. In the Parent corner (behind the parent PIN), the **Use Brain Dojo on every device** card has **Turn on Family Sync**. The device makes a private **Family Sync Code** (26 letters and numbers, shown with a QR code and a link).
-2. Before sync turns on, the parent sees a warning and checks a box: *Engage can't see, reset or recover this code. If you lose it and every linked device, the synced progress is gone.* They can copy, print or screenshot the code.
-3. On another device, they scan the QR with the camera, open the link, or tap **Already training on another device? Link with your Family Sync Code** on the welcome screen and type the code.
-4. From then on, **every save syncs automatically** (a couple of seconds after each answer, when the app is closed or hidden, and every 2 minutes while open). Adding or removing a student carries over too.
-5. In the Parent corner, a linked device has **Show code** (to link more devices), **Turn off on this device**, and **Delete synced data**.
+On your own website, families can link every device with a parent's email instead of copying save codes:
+1. On any device, the welcome screen shows **"Already training on another device? Sign in with a parent's email."** The Parent corner also has a **Use Brain Dojo on every device** card.
+2. The parent types their email and checks the consent box (which explains that profiles are encrypted on the device first), and a **6-digit code** arrives by email. They type it in, and the device is linked. Students on the account appear right away.
+3. From then on, **every save syncs automatically** (a couple of seconds after each answer, when the app is closed or hidden, and every 2 minutes while open). Any device signed in with the same email shows the same students, belts, stripes and points. Adding or removing a student carries over too. The footer says "Synced to p•••@example.com".
+4. In the Parent corner, parents can **Sign out this device**, **Sign out all devices**, or **Delete family data**.
 
-**What's stored (and what isn't):** students' names and progress are encrypted on the device (AES-256-GCM, key derived from the code with HKDF) before upload. `tools/family-sync.gs` only keeps that locked blob in a "Brain Dojo Sync (encrypted)" folder in your Google Drive, filed under a fingerprint of the code. No email, no names, no device details. Nobody at the studio can read it or recover a lost code.
+**Privacy by design (no personal data on file):** each device **encrypts every student profile before it's sent** (AES-256-GCM). The key is made on the device from the parent's email plus a random per-family salt (PBKDF2, 310,000 rounds). The server never receives the key and **never stores an email address**: the email is used once to send the sign-in code. Each family file in your Drive holds only:
+- an anonymous family number (made with a secret only the script knows, so it can't be matched to an email)
+- scrambled student data
+- fingerprints of the linked devices' keys
+
+The script refuses any readable student data. Kids' first names exist in readable form only on the family's own devices. Someone would need both your Drive file and the parent's exact email to unscramble a family.
+
+**How it's built (free, in your Google account):** `tools/family-sync.gs` is a small Google Apps Script web app. Each family is one private JSON file in a "Brain Dojo Family Data" folder in your Google Drive, and the sign-in codes are sent from your Gmail, from the address in `FROM_EMAIL` (set to info@engagelma.com). That address must be listed under Gmail Settings → Accounts → **Send mail as** for the Google account that deploys the script.
 
 **Setup (about 5 minutes):**
 1. Go to script.google.com and create a new project.
 2. Paste in `family-sync.gs` and save.
 3. Deploy it as a web app: Execute as **Me**, Who has access **Anyone**.
-4. Allow the permission it asks for (the Drive files it creates).
+4. Allow the permissions it asks for (the Drive files it creates, and sending email from your Gmail).
 5. Paste the `/exec` URL into `js/config.js` as `accountEndpoint`.
 
-Until that's set, the Family Sync options stay hidden.
+Until that's set, the sign-in options stay hidden.
 
-**Safety and limits:**
-- The code is 128 random bits, so it can't be guessed. Only a separate fingerprint of it reaches the server, and the encryption key never does.
-- Two devices saving at once is handled: the second one merges the first one's changes and saves again. If both changed the same student, the most recent copy of that student wins.
-- Everything coming back is checked field by field before it's shown, like save codes.
-- Each family holds up to 12 students, about 1.5 MB.
-- Lose the code and every linked device and the synced copy can't be recovered. **Back up progress** still saves a file copy any time.
+**Safety:**
+- Codes expire in 10 minutes, allow 5 tries, and are limited to 5 per email per hour.
+- Each linked device gets its own long random key. Only a fingerprint of it is stored, and signing out deletes it.
+- The email code isn't marketing and doesn't join any list.
+- Everything coming back from the account is checked field by field before it's shown, like save codes.
+- If two devices change the same student while offline, the most recent copy of that student wins.
+
+**Limits:**
+- Gmail sends about 100 code emails a day on a regular Google account (about 1,500 on Google Workspace).
+- Each family holds up to 10 students.
 
 On the Claude link, the Claude-account sync described below is used instead.
 
@@ -349,8 +391,9 @@ learning-games/
   js/quest.js            Adventure Map, daily quest, chests, stickers, streak shields
   js/leads.js            parent newsletter / free-class sign-up
   js/config.js           studio settings (sign-up and family account URLs)
-  js/family.js           Family Sync: encrypted, code-based sync across devices
-  js/vendor/qrcode.js    QR code generator (MIT, Kazuhiko Arase)
+  js/music.js            the soundtrack (synthesized in code) and music settings
+  sw.js                  offline support (built by tools/build-sw.py)
+  js/family.js           family accounts: email sign-in and sync across devices
   tools/family-sync.gs   Google Apps Script backend for family accounts
   tools/lead-sheet.gs    Google Sheet script that collects sign-ups
   js/scratch.js          scratch paper for math

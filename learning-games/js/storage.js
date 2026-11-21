@@ -114,6 +114,7 @@ BD.Store = (function () {
     if (p.flash && typeof p.flash === "object" && /^\d{4}-\d\d-\d\d$/.test(p.flash.day)) p.flash = { day: p.flash.day, ops: (Array.isArray(p.flash.ops) ? p.flash.ops : []).filter(function (o, i, a) { return ["add", "sub", "mul", "div"].indexOf(o) !== -1 && a.indexOf(o) === i; }) }; else delete p.flash;
     if (p.xpLog && typeof p.xpLog === "object") { const xl = {}; Object.keys(p.xpLog).forEach(function (k) { if (/^\d{4}-\d\d-\d\d$/.test(k)) xl[k] = Math.max(0, Math.min(10000, Math.round((Number(p.xpLog[k]) || 0) * 2) / 2)); }); p.xpLog = xl; } else delete p.xpLog;
     if (["gi", "training", "sparring", "boxing", "mma"].indexOf(p.outfit) === -1) p.outfit = "gi";
+    if (p.nick !== undefined && (typeof p.nick !== "string" || !(BD.Dojo ? BD.Dojo.nickOk(p.nick, p.name) : /^[A-Za-z]+ [A-Za-z]+ [1-9][0-9]?$/.test(p.nick)))) delete p.nick;
     if (BD.School) BD.School.sanitize(p); else if (p.school && typeof p.school !== "object") delete p.school;
     if (BD.Quest) BD.Quest.sanitize(p);
     return p;
