@@ -57,11 +57,13 @@
         <div class="host-text">
           <p class="eyebrow">Math · Writing · Reading · Spelling · Spanish · Pre-K–8th</p>
           <h1>Who's training today?</h1>
-          <p class="say">Hi, I'm Zumi! Pick your name to step onto the mat.</p>
+          <p class="say" id="zumiSay">Hi, I'm Zumi! Pick your name to step onto the mat.</p>
         </div>
       </div>
+      <div class="welcome-cta" id="welcomeCta"></div>
+      <p class="label switch-label" id="switchLabel" hidden>Someone else training?</p>
       <div class="player-list" id="playerList"></div>
-      <form class="add-player" id="addPlayerForm" autocomplete="off">
+      <form class="add-player" id="addPlayerForm" autocomplete="off" hidden>
         <h2 class="label">New student? Choose your champion</h2>
         <div class="fighter-pick" id="newFighter" role="radiogroup" aria-label="Choose a character"></div>
         <div class="add-row">

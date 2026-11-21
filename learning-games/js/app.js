@@ -319,14 +319,39 @@ BD.UI = (function () {
   }
 
   /* ---------- choose player ---------- */
-  function players() {
+  /* The welcome screen: one big button. "Start here" for a new family,
+     "Resume my training" for whoever trained last. */
+  function lastPlayer() {
     const list = BD.Store.players();
-    $("playerList").innerHTML = list.length ? list.map(function (p) {
+    return BD.Store.current() || list.slice().sort(function (a, b) { return (b.updatedAt || 0) - (a.updatedAt || 0); })[0] || null;
+  }
+  function showAddForm() {
+    $("addPlayerForm").hidden = false;
+    $("addPlayerForm").scrollIntoView({ behavior: "smooth", block: "start" });
+    setTimeout(function () { $("newName").focus(); }, 350);
+  }
+  function players() {
+    const all = BD.Store.players(), last = lastPlayer();
+    if (last) {
+      const belt = BD.beltOf(last);
+      $("welcomeCta").innerHTML =
+        '<button type="button" class="btn btn-primary btn-big cta-main" id="welcomeResume">' + avatar(last, "md") +
+        '<span class="cta-text"><span class="cta-title">Resume my training</span><span class="cta-sub">' + esc(last.name) + ' · ' + BD.gradeLabel(BD.Rank.dojoGrade(last)) + ' · ' + belt.name + ' Belt</span></span><span class="cta-arrow" aria-hidden="true">▶</span></button>' +
+        '<button type="button" class="btn btn-quiet cta-new" id="welcomeNew">＋ New student</button>';
+      $("zumiSay").textContent = "Welcome back, " + last.name + "! Tap the big button to keep training.";
+    } else {
+      $("welcomeCta").innerHTML = '<button type="button" class="btn btn-primary btn-big cta-main cta-start" id="welcomeStart"><span class="cta-text"><span class="cta-title">Start here</span><span class="cta-sub">Add your name and pick your champion</span></span><span class="cta-arrow" aria-hidden="true">▶</span></button>';
+      $("zumiSay").textContent = "Hi, I'm Zumi! Tap Start here to begin your training.";
+    }
+    $("addPlayerForm").hidden = true;
+    const others = all.filter(function (p) { return !last || p.id !== last.id; });
+    $("switchLabel").hidden = !others.length;
+    $("playerList").innerHTML = others.map(function (p) {
       const belt = BD.beltOf(p);
       return '<button type="button" class="player-card" data-id="' + p.id + '">' + avatar(p, "lg") +
         '<span class="pc-name">' + esc(p.name) + '</span>' +
         '<span class="pc-belt">' + beltSwatch(belt) + BD.gradeShort(BD.Rank.dojoGrade(p)) + ' · ' + belt.name + ' Belt</span></button>';
-    }).join("") : '<p class="muted empty-note">No students yet. Add each child below so their belts and progress are saved separately.</p>';
+    }).join("");
     $("newGrade").innerHTML = BD.GRADES.map(function (g) { return '<option value="' + g + '">' + BD.gradeLabel(g) + '</option>'; }).join("");
     $("newGrade").value = "3";
     fighterPicker("newFighter", newFighter, false);
@@ -564,6 +589,10 @@ BD.UI = (function () {
 
   /* ---------- wiring ---------- */
   function bind() {
+    $("welcomeCta").addEventListener("click", function (e) {
+      if (e.target.closest("#welcomeResume")) { const p = lastPlayer(); if (p) { BD.Store.setCurrent(p.id); BD.Sound.tap(); home(); } }
+      else if (e.target.closest("#welcomeStart, #welcomeNew")) { BD.Sound.tap(); showAddForm(); }
+    });
     $("playerList").addEventListener("click", function (e) {
       const b = e.target.closest("[data-id]"); if (!b) return;
       BD.Store.setCurrent(b.dataset.id); BD.Sound.tap(); home();
@@ -704,7 +733,7 @@ BD.UI = (function () {
     BD.Store.onChange(refresh);
     BD.Sync.init();
     BD.Dojo.init();
-    BD.Store.current() ? home() : players();
+    players(); // always open on the welcome screen: Start here / Resume my training
   }
 
   return { championHTML: function (p) { return fighterArt(p, "full"); }, refreshStage: refreshStage, fighterKey: function (p) { return fighterOf(p); }, beltDetails: beltDetails, testMode: testMode, stripeResult: stripeResult, back: back, setGrade: setGrade, syncGradeSelect: syncGradeSelect, refresh: refresh, sheet: sheet, sheetOpen: sheetOpen, show: show, esc: esc, home: home, players: players, results: results, gradePicker: gradePicker, init: init };
