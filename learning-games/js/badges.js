@@ -42,19 +42,22 @@ BD.Badges = (function () {
   ];
 
   /* OUTFITS — what the champion actually wears. Each outfit is drawn as its
-     own picture (so the gear really fits), and unlocks when its gear is earned. */
+     own picture (so the gear really fits). An outfit unlocks only when EVERY
+     piece of it is earned, and contact outfits need a mouthguard, like in class. */
   const OUTFITS = [
-    { id: "gi", name: "Karate Gi", needs: [], gear: [] },
-    { id: "training", name: "Engage Training", needs: ["shirt", "shorts"], gear: ["shirt", "shorts"] },
-    { id: "sparring", name: "Sparring Gear", needs: ["sparring", "boots", "headgear", "chest"], gear: ["shirt", "sparring", "boots", "headgear", "chest"] },
-    { id: "boxing", name: "Boxing", needs: ["boxing", "shirt", "shorts"], gear: ["shirt", "shorts", "boxing"] },
-    { id: "mma", name: "MMA", needs: ["mma", "shirt", "shorts"], gear: ["shirt", "shorts", "mma"] }
+    { id: "gi", name: "Karate Gi", gear: [] },
+    { id: "training", name: "Engage Training", gear: ["shirt", "shorts"] },
+    { id: "sparring", name: "Sparring Gear", gear: ["mouthguard", "shirt", "sparring", "headgear", "chest", "boots"] },
+    { id: "boxing", name: "Boxing", gear: ["mouthguard", "shirt", "shorts", "boxing"] },
+    { id: "mma", name: "MMA", gear: ["mouthguard", "shirt", "shorts", "mma"] }
   ];
+  OUTFITS.forEach(function (o) { o.needs = o.gear; });
   const outfitById = function (id) { return OUTFITS.find(function (o) { return o.id === id; }) || OUTFITS[0]; };
   function hasGear(p, g) { return (p.gear || []).indexOf(g) !== -1; }
   function outfitUnlocked(p, o) { return o.needs.every(function (g) { return hasGear(p, g); }); }
-  /* Outfits are drawn for the student characters (Kimmy, Billy, Tommy, Mackenzie, Rylan). */
-  function canWearOutfits(p) { return BD.Cast.KIDS.indexOf(BD.UI.fighterKey(p)) !== -1; }
+  /* Outfits are drawn for the student characters (Kimmy, Billy, Tommy, Mackenzie,
+     Rylan) and for champions students build themselves. */
+  function canWearOutfits(p) { const k = BD.UI.fighterKey(p); return k === "custom" || BD.Cast.KIDS.indexOf(k) !== -1; }
   function outfit(p) {
     const o = outfitById(p.outfit);
     return o.id !== "gi" && outfitUnlocked(p, o) && canWearOutfits(p) ? o.id : "gi";
@@ -94,14 +97,15 @@ BD.Badges = (function () {
     return '<div class="locker-model">' + BD.UI.championHTML(p) + '</div>' +
       '<h4 class="label">Outfits</h4>' +
       (kid ? '<p class="muted small">Earn the gear to unlock each outfit. Tap one to wear it.</p>' :
-        '<p class="muted small">Outfits are drawn for the student champions: Kimmy, Billy, Tommy, Mackenzie and Rylan. Pick one of them as your champion to wear your gear.</p>') +
+        '<p class="muted small">Outfits are for the student champions (Kimmy, Billy, Tommy, Mackenzie, Rylan) and champions you build. Pick one of them to wear your gear.</p>') +
       '<div class="outfits">' + OUTFITS.map(function (o) {
         const open = outfitUnlocked(p, o), on = now === o.id;
         const missing = o.needs.filter(function (g) { return !hasGear(p, g); }).map(function (g) { return GEAR[g].name; });
         return '<button type="button" class="outfit' + (on ? " on" : "") + (open && kid ? "" : " locked") + '"' + (open && kid ? ' data-outfit="' + o.id + '" aria-pressed="' + on + '"' : ' disabled') + '>' +
           '<span class="outfit-art">' + BD.UI.championHTML(p, o.id) + '</span>' +
           '<strong>' + esc(o.name) + '</strong>' +
-          '<span class="locker-state">' + (on ? "Wearing" : open ? (kid ? "Tap to wear" : "Unlocked") : "🔒 Need: " + esc(missing.join(", "))) + '</span></button>';
+          '<span class="locker-state">' + (on ? "Wearing" : open ? (kid ? "Tap to wear" : "Unlocked") : "🔒 " + (o.needs.length - missing.length) + " of " + o.needs.length + " pieces") + '</span>' +
+          (open ? "" : '<span class="outfit-need">Still need: ' + esc(missing.join(", ")) + '</span>') + '</button>';
       }).join("") + '</div>' +
       '<h4 class="label">Gear collection · ' + have + ' of ' + BADGES.length + '</h4>' +
       '<div class="locker">' + BADGES.map(function (b) {

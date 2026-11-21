@@ -33,7 +33,7 @@ BD.Certificate = (function () {
   /* The champion in the new belt and outfit, drawn the same way as on screen. */
   async function champion(p, beltColor) {
     const key = BD.UI.fighterKey(p), band = BD.Cast.ageBand(BD.Rank.dojoGrade(p));
-    if (key === "custom") return load(svgSrc(await inlineImages(BD.Builder.svg(p.custom, beltColor, "full", band))));
+    if (key === "custom") return load(svgSrc(await inlineImages(BD.Builder.svg(p.custom, beltColor, "full", band, BD.Badges.outfit(p)))));
     const a = BD.Cast.art(key, BD.Rank.dojoGrade(p), BD.Badges.outfit(p));
     const img = await load(a.src);
     const mask = await load(BD.MASKS && BD.MASKS[a.mask] ? BD.MASKS[a.mask] : "img/mask-" + a.mask + ".png");

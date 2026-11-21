@@ -34,7 +34,7 @@ BD.UI = (function () {
   /* The student's character: a cast member, or the fighter they built. */
   function fighterArt(p, mode, outfit) {
     const g = BD.Rank.dojoGrade(p);
-    if (fighterOf(p) === "custom") return BD.Builder.svg(p.custom, BD.beltOf(p).color, mode, BD.Cast.ageBand(g));
+    if (fighterOf(p) === "custom") return BD.Builder.svg(p.custom, BD.beltOf(p).color, mode, BD.Cast.ageBand(g), outfit || BD.Badges.outfit(p));
     if (mode === "face") return '<img src="' + BD.Cast.face(fighterOf(p)) + '" alt="' + esc(BD.Cast.name(fighterOf(p))) + '">';
     return champArt(fighterOf(p), BD.beltOf(p).color, g, outfit || BD.Badges.outfit(p));
   }

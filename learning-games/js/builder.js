@@ -45,8 +45,12 @@ BD.Builder = (function () {
   /* Draw the fighter. mode "full" = whole body, "face" = head portrait. */
   /* age: 0 = Pre-K/K, 1 = 1st–2nd, 2 = 3rd–5th, 3 = 6th–8th (younger = shorter, bigger head). */
   let clipN = 0;
-  function svg(cfg, beltColor, mode, age) {
+  /* outfit: "gi" (their own uniform), "training", "sparring", "boxing" or "mma"
+     — the same outfits the student characters wear, drawn to fit this body. */
+  function svg(cfg, beltColor, mode, age, outfit) {
     const c = clean(cfg);
+    const fit = ["training", "sparring", "boxing", "mma"].indexOf(outfit) !== -1 ? outfit : "gi";
+    if (fit !== "gi") c.uniform = fit === "sparring" ? "spar" : "shirt";
     const A = age === undefined || age === null ? 2 : Math.max(0, Math.min(3, age));
     const AB = [0.72, 0.84, 0.95, 1.06][A], AH = [1.1, 1.04, 1, 0.94][A], AW = [0.9, 0.95, 1, 1.04][A];
     const H = ({ short: 0.86, mid: 1, tall: 1.14 }[c.height] || 1) * AB;
@@ -56,18 +60,22 @@ BD.Builder = (function () {
     const th = 70 * H, lh = 74 * H, tw = 76 * B;
     const oy = 306 - (124 + th + lh + 10); // keep feet on the ground
     const tTop = 124, tBot = tTop + th, cx = 100;
-    const gi = c.uniform === "white" ? "#F2F2F0" : "#1F1E26";
+    const gi = c.uniform === "white" ? "#F2F2F0" : "#1F1E26"; // spar: black pants
     const giEdge = c.uniform === "white" ? "#C9CBD3" : "#3A3946";
-    const shirt = c.uniform === "shirt";
+    const spar = c.uniform === "spar";
+    const shirt = c.uniform === "shirt" || spar;
+    const pants = !(c.uniform === "shirt");
     const top = shirt ? "#15151C" : gi;
     const legs = [], handsAt = [];
     let body = "", beltSvg = "";
 
     // legs / pants
     const legW = tw * 0.44, gap = 5;
-    if (shirt) {
+    if (!pants) {
       const shortsH = lh * 0.42;
       body += '<path d="M' + (cx - tw * 0.48) + ' ' + (tBot - 4) + 'h' + (tw * 0.96) + 'l2 ' + shortsH + 'h' + (-(legW + 2)) + 'l-' + (gap / 2) + ' -' + (shortsH * 0.55) + 'l-' + (gap / 2) + ' ' + (shortsH * 0.55) + 'h' + (-(legW + 2)) + 'z" fill="#15151C" stroke="' + ink + '" stroke-width="2"/>';
+      // white trim on the shorts
+      body += '<path d="M' + (cx - tw * 0.48 - 1) + ' ' + (tBot + shortsH - 6) + 'h' + (legW + 3) + ' M' + (cx + tw * 0.48 + 1) + ' ' + (tBot + shortsH - 6) + 'h' + (-(legW + 3)) + '" stroke="#F2F2F0" stroke-width="2.5"/>';
       legs.push('<rect x="' + (cx - gap / 2 - legW * 0.78) + '" y="' + (tBot + shortsH - 4) + '" width="' + (legW * 0.62) + '" height="' + (lh - shortsH + 2) + '" rx="8" fill="' + skin + '" stroke="' + ink + '" stroke-width="2"/>');
       legs.push('<rect x="' + (cx + gap / 2 + legW * 0.16) + '" y="' + (tBot + shortsH - 4) + '" width="' + (legW * 0.62) + '" height="' + (lh - shortsH + 2) + '" rx="8" fill="' + skin + '" stroke="' + ink + '" stroke-width="2"/>');
     } else {
@@ -78,6 +86,12 @@ BD.Builder = (function () {
     const fy = tBot + lh + 2;
     legs.push('<ellipse cx="' + (cx - gap / 2 - legW * 0.48) + '" cy="' + fy + '" rx="' + (legW * 0.5) + '" ry="7" fill="' + skin + '" stroke="' + ink + '" stroke-width="2"/>');
     legs.push('<ellipse cx="' + (cx + gap / 2 + legW * 0.48) + '" cy="' + fy + '" rx="' + (legW * 0.5) + '" ry="7" fill="' + skin + '" stroke="' + ink + '" stroke-width="2"/>');
+    if (fit === "sparring") [-1, 1].forEach(function (side) {
+      const fx = cx + side * (gap / 2 + legW * 0.48);
+      legs.push('<path d="M' + (fx - legW * 0.5) + ' ' + (fy + 6) + 'v-16 q0 -6 6 -6 h' + (legW - 12) + ' q6 0 6 6 v16 z" fill="#17171D" stroke="' + ink + '" stroke-width="2"/>' +
+        '<ellipse cx="' + fx + '" cy="' + (fy + 1) + '" rx="' + (legW * 0.56) + '" ry="8" fill="#17171D" stroke="' + ink + '" stroke-width="2"/>' +
+        '<path d="M' + (fx - legW * 0.3) + ' ' + (fy - 6) + 'h' + (legW * 0.6) + '" stroke="#F2F2F0" stroke-width="2.5" stroke-linecap="round"/>');
+    });
     body = legs.join("") + body;
 
     // arms (behind torso edges)
@@ -98,20 +112,35 @@ BD.Builder = (function () {
     body += '<rect x="' + (cx - tw / 2) + '" y="' + tTop + '" width="' + tw + '" height="' + th + '" rx="16" fill="' + top + '" stroke="' + ink + '" stroke-width="2"/>';
     if (shirt) {
       body += '<path d="M' + (cx - 12) + ' ' + tTop + ' Q' + cx + ' ' + (tTop + 12) + ' ' + (cx + 12) + ' ' + tTop + '" fill="' + skin + '" stroke="' + ink + '" stroke-width="2"/>';
-      body += '<image href="img/engage-mark.webp" x="' + (cx - 17) + '" y="' + (tTop + th * 0.32) + '" width="34" height="19"/>';
+      if (spar) {
+        body += '<rect x="' + (cx - tw * 0.42) + '" y="' + (tTop + 6) + '" width="' + (tw * 0.84) + '" height="' + (th * 0.7) + '" rx="14" fill="#1A1A21" stroke="#F2F2F0" stroke-width="2.5"/>' +
+          '<path d="M' + (cx - tw * 0.3) + ' ' + (tTop + th * 0.42) + 'h' + (tw * 0.6) + '" stroke="rgba(255,255,255,.25)" stroke-width="2"/>';
+        body += '<image href="img/engage-mark.webp" x="' + (cx - 14) + '" y="' + (tTop + th * 0.16) + '" width="28" height="16"/>';
+      } else body += '<image href="img/engage-mark.webp" x="' + (cx + tw * 0.08) + '" y="' + (tTop + th * 0.18) + '" width="20" height="11"/>';
     } else {
       // crossed lapels
       body += '<path d="M' + (cx - 13) + ' ' + tTop + ' L' + (cx + 10) + ' ' + (tTop + th * 0.62) + '" stroke="' + giEdge + '" stroke-width="5" stroke-linecap="round"/>';
       body += '<path d="M' + (cx + 13) + ' ' + tTop + ' L' + (cx - 4) + ' ' + (tTop + th * 0.4) + '" stroke="' + giEdge + '" stroke-width="5" stroke-linecap="round"/>';
       body += '<path d="M' + (cx - 11) + ' ' + tTop + ' L' + cx + ' ' + (tTop + 13) + ' L' + (cx + 11) + ' ' + tTop + 'z" fill="' + skin + '"/>';
       body += '<image href="img/engage-mark.webp" x="' + (cx + tw * 0.12) + '" y="' + (tTop + 14) + '" width="17" height="10"/>';
-      // belt in the color they've earned
+    }
+    if (c.uniform !== "shirt" || fit !== "gi") {
+      // belt in the color they've earned (outfits wear it too, like the student characters)
       const bc = beltColor || "#FFFFFF";
       beltSvg = '<rect x="' + (cx - tw / 2 - 1) + '" y="' + (tBot - 16) + '" width="' + (tw + 2) + '" height="11" rx="3" fill="' + bc + '" stroke="' + ink + '" stroke-width="2"/>' +
         '<rect x="' + (cx - 7) + '" y="' + (tBot - 19) + '" width="14" height="16" rx="4" fill="' + bc + '" stroke="' + ink + '" stroke-width="2"/>' +
         '<path d="M' + (cx - 5) + ' ' + (tBot - 5) + 'l-8 26l8 1z M' + (cx + 5) + ' ' + (tBot - 5) + 'l8 25l-8 2z" fill="' + bc + '" stroke="' + ink + '" stroke-width="2" stroke-linejoin="round"/>';
       body += beltSvg;
     }
+    // gloves
+    if (fit !== "training" && fit !== "gi") handsAt.forEach(function (h) {
+      const r = aw * (fit === "boxing" ? 0.95 : fit === "sparring" ? 0.78 : 0.66), x = h[0], y = h[1] + 2;
+      body += '<rect x="' + (x - r * 0.62) + '" y="' + (y - r * 1.55) + '" width="' + (r * 1.24) + '" height="' + (r * 0.75) + '" rx="3" fill="#F2F2F0" stroke="' + ink + '" stroke-width="2"/>';
+      if (fit === "mma") body += '<rect x="' + (x - r) + '" y="' + (y - r * 0.85) + '" width="' + (r * 2) + '" height="' + (r * 1.5) + '" rx="' + (r * 0.5) + '" fill="#18181E" stroke="' + ink + '" stroke-width="2"/>' +
+        [-0.6, -0.2, 0.2, 0.6].map(function (k) { return '<rect x="' + (x + k * r - 2.4) + '" y="' + (y + r * 0.55) + '" width="4.8" height="' + (r * 0.55) + '" rx="2.4" fill="' + skin + '" stroke="' + ink + '" stroke-width="1.2"/>'; }).join("");
+      else body += '<ellipse cx="' + x + '" cy="' + (y + r * 0.1) + '" rx="' + r + '" ry="' + (r * 1.12) + '" fill="#18181E" stroke="' + ink + '" stroke-width="2"/>' +
+        '<path d="M' + (x - r * 0.5) + ' ' + (y - r * 0.4) + 'q' + (r * 0.5) + ' -' + (r * 0.35) + ' ' + r + ' 0" stroke="rgba(255,255,255,.35)" stroke-width="2" fill="none"/>';
+    });
     // neck
     body += '<rect x="' + (cx - 9) + '" y="' + (tTop - 10) + '" width="18" height="16" rx="6" fill="' + skinD + '"/>';
 
@@ -157,6 +186,13 @@ BD.Builder = (function () {
     if (c.features.freckles) [[74, 94], [79, 98], [70, 98], [126, 94], [121, 98], [130, 98]].forEach(function (p) { face += '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="1.6" fill="' + shade(skin, -0.38) + '"/>'; });
     if (c.features.glasses) face += '<g fill="rgba(255,255,255,.12)" stroke="#1B1B22" stroke-width="3.5"><circle cx="82" cy="84" r="13"/><circle cx="118" cy="84" r="13"/></g><path d="M95 83 h10 M69 82 l-14 -4 M131 82 l14 -4" stroke="#1B1B22" stroke-width="3.5" stroke-linecap="round"/>';
 
+    if (fit === "sparring") {
+      // padded headgear: covers the top, sides and chin, face open (big hair tucks in)
+      if (["spiky", "curly", "bun"].indexOf(st) !== -1) { front = '<path d="M60 80 Q62 52 100 50 Q138 52 140 80 Q128 64 100 62 Q72 64 60 80 Z" fill="' + hair + '"/>'; if (st !== "curly") back = st === "bun" ? "" : back; else back = ""; }
+      face += '<path fill-rule="evenodd" d="M100 22 C152 22 158 64 156 92 C154 124 136 140 100 142 C64 140 46 124 44 92 C42 64 48 22 100 22 Z M100 50 C132 50 142 70 142 92 C142 118 124 134 100 134 C76 134 58 118 58 92 C58 70 68 50 100 50 Z" fill="#18181E" stroke="' + ink + '" stroke-width="2"/>' +
+        '<path d="M70 38 Q100 26 130 38" stroke="rgba(255,255,255,.3)" stroke-width="3" fill="none" stroke-linecap="round"/>' +
+        '<image href="img/engage-mark.webp" x="89" y="33" width="22" height="13"/>';
+    }
     const headGroup = mode === "face" ? back + ears + head + front + face :
       '<g transform="translate(100 ' + hy + ') scale(' + AH + ') translate(-100 -' + hy + ')">' + back + ears + head + front + face + '</g>';
     if (mode === "face") {
