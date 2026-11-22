@@ -15,6 +15,10 @@
  * same way: the parent's device sends the email with each week's short note,
  * the email must be the family's own sign-in email, and it isn't saved.
  *
+ * Bug reports: the app's "Report a bug" button sends a screenshot and a
+ * short note (action "bug"); this script emails them to BUG_EMAIL and keeps
+ * nothing.
+ *
  * Updating: paste this file over the old code, Save, then Deploy → Manage
  * deployments → Edit (pencil) → Version: New version → Deploy. Same URL.
  *
@@ -34,6 +38,7 @@
  */
 var STUDIO = "Engage Lifestyle Martial Arts";
 var FOLDER = "Brain Dojo Family Data";
+var BUG_EMAIL = "cdyoung@karatenv.com"; // where "Report a bug" goes (only here, never in the app)
 var FROM_EMAIL = "info@engagelma.com"; // must be a "Send mail as" address in the deploying account's Gmail
 var MAX_PLAYERS = 10, MAX_BYTES = 1500000, MAX_DEVICES = 20;
 var CODE_MINUTES = 10, CODES_PER_HOUR = 5, TRIES = 5;
@@ -58,6 +63,7 @@ function doPost(e) {
       case "chRespond": return reply(chRespond(req));
       case "chScore": return reply(chScore(req));
       case "digest": return reply(digest(req));
+      case "bug": return reply(bugReport(req));
       default: return reply({ ok: false, error: "bad_request" });
     }
   } catch (err) {
@@ -500,4 +506,51 @@ function deleteFamily(req) {
     if (dd.w[fid]) { delete dd.w[fid]; df.setContent(JSON.stringify(dd)); }
     return { ok: true };
   });
+}
+
+/* ---------- Report a bug ----------
+   Anyone using the app can send a screenshot and a note. Nothing is stored:
+   the report is emailed to BUG_EMAIL and dropped. Rate-limited per device
+   and overall so it can't be used to flood the inbox. */
+var BUG_PER_HOUR = 40, BUG_PER_10MIN = 5, BUG_IMG_BYTES = 2000000;
+function bugText(x, max) {
+  return String(x === undefined || x === null ? "" : x).replace(/\r\n?/g, "\n").replace(/[\u0000-\u0009\u000b-\u001f\u007f-\u009f\u2028\u2029]/g, " ").replace(/\n{3,}/g, "\n\n").trim().slice(0, max);
+}
+function bugReport(req) {
+  var comment = bugText(req.comment, 1000), img = String(req.image || ""), blob = null;
+  var m = req.meta && typeof req.meta === "object" ? req.meta : {};
+  var meta = {
+    screen: /^[a-z0-9-]{1,40}$/.test(String(m.screen || "")) ? String(m.screen) : "unknown",
+    version: /^[A-Za-z0-9.]{1,24}$/.test(String(m.version || "")) ? String(m.version) : "",
+    grade: m.grade === undefined || m.grade === null || m.grade === "" ? "" : String(Math.max(-1, Math.min(8, Math.round(Number(m.grade) || 0)))),
+    belt: dText(m.belt, 20), game: dText(m.game, 30),
+    viewport: dNum(m.vw, 10000) + " x " + dNum(m.vh, 10000),
+    agent: dText(m.ua, 300), time: dText(m.time, 40)
+  };
+  if (img) {
+    var im = img.match(/^data:image\/(jpeg|png);base64,([A-Za-z0-9+\/=]+)$/);
+    if (!im || im[2].length > Math.ceil(BUG_IMG_BYTES * 4 / 3) + 4) return { ok: false, error: "too_big" };
+    var bytes = Utilities.base64Decode(im[2]);
+    if (!bytes || bytes.length > BUG_IMG_BYTES) return { ok: false, error: "too_big" };
+    blob = Utilities.newBlob(bytes, "image/" + im[1], "screenshot." + (im[1] === "png" ? "png" : "jpg"));
+  }
+  if (!comment && !blob) return { ok: false, error: "empty" };
+  var a = req.token ? auth(req) : null, fid = a ? String(req.token).slice(0, 32) : "";
+  var cache = CacheService.getScriptCache(), hourKey = "bug:h:" + Math.floor(Date.now() / 3600000);
+  var who = "bug:u:" + (fid || "anon:" + sha(meta.agent).slice(0, 16)) + ":" + Math.floor(Date.now() / 600000);
+  var nh = Number(cache.get(hourKey) || 0), nu = Number(cache.get(who) || 0);
+  if (nh >= BUG_PER_HOUR || nu >= BUG_PER_10MIN) return { ok: false, error: "limit" };
+  cache.put(hourKey, String(nh + 1), 3600); cache.put(who, String(nu + 1), 600);
+  var short = comment.replace(/\s+/g, " ").slice(0, 40);
+  var subject = "Brain Dojo bug: " + meta.screen + (short ? " · " + short : "");
+  var rows = [["Screen", meta.screen], ["App version", meta.version], ["Grade", meta.grade], ["Belt", meta.belt], ["Game", meta.game], ["Screen size", meta.viewport], ["Device", meta.agent], ["Time on device", meta.time], ["Family", fid ? "signed in (" + fid.slice(0, 6) + ")" : "not signed in"]];
+  var text = "New Brain Dojo bug report\n\n" + (comment || "(no note)") + "\n\n" + rows.map(function (r) { return r[0] + ": " + (r[1] || "-"); }).join("\n") + (blob ? "\n\nScreenshot attached." : "");
+  var html = '<div style="font-family:Arial,sans-serif;font-size:14px;color:#111"><h2 style="margin:0 0 8px">Brain Dojo bug report</h2>' +
+    '<p style="white-space:pre-wrap;background:#f4f4f6;border-radius:8px;padding:10px">' + (comment ? escH(comment) : "<em>(no note)</em>") + '</p>' +
+    '<table cellpadding="4" style="border-collapse:collapse;font-size:13px">' + rows.map(function (r) { return '<tr><td style="color:#666">' + escH(r[0]) + '</td><td>' + escH(r[1] || "-") + '</td></tr>'; }).join("") + '</table>' +
+    (blob ? '<p><img src="cid:shot" alt="Screenshot" style="max-width:100%;border:1px solid #ddd;border-radius:8px"></p>' : '') + '</div>';
+  var opts = { htmlBody: html, name: "Brain Dojo by " + STUDIO, from: FROM_EMAIL, replyTo: FROM_EMAIL };
+  if (blob) { opts.inlineImages = { shot: blob }; opts.attachments = [blob]; }
+  GmailApp.sendEmail(BUG_EMAIL, subject, text, opts);
+  return { ok: true };
 }
