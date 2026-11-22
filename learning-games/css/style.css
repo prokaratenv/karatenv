@@ -1556,3 +1556,37 @@ body.duel-on .topbar, body.duel-on .footer { visibility: hidden; }
 .mem-card.up .mem-front { transform: none; } .mem-card.up .mem-back { transform: rotateY(180deg); }
 .mem-card.matched .mem-front { box-shadow: 0 0 0 3px #65D94A inset; }
 @media (prefers-reduced-motion: reduce) { .crane-pose { animation: none; } .breath-ring { transition: none; } }
+
+/* ---------- Home: leaderboard strip up top, sections, distinct action cards ---------- */
+#screen-home .lb-strip { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 12px; margin: 14px 0 6px; padding: 12px 14px; border-radius: 18px; border: 1px solid rgba(224, 186, 119, .7); background: linear-gradient(120deg, rgba(224, 186, 119, .22), rgba(79, 108, 238, .22)); box-shadow: 0 6px 18px rgba(0, 0, 0, .25); }
+.lb-strip[hidden] { display: none !important; }
+.lb-trophy { display: grid; place-items: center; width: 52px; height: 52px; border-radius: 16px; font-size: 1.8rem; background: radial-gradient(circle at 40% 35%, #FFE6A6, #C9962F); box-shadow: 0 3px 0 #8A6420; }
+.lb-mid { display: grid; gap: 3px; min-width: 0; }
+.lb-mid strong { font-family: var(--font-display); font-weight: 900; font-style: italic; text-transform: uppercase; font-size: 1.05rem; line-height: 1.1; }
+.lb-line { font-size: .88rem; color: var(--ink); overflow-wrap: anywhere; }
+.lb-line b { color: var(--gold-2); font-family: var(--font-display); }
+.lb-line .belt-swatch { display: inline-block; width: 20px; height: 8px; border-radius: 3px; background: var(--belt); vertical-align: middle; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .35); }
+.lb-goal { display: flex; align-items: center; gap: 8px; font-size: .72rem; color: var(--muted); }
+.lb-goal .dojo-bar { flex: 1; height: 7px; }
+.lb-cta, [data-cta]::after { flex: none; padding: 7px 12px; border-radius: 99px; font-family: var(--font-display); font-weight: 900; font-size: .78rem; text-transform: uppercase; letter-spacing: .03em; white-space: nowrap; }
+.lb-cta { background: var(--gold-2); color: #1B1205; }
+.home-sec { margin: 18px 2px 8px; font-family: var(--font-display); font-weight: 900; font-size: .78rem; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+/* every action card: a colored icon tile, a clear verb chip, its own color */
+.quest-card, .flash-card, .map-card, .boss-card, .duel-card, .team-card { position: relative; border-width: 1.5px; box-shadow: 0 4px 0 rgba(0, 0, 0, .28); transition: transform .12s, box-shadow .12s; }
+.quest-card:active, .flash-card:active, .map-card:active, .boss-card:active, .duel-card:active, .team-card:active { transform: translateY(3px); box-shadow: 0 1px 0 rgba(0, 0, 0, .28); }
+[data-cta]::after { content: attr(data-cta) " ›"; margin-left: auto; align-self: center; color: #0B1426; background: var(--cta, var(--gold-2)); }
+.quest-icon, .flash-card .tile-icon, .duel-icon { display: grid; place-items: center; flex: none; width: 50px; height: 50px; border-radius: 14px; font-size: 1.7rem; background: var(--tile, rgba(255, 255, 255, .12)); }
+.quest-card { --cta: #F5C518; --tile: linear-gradient(135deg, #F5C518, #E08A1E); border-color: rgba(245, 197, 24, .65); background: linear-gradient(120deg, #3B3214, #1B2540); }
+.flash-card { --cta: #6CB0F9; --tile: linear-gradient(135deg, #6CB0F9, #4F6CEE); border-color: rgba(108, 176, 249, .65); background: linear-gradient(120deg, #17305A, #1A1F3D); }
+.map-card { --cta: #65D94A; border-color: rgba(101, 217, 74, .6); background: linear-gradient(120deg, #173A2A, #1A2540); }
+.boss-card { --cta: #FF8C9A; border-color: rgba(255, 92, 110, .7); }
+#duelCard { --cta: #5CBFC1; --tile: linear-gradient(135deg, #5CBFC1, #2E7C8E); }
+.tourney-card { --cta: #E0BA77; --tile: linear-gradient(135deg, #FFE6A6, #C9962F); }
+.team-card { --cta: #B07CFF; }
+.duel-card[data-cta]::after { margin: 6px auto 0; }
+.quest-card .quest-txt, .flash-card .quest-txt, .map-card .quest-txt, .boss-card .boss-txt { flex: 1; min-width: 0; }
+@media (max-width: 560px) { .quest-row { gap: 10px; } }
+@media (min-width: 561px) {
+  .quest-row > [data-cta] { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; align-content: center; }
+  .quest-row > [data-cta]::after { grid-column: 1 / -1; justify-self: end; margin: 8px 0 0; }
+}

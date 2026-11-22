@@ -267,11 +267,11 @@ BD.Dojo = (function () {
     const b = board(), pct = Math.min(100, Math.round(100 * b.total / b.goal)), p = BD.Store.current();
     const me = myRowFor(p, b.rows), rank = me ? b.rows.slice().sort(SORTS.week.sort).indexOf(me) + 1 : 0;
     el.hidden = false;
-    el.innerHTML = '<div class="dojo-head"><span class="dojo-title">🏆 Dojo Leaderboard</span><span class="dojo-num">' + b.total.toLocaleString() + ' / ' + b.goal.toLocaleString() + '</span></div>' +
-      '<div class="dojo-bar"><i style="width:' + pct + '%"></i></div>' +
-      '<p class="dojo-sub">' + (me ? 'You\'re <strong>#' + rank + '</strong> this week · ' + me.belt + ' Belt · ' + me.life.toLocaleString() + ' XP all-time' + (me.cheers && total(me.cheers.week) ? ' · ' + cheerIcons(me.cheers.week) : '') + '. ' : '') +
-      (pct >= 100 ? "Team goal smashed!" : "Team goal: right answers this week from " + b.rows.filter(function (r) { return r.xp > 0 || r.reps > 0; }).length + " champions.") +
-      (p && !p.dojoOptIn ? " <span class='muted'>Tap to see the leaderboard. Ask a parent to join you in.</span>" : " <span class='muted'>Tap to see the boards and cheer on friends.</span>") + '</p>';
+    el.innerHTML = '<span class="lb-trophy" aria-hidden="true">🏆</span><span class="lb-mid"><strong>Dojo Leaderboard</strong>' +
+      '<span class="lb-line">' + (me ? 'You\'re <b>#' + rank + '</b> this week · <span class="belt-swatch" style="--belt:' + me.color + '"></span> ' + me.belt + ' Belt · ' + me.life.toLocaleString() + ' XP' + (me.cheers && total(me.cheers.week) ? ' · ' + cheerIcons(me.cheers.week) : '') :
+        (p && !p.dojoOptIn ? "See who's on top this week. Ask a parent to join you in!" : "This week, all-time and streaks")) + '</span>' +
+      '<span class="lb-goal"><span class="dojo-bar"><i style="width:' + pct + '%"></i></span><span>Team goal ' + b.total.toLocaleString() + ' / ' + b.goal.toLocaleString() + '</span></span></span>' +
+      '<span class="lb-cta">View ›</span>';
   }
   let tab = "week";
   function openBoard(which) {

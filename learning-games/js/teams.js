@@ -179,6 +179,7 @@ BD.Teams = (function () {
     el.hidden = !mine.length && !inv.length;
     if (el.hidden) return;
     const todo = mine.filter(function (t) { const w = week(p, t.id); return !w || !w.done; });
+    el.dataset.cta = inv.length ? "Join" : todo.length ? "Lesson" : "Open";
     el.innerHTML = '<span class="team-patches">' + (mine.length ? mine : inv).map(patch).join("") + '</span><span><strong>' +
       (inv.length ? "You're invited: " + esc(inv[0].name) + "!" : "My Teams") + '</strong><span class="boss-sub">' +
       (inv.length ? (p.teamLost && p.teamLost[inv[0].id] ? "Rejoin and keep up with the weekly lessons" : "Join the team and get its E on your uniform") : todo.length ? "This week's lesson is ready · do it to keep your spot" : "Lessons done this week ✓") + '</span></span>';
