@@ -89,7 +89,8 @@ BD.SentenceGame = (function () {
   /* Read the sentence out loud (automatic for Pre-K to 1st grade). */
   function readItem(auto) {
     if (!S || (auto && !BD.ReadAloud.auto(S.grade))) return;
-    BD.ReadAloud.say("Fix the mistakes in this sentence. " + S.items[S.i].text);
+    // read-along hook: the sentence is highlighted word by word
+    BD.ReadAloud.read([{ text: "Fix the mistakes in this sentence." }, $("sentOriginal").textContent.trim() ? { el: $("sentOriginal") } : { text: S.items[S.i].text }]);
   }
 
   function autoSize() {

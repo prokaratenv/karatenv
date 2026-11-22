@@ -270,7 +270,8 @@ BD.MathGame = (function () {
   function readCard(auto) {
     if (!S || (auto && (S.mode === "clock" || !BD.ReadAloud.auto(S.grade)))) return;
     const q = current();
-    BD.ReadAloud.say((!$("mathDots").hidden ? ($("mathDots").classList.contains("pics") ? "Count the pictures. Tap them to count. " : "Count the dots. ") : "") + "What is " + BD.ReadAloud.words(show(q)) + "?");
+    // read-along hook: the problem card glows while it is read
+    BD.ReadAloud.read([{ el: $("mathProblem"), text: (!$("mathDots").hidden ? ($("mathDots").classList.contains("pics") ? "Count the pictures. Tap them to count. " : "Count the dots. ") : "") + "What is " + BD.ReadAloud.words(show(q)) + "?" }]);
   }
 
   function tick() {

@@ -1595,3 +1595,14 @@ body.duel-on .topbar, body.duel-on .footer { visibility: hidden; }
 .set-family { display: grid; gap: 10px; margin-bottom: 14px; }
 .set-sec { padding: 12px 14px; border-radius: 14px; border: 1px solid rgba(255, 255, 255, .12); background: rgba(255, 255, 255, .04); margin: 10px 0; }
 .set-sec h4 { margin-top: 0; }
+
+/* Weekly email */
+.dg { display: grid; gap: 10px; }
+.dg-row { display: flex; align-items: center; justify-content: space-between; gap: 14px; cursor: pointer; }
+.dg-row > span { display: grid; gap: 3px; min-width: 0; }
+.dg-email span { font-size: .9rem; }
+.dg-note { margin: 0; }
+.dg-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.dg .lf-msg { margin: 0; }
+.dg .lf-msg:empty { display: none; }
+.dg-off { margin: 0; }

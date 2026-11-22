@@ -11,7 +11,9 @@
  * the device as a key), so each family's file in the "Brain Dojo Family
  * Data" folder holds only: an anonymous family number, scrambled student
  * data, and fingerprints of the linked devices' keys. The email is used once
- * to send the code and is not saved.
+ * to send the code and is not saved. The opt-in weekly parent email works the
+ * same way: the parent's device sends the email with each week's short note,
+ * the email must be the family's own sign-in email, and it isn't saved.
  *
  * Updating: paste this file over the old code, Save, then Deploy → Manage
  * deployments → Edit (pencil) → Version: New version → Deploy. Same URL.
@@ -375,7 +377,7 @@ function digestData(file) {
 }
 /* Plain text only: no control characters, no markup, no links; then capped. */
 function dText(x, max) {
-  return String(x === undefined || x === null ? "" : x).replace(/[\u0000-\u001f\u007f-\u009f  <>]/g, " ").replace(/(https?:\/\/|www\.)/gi, "").replace(/\s+/g, " ").trim().slice(0, max);
+  return String(x === undefined || x === null ? "" : x).replace(/[\u0000-\u001f\u007f-\u009f\u2028\u2029<>]/g, " ").replace(/(https?:\/\/|www\.)/gi, "").replace(/\s+/g, " ").trim().slice(0, max);
 }
 function dNum(x, max) { return Math.max(0, Math.min(max, Math.round(Number(x) || 0))); }
 function dList(x, n) { return Array.isArray(x) ? x.slice(0, n) : []; }
@@ -473,9 +475,9 @@ function digest(req) {
   return locked(function () {
     var file = digestFile(), d = digestData(file);
     if (d.w[fid] && d.w[fid] >= week) return { ok: false, error: "already", week: d.w[fid] };
+    send(); // if Gmail fails, nothing is recorded and the device tries again later
     d.w[fid] = week; // only the family number and the week
     file.setContent(JSON.stringify(d));
-    send();
     return { ok: true, week: week };
   });
 }

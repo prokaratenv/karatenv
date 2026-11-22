@@ -190,6 +190,9 @@ BD.Reading = (function () {
     $("readText").textContent = ps.text;
     BD.Speech.stop();
     $("readListen").hidden = !BD.Speech.available;
+    $("readListen").textContent = "Read the story";
+    $("readQRead").setAttribute("aria-label", "Read the question"); $("readQRead").title = "Read the question";
+    R.autoStory = true; // read-along: the first question of a story also reads the story (when reading is automatic)
     if (R.grade <= 1) BD.Cast.say("readSay", null, "Read this story together with a grown-up, or tap Read it to me.");
     BD.UI.syncGradeSelect("readGradeSel", "reading");
     loadQuestion();
@@ -205,14 +208,28 @@ BD.Reading = (function () {
     $("readQType").textContent = BD.READ_TYPES[q.type].label;
     $("readQType").className = "q-type q-" + q.type;
     $("readQuestion").textContent = q.q;
-    if (BD.ReadAloud.auto(R.grade)) setTimeout(function () { if (R && question() === q) BD.ReadAloud.say(q.q); }, 300);
+    if (BD.ReadAloud.auto(R.grade)) {
+      const withStory = R.autoStory; R.autoStory = false;
+      setTimeout(function () { if (R && question() === q) { if (withStory) readStory(); else readQuestion(); } }, 300);
+    }
     $("readInput").value = ""; $("readInput").readOnly = false;
     $("readFeedback").innerHTML = ""; $("readFeedback").className = "read-feedback";
     $("readCheck").hidden = false; $("readCheck").disabled = false; $("readCheck").textContent = "Check my answer";
     $("readNext").hidden = true;
     $("readHint").hidden = false; $("readHint").disabled = false;
     $("readTries").textContent = "";
+    if (BD.ReadAlong) BD.ReadAlong.mic.sync($("readInput"));
     if (R.qi === 0) window.scrollTo(0, 0);
+  }
+
+  /* Read-along (js/readalong.js): the story, then the question, word by word. */
+  function readStory() {
+    if (!R) return;
+    BD.ReadAloud.read([$("readTitle"), $("readText"), $("readQuestion")], { id: "story", button: $("readListen"), stopLabel: "■ Stop" });
+  }
+  function readQuestion() {
+    if (!R) return;
+    BD.ReadAloud.read($("readQuestion"), { id: "question", button: $("readQRead") });
   }
 
   function hint() {
@@ -264,6 +281,7 @@ BD.Reading = (function () {
         '<div class="model"><span class="label">A strong answer</span><p>' + BD.UI.esc(q.answer) + '</p></div>';
       $("readCheck").hidden = true; $("readHint").hidden = true; $("readNext").hidden = false;
       $("readInput").readOnly = true;
+      if (BD.ReadAlong) BD.ReadAlong.mic.sync($("readInput"));
       const last = R.pi === R.passages.length - 1 && R.qi === passage().questions.length - 1;
       $("readNext").textContent = last ? "See results" : R.qi === passage().questions.length - 1 ? "Next story" : "Next question";
       setTimeout(function () { $("readNext").focus(); }, 50);
@@ -375,10 +393,13 @@ BD.Reading = (function () {
     $("readNext").addEventListener("click", next);
     $("readQuit").addEventListener("click", BD.UI.back);
     $("readGradeSel").addEventListener("change", function (e) { changeGrade(Number(e.target.value)); });
-    $("readQRead").addEventListener("click", function () { if (R) BD.ReadAloud.say(question().q); });
+    $("readQRead").addEventListener("click", function () {
+      if (BD.ReadAlong && BD.ReadAlong.active() === "question") { BD.ReadAlong.stop(); return; }
+      readQuestion();
+    });
     $("readListen").addEventListener("click", function () {
-      if (BD.Speech.speaking()) { BD.Speech.stop(); return; }
-      if (R) BD.Speech.say(passage().title + ". " + passage().text + " " + question().q, "en-US", 0.88);
+      if (BD.ReadAlong ? BD.ReadAlong.active() === "story" : BD.Speech.speaking()) { BD.Speech.stop(); return; }
+      readStory();
     });
     $("readTips").addEventListener("click", function () { BD.UI.sheet("Reading tips", tipsHTML(Object.keys(BD.READ_TYPES))); });
     $("readAsk").addEventListener("click", function () { if (R) BD.Sensei.open(senseiContext()); });

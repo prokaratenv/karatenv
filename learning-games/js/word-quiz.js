@@ -595,7 +595,8 @@ BD.WordQuiz = (function () {
       else if (q.mode === "en2es") parts.push({ text: "How do you say " + q.en + " in Spanish?" });
       else parts.push({ text: "Type " + q.en + " in Spanish." });
     }
-    BD.ReadAloud.say(parts);
+    // read-along hook: the prompt card glows while it is read
+    BD.ReadAloud.read(parts.filter(Boolean).map(function (x) { return { text: x.text, lang: x.lang, el: $("wordPrompt") }; }));
   }
 
   /* Quiet mode and the swap button (spelling only). */

@@ -25,7 +25,7 @@ BD.QuickUI = (function () {
       const b = e.target.closest(".qq-choice"); if (!b || b.disabled) return;
       onPick(q.choices[Number(b.dataset.i)], b);
     };
-    if (opts.read && BD.ReadAloud.auto(opts.grade)) BD.ReadAloud.say(q.say || q.prompt);
+    if (opts.read && BD.ReadAloud.auto(opts.grade)) readQ(el, q);
   }
   /* Show which choice was right. */
   function mark(el, q, picked) {
@@ -35,7 +35,13 @@ BD.QuickUI = (function () {
       if (v === q.answer) b.classList.add("is-right"); else if (v === picked) b.classList.add("is-wrong");
     });
   }
-  return { render: render, mark: mark };
+  /* read-along hook: highlight the prompt's words (or make it glow when the spoken words differ, e.g. math). */
+  function readQ(el, q) {
+    const pr = el && el.querySelector(".qq-prompt");
+    if (pr && !q.say) return BD.ReadAloud.read(pr);
+    return BD.ReadAloud.read([{ el: pr || null, text: q.say || q.prompt }]);
+  }
+  return { render: render, mark: mark, readQ: readQ };
 })();
 
 BD.Boss = (function () {
@@ -227,7 +233,7 @@ BD.Boss = (function () {
     $("bossQuit").addEventListener("click", function () { stop(); BD.UI.home(); });
     $("bossAgain").addEventListener("click", start);
     $("bossHome").addEventListener("click", function () { BD.UI.home(); });
-    $("bossRead").addEventListener("click", function () { if (S && S.q) BD.ReadAloud.say(S.q.say || S.q.prompt); });
+    $("bossRead").addEventListener("click", function () { if (S && S.q) BD.QuickUI.readQ($("bossQ"), S.q); });
   }
 
   return { BOSSES: BOSSES, card: card, open: open, start: start, stop: stop, bind: bind, wins: wins, peek: function () { return S && S.q; } };
