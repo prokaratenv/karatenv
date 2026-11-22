@@ -541,3 +541,8 @@ learning-games/
   js/mini.js             the champion beside every game
   js/app.js              home, results and parent screens
 ```
+
+
+## Credits
+
+Spelling hint meanings are adapted from WordNet 3.1, Copyright 2011 by Princeton University, used under the WordNet license (https://wordnet.princeton.edu/license-and-commercial-use).

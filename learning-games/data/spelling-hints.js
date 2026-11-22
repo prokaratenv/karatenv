@@ -1,4 +1,10 @@
 /*
+  WordNet 3.1 Copyright 2011 by Princeton University. All rights reserved.
+  Used under the WordNet license: permission to use, copy, modify and
+  distribute WordNet for any purpose and without fee or royalty is granted,
+  provided this copyright notice appears in all copies. THIS SOFTWARE AND
+  DATABASE IS PROVIDED "AS IS" AND PRINCETON UNIVERSITY MAKES NO
+  REPRESENTATIONS OR WARRANTIES, EXPRESS OR IMPLIED.
   SPELLING HINTS: a short meaning for each spelling word, used by the Hint
   button (hint 1). Built from WordNet 3.1 (Princeton University, free
   license: https://wordnet.princeton.edu/license-and-commercial-use), with the
