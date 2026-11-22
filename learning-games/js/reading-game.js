@@ -193,7 +193,7 @@ BD.Reading = (function () {
     $("readListen").textContent = "Read the story";
     $("readQRead").setAttribute("aria-label", "Read the question"); $("readQRead").title = "Read the question";
     R.autoStory = true; // read-along: the first question of a story also reads the story (when reading is automatic)
-    if (R.grade <= 1) BD.Cast.say("readSay", null, "Read this story together with a grown-up, or tap Read it to me.");
+    if (R.grade <= 1) BD.Cast.say("readSay", null, "Read this story together with a grown-up, or tap Read the story.");
     BD.UI.syncGradeSelect("readGradeSel", "reading");
     loadQuestion();
   }
