@@ -186,6 +186,7 @@ BD.Reading = (function () {
   /* stripe = { grade, belt, test } when started from the belt panel. */
   function start(focus, stripe) {
     const p = BD.Store.current();
+    if (stripe) stripe = BD.Rank.gate(p, "reading", stripe); // practice first: locked parts start as practice
     if (typeof focus !== "string") focus = null;
     if (stripe) p.readingGrade = stripe.grade;
     else if (p.retry && p.retry.reading) p.readingGrade = p.retry.reading.grade;

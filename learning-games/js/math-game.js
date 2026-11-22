@@ -230,6 +230,7 @@ BD.MathGame = (function () {
   /* stripe = { grade, belt, test } when started from the belt panel. */
   function start(mode, focusOps, stripe) {
     const p = BD.Store.current();
+    if (stripe) stripe = BD.Rank.gate(p, "math", stripe); // practice first: locked parts start as practice
     if (stripe) { p.mathGrade = stripe.grade; focusOps = stripe.test && stripe.skill && stripe.skill.ops ? stripe.skill.ops.slice() : beltOps(stripe.grade, stripe.belt); }
     else if (p.retry && p.retry.math) { p.mathGrade = p.retry.math.grade; focusOps = p.retry.math.ops; }
     if (S && S.timer) clearInterval(S.timer);

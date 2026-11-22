@@ -431,6 +431,7 @@ BD.WordQuiz = (function () {
     else if (p.retry && p.retry[game]) p[g.field] = p.retry[game].grade;
     const grade = p[g.field];
     if (flash) { stripe = null; school = null; }
+    if (stripe) stripe = BD.Rank.gate(p, game, stripe); // practice first: locked parts start as practice
     W = { game: game, g: g, grade: grade, school: school || null, flash: flash || null, noRetry: school === "test", items: flash ? flashRound(p, grade, flash) : school ? BD.School.round(p, school === "test", grade) : stripe ? (stripe.test && stripe.skill ? g.beltRound(p, grade, stripe.belt, stripe.skill, 6) : g.beltRound(p, grade, stripe.belt)) : g.round(p, grade), i: 0, xp: 0, correct: 0, firstTry: 0, answered: 0, streak: 0, best: 0, missed: [], stripe: stripe || null, test: !!(stripe && stripe.test) };
     const label = BD.Rank.subject(BD.Rank.BY_GAME[game]).label;
     BD.UI.testMode("screen-word-play", W.test ? label + " stripe test" + (stripe.skill ? " · Part " + (stripe.part + 1) + " of 4: " + stripe.skill.label : "") : flash ? "⚡ Spelling flashcards · " + FLASH_NAMES[flash] : stripe ? label + " stripe practice · " + BD.BELTS[stripe.belt].name + " Belt" : school === "test" ? "School word test" : "", !BD.Rank.hintsAllowed(BD.Store.current(), grade));
