@@ -1568,25 +1568,26 @@ body.duel-on .topbar, body.duel-on .footer { visibility: hidden; }
 .lb-line .belt-swatch { display: inline-block; width: 20px; height: 8px; border-radius: 3px; background: var(--belt); vertical-align: middle; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .35); }
 .lb-goal { display: flex; align-items: center; gap: 8px; font-size: .72rem; color: var(--muted); }
 .lb-goal .dojo-bar { flex: 1; height: 7px; }
-.lb-cta, [data-cta]::after { flex: none; padding: 7px 12px; border-radius: 99px; font-family: var(--font-display); font-weight: 900; font-size: .78rem; text-transform: uppercase; letter-spacing: .03em; white-space: nowrap; }
+.lb-cta { flex: none; padding: 7px 12px; border-radius: 99px; font-family: var(--font-display); font-weight: 900; font-size: .78rem; text-transform: uppercase; letter-spacing: .03em; white-space: nowrap; }
 .lb-cta { background: var(--gold-2); color: #1B1205; }
 .home-sec { margin: 18px 2px 8px; font-family: var(--font-display); font-weight: 900; font-size: .78rem; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
-/* every action card: a colored icon tile, a clear verb chip, its own color */
-.quest-card, .flash-card, .map-card, .boss-card, .duel-card, .team-card { position: relative; border-width: 1.5px; box-shadow: 0 4px 0 rgba(0, 0, 0, .28); transition: transform .12s, box-shadow .12s; }
-.quest-card:active, .flash-card:active, .map-card:active, .boss-card:active, .duel-card:active, .team-card:active { transform: translateY(3px); box-shadow: 0 1px 0 rgba(0, 0, 0, .28); }
-[data-cta]::after { content: attr(data-cta) " ›"; margin-left: auto; align-self: center; color: #0B1426; background: var(--cta, var(--gold-2)); }
-.quest-icon, .flash-card .tile-icon, .duel-icon { display: grid; place-items: center; flex: none; width: 50px; height: 50px; border-radius: 14px; font-size: 1.7rem; background: var(--tile, rgba(255, 255, 255, .12)); }
-.quest-card { --cta: #F5C518; --tile: linear-gradient(135deg, #F5C518, #E08A1E); border-color: rgba(245, 197, 24, .65); background: linear-gradient(120deg, #3B3214, #1B2540); }
-.flash-card { --cta: #6CB0F9; --tile: linear-gradient(135deg, #6CB0F9, #4F6CEE); border-color: rgba(108, 176, 249, .65); background: linear-gradient(120deg, #17305A, #1A1F3D); }
-.map-card { --cta: #65D94A; border-color: rgba(101, 217, 74, .6); background: linear-gradient(120deg, #173A2A, #1A2540); }
-.boss-card { --cta: #FF8C9A; border-color: rgba(255, 92, 110, .7); }
-#duelCard { --cta: #5CBFC1; --tile: linear-gradient(135deg, #5CBFC1, #2E7C8E); }
-.tourney-card { --cta: #E0BA77; --tile: linear-gradient(135deg, #FFE6A6, #C9962F); }
-.team-card { --cta: #B07CFF; }
-.duel-card[data-cta]::after { margin: 6px auto 0; }
-.quest-card .quest-txt, .flash-card .quest-txt, .map-card .quest-txt, .boss-card .boss-txt { flex: 1; min-width: 0; }
-@media (max-width: 560px) { .quest-row { gap: 10px; } }
-@media (min-width: 561px) {
-  .quest-row > [data-cta] { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; align-content: center; }
-  .quest-row > [data-cta]::after { grid-column: 1 / -1; justify-self: end; margin: 8px 0 0; }
+/* every action card: a glowing outline in its own color, and a round play button */
+.quest-card, .flash-card, .map-card, .boss-card, .duel-card, .team-card {
+  position: relative; border: 2px solid var(--cta) !important; border-radius: 22px;
+  background: linear-gradient(180deg, var(--tint), #152240 70%) !important;
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, .25), 0 0 18px var(--glow);
+  transition: transform .12s, box-shadow .12s;
 }
+.quest-card:active, .flash-card:active, .map-card:active, .boss-card:active, .duel-card:active, .team-card:active { transform: scale(.98); box-shadow: 0 0 0 3px rgba(0, 0, 0, .25), 0 0 26px var(--glow); }
+.quest-card { --cta: #F5C518; --tint: rgba(245, 197, 24, .2); --glow: rgba(245, 197, 24, .35); }
+.flash-card { --cta: #6CB0F9; --tint: rgba(108, 176, 249, .2); --glow: rgba(108, 176, 249, .35); }
+.map-card { --cta: #65D94A; --tint: rgba(101, 217, 74, .18); --glow: rgba(101, 217, 74, .32); }
+.boss-card { --cta: #FF8C9A; --tint: rgba(255, 92, 110, .2); --glow: rgba(255, 92, 110, .35); }
+#duelCard { --cta: #5CBFC1; --tint: rgba(92, 191, 193, .2); --glow: rgba(92, 191, 193, .32); }
+.tourney-card { --cta: #E0BA77; --tint: rgba(224, 186, 119, .2); --glow: rgba(224, 186, 119, .32); }
+.team-card { --cta: #B07CFF; --tint: rgba(176, 124, 255, .2); --glow: rgba(176, 124, 255, .35); }
+.quest-icon, .flash-card .tile-icon, .duel-icon { font-size: 2.3rem; flex: none; filter: drop-shadow(0 3px 4px rgba(0, 0, 0, .5)); }
+.quest-card .boss-k, .flash-card .boss-k, .map-card .boss-k, .boss-card .boss-k { color: var(--cta); }
+[data-cta]::after { content: "▶"; flex: none; margin-left: auto; align-self: center; width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; font-size: .85rem; color: #0B1426; background: var(--cta); box-shadow: 0 3px 0 rgba(0, 0, 0, .3); }
+.duel-card[data-cta]::after { content: none; }
+.quest-card .quest-txt, .flash-card .quest-txt, .map-card .quest-txt, .boss-card .boss-txt { flex: 1; min-width: 0; }
