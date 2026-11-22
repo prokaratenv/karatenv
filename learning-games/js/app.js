@@ -72,6 +72,11 @@ BD.UI = (function () {
       p.custom = cfg; p.avatar = "custom"; BD.Store.save(p); home();
     });
   }
+  function openStudio(p) {
+    BD.Studio.open(p, BD.beltOf(p).color, function (key) {
+      p.avatar = key; BD.Store.save(p); home();
+    });
+  }
   /* Character picker: kids choose a fighter from the Engage cast. */
   let newFighter = "kimmy";
   function fighterPicker(elId, selected, big) {
@@ -85,9 +90,16 @@ BD.UI = (function () {
     const kids = BD.Cast.FIGHTERS.slice(0, 6), teachers = BD.Cast.FIGHTERS.slice(6);
     const customCfg = big && me && me.custom ? me.custom : BD.Builder.DEFAULT;
     const build = '<button type="button" class="fighter-opt build-opt" role="radio" data-fighter="custom" aria-checked="' + (selected === "custom") + '">' +
-      '<span class="build-art">' + BD.Builder.svg(customCfg, beltCol, big ? "full" : "face", BD.Cast.ageBand(myGrade)) + '</span>' + (big && me && me.custom ? "My champion" : "Build your own") + '</button>';
-    $(elId).innerHTML = '<p class="fighter-group">Create</p>' + build +
-      (big && me && me.custom ? '<button type="button" class="fighter-opt edit-opt" data-edit="1"><span class="build-art edit-icon">✎</span>Edit my champion</button>' : '') +
+      '<span class="build-art">' + BD.Builder.svg(customCfg, beltCol, big ? "full" : "face", BD.Cast.ageBand(myGrade)) + '</span>' + (big && me && me.custom ? "My drawn champion" : "Draw your own") + '</button>';
+    // Champion Studio: a 3D champion picked by look (skin, hair, extras)
+    const mine3d = big && me && BD.Cast.isStudio(me.avatar) ? me.avatar : null;
+    const studio = '<button type="button" class="fighter-opt studio-opt" ' + (mine3d ? 'role="radio" data-fighter="' + mine3d + '" aria-checked="' + (selected === mine3d) + '"' : 'data-studio="1"' + (elId === "newFighter" ? ' role="radio" aria-checked="' + (selected === "studio") + '"' : '')) + '>' +
+      (big ? (mine3d ? champArt(mine3d, beltCol, myGrade, BD.Badges.outfitUnlocked(me, BD.Badges.OUTFITS.find(function (o) { return o.id === (me.outfit || "gi"); }) || BD.Badges.OUTFITS[0]) ? me.outfit : "gi") : champArt("s12", beltCol, myGrade, "gi")) : '<img src="' + BD.Cast.face(mine3d || "s03") + '" alt="">') +
+      (mine3d ? "My champion" : "Champion Studio") + '</button>';
+    $(elId).innerHTML = '<p class="fighter-group">Create</p>' + studio + build +
+      (mine3d ? '<button type="button" class="fighter-opt edit-opt" data-studio="1"><span class="build-art edit-icon">✎</span>Change my 3D champion</button>' : '') +
+      (big && me && me.custom && selected === "custom" ? '<button type="button" class="fighter-opt edit-opt" data-studio="1"><span class="build-art edit-icon">3D</span>Try the new 3D look</button>' : '') +
+      (big && me && me.custom ? '<button type="button" class="fighter-opt edit-opt" data-edit="1"><span class="build-art edit-icon">✎</span>Edit my drawn champion</button>' : '') +
       '<p class="fighter-group">Students</p>' + kids.map(opt).join("") +
       '<p class="fighter-group">Instructors</p>' + teachers.map(opt).join("");
   }
@@ -643,9 +655,10 @@ BD.UI = (function () {
       e.preventDefault();
       const name = $("newName").value.trim().slice(0, 20);
       if (!name) { $("newName").focus(); return; }
-      const np = BD.Store.addPlayer(name, Number($("newGrade").value), newFighter === "custom" ? null : newFighter);
+      const np = BD.Store.addPlayer(name, Number($("newGrade").value), newFighter === "custom" || newFighter === "studio" ? null : newFighter);
       BD.emit("playerAdded", np);
       if (newFighter === "custom") { home(); openBuilder(np); return; }
+      if (newFighter === "studio") { $("newName").value = ""; home(); openStudio(np); return; }
       $("newName").value = "";
       home();
     });
@@ -738,8 +751,8 @@ BD.UI = (function () {
     BD.WordQuiz.bind();
     BD.Sensei.bind();
     $("newFighter").addEventListener("click", function (e) {
-      const b = e.target.closest("[data-fighter]"); if (!b) return;
-      newFighter = b.dataset.fighter; BD.Sound.tap(); fighterPicker("newFighter", newFighter, false);
+      const b = e.target.closest("[data-fighter],[data-studio]"); if (!b) return;
+      newFighter = b.dataset.studio ? "studio" : b.dataset.fighter; BD.Sound.tap(); fighterPicker("newFighter", newFighter, false);
     });
     $("changeFighter").addEventListener("click", function () {
       const p = BD.Store.current(); if (!p) return;
@@ -752,12 +765,14 @@ BD.UI = (function () {
     $("fighterPick").addEventListener("click", function (e) {
       const p = BD.Store.current();
       if (e.target.closest("[data-edit]")) { closeFighter(); openBuilder(p); return; }
+      if (e.target.closest("[data-studio]")) { closeFighter(); openStudio(p); return; }
       const b = e.target.closest("[data-fighter]"); if (!b) return;
       if (b.dataset.fighter === "custom" && !p.custom) { closeFighter(); openBuilder(p); return; }
       p.avatar = b.dataset.fighter; BD.Store.save(p);
       BD.Sound.right(); closeFighter(); home();
     });
     BD.Builder.bind();
+    BD.Studio.bind();
     BD.Quest.bind();
     BD.Leads.bind();
   }
@@ -827,7 +842,7 @@ BD.UI = (function () {
     offline();
   }
 
-  return { champArt: champArt, championHTML: function (p, outfit) { return fighterArt(p, "full", outfit); }, refreshStage: refreshStage, fighterKey: function (p) { return fighterOf(p); }, beltDetails: beltDetails, testMode: testMode, stripeResult: stripeResult, back: back, setGrade: setGrade, syncGradeSelect: syncGradeSelect, refresh: refresh, sheet: sheet, sheetOpen: sheetOpen, show: show, esc: esc, home: home, players: players, results: results, gradePicker: gradePicker, init: init };
+  return { champArt: champArt, championHTML: function (p, outfit) { return fighterArt(p, "full", outfit); }, refreshStage: refreshStage, openBuilder: function () { const p = BD.Store.current(); if (p) openBuilder(p); }, openStudio: openStudio, fighterKey: function (p) { return fighterOf(p); }, beltDetails: beltDetails, testMode: testMode, stripeResult: stripeResult, back: back, setGrade: setGrade, syncGradeSelect: syncGradeSelect, refresh: refresh, sheet: sheet, sheetOpen: sheetOpen, show: show, esc: esc, home: home, players: players, results: results, gradePicker: gradePicker, init: init };
 })();
 
 document.addEventListener("DOMContentLoaded", BD.UI.init);

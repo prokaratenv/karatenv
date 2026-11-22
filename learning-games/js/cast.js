@@ -32,7 +32,7 @@ BD.Cast = (function () {
 
   function img(key) { return "img/" + key + ".webp"; }
   function face(key) { return "img/face-" + key + ".webp"; }
-  function name(key) { return (PEOPLE[key] || PEOPLE.zumi).name; }
+  function name(key) { return /^s\d\d$/.test(key) ? "My champion" : (PEOPLE[key] || PEOPLE.zumi).name; }
   function line(kind) { return pick(LINES[kind] || LINES.start); }
 
   /* Default fighter for older profiles, so everyone has a character. */
@@ -55,11 +55,33 @@ BD.Cast = (function () {
   function ageBand(grade) { grade = Number(grade); return grade <= 0 ? 0 : grade <= 2 ? 1 : grade <= 5 ? 2 : 3; }
   /* White-belt art and its belt mask for a character at a grade. */
   function art(key, grade, outfit) {
+    if (isStudio(key)) { // one age for every grade
+      if (outfit && outfit !== "gi") return { src: "img/fit-" + key + "-" + outfit + ".webp", mask: key + "-" + outfit, collar: outfit === "highrank" ? key + "-hrcollar" : null, logo: outfit === "sparring" ? null : key + "-" + outfit + "-logo", band: 2 };
+      return { src: "img/age-" + key + ".webp", mask: key, logo: key + "-logo", band: 2 };
+    }
     if (KIDS.indexOf(key) === -1) return { src: "img/wb-" + key + ".webp", mask: key, band: null };
     const b = ageBand(grade === undefined ? 3 : grade);
     if (outfit && outfit !== "gi") return { src: "img/fit-" + key + "-" + b + "-" + outfit + ".webp", mask: key + "-" + b + "-" + outfit, collar: outfit === "highrank" ? key + "-" + b + "-hrcollar" : null, logo: outfit === "sparring" ? null : key + "-" + b + "-" + outfit + "-logo", band: b };
     return { src: "img/age-" + key + "-" + b + ".webp", mask: key + "-" + b, logo: key + "-" + b + "-logo", band: b };
   }
 
-  return { KIDS: KIDS, ageBand: ageBand, art: art, PEOPLE: PEOPLE, FIGHTERS: FIGHTERS, COACH: COACH, img: img, face: face, name: name, line: line, say: say, defaultFighter: defaultFighter };
+  /* CHAMPION STUDIO: 30 original 3D champions (one age, every outfit) that
+     students pick by look: [look, skin 0-5 light to deep, hair style, hair
+     color, extras]. Keys s01..s30; art in img/age-sNN, img/fit-sNN-<outfit>. */
+  const STUDIO = [
+    ["boy", 5, "short", "black", ""], ["girl", 5, "puffs", "black", ""], ["girl", 4, "braids", "black", ""], ["boy", 4, "locs", "black", ""],
+    ["boy", 4, "buzz", "black", "glasses"], ["girl", 4, "curly", "brown", ""], ["girl", 3, "covered", "", "hijab"], ["girl", 2, "covered", "", "hijab glasses"],
+    ["boy", 3, "short", "black", ""], ["girl", 3, "braids", "black", ""], ["boy", 1, "short", "black", ""], ["girl", 1, "ponytail", "black", ""],
+    ["boy", 2, "wavy", "brown", ""], ["girl", 3, "long", "brown", ""], ["boy", 0, "curly", "red", "freckles"], ["girl", 0, "braids", "red", "freckles"],
+    ["boy", 0, "spiky", "blonde", ""], ["girl", 0, "long", "blonde", "glasses"], ["boy", 1, "short", "brown", "glasses"], ["girl", 1, "bun", "red", ""],
+    ["boy", 5, "curly", "black", "glasses"], ["girl", 5, "curly", "black", ""], ["boy", 4, "curly", "brown", ""], ["girl", 4, "locs", "black", ""],
+    ["boy", 2, "buzz", "brown", ""], ["girl", 1, "wavy", "brown", "freckles"], ["boy", 3, "bun", "black", ""], ["girl", 3, "short", "brown", ""],
+    ["boy", 5, "buzz", "black", ""], ["girl", 1, "bun", "black", "glasses"]
+  ].map(function (a, i) { return { key: "s" + (i < 9 ? "0" : "") + (i + 1), look: a[0], skin: a[1], hair: a[2], color: a[3], extras: a[4] ? a[4].split(" ") : [] }; });
+  const STUDIO_KEYS = STUDIO.map(function (s) { return s.key; });
+  function isStudio(key) { return STUDIO_KEYS.indexOf(key) !== -1; }
+  /* Students who wear belts, gear and outfits (the 5 Engage kids and every Studio champion). */
+  function isStudent(key) { return KIDS.indexOf(key) !== -1 || isStudio(key); }
+
+  return { KIDS: KIDS, STUDIO: STUDIO, isStudio: isStudio, isStudent: isStudent, ageBand: ageBand, art: art, PEOPLE: PEOPLE, FIGHTERS: FIGHTERS, COACH: COACH, img: img, face: face, name: name, line: line, say: say, defaultFighter: defaultFighter };
 })();

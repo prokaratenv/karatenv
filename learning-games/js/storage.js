@@ -109,7 +109,7 @@ BD.Store = (function () {
     if (typeof p.id !== "string" || !/^[a-z0-9]{4,40}$/i.test(p.id)) p.id = "p" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
     p.name = String(p.name == null ? "" : p.name).replace(/[\u0000-\u001f\u007f<>]/g, "").trim().slice(0, 20) || "Champion";
     if (typeof p.color !== "string" || !/^#[0-9a-f]{6}$/i.test(p.color)) p.color = BD.AVATAR_COLORS[0];
-    if (p.avatar !== undefined && FIGHTER_KEYS.indexOf(p.avatar) === -1) delete p.avatar;
+    if (p.avatar !== undefined && FIGHTER_KEYS.indexOf(p.avatar) === -1 && !/^s(0[1-9]|[12][0-9]|30)$/.test(p.avatar)) delete p.avatar; // sNN = Champion Studio
     if (p.custom !== undefined && (typeof p.custom !== "object" || p.custom === null)) delete p.custom;
     ["mathGrade", "sentenceGrade", "readingGrade", "spanishGrade", "spellingGrade"].forEach(function (k) { if (p[k] !== undefined) p[k] = gradeOk(p[k], 3); });
     if (p.dojoGrade !== undefined && p.dojoGrade !== null) p.dojoGrade = gradeOk(p.dojoGrade, 3);

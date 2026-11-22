@@ -29,7 +29,7 @@ for top in ["css", "js", "data", "img"]:
             if p == "js/masks.js": continue  # inline masks are for the Claude version only; the website uses img/mask-*.png
             with open(p, "rb") as fh: h.update(p.encode() + fh.read())
             # big character variations come down in the background after the first visit
-            (LATER if p.startswith(("img/fit-", "img/age-", "img/boss-", "img/mask-")) else CORE).append(p)
+            (LATER if p.startswith(("img/fit-", "img/age-", "img/boss-", "img/mask-")) or re.match(r"img/face-s\d\d\.webp$", p) else CORE).append(p)
 for p in ["index.html", "manifest.webmanifest"]:
     with open(p, "rb") as fh: h.update(p.encode() + fh.read())
 version = h.hexdigest()[:12]

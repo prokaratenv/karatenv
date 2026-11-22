@@ -88,7 +88,7 @@ BD.Badges = (function () {
   function outfitUnlocked(p, o) { return o.needs.every(function (g) { return hasGear(p, g); }) && (!o.badge || !!(p.badges && p.badges[o.badge])) && (!o.team || (BD.Teams && BD.Teams.joined(p, o.team))); }
   /* Outfits are drawn for the student characters (Kimmy, Billy, Tommy, Mackenzie,
      Rylan) and for champions students build themselves. */
-  function canWearOutfits(p) { const k = BD.UI.fighterKey(p); return k === "custom" || BD.Cast.KIDS.indexOf(k) !== -1; }
+  function canWearOutfits(p) { const k = BD.UI.fighterKey(p); return k === "custom" || BD.Cast.isStudent(k); }
   function outfit(p) {
     const o = outfitById(p.outfit);
     return o.id !== "gi" && outfitUnlocked(p, o) && canWearOutfits(p) ? o.id : "gi";

@@ -13,3 +13,17 @@ html.text-large { font-size: 112.5%; }
 html.text-xl { font-size: 125%; }
 html.easy-font body, html.easy-font button, html.easy-font input, html.easy-font textarea, html.easy-font select { font-family: "Atkinson Hyperlegible", Verdana, Arial, sans-serif !important; letter-spacing: .01em; }
 html.easy-font .problem, html.easy-font .bb-count { font-family: "Atkinson Hyperlegible", Verdana, sans-serif !important; }
+
+/* Champion Studio (3D champions picked by look) */
+.studio-preview .champ img { height: 210px; max-height: 210px; width: auto; }
+.studio-intro { margin: -4px 0 10px; }
+.studio-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.studio-pick { position: relative; padding: 0; aspect-ratio: 1; border-radius: 50%; border: 3px solid var(--line); overflow: hidden; background: radial-gradient(circle at 50% 30%, #2F5A92, var(--midnight)); }
+.studio-pick img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.studio-pick.on { border-color: var(--green); box-shadow: 0 0 0 2px var(--green), 0 0 14px rgba(101, 217, 74, .5); }
+.studio-pick .best { position: absolute; left: 50%; bottom: 4px; transform: translateX(-50%); white-space: nowrap; font-size: .55rem; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; padding: 1px 6px; border-radius: 99px; background: var(--green); color: #0B1E3D; }
+.chip .hair-dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 5px; vertical-align: -1px; border: 1px solid rgba(255, 255, 255, .4); }
+.chip[disabled] { opacity: .4; }
+.studio-opt { border-style: dashed; border-color: var(--green); }
+.fighter-pick.big .studio-opt .champ img { height: 124px; width: auto; }
+@media (min-width: 640px) { .studio-preview .champ img { height: 300px; max-height: 300px; } .studio-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); } }

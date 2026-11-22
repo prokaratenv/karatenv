@@ -28,8 +28,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cabin:wght@400;600;700&family=Montserrat:ital,wght@0,600;0,700;0,800;0,900;1,800;1,900&display=swap">
-<link rel="stylesheet" href="css/style.css?v=421ccf3eef">
-<link rel="stylesheet" href="css/more.css?v=421ccf3eef">
+<link rel="stylesheet" href="css/style.css?v=43a5f94330">
+<link rel="stylesheet" href="css/more.css?v=43a5f94330">
 </head>
 <body>
 <div class="bg-streaks" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
@@ -554,6 +554,20 @@
   </div>
 </div>
 
+<div class="sheet-backdrop" id="studioSheet" hidden>
+  <div class="sheet builder studio" role="dialog" aria-modal="true" aria-labelledby="studioTitle">
+    <div class="sheet-head"><h2 id="studioTitle">Champion Studio</h2><button type="button" class="btn btn-quiet btn-small" id="studioClose">Close</button></div>
+    <p class="muted small studio-intro">Choose your look and pick the champion you like. Your champion wears your belt, gear and team uniforms.</p>
+    <div class="builder-grid">
+      <div class="builder-preview studio-preview" id="studioPreview"></div>
+      <div class="builder-opts" id="studioOpts"></div>
+    </div>
+    <div class="builder-actions">
+      <button type="button" class="btn btn-quiet" id="studioDraw">Draw my own instead</button>
+      <button type="button" class="btn btn-primary" id="studioSave">Save my champion</button>
+    </div>
+  </div>
+</div>
 <div class="sheet-backdrop" id="builderSheet" hidden>
   <div class="sheet builder" role="dialog" aria-modal="true" aria-labelledby="builderTitle">
     <div class="sheet-head"><h2 id="builderTitle">Build your champion</h2><button type="button" class="btn btn-quiet btn-small" id="builderClose">Close</button></div>
@@ -586,54 +600,55 @@
   </div>
 </div>
 
-<script src="data/sentence-bank.js?v=421ccf3eef"></script>
-<script src="data/reading-bank.js?v=421ccf3eef"></script>
-<script src="data/spanish-bank.js?v=421ccf3eef"></script>
-<script src="data/spelling-bank.js?v=421ccf3eef"></script>
-<script src="js/config.js?v=421ccf3eef"></script>
-<script src="js/storage.js?v=421ccf3eef"></script>
-<script src="js/cast.js?v=421ccf3eef"></script>
-<script src="js/logo-box.js?v=421ccf3eef"></script>
-<script src="js/rank.js?v=421ccf3eef"></script>
-<script src="js/builder.js?v=421ccf3eef"></script>
-<script src="js/effects.js?v=421ccf3eef"></script>
-<script src="js/kid.js?v=421ccf3eef"></script>
-<script src="js/breaks.js?v=421ccf3eef"></script>
-<script src="js/music.js?v=421ccf3eef"></script>
-<script src="js/explain.js?v=421ccf3eef"></script>
-<script src="js/coach.js?v=421ccf3eef"></script>
-<script src="js/sentence-gen.js?v=421ccf3eef"></script>
-<script src="js/story-gen.js?v=421ccf3eef"></script>
-<script src="js/phonics.js?v=421ccf3eef"></script>
-<script src="js/reading-game.js?v=421ccf3eef"></script>
-<script src="js/word-quiz.js?v=421ccf3eef"></script>
-<script src="js/school.js?v=421ccf3eef"></script>
-<script src="js/sync.js?v=421ccf3eef"></script>
-<script src="js/sensei.js?v=421ccf3eef"></script>
-<script src="js/math-game.js?v=421ccf3eef"></script>
-<script src="js/sentence-game.js?v=421ccf3eef"></script>
-<script src="js/scratch.js?v=421ccf3eef"></script>
-<script src="js/quick.js?v=421ccf3eef"></script>
-<script src="js/boss.js?v=421ccf3eef"></script>
-<script src="js/duel.js?v=421ccf3eef"></script>
-<script src="js/tournament.js?v=421ccf3eef"></script>
-<script src="js/teams.js?v=421ccf3eef"></script>
-<script src="js/challenge.js?v=421ccf3eef"></script>
-<script src="js/badges.js?v=421ccf3eef"></script>
-<script src="js/mini.js?v=421ccf3eef"></script>
-<script src="js/backup.js?v=421ccf3eef"></script>
-<script src="js/certificate.js?v=421ccf3eef"></script>
-<script src="js/parent.js?v=421ccf3eef"></script>
-<script src="js/dojo.js?v=421ccf3eef"></script>
-<script src="js/quest.js?v=421ccf3eef"></script>
-<script src="js/leads.js?v=421ccf3eef"></script>
-<script src="js/family.js?v=421ccf3eef"></script>
-<script src="js/settings.js?v=421ccf3eef"></script>
-<script src="js/placement.js?v=421ccf3eef"></script>
-<script src="js/readalong.js?v=421ccf3eef"></script>
-<script src="js/digest.js?v=421ccf3eef"></script>
-<script src="js/goals.js?v=421ccf3eef"></script>
-<script src="js/prefs.js?v=421ccf3eef"></script>
-<script src="js/app.js?v=421ccf3eef"></script>
+<script src="data/sentence-bank.js?v=43a5f94330"></script>
+<script src="data/reading-bank.js?v=43a5f94330"></script>
+<script src="data/spanish-bank.js?v=43a5f94330"></script>
+<script src="data/spelling-bank.js?v=43a5f94330"></script>
+<script src="js/config.js?v=43a5f94330"></script>
+<script src="js/storage.js?v=43a5f94330"></script>
+<script src="js/cast.js?v=43a5f94330"></script>
+<script src="js/logo-box.js?v=43a5f94330"></script>
+<script src="js/rank.js?v=43a5f94330"></script>
+<script src="js/builder.js?v=43a5f94330"></script>
+<script src="js/studio.js?v=43a5f94330"></script>
+<script src="js/effects.js?v=43a5f94330"></script>
+<script src="js/kid.js?v=43a5f94330"></script>
+<script src="js/breaks.js?v=43a5f94330"></script>
+<script src="js/music.js?v=43a5f94330"></script>
+<script src="js/explain.js?v=43a5f94330"></script>
+<script src="js/coach.js?v=43a5f94330"></script>
+<script src="js/sentence-gen.js?v=43a5f94330"></script>
+<script src="js/story-gen.js?v=43a5f94330"></script>
+<script src="js/phonics.js?v=43a5f94330"></script>
+<script src="js/reading-game.js?v=43a5f94330"></script>
+<script src="js/word-quiz.js?v=43a5f94330"></script>
+<script src="js/school.js?v=43a5f94330"></script>
+<script src="js/sync.js?v=43a5f94330"></script>
+<script src="js/sensei.js?v=43a5f94330"></script>
+<script src="js/math-game.js?v=43a5f94330"></script>
+<script src="js/sentence-game.js?v=43a5f94330"></script>
+<script src="js/scratch.js?v=43a5f94330"></script>
+<script src="js/quick.js?v=43a5f94330"></script>
+<script src="js/boss.js?v=43a5f94330"></script>
+<script src="js/duel.js?v=43a5f94330"></script>
+<script src="js/tournament.js?v=43a5f94330"></script>
+<script src="js/teams.js?v=43a5f94330"></script>
+<script src="js/challenge.js?v=43a5f94330"></script>
+<script src="js/badges.js?v=43a5f94330"></script>
+<script src="js/mini.js?v=43a5f94330"></script>
+<script src="js/backup.js?v=43a5f94330"></script>
+<script src="js/certificate.js?v=43a5f94330"></script>
+<script src="js/parent.js?v=43a5f94330"></script>
+<script src="js/dojo.js?v=43a5f94330"></script>
+<script src="js/quest.js?v=43a5f94330"></script>
+<script src="js/leads.js?v=43a5f94330"></script>
+<script src="js/family.js?v=43a5f94330"></script>
+<script src="js/settings.js?v=43a5f94330"></script>
+<script src="js/placement.js?v=43a5f94330"></script>
+<script src="js/readalong.js?v=43a5f94330"></script>
+<script src="js/digest.js?v=43a5f94330"></script>
+<script src="js/goals.js?v=43a5f94330"></script>
+<script src="js/prefs.js?v=43a5f94330"></script>
+<script src="js/app.js?v=43a5f94330"></script>
 </body>
 </html>
