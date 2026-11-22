@@ -1588,6 +1588,6 @@ body.duel-on .topbar, body.duel-on .footer { visibility: hidden; }
 .team-card { --cta: #B07CFF; --tint: rgba(176, 124, 255, .2); --glow: rgba(176, 124, 255, .35); }
 .quest-icon, .flash-card .tile-icon, .duel-icon { font-size: 2.3rem; flex: none; filter: drop-shadow(0 3px 4px rgba(0, 0, 0, .5)); }
 .quest-card .boss-k, .flash-card .boss-k, .map-card .boss-k, .boss-card .boss-k { color: var(--cta); }
-[data-cta]::after { content: "▶"; flex: none; margin-left: auto; align-self: center; width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; font-size: .85rem; color: #0B1426; background: var(--cta); box-shadow: 0 3px 0 rgba(0, 0, 0, .3); }
+[data-cta]::after { content: none; }
 .duel-card[data-cta]::after { content: none; }
 .quest-card .quest-txt, .flash-card .quest-txt, .map-card .quest-txt, .boss-card .boss-txt { flex: 1; min-width: 0; }
