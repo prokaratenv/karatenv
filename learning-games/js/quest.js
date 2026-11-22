@@ -133,7 +133,7 @@ BD.Quest = (function () {
     qc.className = "quest-card" + (c.done && !c.claimed ? " ready" : "") + (c.claimed ? " claimed" : "");
     qc.innerHTML = '<span class="quest-icon" aria-hidden="true">' + (c.claimed ? "✅" : c.done ? "🎁" : "⭐") + '</span>' +
       '<span class="quest-txt"><span class="boss-k">Today\'s quest' + (p.shields ? ' · ' + p.shields + (p.shields > 1 ? " streak shields" : " streak shield") : '') + '</span><strong>' + esc(c.q.title) + '</strong>' +
-      (c.claimed ? '<span class="boss-sub">Done! New quest tomorrow.</span>' : c.done ? '<span class="boss-sub">Quest complete! Tap to open your chest</span>' :
+      (c.claimed ? '<span class="boss-sub">Done! New quest tomorrow.' + (c.q.game || c.q.id === "school" || c.q.id === "boss" ? ' Tap to play again.' : ' Tap to see your map.') + '</span>' : c.done ? '<span class="boss-sub">Quest complete! Tap to open your chest</span>' :
         '<span class="quest-bar"><span style="width:' + pct + '%"></span></span><span class="boss-sub">' + c.n + ' / ' + c.q.goal + (c.q.goal === 25 ? " questions" : "") + '</span>') + '</span>';
     const g = BD.Rank.dojoGrade(p), r = BD.Rank.rec(p, g), reg = REGIONS[r.belt];
     mc.innerHTML = '<span class="map-mini" style="--sky:' + reg.sky + ';--ground:' + reg.ground + '" aria-hidden="true">' + reg.icon + '</span>' +
@@ -144,7 +144,7 @@ BD.Quest = (function () {
     const p = BD.Store.current(); if (!p) return;
     const c = current(p);
     if (c.done && !c.claimed) return chestSheet(p);
-    if (c.claimed) return openMap();
+    if (c.claimed && !c.q.game && c.q.id !== "school" && c.q.id !== "boss") return openMap(); // done: game quests still open their game for extra practice
     // take them straight to the quest
     if (c.q.game === "math") BD.MathGame.openSetup();
     else if (c.q.game === "sentence") BD.SentenceGame.start();
