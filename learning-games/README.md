@@ -546,3 +546,7 @@ learning-games/
 ## Credits
 
 Spelling hint meanings are adapted from WordNet 3.1, Copyright 2011 by Princeton University, used under the WordNet license (https://wordnet.princeton.edu/license-and-commercial-use).
+
+## Report a bug
+
+A small bug icon in the top bar (every screen) takes a screenshot of the current screen (html2canvas 1.4.1, loaded from cdnjs only when tapped), then opens a sheet with the picture, a short note and "Attach a photo instead". Send posts to the family script (action `bug`), which emails the team address set in `tools/family-sync.gs` (`BUG_EMAIL`, server only) with the screenshot attached, a `Report ID` line and a repeat count. Repeats of the same bug within 14 days are still emailed with a subject starting `Brain Dojo bug: Repeat (N):`, and the student is told it's already being worked on. The script keeps only a small rolling list (screen, game, grade, the first few key words of the note, count, dates; at most 200, 14 days) in `bug-reports.json`. The same device re-sending from the same screen within 10 minutes is told it was received without sending again. Inside Claude, bug reports point to brain.engagelma.com.

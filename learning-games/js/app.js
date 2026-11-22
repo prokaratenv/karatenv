@@ -841,6 +841,7 @@ BD.UI = (function () {
     const ok = "serviceWorker" in navigator && (location.protocol === "https:" || /^(localhost|127\.0\.0\.1)$/.test(location.hostname)) && !(window.claude && window.claude.use);
     if (ok) {
       navigator.serviceWorker.register("sw.js").then(function (reg) {
+        if (!reg) return;
         // once settled, fetch the rest of the pictures in the background
         setTimeout(function () { const w = reg.active || reg.waiting || reg.installing; if (w) w.postMessage({ type: "warm" }); }, 8000);
       }).catch(function () { /* plays online only */ });

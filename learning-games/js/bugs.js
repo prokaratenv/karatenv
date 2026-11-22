@@ -30,7 +30,7 @@ BD.Bugs = (function () {
     if (h2cLoad) return h2cLoad;
     h2cLoad = new Promise(function (ok, no) {
       const s = document.createElement("script");
-      s.src = H2C; s.async = true; s.crossOrigin = "anonymous"; s.referrerPolicy = "no-referrer";
+      s.src = H2C; s.async = true; s.referrerPolicy = "no-referrer";
       s.onload = function () { window.html2canvas ? ok(window.html2canvas) : no(new Error("no html2canvas")); };
       s.onerror = function () { h2cLoad = null; no(new Error("load failed")); };
       document.head.appendChild(s);
@@ -56,15 +56,21 @@ BD.Bugs = (function () {
     try {
       const h2c = await loadH2C();
       const bg = getComputedStyle(document.body).backgroundColor;
-      const canvas = await Promise.race([
-        h2c(document.body, {
+      const opts = function (plain) {
+        return {
           backgroundColor: bg && bg !== "rgba(0, 0, 0, 0)" ? bg : "#0B1426", logging: false, useCORS: true,
           x: window.scrollX, y: window.scrollY, width: window.innerWidth, height: window.innerHeight,
           windowWidth: window.innerWidth, windowHeight: window.innerHeight, scale: Math.min(window.devicePixelRatio || 1, 2),
-          ignoreElements: function (el) { return el.id === "bugBtn" || el.classList.contains("bug-toast"); }
-        }),
-        new Promise(function (_, no) { setTimeout(function () { no(new Error("timeout")); }, 10000); })
-      ]);
+          ignoreElements: function (el) { return el.id === "bugBtn" || el.classList.contains("bug-toast"); },
+          // html2canvas 1.4.1 can crash on some CSS gradients; the second try flattens them
+          onclone: plain ? function (doc) { const st = doc.createElement("style"); st.textContent = "*,*::before,*::after{background-image:none!important;mask-image:none!important;-webkit-mask-image:none!important}"; doc.head.appendChild(st); } : undefined
+        };
+      };
+      const run = function (plain) {
+        return Promise.race([h2c(document.body, opts(plain)), new Promise(function (_, no) { setTimeout(function () { no(new Error("timeout")); }, 10000); })]);
+      };
+      let canvas;
+      try { canvas = await run(false); } catch (e) { if (/timeout/.test(e && e.message)) throw e; canvas = await run(true); }
       return shrink(canvas, canvas.width, canvas.height);
     } catch (e) { return null; } // offline or blocked: report without a picture
   }
