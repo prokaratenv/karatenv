@@ -64,7 +64,7 @@ BD.Boss = (function () {
     const idx = belt === 8 && wins(p, g).indexOf(8) !== -1 ? 9 : belt;
     return { grade: g, belt: belt, idx: idx, boss: BOSSES[idx] };
   }
-  const label = function (b) { return b.boss.secret ? "👑 Final Boss" : b.boss.final ? "🔥 Black Belt Boss" : "🥊 " + BD.BELTS[b.belt].name + " Belt Boss"; };
+  const label = function (b) { return b.boss.secret ? "Final Boss" : b.boss.final ? "Black Belt Boss" : BD.BELTS[b.belt].name + " Belt Boss"; };
 
   /* Home card. */
   function card(p) {

@@ -84,7 +84,7 @@ BD.Kid = (function () {
   }
   function homeLink(p) {
     const el = document.getElementById("stickerLink"); if (!el || !p) return;
-    el.innerHTML = '📒 Sticker Book · <strong>' + count(p) + '</strong> of ' + STICKERS.length;
+    el.innerHTML = 'Sticker Book · <strong>' + count(p) + '</strong> of ' + STICKERS.length;
   }
   function open() {
     const p = BD.Store.current(); if (!p) return;

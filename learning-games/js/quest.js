@@ -130,12 +130,12 @@ BD.Quest = (function () {
     const c = current(p), pct = Math.round(100 * c.n / c.q.goal);
     qc.className = "quest-card" + (c.done && !c.claimed ? " ready" : "") + (c.claimed ? " claimed" : "");
     qc.innerHTML = '<span class="quest-icon" aria-hidden="true">' + (c.claimed ? "✅" : c.done ? "🎁" : "⭐") + '</span>' +
-      '<span class="quest-txt"><span class="boss-k">Today\'s quest' + (p.shields ? ' · 🛡️' + (p.shields > 1 ? "×" + p.shields : "") : '') + '</span><strong>' + esc(c.q.title) + '</strong>' +
+      '<span class="quest-txt"><span class="boss-k">Today\'s quest' + (p.shields ? ' · ' + p.shields + (p.shields > 1 ? " streak shields" : " streak shield") : '') + '</span><strong>' + esc(c.q.title) + '</strong>' +
       (c.claimed ? '<span class="boss-sub">Done! New quest tomorrow.</span>' : c.done ? '<span class="boss-sub">Quest complete! Tap to open your chest</span>' :
         '<span class="quest-bar"><span style="width:' + pct + '%"></span></span><span class="boss-sub">' + c.n + ' / ' + c.q.goal + (c.q.goal === 25 ? " questions" : "") + '</span>') + '</span>';
     const g = BD.Rank.dojoGrade(p), r = BD.Rank.rec(p, g), reg = REGIONS[r.belt];
     mc.innerHTML = '<span class="map-mini" style="--sky:' + reg.sky + ';--ground:' + reg.ground + '" aria-hidden="true">' + reg.icon + '</span>' +
-      '<span class="quest-txt"><span class="boss-k">🗺️ Adventure Map</span><strong>' + esc(r.mastered ? "Grade mastered!" : reg.name) + '</strong><span class="boss-sub">' +
+      '<span class="quest-txt"><span class="boss-k">Adventure Map</span><strong>' + esc(r.mastered ? "Grade mastered!" : reg.name) + '</strong><span class="boss-sub">' +
       (r.mastered ? "Every region cleared" : BD.Rank.stripeCount(r) + ' of 4 stripes to the next region') + '</span></span>';
   }
   function questTap() {
