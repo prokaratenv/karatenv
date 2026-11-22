@@ -128,6 +128,7 @@ BD.Store = (function () {
     if (BD.School) BD.School.sanitize(p); else if (p.school && typeof p.school !== "object") delete p.school;
     if (BD.Quest) BD.Quest.sanitize(p);
     if (BD.Breaks) BD.Breaks.sanitize(p);
+    if (BD.Goals && BD.Goals.sanitize) BD.Goals.sanitize(p);
     if (BD.StoryGen && BD.StoryGen.sanitize) BD.StoryGen.sanitize(p);
     if (BD.Phonics && BD.Phonics.sanitize) BD.Phonics.sanitize(p);
     if (BD.SentenceGen && BD.SentenceGen.sanitize) BD.SentenceGen.sanitize(p);

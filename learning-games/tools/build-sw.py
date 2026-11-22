@@ -26,10 +26,10 @@ for top in ["css", "js", "data", "img"]:
     for dp, _, fs in os.walk(top):
         for f in sorted(fs):
             p = os.path.join(dp, f).replace(os.sep, "/")
-            if p.startswith("img/mask-") and p.endswith(".png"): continue  # masks are built into js/masks.js
+            if p == "js/masks.js": continue  # inline masks are for the Claude version only; the website uses img/mask-*.png
             with open(p, "rb") as fh: h.update(p.encode() + fh.read())
             # big character variations come down in the background after the first visit
-            (LATER if p.startswith(("img/fit-", "img/age-", "img/boss-")) else CORE).append(p)
+            (LATER if p.startswith(("img/fit-", "img/age-", "img/boss-", "img/mask-")) else CORE).append(p)
 for p in ["index.html", "manifest.webmanifest"]:
     with open(p, "rb") as fh: h.update(p.encode() + fh.read())
 version = h.hexdigest()[:12]
