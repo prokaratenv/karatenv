@@ -18,6 +18,7 @@ BD.UI = (function () {
     if (id === "screen-players" || id === "screen-home") trail.length = 0; // home is the top
     currentScreen = id;
     if (BD.Music) BD.Music.forScreen(id);
+    BD.emit("screen", id);
     document.body.classList.toggle("on-players", id === "screen-players");
     if (id !== "screen-results") BD.confetti.stop();
     document.querySelectorAll(".screen").forEach(function (s) { s.hidden = s.id !== id; });
@@ -416,6 +417,7 @@ BD.UI = (function () {
     renderPlan(p);
     BD.Quest.render(p);
     show("screen-home");
+    BD.emit("home", p);
   }
 
   /* Gear the champion is wearing, under the home stage. */
@@ -517,6 +519,7 @@ BD.UI = (function () {
     $("resSetup").hidden = !o.setup;
     show("screen-results");
     if (quiet) $("resBreak").innerHTML = ""; else BD.Breaks.offer(p, o);
+    if (!quiet) BD.emit("results", { p: p, o: o });
     BD.Dojo.push();
     setTimeout(function () { BD.Mini.react("bow"); }, 350);
     setTimeout(function () { if (currentScreen === "screen-results" && !sheetOpen()) BD.Badges.award(BD.Store.current()); }, 1400);
@@ -596,6 +599,7 @@ BD.UI = (function () {
         BD.Parent.card(p) +
         BD.School.parentHTML(p) +
         (BD.Teams ? BD.Teams.parentHTML(p) : "") +
+        (BD.Settings ? BD.Settings.studentHTML(p) : "") +
         (redoList(p).length ? '<div class="redo-note"><strong>Redo needed</strong><p>' + redoList(p).join(", ") +
           '. Scored under ' + BD.MathGame.PASS + '%, so this level stays locked in until they pass it.</p><button type="button" class="btn btn-small" data-act="clearRedo">Unlock all levels</button></div>' : '') +
         '<div class="pd-actions" data-id="' + p.id + '"><button type="button" class="btn btn-primary" data-act="share">Share this week</button>' +
@@ -620,7 +624,9 @@ BD.UI = (function () {
         '<span class="confirm" hidden><span class="confirm-text"></span> <button type="button" class="btn btn-small danger" data-act="yes">Yes</button> <button type="button" class="btn btn-small" data-act="no">Cancel</button></span>' +
         '</div></article>';
     }).join("");
+    if (BD.Settings) $("parentBody").insertAdjacentHTML("afterbegin", BD.Settings.familyHTML());
     show("screen-parent");
+    BD.emit("parentRendered", $("parentBody"));
   }
 
   /* ---------- wiring ---------- */
@@ -638,6 +644,7 @@ BD.UI = (function () {
       const name = $("newName").value.trim().slice(0, 20);
       if (!name) { $("newName").focus(); return; }
       const np = BD.Store.addPlayer(name, Number($("newGrade").value), newFighter === "custom" ? null : newFighter);
+      BD.emit("playerAdded", np);
       if (newFighter === "custom") { home(); openBuilder(np); return; }
       $("newName").value = "";
       home();

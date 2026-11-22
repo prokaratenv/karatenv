@@ -45,6 +45,11 @@ BD.streak = function (p) {
   return { days: n, today: today };
 };
 /* Every point a student earns goes through here, so the weekly leaderboard can count it. */
+/* A tiny event bus so features can hook in without editing each other:
+   "screen" (id), "home" (p), "playerAdded" (p), "results" ({p, o}), "parentRendered" (rootEl). */
+BD._ev = BD._ev || {};
+BD.on = function (name, fn) { (BD._ev[name] = BD._ev[name] || []).push(fn); };
+BD.emit = function (name, data) { (BD._ev[name] || []).forEach(function (fn) { try { fn(data); } catch (e) { if (window.console) console.error(e); } }); };
 BD.addXP = function (p, n) {
   n = Math.max(0, Math.round((Number(n) || 0) * 2) / 2); if (!n) return 0; // half points allowed (flashcard bonus is 2.5)
   p.xp = (p.xp || 0) + n;

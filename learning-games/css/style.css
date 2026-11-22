@@ -1591,3 +1591,7 @@ body.duel-on .topbar, body.duel-on .footer { visibility: hidden; }
 [data-cta]::after { content: none; }
 .duel-card[data-cta]::after { content: none; }
 .quest-card .quest-txt, .flash-card .quest-txt, .map-card .quest-txt, .boss-card .boss-txt { flex: 1; min-width: 0; }
+/* Parent settings sections */
+.set-family { display: grid; gap: 10px; margin-bottom: 14px; }
+.set-sec { padding: 12px 14px; border-radius: 14px; border: 1px solid rgba(255, 255, 255, .12); background: rgba(255, 255, 255, .04); margin: 10px 0; }
+.set-sec h4 { margin-top: 0; }
