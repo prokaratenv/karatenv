@@ -95,5 +95,19 @@ BD.Studio = (function () {
     $("studioSave").addEventListener("click", function () { const k = pick; close(); BD.Sound.right(); if (onSave && k) onSave(k); });
     $("studioDraw").addEventListener("click", function () { close(); if (BD.UI.openBuilder) BD.UI.openBuilder(); });
   }
-  return { open: open, bind: bind, score: score, SKINS: SKINS };
+  /* Website: Studio art isn't part of the offline download (270 pictures), so
+     once a student picks a champion, fetch just that champion's looks; the
+     service worker keeps them for offline play. */
+  const warmed = {};
+  function warm(key) {
+    if (!BD.Cast.isStudio(key) || warmed[key] || !("serviceWorker" in navigator) || BD.MASKS) return;
+    warmed[key] = true;
+    const fits = ["training", "sparring", "boxing", "mma", "highrank", "leadership", "athlete", "bbc"];
+    const urls = ["img/age-" + key + ".webp", "img/face-" + key + ".webp", "img/mask-" + key + ".png", "img/mask-" + key + "-logo.png", "img/mask-" + key + "-hrcollar.png"];
+    fits.forEach(function (f) { urls.push("img/fit-" + key + "-" + f + ".webp", "img/mask-" + key + "-" + f + ".png"); if (f !== "sparring") urls.push("img/mask-" + key + "-" + f + "-logo.png"); });
+    setTimeout(function () { urls.forEach(function (u) { fetch(u).catch(function () {}); }); }, 3000);
+  }
+  BD.on("home", function (p) { if (p) warm(p.avatar); });
+
+  return { open: open, bind: bind, score: score, warm: warm, SKINS: SKINS };
 })();

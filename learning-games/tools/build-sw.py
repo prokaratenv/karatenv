@@ -28,8 +28,10 @@ for top in ["css", "js", "data", "img"]:
             p = os.path.join(dp, f).replace(os.sep, "/")
             if p == "js/masks.js": continue  # inline masks are for the Claude version only; the website uses img/mask-*.png
             with open(p, "rb") as fh: h.update(p.encode() + fh.read())
+            # Champion Studio art (30 champions x 9 looks) is fetched only when a student picks it, then kept by the worker
+            if re.match(r"img/(age|fit|mask|face)-s\d\d[-.]", p): continue
             # big character variations come down in the background after the first visit
-            (LATER if p.startswith(("img/fit-", "img/age-", "img/boss-", "img/mask-")) or re.match(r"img/face-s\d\d\.webp$", p) else CORE).append(p)
+            (LATER if p.startswith(("img/fit-", "img/age-", "img/boss-", "img/mask-")) else CORE).append(p)
 for p in ["index.html", "manifest.webmanifest"]:
     with open(p, "rb") as fh: h.update(p.encode() + fh.read())
 version = h.hexdigest()[:12]
