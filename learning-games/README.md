@@ -87,6 +87,20 @@ The **⚡ Daily Flashcards** tile opens both. **Math:** 10 cards of one skill (+
 
 **Unscramble puzzles** show a hint (the first letter), and each letter tile goes dark once it's used, by tapping or typing.
 
+## Dojo Leaderboard and cheers
+
+Tap the **🏆 Dojo Leaderboard** card. Three boards, each with a podium and every student's belt:
+
+- **This week:** XP earned since Monday (resets every Monday).
+- **All-time:** lifetime XP.
+- **Streaks:** current training streak in days.
+
+The student's own card shows their rank, belt, XP this week, all-time XP, streak and the cheers they got. A line under the tabs says how far they are from passing the next student ("Only 36 XP to pass Brave Tiger 12!").
+
+**Cheers:** students on the board can give 🤜 fist bumps, 🙌 high-fives, 👏 applause and 👍 thumbs up to anyone else on it, as many as they like. When cheers come in, the student sees a burst of icons and a "Your dojo is cheering for you!" note (today and this week) the next time they open the app. **Supporter XP:** cheering friends on 3 different days in a week earns +5 XP, and 5 days earns +5 more (+10 a week at most). Only cheer counts and nicknames are stored; they reset every week.
+
+The all-time and streak boards and cheers need the updated family script (see "Updating the family script"); until it's redeployed, the weekly board shows as before.
+
 ## Tournaments
 
 Tap **🏆 Tournaments** on the home screen. Each one is a single-elimination bracket of **6 to 12** competitors (computer opponents with nicknames). Byes go into round 2 when the numbers are uneven, and you can enter as many as you like.

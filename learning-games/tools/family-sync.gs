@@ -50,6 +50,7 @@ function doPost(e) {
       case "delete": return reply(deleteFamily(req));
       case "board": return reply(board(req));
       case "boardPost": return reply(boardPost(req));
+      case "cheer": return reply(cheer(req));
       case "chList": return reply(chList(req));
       case "chSend": return reply(chSend(req));
       case "chRespond": return reply(chRespond(req));
@@ -204,13 +205,29 @@ function nickOk(s) { var m = /^([A-Za-z]+) ([A-Za-z]+) ([1-9][0-9]?)$/.exec(Stri
 function initialOk(s) { return /^[A-Z]\.$/.test(String(s || "")); }
 function weekKey() { var d = new Date(); d.setUTCHours(0, 0, 0, 0); d.setUTCDate(d.getUTCDate() - (d.getUTCDay() + 6) % 7); return d.toISOString().slice(0, 10); }
 function boardFile() { var f = folder(), it = f.getFilesByName("leaderboard.json"); return it.hasNext() ? it.next() : f.createFile("leaderboard.json", "{}", "application/json"); }
-function boardData(file) { var d = {}; try { d = JSON.parse(file.getBlob().getDataAsString()) || {}; } catch (e) { d = {}; } if (d.week !== weekKey()) d = { week: weekKey(), rows: {} }; d.rows = d.rows || {}; return d; }
+/* Rows carry over from week to week (for the all-time and streak boards); a new
+   week starts this week's XP at zero. Rows not updated for 60 days are dropped. */
+function boardData(file) {
+  var d = {}; try { d = JSON.parse(file.getBlob().getDataAsString()) || {}; } catch (e) { d = {}; }
+  d.rows = d.rows && typeof d.rows === "object" ? d.rows : {};
+  if (d.week !== weekKey()) {
+    Object.keys(d.rows).forEach(function (k) { var r = d.rows[k]; if (!r || Date.now() - (Number(r.at) || 0) > 60 * 864e5) delete d.rows[k]; else { r.xp = 0; r.reps = 0; } });
+    d.week = weekKey();
+  }
+  return d;
+}
 function board(req) {
   var d = boardData(boardFile()), mine = null, t = String(req.token || "").match(/^([a-f0-9]{32})\./);
   if (t) mine = t[1];
-  var rows = Object.keys(d.rows).map(function (k) { var r = d.rows[k], me = !!(mine && k.indexOf(mine + ":") === 0), o = { name: r.name, belt: r.belt, xp: r.xp, reps: r.reps, me: me, h: handle(k) }; if (me) o.sid = k.slice(33); return o; });
+  var cd = cheerData(cheerFile());
+  var rows = Object.keys(d.rows).map(function (k) {
+    var r = d.rows[k], me = !!(mine && k.indexOf(mine + ":") === 0), c = cd.r[k];
+    var o = { name: r.name, belt: r.belt, xp: r.xp, reps: r.reps, life: r.life || 0, st: r.st || 0, cw: c ? sum(c.t) : 0, me: me, h: handle(k) };
+    if (me) { o.sid = k.slice(33); o.ch = c ? { t: c.t, d: c.d, by: c.by } : null; o.gave = cd.g[k] || null; }
+    return o;
+  });
   rows.sort(function (a, b) { return (b.xp - a.xp) || (b.reps - a.reps); });
-  return { ok: true, week: d.week, rows: rows.slice(0, 100), total: rows.reduce(function (a, r) { return a + (r.reps || 0); }, 0), count: rows.length, challenges: true };
+  return { ok: true, week: d.week, rows: rows.slice(0, 300), total: rows.reduce(function (a, r) { return a + (r.reps || 0); }, 0), count: rows.length, challenges: true, cheers: true, v: 2 };
 }
 function boardPost(req) {
   return locked(function () {
@@ -220,10 +237,45 @@ function boardPost(req) {
     (Array.isArray(req.players) ? req.players : []).slice(0, 6).forEach(function (p) {
       var sid = String(p && p.sid || ""), name = String(p && p.name || "");
       if (!/^[a-f0-9]{16}$/.test(sid) || !(nickOk(name) || initialOk(name)) || BELTS.indexOf(p.belt) === -1) return;
-      d.rows[fid + ":" + sid] = { name: name, belt: p.belt, xp: Math.max(0, Math.min(10000, Math.round(Number(p.xp) * 2 || 0) / 2)), reps: Math.max(0, Math.min(1500, Math.round(Number(p.reps) || 0))) };
+      d.rows[fid + ":" + sid] = { name: name, belt: p.belt, xp: Math.max(0, Math.min(10000, Math.round(Number(p.xp) * 2 || 0) / 2)), reps: Math.max(0, Math.min(1500, Math.round(Number(p.reps) || 0))),
+        life: Math.max(0, Math.min(1000000, Math.round(Number(p.life) * 2 || 0) / 2)), st: Math.max(0, Math.min(3650, Math.round(Number(p.st) || 0))), at: Date.now() };
     });
     file.setContent(JSON.stringify(d));
     return { ok: true };
+  });
+}
+
+/* ---------- Cheers: fist bumps, high-fives, applause, thumbs up ----------
+   A student on the leaderboard cheers another. Only counts are kept (per kind,
+   per day, this week) and the senders' nicknames; everything resets each week. */
+var CHEER_KINDS = ["f", "h", "c", "u"], CHEERS_PER_DAY = 500;
+function sum(t) { var n = 0; Object.keys(t || {}).forEach(function (k) { n += Number(t[k]) || 0; }); return n; }
+function cheerFile() { var f = folder(), it = f.getFilesByName("cheers.json"); return it.hasNext() ? it.next() : f.createFile("cheers.json", "{}", "application/json"); }
+function cheerData(file) {
+  var d = {}; try { d = JSON.parse(file.getBlob().getDataAsString()) || {}; } catch (e) { d = {}; }
+  if (d.wk !== weekKey()) d = { wk: weekKey(), r: {}, g: {} };
+  d.r = d.r || {}; d.g = d.g || {};
+  return d;
+}
+function cheer(req) {
+  return locked(function () {
+    var a = auth(req); if (!a) return { ok: false, error: "signed_out" };
+    var sid = String(req.sid || ""), to = String(req.to || ""), kind = String(req.kind || ""), day = String(req.day || "");
+    if (!/^[a-f0-9]{16}$/.test(sid) || !/^[a-f0-9]{16}$/.test(to) || CHEER_KINDS.indexOf(kind) === -1) return { ok: false, error: "bad_request" };
+    if (!/^\d{4}-\d\d-\d\d$/.test(day) || Math.abs(dayNum(day) - todayNum()) > 1) day = new Date().toISOString().slice(0, 10);
+    var me = String(req.token).slice(0, 32) + ":" + sid, bd = boardData(boardFile()), from = bd.rows[me];
+    if (!from) return { ok: false, error: "not_on_board" };
+    var target = null; Object.keys(bd.rows).some(function (k) { if (handle(k) === to) { target = k; return true; } return false; });
+    if (!target || target === me) return { ok: false, error: "not_found" };
+    var file = cheerFile(), d = cheerData(file), g = d.g[me] = d.g[me] && d.g[me].day === day ? d.g[me] : { day: day, n: 0 };
+    if (g.n >= CHEERS_PER_DAY) return { ok: false, error: "limit" };
+    g.n++;
+    var r = d.r[target] = d.r[target] || { t: {}, d: {}, by: {} };
+    r.t[kind] = (r.t[kind] || 0) + 1;
+    r.d[day] = r.d[day] || {}; r.d[day][kind] = (r.d[day][kind] || 0) + 1;
+    if (r.by[from.name] || Object.keys(r.by).length < 30) r.by[from.name] = (r.by[from.name] || 0) + 1;
+    file.setContent(JSON.stringify(d));
+    return { ok: true, gave: g.n };
   });
 }
 
@@ -307,6 +359,10 @@ function deleteFamily(req) {
     var fid = String(req.token).slice(0, 32), bf = boardFile(), bd = boardData(bf);
     Object.keys(bd.rows).forEach(function (k) { if (k.indexOf(fid + ":") === 0) delete bd.rows[k]; });
     bf.setContent(JSON.stringify(bd));
+    var hf = cheerFile(), hd = cheerData(hf);
+    Object.keys(hd.r).forEach(function (k) { if (k.indexOf(fid + ":") === 0) delete hd.r[k]; });
+    Object.keys(hd.g).forEach(function (k) { if (k.indexOf(fid + ":") === 0) delete hd.g[k]; });
+    hf.setContent(JSON.stringify(hd));
     var cf = chFile(), cd = chData(cf);
     cd.list = cd.list.filter(function (c) { return c.a.indexOf(fid + ":") !== 0 && c.b.indexOf(fid + ":") !== 0; });
     cf.setContent(JSON.stringify(cd));

@@ -378,6 +378,7 @@ BD.UI = (function () {
     $("homeFighter").innerHTML = fighterArt(p, "full");
     refreshStage();
     BD.Dojo.render();
+    setTimeout(function () { if (currentScreen === "screen-home") BD.Dojo.splash(); }, 900);
     BD.Boss.card(p);
     BD.Tourney.card(p);
     if (BD.Teams) BD.Teams.card(p);

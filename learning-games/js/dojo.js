@@ -42,42 +42,62 @@ BD.Dojo = (function () {
   }
   function display(p) { return p.nick && nickOk(p.nick, p.name) ? p.nick : initial(p.name); }
   function sid(id) { let h1 = 0x811c9dc5, h2 = 0x1b873593; for (let i = 0; i < id.length; i++) { h1 = Math.imul(h1 ^ id.charCodeAt(i), 16777619); h2 = Math.imul(h2 ^ id.charCodeAt(i), 2246822519); } return ((h1 >>> 0).toString(16).padStart(8, "0") + (h2 >>> 0).toString(16).padStart(8, "0")); }
+  /* Cheers: fist bumps, high-fives, applause and thumbs up for friends on the board. */
+  const CHEERS = [{ k: "f", icon: "🤜", name: "fist bump" }, { k: "h", icon: "🙌", name: "high-five" }, { k: "c", icon: "👏", name: "applause" }, { k: "u", icon: "👍", name: "thumbs up" }];
+  const CK = CHEERS.map(function (c) { return c.k; });
+  const cleanCounts = function (t) { const o = {}; CK.forEach(function (k) { const n = Math.max(0, Math.min(100000, Math.round(Number(t && t[k]) || 0))); if (n) o[k] = n; }); return o; };
+  const total = function (t) { return CK.reduce(function (a, k) { return a + ((t && t[k]) || 0); }, 0); };
+
   /* Entries come from other families: keep only what the board needs, checked. */
   const BELT_BY_NAME = {};
+  function cleanPlayer(pl) {
+    BD.BELTS.forEach(function (b) { BELT_BY_NAME[b.name] = b; });
+    const b = BELT_BY_NAME[pl && pl.belt] || BD.BELTS[0];
+    const reps = Math.max(0, Math.min(1500, Math.round(Number(pl && pl.reps) || 0))); // no one answers 1,500+ in a week
+    const xp = Math.max(0, Math.min(10000, Math.round((Number(pl && pl.xp) || 0) * 2) / 2));
+    const life = Math.max(0, Math.min(1000000, Math.round((Number(pl && pl.life) || 0) * 2) / 2));
+    const st = Math.max(0, Math.min(3650, Math.round(Number(pl && pl.st) || 0)));
+    const nm = pl && pl.name;
+    return { name: nickParts(nm) ? nm : /^[A-Z]\.$/.test(nm || "") ? nm : initial(nm), belt: b.name, color: b.color, rank: BD.BELTS.indexOf(b), reps: reps, xp: xp, life: Math.max(life, xp), st: st,
+      sid: typeof (pl && pl.sid) === "string" && /^[a-f0-9]{16}$/.test(pl.sid) ? pl.sid : "" };
+  }
   function cleanEntry(e) {
     if (!e || typeof e !== "object" || typeof e.week !== "string" || !Array.isArray(e.players)) return null;
-    BD.BELTS.forEach(function (b) { BELT_BY_NAME[b.name] = b; });
+    const wk = e.week.slice(0, 10);
     return {
-      week: e.week.slice(0, 10),
-      players: e.players.slice(0, 6).map(function (pl) {
-        const b = BELT_BY_NAME[pl && pl.belt] || BD.BELTS[0];
-        const reps = Math.max(0, Math.min(1500, Math.round(Number(pl && pl.reps) || 0))); // no one answers 1,500+ in a week
-        const xp = Math.max(0, Math.min(10000, Math.round((Number(pl && pl.xp) || 0) * 2) / 2));
-        const nm = pl && pl.name;
-        return { name: nickParts(nm) ? nm : /^[A-Z]\.$/.test(nm || "") ? nm : initial(nm), belt: b.name, color: b.color, reps: reps, xp: xp };
-      })
+      week: wk,
+      players: e.players.slice(0, 6).map(cleanPlayer),
+      // cheers this family gave this week (Claude link): [{ to: "doc:sid", by: sid, k, d }]
+      given: wk === weekId() && Array.isArray(e.given) ? e.given.slice(-600).filter(function (g) { return g && typeof g.to === "string" && g.to.length < 120 && CK.indexOf(g.k) !== -1 && /^\d{4}-\d\d-\d\d$/.test(g.d) && /^[a-f0-9]{16}$/.test(g.by); }).map(function (g) { return { to: g.to, by: g.by, k: g.k, d: g.d }; }) : []
     };
   }
 
   /* On your own website the board runs through the family account script:
      anyone can see it; signed-in families with the parent's OK appear on it. */
-  let web = false, webRows = [], webTotal = 0, webTimer = null, webCh = false;
+  let web = false, webRows = [], webTotal = 0, webTimer = null, webCh = false, webV2 = false;
   function webOn() { return !!(BD.Family && BD.Family.enabled()) && !(window.claude && window.claude.use); }
   async function webLoad() {
     const res = await BD.Family.call("board", { token: BD.Family.token() || "" });
     if (!res || !res.ok) return;
-    BD.BELTS.forEach(function (b) { BELT_BY_NAME[b.name] = b; });
-    webRows = (Array.isArray(res.rows) ? res.rows : []).map(function (r) {
-      const e = cleanEntry({ week: weekId(), players: [r] }); const x = e && e.players[0];
-      if (!x) return null;
-      x.me = !!r.me;
-      if (typeof r.h === "string" && /^[a-f0-9]{16}$/.test(r.h)) x.h = r.h;
-      if (x.me && typeof r.sid === "string" && /^[a-f0-9]{16}$/.test(r.sid)) x.sid = r.sid;
-      return x;
+    webRows = (Array.isArray(res.rows) ? res.rows : []).slice(0, 300).map(function (r) {
+      const x = cleanPlayer(r);
+      x.me = !!r.me; x.sid = "";
+      x.cw = Math.max(0, Math.min(100000, Math.round(Number(r.cw) || 0)));
+      if (typeof r.h === "string" && /^[a-f0-9]{16}$/.test(r.h)) x.h = x.key = r.h;
+      if (x.me && typeof r.sid === "string" && /^[a-f0-9]{16}$/.test(r.sid)) {
+        x.sid = r.sid;
+        const ch = r.ch && typeof r.ch === "object" ? r.ch : {}, days = {};
+        Object.keys(ch.d || {}).slice(0, 8).forEach(function (d) { if (/^\d{4}-\d\d-\d\d$/.test(d)) days[d] = cleanCounts(ch.d[d]); });
+        const by = []; Object.keys(ch.by || {}).forEach(function (n) { if (nickParts(n) || /^[A-Z]\.$/.test(n)) by.push([n, Math.max(1, Math.round(Number(ch.by[n]) || 1))]); });
+        x.cheers = { week: cleanCounts(ch.t), days: days, by: by.sort(function (a, b) { return b[1] - a[1]; }).slice(0, 12) };
+      }
+      return x.key ? x : null;
     }).filter(Boolean);
     webCh = res.challenges === true; // the deployed script knows friend challenges
+    webV2 = res.v === 2 && res.cheers === true; // ... and the all-time / streak boards and cheers
     webTotal = Math.max(0, Math.min(10000000, Number(res.total) || 0));
     render();
+    splash();
   }
   async function init() {
     if (webOn()) {
@@ -97,23 +117,23 @@ BD.Dojo = (function () {
       snap.docs.forEach(function (d) { if (d.exists) entries[d.id] = cleanEntry(d.data()); });
       col.onSnapshot(function (qs) {
         qs.docs.forEach(function (d) { entries[d.id] = cleanEntry(d.data()); });
-        render();
+        render(); splash();
       }, function () { /* keep what we have */ });
     } catch (e) { col = null; return; }
     ready = true;
-    render();
+    render(); splash();
     push();
   }
 
-  /* This family's joined students and their right answers this week. */
+  /* This family's joined students: points this week, all-time points and streak. */
   function mine() {
     const ws = BD.Parent.weekStart(), now = Date.now() + 864e5;
     return BD.Store.players().filter(function (p) { return p.dojoOptIn; }).map(function (p) {
       const w = BD.Parent.weekStats(p, ws, now), belt = BD.beltOf(p);
-      return { sid: sid(p.id), name: display(p), belt: belt.name, reps: Math.min(1500, w.correct), xp: Math.min(10000, BD.xpSince(p, ws)) };
+      return { sid: sid(p.id), name: display(p), belt: belt.name, reps: Math.min(1500, w.correct), xp: Math.min(10000, BD.xpSince(p, ws)), life: Math.min(1000000, p.xp || 0), st: Math.min(3650, BD.streak(p).days) };
     });
   }
-  let lastWeb = "";
+  let lastWeb = "", given = [];
   function push() {
     if (!ready) return;
     clearTimeout(timer);
@@ -128,25 +148,116 @@ BD.Dojo = (function () {
       return;
     }
     timer = setTimeout(async function () {
-      const doc = { week: weekId(), players: mine().map(function (x) { delete x.sid; return x; }), updatedAt: Date.now() };
       const was = entries[uid];
+      const gv = (was && was.week === weekId() ? was.given : []).concat(given).slice(-600); given = [];
+      const doc = { week: weekId(), players: mine(), given: gv, updatedAt: Date.now() };
       if (!doc.players.length && !was) return;
-      if (was && JSON.stringify(was.players.map(function (x) { return [x.name, x.belt, x.reps, x.xp]; })) === JSON.stringify(doc.players.map(function (x) { return [x.name, x.belt, x.reps, x.xp]; })) && was.week === doc.week) return;
+      if (was && !gv.length && JSON.stringify(was.players.map(function (x) { return [x.name, x.belt, x.reps, x.xp, x.life, x.st]; })) === JSON.stringify(doc.players.map(function (x) { return [x.name, x.belt, x.reps, x.xp, x.life, x.st]; })) && was.week === doc.week && !(was.given || []).length) return;
       try { await col.doc(uid).set(doc); entries[uid] = cleanEntry(doc); render(); } catch (e) { /* can't write here: the board stays read-only */ }
     }, 1500);
   }
 
+  /* Everyone on the board (Claude link): all-time and streaks carry over; this week's XP only for this week. */
   function board() {
-    if (web) return { rows: webRows, total: webTotal, goal: GOAL };
-    const wk = weekId(), rows = [];
+    if (web) return { rows: webRows, total: webTotal, goal: GOAL, v2: webV2 };
+    const wk = weekId(), rows = [], cheersIn = {};
     Object.keys(entries).forEach(function (id) {
-      const e = entries[id];
-      if (!e || e.week !== wk) return;
-      (e.players || []).forEach(function (pl) { rows.push(Object.assign({ me: id === uid }, pl)); });
+      const e = entries[id]; if (!e) return;
+      e.given.forEach(function (g) {
+        const from = e.players.find(function (x) { return x.sid === g.by; });
+        const c = cheersIn[g.to] = cheersIn[g.to] || { week: {}, days: {}, by: {} };
+        c.week[g.k] = (c.week[g.k] || 0) + 1;
+        c.days[g.d] = c.days[g.d] || {}; c.days[g.d][g.k] = (c.days[g.d][g.k] || 0) + 1;
+        if (from) c.by[from.name] = (c.by[from.name] || 0) + 1;
+      });
     });
-    rows.sort(function (a, b) { return (b.xp - a.xp) || (b.reps - a.reps); }); // leaderboard: points this week
-    const total = rows.reduce(function (a, r) { return a + (r.reps || 0); }, 0);
-    return { rows: rows, total: total, goal: GOAL };
+    Object.keys(entries).forEach(function (id) {
+      const e = entries[id]; if (!e) return;
+      e.players.forEach(function (pl) {
+        if (!pl.sid) return;
+        const key = id + ":" + pl.sid, c = cheersIn[key], cur = e.week === wk;
+        rows.push(Object.assign({}, pl, { me: id === uid, key: key, xp: cur ? pl.xp : 0, reps: cur ? pl.reps : 0, cw: c ? total(c.week) : 0,
+          cheers: id === uid ? { week: c ? c.week : {}, days: c ? c.days : {}, by: c ? Object.keys(c.by).map(function (n) { return [n, c.by[n]]; }).sort(function (a, b) { return b[1] - a[1]; }) : [] } : undefined }));
+      });
+    });
+    rows.sort(function (a, b) { return (b.xp - a.xp) || (b.reps - a.reps); });
+    return { rows: rows, total: rows.reduce(function (a, r) { return a + (r.reps || 0); }, 0), goal: GOAL, v2: true };
+  }
+  const SORTS = {
+    week: { label: "This week", sort: function (a, b) { return (b.xp - a.xp) || (b.reps - a.reps); }, val: function (r) { return r.xp.toLocaleString() + " XP"; }, raw: function (r) { return r.xp; } },
+    life: { label: "All-time", sort: function (a, b) { return (b.life - a.life) || (b.rank - a.rank); }, val: function (r) { return r.life.toLocaleString() + " XP"; }, raw: function (r) { return r.life; } },
+    streak: { label: "Streaks", sort: function (a, b) { return (b.st - a.st) || (b.life - a.life); }, val: function (r) { return "🔥 " + r.st + (r.st === 1 ? " day" : " days"); }, raw: function (r) { return r.st; } }
+  };
+  function myRowFor(p, rows) { if (!p) return null; const id = sid(p.id); return rows.find(function (r) { return r.me && r.sid === id; }) || null; }
+
+  /* ---------- cheering ---------- */
+  const SUPPORT_DAYS = [3, 5], SUPPORT_XP = 5;
+  function supportWeek(p) {
+    const wk = weekId();
+    if (!p.support || p.support.wk !== wk) p.support = { wk: wk, days: [], paid: 0 };
+    return p.support;
+  }
+  /* Being a consistent supporter earns XP: cheer friends on 3 different days in a week (+5), then 5 days (+5 more). */
+  function noteSupport(p) {
+    const s = supportWeek(p), t = BD.today();
+    if (s.days.indexOf(t) === -1) s.days.push(t);
+    let xp = 0;
+    while (s.paid < SUPPORT_DAYS.length && s.days.length >= SUPPORT_DAYS[s.paid]) { s.paid++; xp += BD.addXP(p, SUPPORT_XP); }
+    BD.Store.save(p);
+    return xp;
+  }
+  async function sendCheer(p, r, kind, btn) {
+    const me = myRowFor(p, board().rows); if (!me || r.me) return false;
+    let ok = false;
+    if (web) {
+      const res = await BD.Family.call("cheer", { token: BD.Family.token(), sid: me.sid, to: r.key, kind: kind, day: BD.today() });
+      ok = !!(res && res.ok);
+    } else {
+      given.push({ to: r.key, by: me.sid, k: kind, d: BD.today() }); ok = true; push();
+    }
+    if (!ok) { if (btn) btn.classList.add("cheer-fail"); return false; }
+    r.cw = (r.cw || 0) + 1;
+    const xp = noteSupport(p);
+    pop(btn, CHEERS.find(function (c) { return c.k === kind; }).icon, xp);
+    BD.Sound.tap();
+    const cnt = btn && btn.closest("li") && btn.closest("li").querySelector(".dl-cw");
+    if (cnt) cnt.textContent = "💛 " + r.cw;
+    const sp = $("supportLine"); if (sp) sp.innerHTML = supportLine(p);
+    return true;
+  }
+  function pop(btn, icon, xp) {
+    if (!btn) return;
+    const rc = btn.getBoundingClientRect(), el = document.createElement("span");
+    el.className = "cheer-pop"; el.textContent = icon + (xp ? " +" + xp + " XP" : " +1");
+    el.style.left = (rc.left + rc.width / 2) + "px"; el.style.top = rc.top + "px";
+    document.body.appendChild(el); setTimeout(function () { el.remove(); }, 1100);
+  }
+  function supportLine(p) {
+    const s = supportWeek(p), n = s.days.length, next = SUPPORT_DAYS.find(function (d) { return d > n; });
+    return '💛 <strong>Supporter:</strong> cheered friends on ' + n + (n === 1 ? " day" : " days") + ' this week. ' +
+      (next ? (next - n) + " more " + (next - n === 1 ? "day" : "days") + " for +" + SUPPORT_XP + " XP." : "Super Supporter! +" + (SUPPORT_XP * SUPPORT_DAYS.length) + " XP earned this week.");
+  }
+  function cheerIcons(t) { return CHEERS.filter(function (c) { return t && t[c.k]; }).map(function (c) { return '<span class="ci">' + c.icon + '<b>' + t[c.k] + '</b></span>'; }).join(""); }
+
+  /* When cheers have come in since the student last looked: a burst of icons on the screen. */
+  function splash() {
+    const p = BD.Store.current(); if (!p || !p.dojoOptIn) return;
+    const me = myRowFor(p, board().rows); if (!me || !me.cheers) return;
+    const wk = weekId(), n = total(me.cheers.week), seen = p.cheerSeen && p.cheerSeen.wk === wk ? p.cheerSeen.n : 0;
+    if (n <= seen) return;
+    p.cheerSeen = { wk: wk, n: n }; BD.Store.save(p);
+    const today = me.cheers.days[BD.today()] || {};
+    const toast = document.createElement("div");
+    toast.className = "cheer-toast"; toast.setAttribute("role", "status");
+    toast.innerHTML = '<strong>Your dojo is cheering for you!</strong><span>' + (total(today) ? "Today: " + cheerIcons(today) + " · " : "") + "This week: " + cheerIcons(me.cheers.week) + '</span>';
+    document.body.appendChild(toast);
+    const icons = []; CHEERS.forEach(function (c) { for (let i = 0; i < Math.min(8, (me.cheers.week[c.k] || 0)); i++) icons.push(c.icon); });
+    icons.slice(0, 24).forEach(function (ic, i) {
+      const f = document.createElement("span"); f.className = "cheer-float"; f.textContent = ic;
+      f.style.left = (8 + Math.random() * 84) + "vw"; f.style.animationDelay = (i * 0.12) + "s";
+      document.body.appendChild(f); setTimeout(function () { f.remove(); }, 3600 + i * 120);
+    });
+    setTimeout(function () { toast.classList.add("out"); setTimeout(function () { toast.remove(); }, 600); }, 5200);
   }
 
   /* Home screen card. */
@@ -154,30 +265,59 @@ BD.Dojo = (function () {
     const el = $("dojoCard"); if (!el) return;
     if (!ready) { el.hidden = true; return; }
     const b = board(), pct = Math.min(100, Math.round(100 * b.total / b.goal)), p = BD.Store.current();
+    const me = myRowFor(p, b.rows), rank = me ? b.rows.slice().sort(SORTS.week.sort).indexOf(me) + 1 : 0;
     el.hidden = false;
-    el.innerHTML = '<div class="dojo-head"><span class="dojo-title">🥋 Dojo Challenge</span><span class="dojo-num">' + b.total.toLocaleString() + ' / ' + b.goal.toLocaleString() + '</span></div>' +
+    el.innerHTML = '<div class="dojo-head"><span class="dojo-title">🏆 Dojo Leaderboard</span><span class="dojo-num">' + b.total.toLocaleString() + ' / ' + b.goal.toLocaleString() + '</span></div>' +
       '<div class="dojo-bar"><i style="width:' + pct + '%"></i></div>' +
-      '<p class="dojo-sub">' + (pct >= 100 ? "Goal smashed! The whole dojo did it this week." : "Right answers this week from " + b.rows.length + (b.rows.length === 1 ? " champion" : " champions") + ". Every right answer counts!") +
-      (p && !p.dojoOptIn ? " <span class='muted'>Tap to see the leaderboard. Ask a parent to join you in.</span>" : " <span class='muted'>Tap for the leaderboard.</span>") + '</p>';
+      '<p class="dojo-sub">' + (me ? 'You\'re <strong>#' + rank + '</strong> this week · ' + me.belt + ' Belt · ' + me.life.toLocaleString() + ' XP all-time' + (me.cheers && total(me.cheers.week) ? ' · ' + cheerIcons(me.cheers.week) : '') + '. ' : '') +
+      (pct >= 100 ? "Team goal smashed!" : "Team goal: right answers this week from " + b.rows.filter(function (r) { return r.xp > 0 || r.reps > 0; }).length + " champions.") +
+      (p && !p.dojoOptIn ? " <span class='muted'>Tap to see the leaderboard. Ask a parent to join you in.</span>" : " <span class='muted'>Tap to see the boards and cheer on friends.</span>") + '</p>';
   }
-  function openBoard() {
+  let tab = "week";
+  function openBoard(which) {
     if (!ready) return;
+    if (which) tab = which;
     const b = board(), p = BD.Store.current();
+    if (!b.v2) tab = "week";
     const canCh = !!(p && BD.Challenge && BD.Challenge.canSend(p));
-    BD.UI.sheet("Dojo Challenge",
-      (p ? '<div class="nick-bar"><span>Your leaderboard name: <strong>' + BD.UI.esc(display(p)) + '</strong>' + (p.dojoOptIn ? '' : ' <span class="muted small">(not on the board yet: ask a parent)</span>') + '</span><button type="button" class="btn btn-small btn-gold" id="nickPick">' + (p.nick ? "Change nickname" : "Pick a nickname") + '</button></div>' : '') +
-      '<p><strong>' + b.total.toLocaleString() + '</strong> of <strong>' + b.goal.toLocaleString() + '</strong> right answers this week (team goal). Resets every Monday.</p>' +
-      '<h4 class="label">Leaderboard · XP this week</h4>' +
-      (b.rows.length ? '<ol class="dojo-list">' + b.rows.map(function (r) {
-        return '<li' + (r.me ? ' class="me"' : '') + '><span class="belt-swatch" style="--belt:' + r.color + '"></span><span class="dl-name">' + BD.UI.esc(r.name) + '</span><span class="dl-belt">' + BD.UI.esc(r.belt) + '</span><span class="dl-n">' + r.xp.toLocaleString() + ' XP</span>' +
-          (canCh && !r.me && r.h ? '<button type="button" class="btn btn-small btn-quiet dl-ch" data-ch="' + r.h + '" aria-label="Challenge ' + BD.UI.esc(r.name) + '">⚔️ Challenge</button>' : '') + '</li>';
-      }).join("") + '</ol>' : '<p class="muted">No one has joined yet this week. Be the first!</p>') +
-      (BD.Challenge ? BD.Challenge.boardNote(p, canCh) : '') +
-      '<p class="muted small">XP comes from doing the work: practice (up to 100 per stripe), graduation bonuses earned by that practice (up to +100), Daily Flashcards (up to +10 a day), bosses, challenges and daily chests. Stripe tests alone give no points. No names are ever shown: only nicknames (or first initials) and belts. Parents can join or leave in the Parent corner.</p>');
-    if ($("nickPick")) $("nickPick").onclick = function () { pickNick(p, openBoard); };
-    document.querySelectorAll("#infoBody [data-ch]").forEach(function (btn) {
-      btn.onclick = function () { const r = b.rows.find(function (x) { return x.h === btn.dataset.ch; }); if (r) BD.Challenge.send(p, r); };
+    const me = myRowFor(p, b.rows), canCheer = !!(me && b.v2);
+    const S = SORTS[tab], rows = b.rows.slice().sort(S.sort);
+    const myIdx = me ? rows.indexOf(me) : -1;
+    const ahead = myIdx > 0 ? rows[myIdx - 1] : null, gap = ahead ? S.raw(ahead) - S.raw(me) : 0;
+    const medal = ["🥇", "🥈", "🥉"];
+    const podium = rows.slice(0, 3).map(function (r, i) {
+      return '<div class="pod pod-' + (i + 1) + (r.me ? " me" : "") + '"><span class="pod-medal">' + medal[i] + '</span><span class="pod-name">' + BD.UI.esc(r.name) + '</span><span class="belt-swatch" style="--belt:' + r.color + '"></span><span class="pod-val">' + S.val(r) + '</span></div>';
     });
+    const order = podium.length === 3 ? [podium[1], podium[0], podium[2]] : podium;
+    BD.UI.sheet("Dojo Leaderboard",
+      (p ? '<div class="nick-bar"><span>Your leaderboard name: <strong>' + BD.UI.esc(display(p)) + '</strong>' + (p.dojoOptIn ? '' : ' <span class="muted small">(not on the board yet: ask a parent)</span>') + '</span><button type="button" class="btn btn-small btn-gold" id="nickPick">' + (p.nick ? "Change nickname" : "Pick a nickname") + '</button></div>' : '') +
+      (me ? '<div class="my-card"><span class="belt-swatch big" style="--belt:' + me.color + '"></span><div><strong>' + BD.UI.esc(me.name) + '</strong> · ' + me.belt + ' Belt' +
+        '<div class="my-stats"><span><b>#' + (rows.indexOf(me) + 1 || "–") + '</b> ' + S.label.toLowerCase() + '</span><span><b>' + me.xp.toLocaleString() + '</b> XP this week</span><span><b>' + me.life.toLocaleString() + '</b> XP all-time</span><span><b>🔥 ' + me.st + '</b> day streak</span></div>' +
+        (me.cheers && total(me.cheers.week) ? '<div class="my-cheers">Cheers this week: ' + cheerIcons(me.cheers.week) + (me.cheers.by.length ? ' <span class="muted small">from ' + me.cheers.by.slice(0, 5).map(function (x) { return BD.UI.esc(x[0]); }).join(", ") + (me.cheers.by.length > 5 ? " and more" : "") + '</span>' : '') + '</div>' : '') +
+        '</div></div>' : '') +
+      (b.v2 ? '<div class="lb-tabs" role="tablist">' + Object.keys(SORTS).map(function (k) { return '<button type="button" role="tab" class="lb-tab' + (k === tab ? " on" : "") + '" aria-selected="' + (k === tab) + '" data-tab="' + k + '">' + SORTS[k].label + '</button>'; }).join("") + '</div>' : '<h4 class="label">Leaderboard · XP this week</h4>') +
+      (ahead && gap >= 0 ? '<p class="lb-chase">' + (tab === "streak" ? "Keep training: " + (gap + 1) + (gap + 1 === 1 ? " more day" : " more days") + " passes " : "Only " + (Math.floor(gap) + 1).toLocaleString() + " XP to pass ") + '<strong>' + BD.UI.esc(ahead.name) + '</strong>! You\'ve got this. 💪</p>' : myIdx === 0 ? '<p class="lb-chase">You\'re leading the dojo! Lead by example and cheer on your teammates. 🏆</p>' : '') +
+      (rows.length ? '<div class="podium">' + order.join("") + '</div>' +
+        '<ol class="dojo-list lb">' + rows.map(function (r, i) {
+          return '<li' + (r.me ? ' class="me"' : '') + ' data-key="' + BD.UI.esc(r.key) + '"><span class="dl-rank">' + (i + 1) + '</span><span class="belt-swatch" style="--belt:' + r.color + '"></span><span class="dl-name">' + BD.UI.esc(r.name) + '<span class="dl-belt">' + BD.UI.esc(r.belt) + ' Belt</span></span><span class="dl-n">' + S.val(r) + '</span>' +
+            '<span class="dl-cw" title="Cheers this week">' + (r.cw ? "💛 " + r.cw : "") + '</span>' +
+            (canCheer && !r.me ? '<span class="dl-cheers">' + CHEERS.map(function (c) { return '<button type="button" class="cheer-btn" data-cheer="' + c.k + '" aria-label="Give ' + BD.UI.esc(r.name) + ' a ' + c.name + '">' + c.icon + '</button>'; }).join("") + '</span>' : '') +
+            (canCh && !r.me && r.h ? '<button type="button" class="btn btn-small btn-quiet dl-ch" data-ch="' + r.h + '" aria-label="Challenge ' + BD.UI.esc(r.name) + '">⚔️ Challenge</button>' : '') + '</li>';
+        }).join("") + '</ol>' : '<p class="muted">No one is on this board yet. Be the first!</p>') +
+      (canCheer ? '<p class="support-line" id="supportLine">' + supportLine(p) + '</p>' : b.v2 && p && !p.dojoOptIn ? '<p class="muted small">Join the leaderboard (ask a parent in the Parent corner) to cheer on friends.</p>' : '') +
+      '<p class="muted small">Cheer as often as you like: 🤜 fist bump, 🙌 high-five, 👏 applause, 👍 thumbs up. Supporting others is a black belt skill.</p>' +
+      (BD.Challenge ? BD.Challenge.boardNote(p, canCh) : '') +
+      '<p><strong>' + b.total.toLocaleString() + '</strong> of <strong>' + b.goal.toLocaleString() + '</strong> right answers this week (team goal). This week\'s board resets every Monday.</p>' +
+      '<p class="muted small">XP comes from doing the work: practice (up to 100 per stripe), graduation bonuses earned by that practice (up to +100), Daily Flashcards, bosses, challenges, team lessons and daily chests. Stripe tests alone give no points. No names are ever shown: only nicknames (or first initials) and belts. Parents can join or leave in the Parent corner.</p>');
+    if ($("nickPick")) $("nickPick").onclick = function () { pickNick(p, function () { openBoard(); }); };
+    $("infoBody").onclick = function (e) {
+      const t = e.target.closest("[data-tab]");
+      if (t) { BD.Sound.tap(); openBoard(t.dataset.tab); return; }
+      const c = e.target.closest("[data-cheer]");
+      if (c) { const li = c.closest("li"), r = rows.find(function (x) { return x.key === li.dataset.key; }); if (r) sendCheer(p, r, c.dataset.cheer, c); return; }
+      const ch = e.target.closest("[data-ch]");
+      if (ch) { const r = rows.find(function (x) { return x.h === ch.dataset.ch; }); if (r) BD.Challenge.send(p, r); }
+    };
   }
 
   /* The nickname picker: words from kid-safe lists, never close to the real name. */
@@ -226,5 +366,5 @@ BD.Dojo = (function () {
     $("dojoNo").onclick = function () { $("infoClose").click(); };
   }
 
-  return { sid: sid, web: function () { return web; }, webChallenges: function () { return web && webCh; }, myRow: function (p) { const id = sid(p.id); return webRows.find(function (r) { return r.me && r.sid === id; }) || null; }, reload: function () { return web ? webLoad() : Promise.resolve(); }, nickOk: nickOk, randomNick: randomNick, pickNick: pickNick, display: display, init: init, push: push, render: render, openBoard: openBoard, toggle: toggle, board: board, ready: function () { return ready; } };
+  return { CHEERS: CHEERS, splash: splash, supportWeek: supportWeek, sendCheer: sendCheer, sid: sid, web: function () { return web; }, webChallenges: function () { return web && webCh; }, myRow: function (p) { const id = sid(p.id); return webRows.find(function (r) { return r.me && r.sid === id; }) || null; }, reload: function () { return web ? webLoad() : Promise.resolve(); }, nickOk: nickOk, randomNick: randomNick, pickNick: pickNick, display: display, init: init, push: push, render: render, openBoard: openBoard, toggle: toggle, board: board, ready: function () { return ready; } };
 })();

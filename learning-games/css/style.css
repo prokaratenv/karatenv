@@ -1352,3 +1352,43 @@ body.duel-on .topbar, body.duel-on .footer { visibility: hidden; }
 .tp-moment { margin: 6px 0 2px; }
 .tp-list { margin: 0; padding-left: 18px; display: grid; gap: 3px; }
 .tp-say { margin: 4px 0; font-style: italic; }
+
+/* ---------- Dojo Leaderboard: tabs, podium, my card, cheers ---------- */
+.lb-tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin: 12px 0 8px; padding: 4px; border-radius: 14px; background: rgba(0, 0, 0, .3); }
+.lb-tab { border: 0; border-radius: 10px; padding: 9px 6px; background: transparent; color: var(--muted); font: inherit; font-weight: 800; cursor: pointer; }
+.lb-tab.on { background: linear-gradient(135deg, #65D94A, #5CBFC1, #4F6CEE); color: #08121F; }
+.lb-chase { margin: 6px 0 10px; padding: 8px 12px; border-radius: 12px; background: rgba(101, 217, 74, .12); border: 1px solid rgba(101, 217, 74, .35); }
+.my-card { display: flex; gap: 12px; align-items: flex-start; margin: 10px 0; padding: 12px; border-radius: 16px; border: 1px solid rgba(224, 186, 119, .5); background: linear-gradient(135deg, rgba(224, 186, 119, .14), rgba(79, 108, 238, .12)); }
+.my-card .belt-swatch.big { width: 36px; height: 14px; margin-top: 4px; border-radius: 4px; background: var(--belt); box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .35); flex: none; }
+.my-stats { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 6px; font-size: .9rem; color: var(--muted); }
+.my-stats b { color: var(--gold-2); font-family: var(--font-display); }
+.my-cheers { margin-top: 6px; }
+.ci { display: inline-flex; align-items: center; gap: 2px; margin-right: 6px; }
+.ci b { font-size: .8rem; color: var(--gold-2); }
+.podium { display: grid; grid-template-columns: repeat(3, 1fr); align-items: end; gap: 8px; margin: 12px 0; }
+.pod { display: grid; justify-items: center; gap: 4px; padding: 10px 6px; border-radius: 14px 14px 6px 6px; background: rgba(13, 24, 48, .7); text-align: center; min-width: 0; }
+.pod-1 { min-height: 128px; background: linear-gradient(180deg, rgba(224, 186, 119, .35), rgba(13, 24, 48, .8)); border: 1px solid rgba(224, 186, 119, .6); }
+.pod-2 { min-height: 104px; } .pod-3 { min-height: 92px; }
+.pod.me { outline: 2px solid var(--gold-2); }
+.pod-medal { font-size: 1.8rem; line-height: 1; }
+.pod-name { font-weight: 800; font-size: .85rem; overflow-wrap: anywhere; }
+.pod .belt-swatch { display: inline-block; width: 26px; height: 9px; border-radius: 3px; background: var(--belt); }
+.pod-val { font-family: var(--font-display); font-weight: 800; color: var(--gold-2); font-size: .85rem; }
+.dojo-list.lb li { grid-template-columns: 2em 26px 1fr auto auto; counter-increment: none; }
+.dojo-list.lb li::before { content: none; }
+.dl-rank { font-weight: 800; color: var(--muted); }
+.dl-name { display: grid; } .dl-name .dl-belt { font-weight: 600; }
+.dl-cw { font-size: .8rem; color: var(--gold-2); min-width: 2.6em; text-align: right; }
+.dl-cheers { grid-column: 3 / -1; display: flex; gap: 6px; justify-content: flex-end; }
+.cheer-btn { border: 1px solid rgba(255, 255, 255, .18); background: rgba(255, 255, 255, .06); border-radius: 10px; min-width: 40px; min-height: 36px; font-size: 1.15rem; cursor: pointer; transition: transform .1s; }
+.cheer-btn:active { transform: scale(1.25); }
+.cheer-fail { opacity: .4; }
+.support-line { margin: 10px 0; padding: 8px 12px; border-radius: 12px; background: rgba(224, 186, 119, .1); }
+.cheer-pop { position: fixed; z-index: 9999; transform: translate(-50%, 0); pointer-events: none; font-weight: 900; color: var(--gold-2); animation: cheerUp 1.1s ease-out forwards; text-shadow: 0 2px 6px rgba(0, 0, 0, .6); }
+@keyframes cheerUp { to { transform: translate(-50%, -60px); opacity: 0; } }
+.cheer-toast { position: fixed; z-index: 9998; left: 50%; top: max(16px, env(safe-area-inset-top)); transform: translateX(-50%); width: min(92vw, 420px); display: grid; gap: 4px; padding: 12px 16px; border-radius: 16px; background: linear-gradient(135deg, #1C2F52, #13213D); border: 1px solid rgba(224, 186, 119, .6); box-shadow: 0 12px 30px rgba(0, 0, 0, .5); color: var(--ink); text-align: center; animation: toastIn .4s ease-out; transition: opacity .5s, transform .5s; }
+.cheer-toast.out { opacity: 0; transform: translate(-50%, -20px); }
+@keyframes toastIn { from { opacity: 0; transform: translate(-50%, -20px); } }
+.cheer-float { position: fixed; z-index: 9997; bottom: -40px; font-size: 2rem; pointer-events: none; animation: cheerFloat 3.4s ease-in forwards; }
+@keyframes cheerFloat { to { transform: translateY(-110vh) rotate(25deg); opacity: .2; } }
+@media (prefers-reduced-motion: reduce) { .cheer-float { display: none; } .cheer-pop, .cheer-toast { animation: none; } }
