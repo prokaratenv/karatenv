@@ -1,9 +1,9 @@
 /* DAILY GOAL AND BREAK REMINDERS — healthy play with no parent involvement.
-   - Daily goal (default 30 minutes of training). When it's met: "Training
-     complete!" with the choice to take a break or keep going.
-   - Then a friendly break reminder every 30 minutes of play ("Time for a
-     stretch!"), with a Power Break button. Nothing is ever locked: students
-     can always keep training.
+   - Daily goal (default 30 minutes of training). When it's met: "You reached
+     your goal for today. See you training tomorrow!" with one button, Keep
+     training, which resets the reminder.
+   - If they keep going, the same message comes back every 30 minutes of play.
+     Nothing is ever locked: students can always keep training.
    Reminders appear between rounds (results or home screen), never in the
    middle of a question. Time counts only while a game screen is open and
    the app is visible. Parents can change the goal or reminder spacing in
@@ -15,7 +15,7 @@ BD.Goals = (function () {
   const esc = function (s) { return BD.UI.esc(s); };
   const PLAY = /^screen-(math-play|sentence-play|read-play|word-play|boss|tourney|duel)$/;
   const GOALS = [["m30", "30 minutes"], ["m20", "20 minutes"], ["m15", "15 minutes"], ["m45", "45 minutes"], ["r3", "3 rounds"], ["r5", "5 rounds"], ["off", "No daily goal"]];
-  const EVERY = [["30", "Every 30 minutes"], ["20", "Every 20 minutes"], ["45", "Every 45 minutes"], ["60", "Every hour"], ["off", "No break reminders"]];
+  const EVERY = [["30", "Every 30 minutes"], ["20", "Every 20 minutes"], ["45", "Every 45 minutes"], ["60", "Every hour"], ["off", "Only once a day"]];
 
   function day(p) {
     const t = BD.today();
@@ -64,24 +64,23 @@ BD.Goals = (function () {
     }
   }
 
-  /* ---------- the reminders (between rounds only) ---------- */
+  /* ---------- the reminder (between rounds only) ----------
+     One simple message: today's goal is reached, see you tomorrow. "Keep
+     training" closes it and starts the clock for the next reminder. */
   function show() {
     if (!pending) return;
     if (BD.UI.sheetOpen && BD.UI.sheetOpen()) return setTimeout(show, 1500);
     const p = BD.Store.current(); if (!p) return;
-    const kind = pending; pending = null;
-    const mins = Math.round(day(p).s / 60);
-    const html = kind === "goal"
-      ? '<div class="unlock"><div class="chest-prize">🥋</div><h3>Training complete, ' + esc(p.name) + '!</h3><p>You hit today\'s goal. Great work!</p>' +
-        '<p class="muted">Rest is part of training. Take a break, or keep going if you\'re having fun. Every round still counts.</p>'
-      : '<div class="unlock"><div class="chest-prize">🧘</div><h3>Time for a stretch, ' + esc(p.name) + '!</h3><p>You\'ve trained ' + mins + ' minutes today. Champions take breaks: stand up, stretch, get some water.</p>' +
-        '<p class="muted">Then come back and keep training whenever you\'re ready.</p>';
-    BD.UI.sheet(kind === "goal" ? "Training complete!" : "Break time", html +
-      '<div class="res-actions">' + (BD.Breaks ? '<button type="button" class="btn btn-primary" id="goalBreak">Take a Power Break</button>' : '') +
-      '<button type="button" class="btn ' + (BD.Breaks ? "btn-quiet" : "btn-primary") + '" id="goalOk">Keep training</button></div></div>');
-    if (kind === "goal") { BD.Sound.belt(); BD.confetti(120); } else BD.Sound.tap();
-    $("goalOk").onclick = function () { $("infoClose").click(); };
-    if ($("goalBreak")) $("goalBreak").onclick = function () { BD.Breaks.pick(p); };
+    const first = pending === "goal"; pending = null;
+    BD.UI.sheet("Goal reached!", '<div class="unlock"><div class="chest-prize">🥋</div><h3>Great training, ' + esc(p.name) + '!</h3>' +
+      '<p>You reached your goal for today. See you training tomorrow!</p>' +
+      '<div class="res-actions"><button type="button" class="btn btn-primary" id="goalOk">Keep training</button></div></div>');
+    if (first) { BD.Sound.belt(); BD.confetti(120); } else BD.Sound.tap();
+    $("goalOk").onclick = function () {
+      const d = day(p), e = settings(p).every;
+      if (e !== "off") d.nb = d.s + Number(e) * 60; // reset: next reminder from now
+      BD.Store.save(p); $("infoClose").click();
+    };
   }
 
   /* ---------- home line ---------- */
@@ -103,9 +102,9 @@ BD.Goals = (function () {
     html: function (p) {
       const s = settings(p), d = day(p), pr = progress(p);
       const opt = function (list, v) { return list.map(function (o) { return '<option value="' + o[0] + '"' + (o[0] === v ? " selected" : "") + '>' + o[1] + '</option>'; }).join(""); };
-      return '<p class="muted small">Works on its own: after about 30 minutes ' + esc(p.name) + ' sees "Training complete!", then a break reminder every 30 minutes if they keep going. Nothing is ever locked. Change it here if you like.</p>' +
+      return '<p class="muted small">Works on its own: after about 30 minutes ' + esc(p.name) + ' sees "You reached your goal for today. See you training tomorrow!" If they tap Keep training, it reminds them again every 30 minutes. Nothing is ever locked. Change it here if you like.</p>' +
         '<div class="set-row"><label>Daily goal <select data-goal>' + opt(GOALS, s.goal) + '</select></label>' +
-        '<label>Break reminders <select data-every>' + opt(EVERY, s.every) + '</select></label></div>' +
+        '<label>Remind again <select data-every>' + opt(EVERY, s.every) + '</select></label></div>' +
         '<p class="small">Today: ' + Math.floor(d.s / 60) + ' min, ' + d.r + (d.r === 1 ? ' round' : ' rounds') + (pr ? (pr.met ? ' · goal done ✓' : ' · goal ' + pr.have + ' of ' + pr.need) : '') + '</p>';
     },
     bind: function (el, p, rerender) {
