@@ -56,7 +56,7 @@ BD.Breaks = (function () {
       const c = e.target.closest("[data-move]"); if (!c) return;
       const m = MOVES.find(function (x) { return x.id === c.dataset.move; });
       const b = day(p); b.n++; b.r = 0; BD.Store.save(p);
-      BD.Sound.tap();
+      stopTimers(); BD.Sound.tap();
       ({ body: body, pads: pads, stars: stars, board: board, crane: crane, breath: breath, combo: combo, count: count, match: match })[m.kind](p, m);
     };
   }
@@ -247,6 +247,7 @@ BD.Breaks = (function () {
     BD.UI.sheet("🥋 Sensei Says", '<div class="break-game"><div class="bg-top"><span id="cbMsg">Watch Sensei\'s combo…</span><span class="bg-score">🥋 <b id="cbBest">0</b></span></div>' +
       '<div class="combo-show" id="cbShow"></div><div class="combo-pads">' + MV.map(function (m) { return '<button type="button" class="combo-btn" data-mv="' + m[0] + '"><span>' + m[1] + '</span>' + m[2] + '</button>'; }).join("") + '</div></div>');
     const play = function () {
+      if (!$("cbMsg")) return;
       seq.push(MV[r(MV.length)][0]); at = 0; showing = true;
       $("cbMsg").textContent = "Watch Sensei's combo…";
       seq.forEach(function (mv, i) {
