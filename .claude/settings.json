@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__Higgsfield__generate_image",
+      "mcp__Higgsfield__generate_image_batch",
+      "mcp__Higgsfield__jobs_wait",
+      "mcp__Higgsfield__balance",
+      "mcp__Higgsfield__estimate_image_cost"
+    ]
+  }
+}
