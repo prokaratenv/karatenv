@@ -72,11 +72,27 @@ BD.confetti.stop = function () {
    Used to read stories aloud, say Spanish words, and say spelling words. */
 BD.Speech = (function () {
   const ok = typeof window !== "undefined" && "speechSynthesis" in window && typeof window.SpeechSynthesisUtterance === "function";
+  /* Novelty voices (mostly macOS/iOS) that are hard for children to understand. */
+  const ODD = /albert|bad news|bahh|bells|boing|bubbles|cellos|good news|jester|organ|superstar|trinoids|whisper|wobble|zarvox|deranged|hysterical|pipe organ|ralph|junior|fred/i;
+  /* The clearest voice for a language: exact language match first, on-device
+     ("local") voices before network ones (local voices also tend to report
+     word boundaries, which the read-along highlighting uses), then the default. */
   function voiceFor(lang) {
     try {
-      const vs = window.speechSynthesis.getVoices();
-      return vs.find(function (v) { return v.lang && v.lang.toLowerCase() === lang.toLowerCase(); }) ||
-        vs.find(function (v) { return v.lang && v.lang.toLowerCase().indexOf(lang.slice(0, 2).toLowerCase()) === 0; }) || null;
+      const vs = window.speechSynthesis.getVoices(), want = String(lang || "en-US").toLowerCase().replace("_", "-");
+      const norm = function (v) { return String(v.lang || "").toLowerCase().replace("_", "-"); };
+      const score = function (v) {
+        const l = norm(v);
+        let s = l === want ? 40 : l.indexOf(want.slice(0, 2)) === 0 ? 20 : -1000;
+        if (v.localService) s += 8;
+        if (v.default) s += 2;
+        if (ODD.test(v.name || "")) s -= 30;
+        if (/enhanced|premium|natural|samantha|google us english/i.test(v.name || "")) s += 3;
+        return s;
+      };
+      let best = null, bs = -1;
+      vs.forEach(function (v) { const s = score(v); if (s > bs) { best = v; bs = s; } });
+      return bs >= 0 ? best : null;
     } catch (e) { return null; }
   }
   function say(text, lang, rate) {
@@ -109,7 +125,7 @@ BD.Speech = (function () {
       return true;
     } catch (e) { return false; }
   }
-  return { available: ok, say: say, sayAll: sayAll, stop: stop, speaking: speaking };
+  return { available: ok, say: say, sayAll: sayAll, stop: stop, speaking: speaking, voiceFor: voiceFor };
 })();
 
 /* READ ALOUD — instructions spoken for children who can't read yet.
@@ -117,14 +133,29 @@ BD.Speech = (function () {
    instructions automatically unless sound is off or Quiet mode is on. */
 BD.ReadAloud = {
   can: function () { return BD.Speech.available && !(BD.Store && BD.Store.muted); },
+  /* Should this grade hear things automatically? Follows the family's
+     "Read aloud" setting (BD.ReadAlong, js/readalong.js): "auto" = Pre-K to
+     1st grade (the original behaviour), "always" = every grade, "tap" = never. */
   auto: function (grade) {
     const p = BD.Store && BD.Store.current();
-    return this.can() && Number(grade) <= 1 && !(p && p.quietMode);
+    if (!this.can() || (p && p.quietMode)) return false;
+    const mode = BD.ReadAlong && BD.ReadAlong.settings ? BD.ReadAlong.settings().mode : "auto";
+    return mode === "always" ? true : mode === "tap" ? false : Number(grade) <= 1;
   },
+  /* The family's reading speed. */
+  rate: function () { return BD.ReadAlong && BD.ReadAlong.rate ? BD.ReadAlong.rate() : 0.9; },
   /* parts: a string, or [{text, lang}] */
   say: function (parts) {
     if (!this.can()) return false;
-    return BD.Speech.sayAll(typeof parts === "string" ? [{ text: parts }] : parts, 0.9);
+    return BD.Speech.sayAll(typeof parts === "string" ? [{ text: parts }] : parts, this.rate());
+  },
+  /* Read with word highlighting when js/readalong.js is loaded.
+     target: an element, or a list of parts { el?, text?, lang? } (see BD.ReadAlong.read). */
+  read: function (target, opts) {
+    if (BD.ReadAlong && BD.ReadAlong.read) return BD.ReadAlong.read(target, opts);
+    const list = Array.isArray(target) ? target : [target];
+    return this.say(list.map(function (x) { return x && x.nodeType ? { text: x.textContent } : x; }).filter(function (x) { return x && (x.text || (x.el && x.el.textContent)); })
+      .map(function (x) { return { text: x.text || x.el.textContent, lang: x.lang }; }));
   },
   /* Math symbols and blanks as words. */
   words: function (t) {

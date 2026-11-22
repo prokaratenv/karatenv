@@ -55,6 +55,7 @@ function doPost(e) {
       case "chSend": return reply(chSend(req));
       case "chRespond": return reply(chRespond(req));
       case "chScore": return reply(chScore(req));
+      case "digest": return reply(digest(req));
       default: return reply({ ok: false, error: "bad_request" });
     }
   } catch (err) {
@@ -352,6 +353,133 @@ function chScore(req) {
   });
 }
 
+/* ---------- Weekly parent email (opt-in, set up in the app's Parents area) ----------
+   The parent's device sends its own email with a short summary of last week;
+   the email is checked against this family (only the family's own sign-in
+   email can get it), the note is built here from plain fields (everything
+   escaped, capped), sent, and the email is forgotten. digests.json keeps only
+   the family number and the week of the last weekly email. Kids' first names
+   appear in the email (it goes to their own parent) and are never stored.
+   kind "weekly": one per family per week. "sample": up to 3 a day. "check": no email,
+   just whether this email is the family's. */
+var DIGEST_SAMPLES_PER_DAY = 3, DIGEST_CHECKS_PER_HOUR = 10, DIGEST_KIDS = 6;
+var DIGEST_GAMES = { math: "Math Dojo", sentence: "Fix-It Sentences", reading: "Story Scrolls", spelling: "Spelling Bee", spanish: "Spanish Dojo", boss: "Boss battles",
+  duel: "Duels", tournament: "Tournaments", team: "Engage Teams lesson", quick: "Quick rounds", mini: "Mini games", phonics: "Phonics", readalong: "Read-along", flash: "Flash facts", school: "School words" };
+var BELT_COLORS = { White: "#FFFFFF", Yellow: "#F5C518", Orange: "#F08A24", Blue: "#2D6CDF", Green: "#2FA866", Purple: "#7B4BC4", Brown: "#8A5A3B", Red: "#D63A2F", Black: "#17171C" };
+function digestFile() { var f = folder(), it = f.getFilesByName("digests.json"); return it.hasNext() ? it.next() : f.createFile("digests.json", "{}", "application/json"); }
+function digestData(file) {
+  var d = {}; try { d = JSON.parse(file.getBlob().getDataAsString()) || {}; } catch (e) { d = {}; }
+  var w = d.w && typeof d.w === "object" ? d.w : {}, out = {};
+  Object.keys(w).forEach(function (k) { if (/^[a-f0-9]{32}$/.test(k) && /^\d{4}-\d\d-\d\d$/.test(w[k]) && todayNum() - dayNum(w[k]) <= 60) out[k] = w[k]; });
+  return { w: out };
+}
+/* Plain text only: no control characters, no markup, no links; then capped. */
+function dText(x, max) {
+  return String(x === undefined || x === null ? "" : x).replace(/[\u0000-\u001f\u007f-\u009f  <>]/g, " ").replace(/(https?:\/\/|www\.)/gi, "").replace(/\s+/g, " ").trim().slice(0, max);
+}
+function dNum(x, max) { return Math.max(0, Math.min(max, Math.round(Number(x) || 0))); }
+function dList(x, n) { return Array.isArray(x) ? x.slice(0, n) : []; }
+function escH(s) { return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;"); }
+function cleanKid(k) {
+  if (!k || typeof k !== "object") return null;
+  var name = dText(k.name, 20); if (!name) return null;
+  var games = [];
+  dList(k.games, 12).forEach(function (g) { var id = String(g && g.id || ""); if (DIGEST_GAMES.hasOwnProperty(id) && games.length < 8) games.push({ name: DIGEST_GAMES[id], n: dNum(g.n, 500) }); });
+  return {
+    name: name, belt: BELTS.indexOf(k.belt) !== -1 ? k.belt : "", grade: dText(k.grade, 24),
+    days: dNum(k.days, 7), rounds: dNum(k.rounds, 500), answers: dNum(k.answers, 20000), pct: dNum(k.pct, 100), streak: dNum(k.streak, 3650),
+    games: games,
+    wins: dList(k.wins, 10).map(function (x) { return dText(x, 80); }).filter(Boolean),
+    weak: dList(k.weak, 4).map(function (x) { return dText(x, 160); }).filter(Boolean),
+    teams: dList(k.teams, 3).map(function (t) {
+      if (!t || typeof t !== "object") return null;
+      return { team: dText(t.team, 30), done: t.done === true, title: dText(t.title, 60), value: dText(t.value, 60), moment: dText(t.moment, 240), say: dText(t.say, 140), mission: dText(t.mission, 200),
+        picks: dList(t.picks, 3).map(function (q) { return q && typeof q === "object" ? { q: dText(q.q, 40), chose: dText(q.chose, 160), best: q.best === true, found: dText(q.found, 160) } : null; }).filter(function (q) { return q && q.chose; }) };
+    }).filter(function (t) { return t && t.team; })
+  };
+}
+function dDate(n) { var d = new Date(n * 864e5); return ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][d.getUTCMonth()] + " " + d.getUTCDate(); }
+function digestMail(kids, tip, range, sample) {
+  var names = kids.map(function (k) { return k.name; });
+  var who = names.length <= 1 ? names.join("") : names.slice(0, -1).join(", ") + " and " + names[names.length - 1];
+  var subject = (sample ? "Sample: " : "") + "Brain Dojo weekly: " + who + "'s week (" + range + ")";
+  var H = [], T = [];
+  var p = function (html, text) { H.push(html); if (text !== undefined) T.push(text); };
+  p('<div style="margin:0;padding:0;background:#0B1528"><div style="max-width:600px;margin:0 auto;padding:20px 16px;font-family:Arial,Helvetica,sans-serif;color:#1B2433">');
+  p('<div style="background:#12223F;color:#F4F4F4;border-radius:14px 14px 0 0;padding:18px 20px"><div style="font-size:22px;font-weight:900;letter-spacing:.5px">BRAIN DOJO</div>' +
+    '<div style="color:#E0BA77;font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:1px">' + (sample ? "Sample · " : "") + "Weekly progress · " + escH(range) + '</div></div>',
+    (sample ? "SAMPLE · " : "") + "BRAIN DOJO WEEKLY PROGRESS · " + range + "\n");
+  p('<div style="background:#FFFFFF;border-radius:0 0 14px 14px;padding:6px 20px 18px">');
+  kids.forEach(function (k) {
+    var bc = BELT_COLORS[k.belt] || "#CCCCCC";
+    p('<h2 style="margin:18px 0 4px;font-size:20px;color:#12223F">' + escH(k.name) + '</h2>' +
+      '<div style="font-size:13px;color:#5A6578;margin-bottom:8px">' + (k.belt ? '<span style="display:inline-block;width:22px;height:9px;border-radius:3px;background:' + bc + ';border:1px solid #888;vertical-align:middle"></span> ' + escH(k.belt) + ' Belt' : '') + (k.grade ? (k.belt ? " · " : "") + escH(k.grade) : '') + '</div>',
+      "\n" + k.name.toUpperCase() + (k.belt ? " · " + k.belt + " Belt" : "") + (k.grade ? " · " + k.grade : ""));
+    var line = k.rounds ? k.days + (k.days === 1 ? " day" : " days") + ", " + k.rounds + (k.rounds === 1 ? " round" : " rounds") + (k.answers ? ", " + k.answers + " questions (" + k.pct + "% right)" : "") : "No practice " + (sample ? "yet this week" : "last week") + ". A short round today gets things rolling again.";
+    var games = k.games.map(function (g) { return g.name + (g.n > 1 ? " ×" + g.n : ""); }).join(", ");
+    p('<p style="margin:6px 0"><strong>Practiced:</strong> ' + escH(line) + (games ? '<br><span style="color:#5A6578">' + escH(games) + '</span>' : '') + '</p>', "Practiced: " + line + (games ? "\n  " + games : ""));
+    var wins = k.wins.slice(); if (k.streak) wins.unshift(k.streak + "-day streak");
+    if (wins.length) p('<p style="margin:6px 0"><strong>Wins:</strong></p><ul style="margin:4px 0 8px;padding-left:20px">' + wins.map(function (w) { return '<li>' + escH(w) + '</li>'; }).join("") + '</ul>', "Wins:\n" + wins.map(function (w) { return "  - " + w; }).join("\n"));
+    if (k.weak.length) p('<p style="margin:6px 0"><strong>Working on:</strong></p><ul style="margin:4px 0 8px;padding-left:20px">' + k.weak.map(function (w) { return '<li>' + escH(w) + '</li>'; }).join("") + '</ul>', "Working on:\n" + k.weak.map(function (w) { return "  - " + w; }).join("\n"));
+    k.teams.forEach(function (t) {
+      var h = '<div style="border-left:4px solid #8B4BE0;background:#F5F1FC;border-radius:8px;padding:10px 12px;margin:10px 0"><div style="font-weight:700;color:#4A2A86">Engage Teams · ' + escH(t.team) + '</div>', tx = "Engage Teams · " + t.team;
+      if (!t.done) { h += '<div style="margin-top:4px">The weekly lesson wasn\'t done' + (sample ? ' yet this week.' : ' last week.') + ' Doing it each week keeps their spot on the team.</div>'; tx += "\n  The weekly lesson wasn't done" + (sample ? " yet this week." : " last week.") + " Doing it each week keeps their spot on the team."; }
+      else {
+        if (t.title) { h += '<div style="margin-top:4px"><strong>' + escH(t.title) + '</strong>' + (t.value ? ' (' + escH(t.value) + ')' : '') + (t.moment ? ': ' + escH(t.moment) : '') + '</div>'; tx += "\n  " + t.title + (t.value ? " (" + t.value + ")" : "") + (t.moment ? ": " + t.moment : ""); }
+        if (t.picks.length) { h += '<ul style="margin:6px 0;padding-left:18px">' + t.picks.map(function (q) { return '<li>' + (q.q ? '<span style="color:#5A6578">' + escH(q.q) + '</span> ' : '') + 'They chose: ' + escH(q.chose) + (q.best ? ' <span style="color:#1E8A4C;font-weight:700">(best answer)</span>' : q.found ? ' <span style="color:#5A6578">(then found: ' + escH(q.found) + ')</span>' : '') + '</li>'; }).join("") + '</ul>';
+          t.picks.forEach(function (q) { tx += "\n  - " + (q.q ? q.q + " " : "") + "They chose: " + q.chose + (q.best ? " (best answer)" : q.found ? " (then found: " + q.found + ")" : ""); }); }
+        if (t.say) { h += '<div style="font-style:italic">In their own words: "' + escH(t.say) + '"</div>'; tx += '\n  In their own words: "' + t.say + '"'; }
+        h += '<div style="color:#5A6578;font-size:13px;margin-top:4px">Talking point: ask when a moment like this came up for them' + (t.mission ? ', and try this together: ' + escH(t.mission) : '.') + '</div>';
+        tx += "\n  Talking point: ask when a moment like this came up for them" + (t.mission ? ", and try this together: " + t.mission : ".");
+      }
+      p(h + '</div>', tx);
+    });
+  });
+  if (tip) p('<div style="background:#FFF7E6;border:1px solid #E0BA77;border-radius:10px;padding:12px 14px;margin:16px 0 4px"><strong>Try this at home:</strong> ' + escH(tip) + '</div>', "\nTry this at home: " + tip);
+  p('</div><p style="color:#A3B4CE;font-size:12px;line-height:1.5;margin:14px 4px 0">You get this because you turned on the weekly progress email in Brain Dojo. ' +
+    '<strong>Unsubscribe:</strong> turn it off in the app\'s Parents area (Weekly progress email). Your email isn\'t stored on our server; it\'s only used to send this note.<br>Brain Dojo by ' + escH(STUDIO) + '</p></div></div>',
+    "\n--\nYou get this because you turned on the weekly progress email in Brain Dojo.\nUnsubscribe: turn it off in the app's Parents area (Weekly progress email). Your email isn't stored on our server; it's only used to send this note.\nBrain Dojo by " + STUDIO);
+  return { subject: subject, html: H.join(""), text: T.join("\n") };
+}
+function digest(req) {
+  var a = auth(req); if (!a) return { ok: false, error: "signed_out" };
+  var fid = String(req.token).slice(0, 32), email = cleanEmail(req.email), kind = String(req.kind || "weekly");
+  if (["weekly", "sample", "check"].indexOf(kind) === -1) return { ok: false, error: "bad_request" };
+  var cache = CacheService.getScriptCache();
+  if (kind === "check") {
+    var c = Number(cache.get("dcheck:" + fid) || 0);
+    if (c >= DIGEST_CHECKS_PER_HOUR) return { ok: false, error: "limit" };
+    cache.put("dcheck:" + fid, String(c + 1), 3600);
+  }
+  if (!email || familyId(email) !== fid) return { ok: false, error: "wrong_email" }; // only the family's own sign-in email
+  if (kind === "check") return { ok: true };
+  var week = String(req.week || "");
+  if (!/^\d{4}-\d\d-\d\d$/.test(week) || new Date(week + "T00:00:00Z").getUTCDay() !== 1 || dayNum(week) < todayNum() - 7 || dayNum(week) > todayNum() + 1) return { ok: false, error: "bad_request" };
+  var kids = dList(req.kids, DIGEST_KIDS).map(cleanKid).filter(Boolean);
+  if (!kids.length) return { ok: false, error: "bad_request" };
+  var sample = kind === "sample", wn = dayNum(week);
+  var range = sample ? dDate(wn) + " – " + dDate(Math.max(wn, Math.min(wn + 6, todayNum()))) : dDate(wn - 7) + " – " + dDate(wn - 1);
+  var mail = digestMail(kids, dText(req.tip, 240), range, sample);
+  var send = function () {
+    GmailApp.sendEmail(email, mail.subject, mail.text, { htmlBody: mail.html, name: "Brain Dojo by " + STUDIO, from: FROM_EMAIL, replyTo: FROM_EMAIL });
+  };
+  if (sample) {
+    var key = "dsample:" + fid + ":" + todayNum(), n = Number(cache.get(key) || 0);
+    if (n >= DIGEST_SAMPLES_PER_DAY) return { ok: false, error: "limit" };
+    cache.put(key, String(n + 1), 86400);
+    send();
+    return { ok: true, left: DIGEST_SAMPLES_PER_DAY - n - 1 };
+  }
+  return locked(function () {
+    var file = digestFile(), d = digestData(file);
+    if (d.w[fid] && d.w[fid] >= week) return { ok: false, error: "already", week: d.w[fid] };
+    d.w[fid] = week; // only the family number and the week
+    file.setContent(JSON.stringify(d));
+    send();
+    return { ok: true, week: week };
+  });
+}
+
 function deleteFamily(req) {
   return locked(function () {
     var a = auth(req); if (!a) return { ok: false, error: "signed_out" };
@@ -366,6 +494,8 @@ function deleteFamily(req) {
     var cf = chFile(), cd = chData(cf);
     cd.list = cd.list.filter(function (c) { return c.a.indexOf(fid + ":") !== 0 && c.b.indexOf(fid + ":") !== 0; });
     cf.setContent(JSON.stringify(cd));
+    var df = digestFile(), dd = digestData(df);
+    if (dd.w[fid]) { delete dd.w[fid]; df.setContent(JSON.stringify(dd)); }
     return { ok: true };
   });
 }
