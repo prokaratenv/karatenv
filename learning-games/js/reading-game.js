@@ -166,6 +166,23 @@ BD.Reading = (function () {
     return out;
   }
 
+  /* One part of the Comprehension stripe test: 3 or 4 questions of one kind
+     (main idea, details, reading between the lines, word meaning), drawn from
+     short stories. Falls back to a whole story if that kind is rare. */
+  function partPassages(p, grade, beltIndex, type) {
+    const out = [], seen = [];
+    let n = 0;
+    for (let k = 0; k < 4 && n < 3; k++) {
+      beltPassages(p, grade, beltIndex).forEach(function (x) {
+        if (!x || seen.indexOf(x.id) !== -1 || n >= 4) return; seen.push(x.id);
+        const qs = (x.questions || []).filter(function (q) { return q.type === type; }).slice(0, 4 - n);
+        if (qs.length) { out.push(Object.assign({}, x, { questions: qs })); n += qs.length; }
+      });
+    }
+    if (n < 2) { const one = beltPassages(p, grade, beltIndex)[0]; return one ? [one] : out; }
+    return out;
+  }
+
   /* stripe = { grade, belt, test } when started from the belt panel. */
   function start(focus, stripe) {
     const p = BD.Store.current();
@@ -173,9 +190,9 @@ BD.Reading = (function () {
     if (stripe) p.readingGrade = stripe.grade;
     else if (p.retry && p.retry.reading) p.readingGrade = p.retry.reading.grade;
     const grade = p.readingGrade;
-    R = { grade: grade, focus: focus, passages: stripe ? beltPassages(p, grade, stripe.belt) : choose(p, grade, focus), pi: 0, qi: 0, xp: 0, results: [], stripe: stripe || null, test: !!(stripe && stripe.test) };
+    R = { grade: grade, focus: focus, passages: stripe ? (stripe.test && stripe.skill && stripe.skill.type ? partPassages(p, grade, stripe.belt, stripe.skill.type) : beltPassages(p, grade, stripe.belt)) : choose(p, grade, focus), pi: 0, qi: 0, xp: 0, results: [], stripe: stripe || null, test: !!(stripe && stripe.test) };
     BD.UI.show("screen-read-play");
-    BD.UI.testMode("screen-read-play", R.test ? "Comprehension stripe test" : stripe ? "Comprehension stripe practice · " + BD.BELTS[stripe.belt].name + " Belt" : "", !BD.Rank.hintsAllowed(BD.Store.current(), R.grade));
+    BD.UI.testMode("screen-read-play", R.test ? "Comprehension stripe test" + (stripe.skill ? " · Part " + (stripe.part + 1) + " of 4: " + stripe.skill.label : "") : stripe ? "Comprehension stripe practice · " + BD.BELTS[stripe.belt].name + " Belt" : "", !BD.Rank.hintsAllowed(BD.Store.current(), R.grade));
     BD.Cast.say("readSay", "start");
     loadPassage();
     topUp(p, grade);
@@ -316,7 +333,7 @@ BD.Reading = (function () {
     if (R.test) {
       p.seenPassages = R.passages.map(function (x) { return x.id; }).concat(p.seenPassages).slice(0, 200);
       const review = R.results.filter(function (x) { return x.best < 2; }).map(function (x) { return x.q + " → " + x.answer; });
-      BD.UI.stripeResult({ subject: "comprehension", grade: grade, pct: acc, score: pts + " / " + max + " points", review: review, again: function () { start(null, { grade: grade, belt: BD.Rank.rec(p, grade).belt, test: true }); } });
+      BD.UI.stripeResult({ subject: "comprehension", grade: grade, part: R.stripe ? R.stripe.part : undefined, pct: acc, score: pts + " / " + max + " points", review: review, again: function () { start(null, Object.assign({}, R.stripe, { grade: grade, belt: BD.Rank.rec(p, grade).belt, test: true })); } });
       return;
     }
     const stripeAgain = R.stripe ? { grade: grade, belt: BD.Rank.rec(p, grade).belt, test: false } : null;

@@ -152,6 +152,7 @@ BD.MathGame = (function () {
       const op = BD.Coach.pickOp(BD.Store.current(), S.grade, S.ops);
       let g = S.grade;
       if (S.stripe) { g = BD.Rank.itemGrade(S.grade, S.stripe.belt); if (opsFor(g).indexOf(op) === -1) g = S.grade; }
+      if (S.stripe && S.stripe.skill && S.stripe.skill.up && S.grade < BD.MAX_GRADE && opsFor(S.grade + 1).indexOf(op) !== -1) g = S.grade + 1; // "Challenge mix" part
       p = makeProblem(op, g);
       if (recent.indexOf(p.key) === -1) break;
     }
@@ -229,7 +230,7 @@ BD.MathGame = (function () {
   /* stripe = { grade, belt, test } when started from the belt panel. */
   function start(mode, focusOps, stripe) {
     const p = BD.Store.current();
-    if (stripe) { p.mathGrade = stripe.grade; focusOps = beltOps(stripe.grade, stripe.belt); }
+    if (stripe) { p.mathGrade = stripe.grade; focusOps = stripe.test && stripe.skill && stripe.skill.ops ? stripe.skill.ops.slice() : beltOps(stripe.grade, stripe.belt); }
     else if (p.retry && p.retry.math) { p.mathGrade = p.retry.math.grade; focusOps = p.retry.math.ops; }
     if (S && S.timer) clearInterval(S.timer);
     S = {
@@ -245,7 +246,7 @@ BD.MathGame = (function () {
       xp: 0, missed: [], timer: null, endsAt: 0, xpBefore: p.xp
     };
     if (S.test) {
-      for (let n = 0; n < 20; n++) S.queue.push(freshProblem());
+      for (let n = 0; n < (typeof stripe.part === "number" ? 10 : 20); n++) S.queue.push(freshProblem()); // one part = 10 problems
     } else if (mode === "flash") {
       for (let n = 0; n < FLASH_CARDS; n++) S.queue.push(freshProblem());
     } else if (mode === "practice") {
@@ -259,7 +260,7 @@ BD.MathGame = (function () {
     }
     buildKeypad();
     BD.UI.syncGradeSelect("mathGradeSel", "math");
-    BD.UI.testMode("screen-math-play", S.test ? "Math stripe test" : S.stripe ? "Math stripe practice · " + BD.BELTS[S.stripe.belt].name + " Belt" : mode === "flash" ? "⚡ " + OPS[S.ops[0]].label + " flashcards" : "", !BD.Rank.hintsAllowed(BD.Store.current(), S.grade));
+    BD.UI.testMode("screen-math-play", S.test ? "Math stripe test" + (S.stripe.skill ? " · Part " + (S.stripe.part + 1) + " of 4: " + S.stripe.skill.label : "") : S.stripe ? "Math stripe practice · " + BD.BELTS[S.stripe.belt].name + " Belt" : mode === "flash" ? "⚡ " + OPS[S.ops[0]].label + " flashcards" : "", !BD.Rank.hintsAllowed(BD.Store.current(), S.grade));
     BD.UI.show("screen-math-play");
     BD.Cast.say("mathSay", "start");
     BD.Scratch.close(); BD.Scratch.clear();
@@ -456,7 +457,7 @@ BD.MathGame = (function () {
     if (S.test) {
       const review = [];
       S.missed.forEach(function (q) { const t = show(q) + " = " + num(q.answer); if (review.indexOf(t) === -1) review.push(t); });
-      BD.UI.stripeResult({ subject: "math", grade: grade, pct: acc, score: S.correct + " / " + S.answered, review: review, again: function () { start("practice", null, { grade: grade, belt: BD.Rank.rec(p, grade).belt, test: true }); } });
+      BD.UI.stripeResult({ subject: "math", grade: grade, part: S.stripe ? S.stripe.part : undefined, pct: acc, score: S.correct + " / " + S.answered, review: review, again: function () { start("practice", null, Object.assign({}, S.stripe, { grade: grade, belt: BD.Rank.rec(p, grade).belt, test: true })); } });
       return;
     }
     let record = false;

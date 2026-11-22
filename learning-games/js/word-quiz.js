@@ -359,23 +359,33 @@ BD.WordQuiz = (function () {
   }
 
   /* Belt rounds: words drawn from the grades around the belt grade (harder as belts go up). */
-  spelling.beltRound = function (p, grade, beltIndex) {
-    const out = [], used = new Set(), bag = styleBag(grade, isQuiet(p));
+  /* skill (a stripe test part): size 0 short / 1 medium / 2 long words, -1 mixed; n items. */
+  spelling.beltRound = function (p, grade, beltIndex, skill, n) {
+    const out = [], used = new Set(), bag = styleBag(grade, isQuiet(p)), want = n || ROUND;
+    const third = function (list, size) {
+      if (size === undefined || size < 0) return list;
+      const lens = list.map(function (x) { return x[0].length; }).sort(function (a, b) { return a - b; });
+      const lo = lens[Math.floor(lens.length / 3)], hi = lens[Math.floor(2 * lens.length / 3)];
+      const f = list.filter(function (x) { const L = x[0].length; return size === 0 ? L <= lo : size === 1 ? L > lo && L <= hi : L > hi; });
+      return f.length >= want ? f : list;
+    };
     let guard = 0;
-    while (out.length < ROUND && guard++ < 200) {
-      const g = BD.Rank.itemGrade(grade, beltIndex), list = BD.SPELLING[String(g)] || BD.SPELLING[String(grade)];
+    while (out.length < want && guard++ < 200) {
+      const g = BD.Rank.itemGrade(grade, beltIndex), list = third(BD.SPELLING[String(g)] || BD.SPELLING[String(grade)], skill && skill.size);
       const x = list[r(list.length)];
       if (used.has(x[0])) continue;
       used.add(x[0]); out.push(makeSpelling(x, grade, bag()));
     }
     return out;
   };
-  spanish.beltRound = function (p, grade, beltIndex) {
-    const out = [], used = new Set();
+  /* skill (a stripe test part): { topics: [names] } limits the words to those topics. */
+  spanish.beltRound = function (p, grade, beltIndex, skill, n) {
+    const out = [], used = new Set(), want = n || ROUND, names = skill && skill.topics && skill.topics.length ? skill.topics : null;
     let guard = 0;
-    while (out.length < ROUND && guard++ < 300) {
+    while (out.length < want && guard++ < 300) {
       const topics = this.topics(BD.Rank.itemGrade(grade, beltIndex));
-      const pool = topics.length ? topics : this.topics(grade);
+      let pool = topics.length ? topics : this.topics(grade);
+      if (names) { const only = this.topics(grade).filter(function (t) { return names.indexOf(t.topic) !== -1; }); if (only.length) pool = only; }
       const t = pool[r(pool.length)], w = t.words[r(t.words.length)];
       if (used.has(t.topic + ":" + w[0])) continue;
       used.add(t.topic + ":" + w[0]);
@@ -421,9 +431,9 @@ BD.WordQuiz = (function () {
     else if (p.retry && p.retry[game]) p[g.field] = p.retry[game].grade;
     const grade = p[g.field];
     if (flash) { stripe = null; school = null; }
-    W = { game: game, g: g, grade: grade, school: school || null, flash: flash || null, noRetry: school === "test", items: flash ? flashRound(p, grade, flash) : school ? BD.School.round(p, school === "test", grade) : stripe ? g.beltRound(p, grade, stripe.belt) : g.round(p, grade), i: 0, xp: 0, correct: 0, firstTry: 0, answered: 0, streak: 0, best: 0, missed: [], stripe: stripe || null, test: !!(stripe && stripe.test) };
+    W = { game: game, g: g, grade: grade, school: school || null, flash: flash || null, noRetry: school === "test", items: flash ? flashRound(p, grade, flash) : school ? BD.School.round(p, school === "test", grade) : stripe ? (stripe.test && stripe.skill ? g.beltRound(p, grade, stripe.belt, stripe.skill, 6) : g.beltRound(p, grade, stripe.belt)) : g.round(p, grade), i: 0, xp: 0, correct: 0, firstTry: 0, answered: 0, streak: 0, best: 0, missed: [], stripe: stripe || null, test: !!(stripe && stripe.test) };
     const label = BD.Rank.subject(BD.Rank.BY_GAME[game]).label;
-    BD.UI.testMode("screen-word-play", W.test ? label + " stripe test" : flash ? "⚡ Spelling flashcards · " + FLASH_NAMES[flash] : stripe ? label + " stripe practice · " + BD.BELTS[stripe.belt].name + " Belt" : school === "test" ? "School word test" : "", !BD.Rank.hintsAllowed(BD.Store.current(), grade));
+    BD.UI.testMode("screen-word-play", W.test ? label + " stripe test" + (stripe.skill ? " · Part " + (stripe.part + 1) + " of 4: " + stripe.skill.label : "") : flash ? "⚡ Spelling flashcards · " + FLASH_NAMES[flash] : stripe ? label + " stripe practice · " + BD.BELTS[stripe.belt].name + " Belt" : school === "test" ? "School word test" : "", !BD.Rank.hintsAllowed(BD.Store.current(), grade));
     $("wordCoachFace").src = BD.Cast.face(g.coach);
     $("wordCoachName").textContent = BD.Cast.name(g.coach);
     BD.UI.syncGradeSelect("wordGradeSel", game);
@@ -642,7 +652,7 @@ BD.WordQuiz = (function () {
     if (W.test) {
       const review = [];
       W.missed.forEach(function (q) { if (review.indexOf(q.explain) === -1) review.push(q.explain); });
-      BD.UI.stripeResult({ subject: BD.Rank.BY_GAME[game], grade: grade, pct: acc, score: W.correct + " / " + W.answered, review: review, again: function () { start(game, { grade: grade, belt: BD.Rank.rec(p, grade).belt, test: true }); } });
+      BD.UI.stripeResult({ subject: BD.Rank.BY_GAME[game], grade: grade, part: W.stripe ? W.stripe.part : undefined, pct: acc, score: W.correct + " / " + W.answered, review: review, again: function () { start(game, Object.assign({}, W.stripe, { grade: grade, belt: BD.Rank.rec(p, grade).belt, test: true })); } });
       return;
     }
     const stripeAgain = W.stripe ? { grade: grade, belt: BD.Rank.rec(p, grade).belt, test: false } : null;
@@ -746,6 +756,7 @@ BD.WordQuiz = (function () {
   }
 
   function peek() { return W && W.items[W.i]; }
+  function game() { return W ? W.game : null; }
 
-  return { flashHTML: flashHTML, flashDone: flashDone, flashToday: flashToday, FLASH_NAMES: FLASH_NAMES, SPELL_FLASH_BONUS: FLASH_BONUS, styleBag: styleBag, STYLE_INFO: STYLE_INFO, bankNow: bankNow, isQuiet: isQuiet, misspellings: misspellings, makeSpelling: makeSpelling, peek: peek, start: start, stop: stop, bind: bind, planItems: planItems, PASS: PASS, GAMES: GAMES, plain: plain };
+  return { flashHTML: flashHTML, flashDone: flashDone, flashToday: flashToday, FLASH_NAMES: FLASH_NAMES, SPELL_FLASH_BONUS: FLASH_BONUS, styleBag: styleBag, STYLE_INFO: STYLE_INFO, bankNow: bankNow, isQuiet: isQuiet, misspellings: misspellings, makeSpelling: makeSpelling, peek: peek, game: game, start: start, stop: stop, bind: bind, planItems: planItems, PASS: PASS, GAMES: GAMES, plain: plain };
 })();

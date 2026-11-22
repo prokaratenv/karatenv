@@ -31,7 +31,8 @@ BD.gradeShort = function (g) {
 BD.AVATAR_COLORS = ["#E2402F", "#2D6CDF", "#2FA866", "#7B4BC4", "#F08A24", "#0F9BA8"];
 
 /* The student's belt at the grade they're training (see js/rank.js). */
-BD.beltOf = function (p) { return BD.Rank ? BD.Rank.belt(p) : BD.BELTS[0]; };
+/* BD.Rank.at: the grade being played right now (a game shows that grade's belt). */
+BD.beltOf = function (p) { return BD.Rank ? BD.Rank.belt(p, BD.Rank.at !== null && BD.Rank.at !== undefined ? BD.Rank.at : undefined) : BD.BELTS[0]; };
 /* Days in a row with practice, counting today (or up to yesterday if they
    haven't trained yet today, so the streak isn't lost before they play). */
 BD.streak = function (p) {
@@ -129,6 +130,7 @@ BD.Store = (function () {
     if (BD.Quest) BD.Quest.sanitize(p);
     if (BD.Breaks) BD.Breaks.sanitize(p);
     if (BD.Placement) BD.Placement.sanitize(p);
+    if (BD.Rank && BD.Rank.sanitize) BD.Rank.sanitize(p);
     if (BD.Goals && BD.Goals.sanitize) BD.Goals.sanitize(p);
     if (BD.StoryGen && BD.StoryGen.sanitize) BD.StoryGen.sanitize(p);
     if (BD.Phonics && BD.Phonics.sanitize) BD.Phonics.sanitize(p);

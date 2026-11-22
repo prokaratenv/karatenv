@@ -27,3 +27,18 @@ html.easy-font .problem, html.easy-font .bb-count { font-family: "Atkinson Hyper
 .studio-opt { border-style: dashed; border-color: var(--green); }
 .fighter-pick.big .studio-opt .champ img { height: 124px; width: auto; }
 @media (min-width: 640px) { .studio-preview .champ img { height: 300px; max-height: 300px; } .studio-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); } }
+
+/* Stripe test parts and per-grade belts */
+.part-dots { display: inline-flex; gap: 3px; vertical-align: middle; margin-right: 4px; }
+.part-dots i { width: 8px; height: 8px; border-radius: 50%; background: rgba(255, 255, 255, .18); border: 1px solid rgba(255, 255, 255, .35); }
+.part-dots i.on { background: #FFFFFF; border-color: #FFFFFF; }
+.sr-part { display: block; font-size: .78rem; color: var(--muted); margin-top: 2px; }
+.mini-track { position: relative; }
+.mini-track .pt { position: absolute; top: -1px; bottom: -1px; width: 2px; background: rgba(255, 255, 255, .35); z-index: 1; }
+.part-list { margin: 8px 0 12px; padding-left: 20px; }
+.part-list li { margin: 4px 0; }
+.part-list li.done strong { color: #8be28b; }
+.part-list li.now strong { color: var(--gold, #E0BA77); }
+.review-note { display: block; font-size: .82rem; color: var(--gold, #E0BA77); margin: 4px 0; }
+.chip-belt { display: inline-block; width: 10px; height: 10px; border-radius: 3px; background: var(--belt); border: 1px solid rgba(0, 0, 0, .45); box-shadow: 0 0 0 1px rgba(255, 255, 255, .25); margin-right: 4px; vertical-align: -1px; }
+.grade-belt-line { margin: 6px 0 0; font-size: .85rem; color: var(--muted); display: flex; align-items: center; gap: 6px; }

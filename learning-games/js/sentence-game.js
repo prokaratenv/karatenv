@@ -33,11 +33,11 @@ BD.SentenceGame = (function () {
   }
 
   /* Belt items: more mistakes per sentence as the belts go up, mixing in the grades around it. */
-  function beltItems(grade, beltIndex, n) {
+  function beltItems(grade, beltIndex, n, w) {
     const extra = beltIndex <= 2 ? -1 : beltIndex <= 5 ? 0 : 1, out = [], p = BD.Store.current();
     let guard = 0;
     while (out.length < n && guard++ < 60) {
-      const it = BD.SentenceGen.make(BD.Rank.itemGrade(grade, beltIndex), { cap: 1, punct: 1, spell: 1, grammar: 1 }, extra, { p: p });
+      const it = BD.SentenceGen.make(BD.Rank.itemGrade(grade, beltIndex), w || { cap: 1, punct: 1, spell: 1, grammar: 1 }, extra, { p: p });
       if (it) out.push(it);
     }
     return out;
@@ -49,10 +49,10 @@ BD.SentenceGame = (function () {
     if (typeof focus !== "string") focus = null;
     if (stripe) p.sentenceGrade = stripe.grade;
     else if (p.retry && p.retry.sentence) p.sentenceGrade = p.retry.sentence.grade;
-    const items = stripe ? beltItems(stripe.grade, stripe.belt, 8) : BD.SentenceGen.round(p, p.sentenceGrade, BD.Kid && BD.Kid.young(p.sentenceGrade) ? 5 : ROUND, focus);
+    const items = stripe ? (stripe.test && stripe.skill ? beltItems(stripe.grade, stripe.belt, 5, stripe.skill.w) : beltItems(stripe.grade, stripe.belt, 8)) : BD.SentenceGen.round(p, p.sentenceGrade, BD.Kid && BD.Kid.young(p.sentenceGrade) ? 5 : ROUND, focus);
     S = { grade: p.sentenceGrade, items: items, training: items.training || null, focus: focus, i: 0, xp: 0, solved: 0, firstTry: 0, results: [], stripe: stripe || null, test: !!(stripe && stripe.test) };
     BD.UI.show("screen-sentence-play");
-    BD.UI.testMode("screen-sentence-play", S.test ? "Reading stripe test" : stripe ? "Reading stripe practice · " + BD.BELTS[stripe.belt].name + " Belt" : "", !BD.Rank.hintsAllowed(BD.Store.current(), S.grade));
+    BD.UI.testMode("screen-sentence-play", S.test ? "Reading stripe test" + (stripe.skill ? " · Part " + (stripe.part + 1) + " of 4: " + stripe.skill.label : "") : stripe ? "Reading stripe practice · " + BD.BELTS[stripe.belt].name + " Belt" : "", !BD.Rank.hintsAllowed(BD.Store.current(), S.grade));
     BD.Cast.say("sentSay", "start");
     load();
     BD.SentenceGen.topUp(p, S.grade); // ask Claude for more sentences if the bank is running low
@@ -198,7 +198,7 @@ BD.SentenceGame = (function () {
     const acc = Math.round(100 * S.solved / total);
     if (S.test) {
       const review = S.results.filter(function (x) { return !x.won; }).map(function (x) { const it = S.items.find(function (s) { return s.id === x.id; }); return answers(it)[0]; });
-      BD.UI.stripeResult({ subject: "reading", grade: grade, pct: acc, score: S.solved + " / " + total, review: review, again: function () { start(null, { grade: grade, belt: BD.Rank.rec(p, grade).belt, test: true }); } });
+      BD.UI.stripeResult({ subject: "reading", grade: grade, part: S.stripe ? S.stripe.part : undefined, pct: acc, score: S.solved + " / " + total, review: review, again: function () { start(null, Object.assign({}, S.stripe, { grade: grade, belt: BD.Rank.rec(p, grade).belt, test: true })); } });
       return;
     }
     const stripeAgain = S.stripe ? { grade: grade, belt: BD.Rank.rec(p, grade).belt, test: false } : null;

@@ -17,6 +17,7 @@ BD.UI = (function () {
     }
     if (id === "screen-players" || id === "screen-home") trail.length = 0; // home is the top
     currentScreen = id;
+    BD.Rank.at = playGrade(id); // a game shows the belt at the grade being played
     if (BD.Music) BD.Music.forScreen(id);
     BD.emit("screen", id);
     document.body.classList.toggle("on-players", id === "screen-players");
@@ -32,6 +33,14 @@ BD.UI = (function () {
     window.scrollTo(0, 0);
   }
 
+  /* The grade a play screen is training at (null elsewhere). */
+  function playGrade(id) {
+    const p = BD.Store.current(); if (!p) return null;
+    const f = { "screen-math-play": "mathGrade", "screen-sentence-play": "sentenceGrade", "screen-read-play": "readingGrade" }[id] ||
+      (id === "screen-word-play" ? (BD.WordQuiz && BD.WordQuiz.game && BD.WordQuiz.game() === "spanish" ? "spanishGrade" : "spellingGrade") : null);
+    if (!f) return null;
+    const g = Number(p[f]); return isFinite(g) ? g : null;
+  }
   function fighterOf(p) { return p.avatar || BD.Cast.defaultFighter(p); }
   /* The student's character: a cast member, or the fighter they built. */
   function fighterArt(p, mode, outfit) {
@@ -103,6 +112,12 @@ BD.UI = (function () {
       '<p class="fighter-group">Students</p>' + kids.map(opt).join("") +
       '<p class="fighter-group">Instructors</p>' + teachers.map(opt).join("");
   }
+  /* Four little dots: which parts of a stripe test are passed. */
+  function partDots(r, key) {
+    const n = BD.Rank.partsDone(r, key);
+    return '<span class="part-dots" aria-label="' + n + ' of 4 parts passed">' + [0, 1, 2, 3].map(function (i) { return '<i class="' + (i < n ? "on" : "") + '"></i>'; }).join("") + '</span>';
+  }
+  function partTicks() { return '<b class="pt" style="left:25%"></b><b class="pt" style="left:50%"></b><b class="pt" style="left:75%"></b>'; }
   function beltSwatch(belt) {
     return '<span class="belt-swatch" style="--belt:' + belt.color + '" title="' + belt.name + ' belt"></span>';
   }
@@ -111,23 +126,25 @@ BD.UI = (function () {
     const g = BD.Rank.dojoGrade(p), r = BD.Rank.rec(p, g), belt = BD.BELTS[r.belt];
     const count = BD.Rank.stripeCount(r), xp = BD.Rank.beltXP(r);
     const rows = BD.Rank.SUBJECTS.map(function (sj) {
-      const got = !!r.stripes[sj.key], x = Math.min(BD.Rank.PRACTICE_MAX, r.xp[sj.key] || 0);
+      const got = !!r.stripes[sj.key], x = Math.min(BD.Rank.PRACTICE_MAX, r.xp[sj.key] || 0), np = BD.Rank.nextPart(r, sj.key);
+      const sk = np ? BD.Rank.partSkills(sj.key, g)[np.i] : null;
       return '<div class="stripe-row' + (got ? " earned" : "") + (sj.optional ? " optional" : "") + '">' +
         '<span class="stripe-chip" aria-hidden="true"></span>' +
         '<div class="sr-main"><strong>' + sj.label + (sj.optional ? ' <em>bonus</em>' : '') + '</strong>' +
         '<span class="sr-sub">' + (got ? "Stripe earned" : x + " / 100 practice XP") + (sj.note ? " · " + sj.note : "") + '</span>' +
-        '<span class="mini-track"><i style="width:' + x + '%"></i></span></div>' +
+        (np ? '<span class="sr-part">' + partDots(r, sj.key) + ' Part ' + (np.i + 1) + ' of 4: ' + esc(sk.label) + (np.open ? ' · ready!' : ' · unlocks at ' + np.need + ' XP') + '</span>' : '') +
+        '<span class="mini-track">' + partTicks() + '<i style="width:' + x + '%"></i></span></div>' +
         '<div class="sr-actions"><button type="button" class="btn btn-small" data-stripe-practice="' + sj.key + '">Practice</button>' +
-        '<button type="button" class="btn btn-small btn-primary" data-stripe-test="' + sj.key + '">' + (got ? "Retest" : "Stripe test") + '</button></div></div>';
+        '<button type="button" class="btn btn-small' + (got || np.open ? " btn-primary" : " btn-quiet") + '" data-stripe-test="' + sj.key + '">' + (got ? "Retest" : "Part " + (np.i + 1) + " test") + '</button></div></div>';
     }).join("");
     return '<div class="rank-card">' +
       '<div class="rank-top"><label class="grade-select"><span class="eyebrow">Dojo grade</span><select id="dojoGradeSel">' +
       BD.GRADES.map(function (x) { return '<option value="' + x + '"' + (x === g ? " selected" : "") + '>' + BD.gradeLabel(x) + '</option>'; }).join("") +
       '</select></label><span class="rank-xp">Belt XP <strong>' + xp + '</strong> / 500</span></div>' +
-      '<button type="button" class="rank-belt" id="rankBeltBtn" aria-label="See belt details">' + BD.Rank.beltSVG(r.belt, r.stripes) + '<span class="rank-tap">Tap your belt for details</span></button>' +
+      '<button type="button" class="rank-belt" id="rankBeltBtn" aria-label="See belt details">' + BD.Rank.beltSVG(r.belt, r.stripes, { parts: r.parts }) + '<span class="rank-tap">Tap your belt for details</span></button>' +
       '<h2 class="rank-name">' + BD.gradeLabel(g) + ' · ' + belt.name + ' Belt</h2>' +
       (r.mastered ? '<p class="rank-note mastered">Grade mastered! You earned every belt in ' + BD.gradeLabel(g) + '.' + (g < BD.MAX_GRADE ? ' <button type="button" class="btn btn-small btn-primary" id="rankNextGrade">Start ' + BD.gradeLabel(g + 1) + '</button>' : '') + '</p>'
-        : '<p class="rank-note">' + count + ' of 4 stripes · score ' + BD.Rank.PASS + '% on a stripe test to earn it · ' + BD.Rank.levelNote(r.belt) + '</p>') +
+        : '<p class="rank-note">' + count + ' of 4 stripes · each stripe test has 4 parts (score ' + BD.Rank.PASS + '% on each) · ' + BD.Rank.levelNote(r.belt) + '</p>') +
       '<div class="xp-track"><div class="xp-fill" style="width:' + Math.round(100 * xp / 500) + '%"></div></div>' +
       '<div class="stripe-list">' + rows + '</div></div>';
   }
@@ -145,7 +162,7 @@ BD.UI = (function () {
     const rows = BD.Rank.SUBJECTS.map(function (sj) {
       const got = !!r.stripes[sj.key], x = Math.min(100, r.xp[sj.key] || 0);
       return '<tr><th scope="row">' + sj.label + (sj.optional ? ' <em class="bonus">bonus</em>' : '') + '</th>' +
-        '<td>' + (got ? '<span class="got">Earned</span>' : '<span class="muted">Not yet</span>') + '</td>' +
+        '<td>' + (got ? '<span class="got">Earned</span>' : partDots(r, sj.key) + ' <span class="muted">' + BD.Rank.partsDone(r, sj.key) + ' of 4 parts</span>') + '</td>' +
         '<td><span class="mini-track"><i style="width:' + x + '%"></i></span><small>' + x + ' / 100 XP</small></td></tr>';
     }).join("");
     const ladder = '<ol class="bd-ladder">' + BD.BELTS.map(function (b, i) {
@@ -159,7 +176,7 @@ BD.UI = (function () {
     const nextLine = r.mastered ? "Grade mastered! Every belt earned." : next ? "Next belt: <strong>" + next.name + "</strong>. Earn the " + (4 - BD.Rank.stripeCount(r)) + " remaining stripe" + (4 - BD.Rank.stripeCount(r) === 1 ? "" : "s") + " to graduate." : "Black Belt is the top belt. Earn all 4 stripes to master " + BD.gradeLabel(g) + ".";
     sheet("My belt",
       tabs +
-      '<div class="bd-belt">' + BD.Rank.beltSVG(r.belt, r.stripes) + '</div>' +
+      '<div class="bd-belt">' + BD.Rank.beltSVG(r.belt, r.stripes, { parts: r.parts }) + '</div>' +
       '<h3 class="bd-name">' + BD.gradeLabel(g) + ' · ' + belt.name + ' Belt</h3>' +
       '<p class="bd-next">' + BD.Rank.stripeCount(r) + ' of 4 stripes · ' + nextLine + '</p>' +
       '<p class="bd-xp">Belt XP <strong>' + BD.Rank.beltXP(r) + '</strong> / 500 <span class="muted">(up to 100 per stripe from practice + a graduation bonus of up to 100, earned by that practice)</span></p>' +
@@ -187,6 +204,8 @@ BD.UI = (function () {
   function launchStripe(key, test) {
     const p = BD.Store.current(), g = BD.Rank.dojoGrade(p), r = BD.Rank.rec(p, g);
     const stripe = { grade: g, belt: r.belt, test: !!test };
+    // A stripe not earned yet is tested one part (one skill) at a time; Retest is one mixed test.
+    if (test && !r.stripes[key]) { const n = BD.Rank.nextPart(r, key); stripe.part = n.i; stripe.skill = BD.Rank.partSkills(key, g)[n.i]; }
     if (key === "math") BD.MathGame.start("practice", null, stripe);
     else if (key === "reading") BD.SentenceGame.start(null, stripe);
     else if (key === "comprehension") BD.Reading.start(null, stripe);
@@ -194,19 +213,30 @@ BD.UI = (function () {
   }
   function confirmTest(key) {
     const p = BD.Store.current(), g = BD.Rank.dojoGrade(p), r = BD.Rank.rec(p, g), sj = BD.Rank.subject(key);
-    const what = { math: "20 problems", reading: "8 sentences to fix", spelling: "10 words to spell", comprehension: "2 stories with 6 questions", spanish: "10 Spanish words" }[key];
-    sheet(sj.label + " stripe test",
-      '<p><strong>' + BD.gradeLabel(g) + ' · ' + BD.BELTS[r.belt].name + ' Belt.</strong> ' + what + '. No hints. Score <strong>' + BD.Rank.PASS + '%</strong> or better to earn your ' + sj.label + ' stripe.</p>' +
-      (function () {
-        const x = Math.min(100, r.xp[key] || 0), last = !r.stripes[key] && BD.Rank.stripeCount(r) === 3 && !sj.optional;
-        if (x >= 100 && !last) return '<p class="muted">All 100 practice XP earned for this stripe. You can take the test any time, and try again as often as you need.</p>';
-        if (last) return '<div class="xp-warn"><strong>🎓 This is your last stripe: passing it graduates you!</strong><p>Your graduation bonus comes from practice: right now it would be <strong>+' + BD.Rank.gradBonus(r) + ' XP</strong> of 100. ' +
-          (BD.Rank.beltXP(r) < 400 ? 'Practice XP you haven\'t earned on this belt (' + (400 - BD.Rank.beltXP(r)) + ' left) is gone once you move up. Practice first to grow your bonus and climb the leaderboard!' : 'You did all the practice. Full bonus!') + '</p></div>';
-        return '<div class="xp-warn"><strong>⚠️ The test doesn\'t give points. Practice does.</strong><p>You have ' + x + ' of 100 practice XP for this stripe. You can still practice after you earn it, until you move up a belt. Doing the work is what climbs the leaderboard.</p></div>';
-      })() +
-      '<div class="res-actions">' + ((r.xp[key] || 0) < 100 || (!r.stripes[key] && BD.Rank.stripeCount(r) === 3 && BD.Rank.beltXP(r) < 400) ? '<button type="button" class="btn btn-primary btn-big" id="testPractice">Practice first</button><button type="button" class="btn btn-quiet" id="testGo">Take the test now</button>' :
-        '<button type="button" class="btn btn-primary btn-big" id="testGo">Start the test</button><button type="button" class="btn btn-quiet" id="testPractice">Practice more</button>') + '</div>');
-    $("testGo").onclick = function () { closeSheet(); launchStripe(key, true); };
+    const x = Math.min(100, r.xp[key] || 0);
+    if (r.stripes[key]) {
+      const what = { math: "20 problems", reading: "8 sentences to fix", spelling: "10 words to spell", comprehension: "2 stories with 6 questions", spanish: "10 Spanish words" }[key];
+      sheet(sj.label + " retest",
+        '<p><strong>' + BD.gradeLabel(g) + ' · ' + BD.BELTS[r.belt].name + ' Belt.</strong> You already have this stripe. The retest mixes every skill: ' + what + '. No hints. Score <strong>' + BD.Rank.PASS + '%</strong> to keep it strong.</p>' +
+        '<div class="res-actions"><button type="button" class="btn btn-primary btn-big" id="testGo">Start the retest</button><button type="button" class="btn btn-quiet" id="testPractice">Practice more</button></div>');
+    } else {
+      const n = BD.Rank.nextPart(r, key), skills = BD.Rank.partSkills(key, g), sk = skills[n.i];
+      const what = { math: "10 problems", reading: "5 sentences to fix", spelling: "6 words to spell", comprehension: "a short story with 3 or 4 questions", spanish: "6 Spanish words" }[key];
+      const last = n.i === BD.Rank.PARTS - 1 && BD.Rank.stripeCount(r) === 3 && !sj.optional;
+      const list = '<ol class="part-list">' + skills.map(function (k, i) {
+        const done = BD.Rank.partsDone(r, key) > i && (r.parts[key] || [])[i];
+        return '<li class="' + (done ? "done" : i === n.i ? "now" : "") + '"><strong>Part ' + (i + 1) + ': ' + esc(k.label) + '</strong> <span class="muted small">' + (done ? "passed ✓" : "opens at " + BD.Rank.partNeed(i) + " XP") + '</span></li>';
+      }).join("") + '</ol>';
+      sheet(sj.label + " stripe test",
+        '<p><strong>' + BD.gradeLabel(g) + ' · ' + BD.BELTS[r.belt].name + ' Belt.</strong> The ' + sj.label + ' stripe test has 4 parts, each a different skill. Pass all 4 (' + BD.Rank.PASS + '% or better) to earn the stripe.</p>' + list +
+        (!n.open ? '<div class="xp-warn"><strong>Part ' + (n.i + 1) + ' (' + esc(sk.label) + ') opens at ' + n.need + ' practice XP.</strong><p>You have ' + x + '. Keep practicing ' + sj.label + ' to unlock it.</p></div>'
+          : '<p><strong>Part ' + (n.i + 1) + ' of 4: ' + esc(sk.label) + '.</strong> ' + what + '. No hints.</p>' +
+            (last ? '<div class="xp-warn"><strong>🎓 This is your last part of your last stripe: passing it graduates you!</strong><p>Your graduation bonus comes from practice: right now it would be <strong>+' + BD.Rank.gradBonus(r) + ' XP</strong> of 100.' +
+              (BD.Rank.beltXP(r) < 400 ? ' Practice XP you haven\'t earned on this belt (' + (400 - BD.Rank.beltXP(r)) + ' left) is gone once you move up.' : ' You did all the practice. Full bonus!') + '</p></div>' : '')) +
+        '<div class="res-actions">' + (n.open ? '<button type="button" class="btn btn-primary btn-big" id="testGo">Start Part ' + (n.i + 1) + '</button><button type="button" class="btn btn-quiet" id="testPractice">Practice first</button>'
+          : '<button type="button" class="btn btn-primary btn-big" id="testPractice">Practice ' + esc(sj.label) + '</button>') + '</div>');
+    }
+    if ($("testGo")) $("testGo").onclick = function () { closeSheet(); launchStripe(key, true); };
     $("testPractice").onclick = function () { closeSheet(); launchStripe(key, false); };
   }
 
@@ -225,27 +255,31 @@ BD.UI = (function () {
   let lastStripe = null;
   function stripeResult(o) {
     const p = BD.Store.current();
-    const res = BD.Rank.testDone(p, o.subject, o.grade, o.pct);
+    const res = BD.Rank.testDone(p, o.subject, o.grade, o.pct, o.part);
     lastStripe = o;
     const sj = BD.Rank.subject(o.subject);
     BD.Store.recordSession(p, { game: "test-" + o.subject, grade: o.grade, correct: o.pct, total: 100, xp: res.graduated ? res.graduated.bonus : 0 });
-    $("stripeSub").textContent = sj.label + " stripe test · " + BD.gradeLabel(o.grade);
-    $("stripeTitle").textContent = res.passed ? (res.already ? "Stripe kept strong!" : sj.label + " stripe earned!") : "Not yet. Keep training!";
+    const partNo = typeof res.part === "number" ? res.part + 1 : 0, skill = partNo ? BD.Rank.partSkills(o.subject, o.grade)[res.part].label : "";
+    $("stripeSub").textContent = sj.label + " stripe test · " + (partNo ? "Part " + partNo + " of 4 · " + skill + " · " : "") + BD.gradeLabel(o.grade);
+    $("stripeTitle").textContent = res.partOnly ? (res.partPassed ? "Part " + partNo + " passed! " + res.partsDone + " of 4 parts" : "Not yet. Keep training!") :
+      res.passed ? (res.already ? "Stripe kept strong!" : partNo ? "All 4 parts! " + sj.label + " stripe earned!" : sj.label + " stripe earned!") : "Not yet. Keep training!";
     $("stripeScore").textContent = o.score + " · " + o.pct + "%" + (res.passed ? "" : " (need " + BD.Rank.PASS + "%)");
     const r = BD.Rank.rec(p, o.grade);
     const shownBelt = res.graduated ? res.beltBefore : r.belt;
     const shownStripes = res.graduated ? BD.Rank.REQUIRED.reduce(function (a, k) { a[k] = true; return a; }, {}) : r.stripes;
-    $("stripeBelt").innerHTML = BD.Rank.beltSVG(shownBelt, shownStripes, { newStripe: res.passed && !res.already ? o.subject : null });
-    $("stripeSay").textContent = "Zumi: " + (res.passed ? BD.Cast.line("win") : BD.Cast.line("retry"));
+    $("stripeBelt").innerHTML = BD.Rank.beltSVG(shownBelt, shownStripes, { newStripe: res.passed && !res.already ? o.subject : null, parts: res.graduated ? {} : r.parts });
+    const np = res.partOnly ? BD.Rank.nextPart(r, o.subject) : null;
+    $("stripeSay").textContent = "Zumi: " + (res.partOnly && res.partPassed ? BD.Cast.line("win") + " Next up: Part " + (np.i + 1) + ", " + BD.Rank.partSkills(o.subject, o.grade)[np.i].label + (np.open ? ". It's ready when you are!" : ". It opens at " + np.need + " practice XP.") :
+      res.passed ? BD.Cast.line("win") : BD.Cast.line("retry"));
     $("stripeReview").hidden = !o.review || !o.review.length;
     $("stripeReviewList").innerHTML = (o.review || []).slice(0, 12).map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("");
-    $("stripeRetry").hidden = res.passed;
+    $("stripeRetry").hidden = res.passed || !!res.partPassed;
     $("stripeHome").textContent = res.graduated ? "Graduate!" : "Back to my belt";
     $("stripeHome").onclick = function () { if (res.graduated) graduation(res); else home(); };
     $("stripePractice").onclick = function () { launchStripe(o.subject, false); };
     $("stripeRetry").onclick = function () { o.again(); };
     show("screen-stripe");
-    if (res.passed) { BD.Sound.win(); BD.confetti(res.graduated ? 160 : 90); } else BD.Sound.wrong();
+    if (res.passed || res.partPassed) { BD.Sound.win(); BD.confetti(res.graduated ? 160 : res.passed ? 90 : 45); } else BD.Sound.wrong();
     BD.Dojo.push();
     if (!res.graduated) setTimeout(function () { if (currentScreen === "screen-stripe" && !sheetOpen()) BD.Badges.award(p); }, 1400);
   }
@@ -317,6 +351,7 @@ BD.UI = (function () {
     const r = p.retry[game];
     if (r && g > r.grade) return false;
     if (r && g < r.grade) p.retry[game] = null;
+    if (g > p[GRADE_FIELD[game]]) BD.Rank.raise(p, game, g); // moving up raises the subject level; moving down never lowers it
     p[GRADE_FIELD[game]] = g;
     BD.Store.save(p);
     return true;
@@ -327,16 +362,24 @@ BD.UI = (function () {
     const r = p.retry && p.retry[game];
     const cur = p[GRADE_FIELD[game]];
     sel.innerHTML = BD.GRADES.map(function (g) {
-      return '<option value="' + g + '"' + (r && g > r.grade ? " disabled" : "") + '>' + BD.gradeLabel(g) + (r && g > r.grade ? " (locked)" : "") + '</option>';
+      return '<option value="' + g + '"' + (r && g > r.grade ? " disabled" : "") + '>' + BD.gradeLabel(g) + " · " + BD.BELTS[BD.Rank.peek(p, g).belt].name + " Belt" + (r && g > r.grade ? " (locked)" : "") + '</option>';
     }).join("");
     sel.value = String(cur);
   }
 
+  /* Grade chips: each shows the belt earned at that grade (white if not trained yet),
+     and a line under them names the selected grade's belt. */
   function gradePicker(id, selected, locked) {
+    const p = BD.Store.current();
+    const pk = function (g) { return p ? BD.Rank.peek(p, g) : { belt: 0, stripes: {}, trained: false }; };
+    const sel = pk(selected), sb = BD.BELTS[sel.belt], n = BD.Rank.stripeCount({ stripes: sel.stripes });
     return '<div class="chips grade-chips" id="' + id + '" role="group" aria-label="Grade level">' +
       BD.GRADES.map(function (g) {
-        return '<button type="button" class="chip' + (g === selected ? " on" : "") + '" data-grade="' + g + '" aria-pressed="' + (g === selected) + '"' + (locked && g > selected ? " disabled" : "") + ' title="' + BD.gradeLabel(g) + '">' + BD.gradeShort(g) + '</button>';
-      }).join("") + '</div>';
+        const b = BD.BELTS[pk(g).belt];
+        return '<button type="button" class="chip' + (g === selected ? " on" : "") + '" data-grade="' + g + '" aria-pressed="' + (g === selected) + '"' + (locked && g > selected ? " disabled" : "") + ' title="' + BD.gradeLabel(g) + ' · ' + b.name + ' Belt">' +
+          '<span class="chip-belt" style="--belt:' + b.color + '" aria-hidden="true"></span>' + BD.gradeShort(g) + '</button>';
+      }).join("") + '</div>' +
+      '<p class="grade-belt-line"><span class="belt-swatch" style="--belt:' + sb.color + '"></span>' + BD.gradeLabel(selected) + ' · ' + sb.name + ' Belt · ' + (sel.mastered ? "mastered" : n + " of 4 stripes") + '</p>';
   }
 
   /* ---------- choose player ---------- */
@@ -510,7 +553,12 @@ BD.UI = (function () {
       '<span>' + (rk.gained ? "+" + rk.gained + " XP · " : "") + rk.now + " / 100 XP on your " + BD.gradeLabel(rk.grade) + " " + rk.belt.name + " Belt" +
       (rk.locked ? "" : rk.earned > rk.gained ? " (this stripe's practice is maxed at 100, so extra XP doesn't add up)" : "") + '</span>' +
       '<div class="xp-track"><div class="xp-fill" style="width:' + rk.now + '%"></div></div>' +
-      (rk.hasStripe ? '<span class="muted">You already have this stripe. Practice still earns XP for it (up to 100) until you move up a belt.</span>' : '<button type="button" class="btn btn-small btn-primary" id="resStripeTest">' + (rk.maxed ? "All 100 XP! Take the " + sjr.label + " stripe test" : "Take the " + sjr.label + " stripe test") + '</button>' + (rk.maxed ? "" : '<span class="muted small">Tests don\'t give points. ' + (100 - rk.now) + ' more practice XP is waiting for this stripe.</span>')) +
+      (rk.factor < 1 ? '<span class="review-note">Review practice: ' + Math.round(rk.factor * 100) + '% points. Try ' + BD.gradeLabel(rk.level) + ' for full points!</span>' : '') +
+      (rk.hasStripe ? '<span class="muted">You already have this stripe. Practice still earns XP for it (up to 100) until you move up a belt.</span>' : (function () {
+        const rr = BD.Rank.rec(p, rk.grade), n = BD.Rank.nextPart(rr, rk.subject); if (!n) return "";
+        return n.open ? '<button type="button" class="btn btn-small btn-primary" id="resStripeTest">Part ' + (n.i + 1) + ' of the ' + sjr.label + ' stripe test is ready!</button>'
+          : '<span class="muted small">Part ' + (n.i + 1) + ' of the ' + sjr.label + ' stripe test opens at ' + n.need + ' practice XP (' + (n.need - rk.now) + ' to go).</span>';
+      })()) +
       '</div></div>' : "";
     if ($("resStripeTest")) $("resStripeTest").onclick = function () { p.dojoGrade = rk.grade; BD.Store.save(p); confirmTest(rk.subject); };
     $("resFailed").hidden = !o.failed;
@@ -693,7 +741,7 @@ BD.UI = (function () {
     $("flashCard").addEventListener("click", function () { BD.MathGame.openFlash(); });
     $("parentHow").addEventListener("click", function () {
       sheet("How Brain Dojo works",
-        '<h4 class="label">Belts and stripes</h4><p>Each grade has its own belt path: White, Yellow, Orange, Blue, Green, Purple, Brown, Red, Black. A belt needs 4 stripes (Math, Reading, Spelling, Comprehension), each earned by scoring 85% on a stripe test. The 4th stripe graduates them to the next belt. Spanish is a bonus stripe.</p>' +
+        '<h4 class="label">Belts and stripes</h4><p>Each grade has its own belt path: White, Yellow, Orange, Blue, Green, Purple, Brown, Red, Black. A belt needs 4 stripes (Math, Reading, Spelling, Comprehension). Each stripe test comes in 4 parts, each a different skill (for example Capitals, Punctuation, Spelling and Grammar), unlocking at 25, 50, 75 and 100 practice XP. Passing all 4 parts (85% each) earns the stripe, and the 4th stripe graduates them to the next belt. Spanish is a bonus stripe. Practice below their level still builds that grade's belt, at fewer points (60% one grade below, 40% two below, 25% three or more), so the fastest way up is training at their own level.</p>' +
         '<h4 class="label">Practice and hints</h4><p>Points come from doing the work. Practice earns up to 100 XP per stripe; stripe tests add no XP (practice to 56, pass the test, and it stays 56). They can keep practicing a stripe after earning it, until they move up a belt. Graduating adds a bonus earned by practice: a quarter of the belt\'s practice XP (all 400 = +100; tests only = +0). The Dojo leaderboard ranks XP earned this week, so practice beats rushing tests. White through Purple belts can use hints. Brown, Red and Black belts work without them. Pre-K to 1st grade hear instructions read aloud.</p>' +
         '<h4 class="label">Badges and gear</h4><p>Gear unlocks the way it does at Engage: a mouthguard on sign-up, the Engage shirt after 3 days of training, MMA shorts after 10 days, MMA gloves with the first stripe, a sparring gear bag at the first graduation, then sparring gloves, boots, headgear and chest gear with each Yellow Belt stripe. The full Sparring Gear outfit unlocks at the Yellow to Orange Belt graduation, when sparring starts in class.</p>' +
         '<h4 class="label">Weapons, judo and tournaments</h4><p>Weapons are for show only: Nunchucks at Green Belt, Kamas at Purple, Bo Staff at Brown and a Wooden Sword at Red. They are performed in Weapons tournaments and never used against anyone or any boss. At Green Belt they earn Boxing Gloves and Judo Moves (every 5 right in a row is a judo throw). Tournaments are single-elimination brackets of 6 to 12: Kata opens at Yellow Belt with 2 stripes, Sparring at Orange and Weapons at Green. Gold +10 XP, Silver +7.5, Bronze +5, double on weekends.</p>' +

@@ -304,6 +304,7 @@ BD.Placement = (function () {
       const lock = p.retry && p.retry[s.game];
       if (lock) { kept.push(s.key); return; } // a redo is in progress: leave it alone
       p[s.field] = g;
+      if (BD.Rank && BD.Rank.setLevel) BD.Rank.setLevel(p, s.key, g); // a measured level sets full-points grade
     });
     const got = SUBJECTS.map(function (s) { return out[s.key]; }).filter(function (g) { return g !== null; });
     if (!got.length) return null;
@@ -417,6 +418,7 @@ BD.Placement = (function () {
     else if (rounds.every(function (x) { return accOf(x, game) <= DOWN; }) && cur > BD.MIN_GRADE) to = cur - 1;
     if (to === cur) return null;
     p[a.field] = to;
+    if (BD.Rank && BD.Rank.setLevel) BD.Rank.setLevel(p, game, to);
     p.levelLog = p.levelLog && typeof p.levelLog === "object" ? p.levelLog : {};
     p.levelLog[game] = { d: BD.today(), at: Date.now(), from: cur, to: to };
     BD.Store.save(p);
