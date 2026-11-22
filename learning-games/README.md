@@ -111,10 +111,17 @@ The all-time and streak boards and cheers need the updated family script (see "U
 
 After finished learning rounds, the results screen offers a **⚡ Power Break**: every round for Pre-K to 2nd grade, every 2nd round after that, at most 4 a day, never after a round that needs a redo. About 20 seconds, no XP, then **Back to training** starts the next round in Sensei's plan.
 
-- **Jumping Jacks, Push-ups, Sit-ups:** real movement with the champion, counted out loud (fewer reps for the youngest).
-- **Focus Pads:** hit the pad with the right answer to a quick math fact at their level, as many as they can in 20 seconds.
+14 activities in two groups (the student picks one):
+
+**Move your body** (real movement, counted out loud; fewer reps for the youngest): Jumping Jacks, Push-ups, Sit-ups, Front Kicks, Horse Stance Squats, High Knees, Crane Balance (stand on one leg, then the other) and Ninja Breathing (three slow breaths to refocus).
+
+**Dojo brain games** (the brain keeps working):
+- **Focus Pads:** hit the pad with the right answer to a quick math fact at their level.
 - **Throwing Stars:** throw at the wooden target with the right letter (Pre-K to 1st) or the right spelling. Targets only, never a person.
 - **Board Break:** strike when the power meter is in the green; 1, then 2, then 3 boards.
+- **Sensei Says:** watch Sensei's combo (punch, kick, block, bow), then repeat it; it grows by one move each round.
+- **Number Punch:** punch the numbers in order (1 to 8, or skip counting by 2s, 5s, 10s, 3s, 4s, 6s, 7s by grade).
+- **Dojo Memory:** flip cards to find the matching pairs.
 
 ## Tournaments
 

@@ -35,19 +35,29 @@ BD.Breaks = (function () {
     { id: "jacks", icon: "🤸", name: "Jumping Jacks", kind: "body", reps: [8, 10], say: "jumping jacks" },
     { id: "pushups", icon: "💪", name: "Push-ups", kind: "body", reps: [3, 5], say: "push-ups" },
     { id: "situps", icon: "🧘", name: "Sit-ups", kind: "body", reps: [5, 8], say: "sit-ups" },
-    { id: "pads", icon: "🥊", name: "Focus Pads", kind: "pads" },
-    { id: "stars", icon: "⭐", name: "Throwing Stars", kind: "stars" },
-    { id: "board", icon: "🪵", name: "Board Break", kind: "board" }
+    { id: "kicks", icon: "🦵", name: "Front Kicks", kind: "body", reps: [6, 10], say: "front kicks (switch legs each time)" },
+    { id: "squats", icon: "🏋️", name: "Horse Stance Squats", kind: "body", reps: [5, 8], say: "horse stance squats" },
+    { id: "knees", icon: "🏃", name: "High Knees", kind: "body", reps: [10, 16], say: "high knees" },
+    { id: "crane", icon: "🦩", name: "Crane Balance", kind: "crane" },
+    { id: "breath", icon: "🌬️", name: "Ninja Breathing", kind: "breath" },
+    { id: "pads", icon: "🥊", name: "Focus Pads", kind: "pads", brain: true },
+    { id: "stars", icon: "⭐", name: "Throwing Stars", kind: "stars", brain: true },
+    { id: "board", icon: "🪵", name: "Board Break", kind: "board", brain: true },
+    { id: "combo", icon: "🥋", name: "Sensei Says", kind: "combo", brain: true },
+    { id: "count", icon: "🔢", name: "Number Punch", kind: "count", brain: true },
+    { id: "match", icon: "🃏", name: "Dojo Memory", kind: "match", brain: true }
   ];
   function pick(p) {
-    BD.UI.sheet("⚡ Power Break", '<p class="muted small">Pick one. About 20 seconds, then back to training!</p><div class="break-grid">' +
-      MOVES.map(function (m) { return '<button type="button" class="break-card" data-move="' + m.id + '"><span class="bc-icon" aria-hidden="true">' + m.icon + '</span><strong>' + m.name + '</strong></button>'; }).join("") + '</div>');
+    const card = function (m) { return '<button type="button" class="break-card" data-move="' + m.id + '"><span class="bc-icon" aria-hidden="true">' + m.icon + '</span><strong>' + m.name + '</strong></button>'; };
+    BD.UI.sheet("⚡ Power Break", '<p class="muted small">Pick one. About 20 seconds, then back to training!</p>' +
+      '<h4 class="label">Move your body</h4><div class="break-grid">' + MOVES.filter(function (m) { return !m.brain; }).map(card).join("") + '</div>' +
+      '<h4 class="label">Dojo brain games</h4><div class="break-grid">' + MOVES.filter(function (m) { return m.brain; }).map(card).join("") + '</div>');
     $("infoBody").onclick = function (e) {
       const c = e.target.closest("[data-move]"); if (!c) return;
       const m = MOVES.find(function (x) { return x.id === c.dataset.move; });
       const b = day(p); b.n++; b.r = 0; BD.Store.save(p);
       BD.Sound.tap();
-      ({ body: body, pads: pads, stars: stars, board: board })[m.kind](p, m);
+      ({ body: body, pads: pads, stars: stars, board: board, crane: crane, breath: breath, combo: combo, count: count, match: match })[m.kind](p, m);
     };
   }
   function speak(t) { if (!(BD.Store && BD.Store.muted) && BD.Speech && BD.Speech.available) BD.Speech.say(t, "en-US", 1.05); }
@@ -189,6 +199,107 @@ BD.Breaks = (function () {
         if (level >= LEVELS.length) { clearInterval(t); setTimeout(function () { done('<div class="chest-prize">🪵</div><h3>' + broke + ' boards broken!</h3><p>Focus plus power. That\'s a black belt combo.</p>'); }, 700); }
         else setTimeout(setup, 700);
       } else { BD.Sound.wrong(); wood.forEach(function (w) { w.classList.remove("wobble"); void w.offsetWidth; w.classList.add("wobble"); }); }
+    };
+  }
+
+  /* ---------- crane balance: stand on one leg, then the other ---------- */
+  function crane(p) {
+    const secs = young(p) ? 8 : 12; let side = 0, left = secs;
+    BD.UI.sheet("🦩 Crane Balance", '<div class="break-body"><p class="bb-task" id="crTask">Stand up! Lift your <strong>left</strong> knee, arms out like a crane, and hold.</p>' +
+      '<div class="bb-champ crane-pose">' + BD.UI.championHTML(p) + '</div><div class="bb-count" id="bbCount">' + secs + '</div>' + backBtn("I did it! Back to training") + '</div>');
+    $("breakBack").onclick = back;
+    speak("Crane balance! Lift your left knee and hold.");
+    const t = setInterval(function () {
+      left--; if (!$("bbCount")) return clearInterval(t);
+      $("bbCount").textContent = left > 0 ? left : "Switch!";
+      if (left <= 0) {
+        if (side === 0) { side = 1; left = secs + 1; $("crTask").innerHTML = "Now your <strong>right</strong> knee. Steady eyes, steady body."; speak("Switch! Right knee up."); }
+        else { clearInterval(t); $("bbCount").textContent = "Osu! Rock solid!"; speak("Osu! Rock solid!"); BD.confetti(50); }
+      }
+    }, 1000);
+    timers.push(t);
+  }
+
+  /* ---------- ninja breathing: three slow breaths to refocus ---------- */
+  function breath(p) {
+    let n = 0;
+    BD.UI.sheet("🌬️ Ninja Breathing", '<div class="break-body"><p class="bb-task">Sit tall. Breathe in as the circle grows, out as it shrinks.</p>' +
+      '<div class="breath-ring" id="brRing"><span id="brWord">Ready</span></div><div class="bb-count" id="bbCount">0 / 3</div>' + backBtn("I feel focused. Back to training") + '</div>');
+    $("breakBack").onclick = back;
+    speak("Ninja breathing. Sit tall.");
+    const cycle = function () {
+      if (!$("brRing")) return;
+      if (n >= 3) { $("brWord").textContent = "Focused!"; speak("Focused. Let's train!"); return; }
+      $("brRing").className = "breath-ring in"; $("brWord").textContent = "Breathe in"; speak("Breathe in");
+      timers.push(setTimeout(function () {
+        if (!$("brRing")) return;
+        $("brRing").className = "breath-ring out"; $("brWord").textContent = "Breathe out"; speak("Breathe out");
+        timers.push(setTimeout(function () { n++; if ($("bbCount")) $("bbCount").textContent = n + " / 3"; cycle(); }, 4000));
+      }, 4000));
+    };
+    timers.push(setTimeout(cycle, 1500));
+  }
+
+  /* ---------- Sensei Says: watch the combo, then repeat it ---------- */
+  function combo(p) {
+    const MV = [["punch", "🤜", "Punch"], ["kick", "🦶", "Kick"], ["block", "✋", "Block"], ["bow", "🙇", "Bow"]];
+    let seq = [], at = 0, best = 0, showing = false;
+    BD.UI.sheet("🥋 Sensei Says", '<div class="break-game"><div class="bg-top"><span id="cbMsg">Watch Sensei\'s combo…</span><span class="bg-score">🥋 <b id="cbBest">0</b></span></div>' +
+      '<div class="combo-show" id="cbShow"></div><div class="combo-pads">' + MV.map(function (m) { return '<button type="button" class="combo-btn" data-mv="' + m[0] + '"><span>' + m[1] + '</span>' + m[2] + '</button>'; }).join("") + '</div></div>');
+    const play = function () {
+      seq.push(MV[r(MV.length)][0]); at = 0; showing = true;
+      $("cbMsg").textContent = "Watch Sensei's combo…";
+      seq.forEach(function (mv, i) {
+        timers.push(setTimeout(function () { const s = $("cbShow"); if (!s) return; const m = MV.find(function (x) { return x[0] === mv; }); s.innerHTML = '<span class="cb-big">' + m[1] + '</span><span>' + m[2] + '</span>'; s.classList.remove("flash"); void s.offsetWidth; s.classList.add("flash"); BD.Sound.tap(); }, 700 + i * 800));
+      });
+      timers.push(setTimeout(function () { if (!$("cbShow")) return; $("cbShow").innerHTML = "<span>Your turn!</span>"; $("cbMsg").textContent = "Repeat the combo: " + seq.length + (seq.length === 1 ? " move" : " moves"); showing = false; }, 700 + seq.length * 800));
+    };
+    $("infoBody").onclick = function (e) {
+      const b = e.target.closest("[data-mv]"); if (!b || showing) return;
+      b.classList.remove("hitme"); void b.offsetWidth; b.classList.add("hitme");
+      if (b.dataset.mv === seq[at]) {
+        at++; BD.Sound.tap();
+        if (at === seq.length) { best = seq.length; $("cbBest").textContent = best; BD.Sound.right(); if (best >= 7) return done('<div class="chest-prize">🥋</div><h3>A ' + best + '-move combo!</h3><p>Black belt memory.</p>'); timers.push(setTimeout(play, 700)); }
+      } else { BD.Sound.wrong(); $("infoBody").onclick = null; done('<div class="chest-prize">🥋</div><h3>' + (best ? "You remembered a " + best + "-move combo!" : "Good try!") + '</h3><p>Watching closely is a black belt skill.</p>'); }
+    };
+    play();
+  }
+
+  /* ---------- Number Punch: punch the pads in order (counting or skip counting) ---------- */
+  function count(p) {
+    const g = grade(p), step = g <= 0 ? 1 : g <= 1 ? [1, 2][r(2)] : g <= 3 ? [2, 5, 10][r(3)] : [3, 4, 6, 7][r(4)];
+    const nums = Array.from({ length: 8 }, function (_, i) { return step * (i + 1); });
+    let at = 0; const t0 = Date.now();
+    BD.UI.sheet("🔢 Number Punch", '<div class="break-game"><div class="bg-top"><span>' + (step === 1 ? "Punch 1 to 8 in order!" : "Count by " + step + "s: punch them in order!") + '</span><span class="bg-score" id="npNext">Next: ' + nums[0] + '</span></div>' +
+      '<div class="pad-grid np-grid">' + shuffle(nums).map(function (v) { return '<button type="button" class="pad" data-v="' + v + '">' + v + '</button>'; }).join("") + '</div></div>');
+    speak(step === 1 ? "Punch the numbers in order!" : "Count by " + step + "s!");
+    $("infoBody").onclick = function (e) {
+      const b = e.target.closest(".pad"); if (!b || b.disabled) return;
+      if (Number(b.dataset.v) === nums[at]) {
+        at++; b.classList.add("smack"); b.disabled = true; BD.Sound.right(); speak(String(b.dataset.v));
+        if (at === nums.length) { const s = Math.round((Date.now() - t0) / 100) / 10; $("infoBody").onclick = null; return setTimeout(function () { done('<div class="chest-prize">🔢</div><h3>All ' + nums.length + ' in ' + s + ' seconds!</h3><p>' + (step === 1 ? "Counting champion." : "Skip-counting by " + step + "s like a pro.") + '</p>'); }, 400); }
+        $("npNext").textContent = "Next: " + nums[at];
+      } else { b.classList.remove("miss"); void b.offsetWidth; b.classList.add("miss"); BD.Sound.wrong(); }
+    };
+  }
+
+  /* ---------- Dojo Memory: flip cards to find the pairs ---------- */
+  function match(p) {
+    const icons = shuffle(["🥋", "🥊", "🦶", "🐉", "🏆", "⭐", "🥷", "🪵"]).slice(0, young(p) ? 4 : 6);
+    const deck = shuffle(icons.concat(icons));
+    let open = [], found = 0, flips = 0, lock = false;
+    BD.UI.sheet("🃏 Dojo Memory", '<div class="break-game"><div class="bg-top"><span>Find the pairs!</span><span class="bg-score">Flips: <b id="mmFlips">0</b></span></div>' +
+      '<div class="memory-grid' + (icons.length === 4 ? " small" : "") + '">' + deck.map(function (ic, i) { return '<button type="button" class="mem-card" data-i="' + i + '"><span class="mem-front">' + ic + '</span><span class="mem-back">E</span></button>'; }).join("") + '</div></div>');
+    $("infoBody").onclick = function (e) {
+      const c = e.target.closest(".mem-card"); if (!c || lock || c.classList.contains("up")) return;
+      c.classList.add("up"); open.push(c); BD.Sound.tap();
+      if (open.length < 2) return;
+      flips++; $("mmFlips").textContent = flips; lock = true;
+      const a = open[0], b = open[1]; open = [];
+      if (deck[a.dataset.i] === deck[b.dataset.i]) {
+        found++; a.classList.add("matched"); b.classList.add("matched"); BD.Sound.right(); lock = false;
+        if (found === icons.length) { $("infoBody").onclick = null; setTimeout(function () { done('<div class="chest-prize">🃏</div><h3>All pairs in ' + flips + ' flips!</h3><p>Sharp memory, sharp mind.</p>'); }, 500); }
+      } else timers.push(setTimeout(function () { a.classList.remove("up"); b.classList.remove("up"); lock = false; }, 800));
     };
   }
 
