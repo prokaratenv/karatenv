@@ -123,6 +123,9 @@ BD.Store = (function () {
     if (BD.School) BD.School.sanitize(p); else if (p.school && typeof p.school !== "object") delete p.school;
     if (BD.Quest) BD.Quest.sanitize(p);
     if (BD.Breaks) BD.Breaks.sanitize(p);
+    if (BD.StoryGen && BD.StoryGen.sanitize) BD.StoryGen.sanitize(p);
+    if (BD.Phonics && BD.Phonics.sanitize) BD.Phonics.sanitize(p);
+    if (BD.SentenceGen && BD.SentenceGen.sanitize) BD.SentenceGen.sanitize(p);
     if (BD.Kid) BD.Kid.sanitize(p); else if (p.stickers !== undefined && (typeof p.stickers !== "object" || p.stickers === null)) delete p.stickers;
     if (BD.Teams) BD.Teams.sanitize(p); else { if (p.teams !== undefined && (typeof p.teams !== "object" || p.teams === null)) delete p.teams; if (p.teamLog !== undefined && (typeof p.teamLog !== "object" || p.teamLog === null)) delete p.teamLog; }
     if (BD.Tourney) BD.Tourney.sanitize(p); else if (p.medals !== undefined && !Array.isArray(p.medals)) delete p.medals;

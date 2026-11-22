@@ -34,10 +34,10 @@ BD.SentenceGame = (function () {
 
   /* Belt items: more mistakes per sentence as the belts go up, mixing in the grades around it. */
   function beltItems(grade, beltIndex, n) {
-    const extra = beltIndex <= 2 ? -1 : beltIndex <= 5 ? 0 : 1, out = [];
+    const extra = beltIndex <= 2 ? -1 : beltIndex <= 5 ? 0 : 1, out = [], p = BD.Store.current();
     let guard = 0;
     while (out.length < n && guard++ < 60) {
-      const it = BD.SentenceGen.make(BD.Rank.itemGrade(grade, beltIndex), { cap: 1, punct: 1, spell: 1, grammar: 1 }, extra);
+      const it = BD.SentenceGen.make(BD.Rank.itemGrade(grade, beltIndex), { cap: 1, punct: 1, spell: 1, grammar: 1 }, extra, { p: p });
       if (it) out.push(it);
     }
     return out;
@@ -50,7 +50,7 @@ BD.SentenceGame = (function () {
     if (stripe) p.sentenceGrade = stripe.grade;
     else if (p.retry && p.retry.sentence) p.sentenceGrade = p.retry.sentence.grade;
     const items = stripe ? beltItems(stripe.grade, stripe.belt, 8) : BD.SentenceGen.round(p, p.sentenceGrade, BD.Kid && BD.Kid.young(p.sentenceGrade) ? 5 : ROUND, focus);
-    S = { grade: p.sentenceGrade, items: items, focus: focus, i: 0, xp: 0, solved: 0, firstTry: 0, results: [], stripe: stripe || null, test: !!(stripe && stripe.test) };
+    S = { grade: p.sentenceGrade, items: items, training: items.training || null, focus: focus, i: 0, xp: 0, solved: 0, firstTry: 0, results: [], stripe: stripe || null, test: !!(stripe && stripe.test) };
     BD.UI.show("screen-sentence-play");
     BD.UI.testMode("screen-sentence-play", S.test ? "Reading stripe test" : stripe ? "Reading stripe practice · " + BD.BELTS[stripe.belt].name + " Belt" : "", !BD.Rank.hintsAllowed(BD.Store.current(), S.grade));
     BD.Cast.say("sentSay", "start");
@@ -60,7 +60,7 @@ BD.SentenceGame = (function () {
 
   function load() {
     const item = S.items[S.i];
-    S.tries = 0; S.hints = 0; S.done = false;
+    S.tries = 0; S.hints = 0; S.done = false; S.first = null; S.hintsAtFirst = 0;
     $("sentProgress").textContent = "Sentence " + (S.i + 1) + " of " + S.items.length;
     $("sentScore").textContent = S.xp + " XP";
     BD.UI.syncGradeSelect("sentGradeSel", "sentence");
@@ -74,7 +74,8 @@ BD.SentenceGame = (function () {
     $("sentMistakes").innerHTML = '<span class="mistake-count">' + item.fixes.length + (item.fixes.length === 1 ? " mistake" : " mistakes") + ' to fix</span>' +
       Object.keys(BD.FIX_TYPES).filter(function (k) { return counts[k]; }).map(function (k) {
         return '<span class="fix-tag fix-' + k + '">' + BD.FIX_TYPES[k].label + (counts[k] > 1 ? " ×" + counts[k] : "") + '</span>';
-      }).join("");
+      }).join("") +
+      (S.training && item.target === S.training.skill ? '<p class="sent-training" style="margin:6px 0 0;font-size:.85rem;font-weight:700;opacity:.8">Training: ' + BD.UI.esc(S.training.label) + '</p>' : "");
     $("sentHints").innerHTML = "";
     $("sentFeedback").innerHTML = "";
     $("sentFeedback").className = "sent-feedback";
@@ -111,6 +112,7 @@ BD.SentenceGame = (function () {
     const item = S.items[S.i];
     const typed = $("sentInput").value;
     const accepted = answers(item);
+    if (!S.first) { S.first = words(typed); S.hintsAtFirst = S.hints; } // first attempt: which planted mistakes were fixed
     // The comma before "and"/"or" in a list is optional, so accept it either way.
     const loose = function (x) { return norm(x).replace(/,( (?:and|or) )/g, "$1"); };
     if (accepted.some(function (a) { return norm(a) === norm(typed) || loose(a) === loose(typed); })) return solved();
@@ -155,7 +157,14 @@ BD.SentenceGame = (function () {
     const st = p.sentenceStats[S.grade] || (p.sentenceStats[S.grade] = { r: 0, w: 0, firstTry: 0 });
     if (won) { st.r++; if (S.tries === 0) st.firstTry++; } else st.w++;
     const clean = won && S.tries === 0 && S.hints === 0;
-    item.fixes.forEach(function (f) { BD.Coach.recordType(p, S.grade, f.type, clean); });
+    // Score each planted mistake on its own: fixed on the first try without its hint?
+    const target = words(answers(item)[0]);
+    item.fixes.forEach(function (f, i) {
+      let ok = clean;
+      if (!clean && typeof f.at === "number" && S.first && S.first.length === target.length) ok = i >= S.hintsAtFirst && S.first[f.at] === target[f.at];
+      BD.Coach.recordType(p, S.grade, f.type, ok);
+      if (BD.SentenceGen.note) BD.SentenceGen.note(f.type, ok, f.skill, p);
+    });
     if (item.source !== "gen") p.seenSentences = [item.id].concat(p.seenSentences.filter(function (x) { return x !== item.id; })).slice(0, 400);
     BD.Store.save();
 
