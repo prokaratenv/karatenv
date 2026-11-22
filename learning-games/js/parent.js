@@ -101,6 +101,7 @@ BD.Parent = (function () {
         (ins.strong ? 'Strong at <strong>' + esc(ins.strong.label) + '</strong> (' + Math.round(ins.strong.r * 100) + '%). ' : '') +
         (ins.weak ? 'Work on <strong>' + esc(ins.weak.label) + '</strong> (' + Math.round(ins.weak.r * 100) + '%).' : 'No weak spots right now.') + '</span></div>' : '') +
       (ins && ins.tip ? '<div class="pd-row pd-tip"><span class="pd-k">Try at home</span><span>' + esc(ins.tip) + '</span></div>' : '') +
+      (BD.Phonics && BD.Phonics.parentLine(p) ? '<div class="pd-row"><span class="pd-k">Spelling focus</span><span>' + esc(BD.Phonics.parentLine(p)) + '</span></div>' : '') +
       (!monday ? recap : "") +
       '<div class="pd-row"><span class="pd-k">Badges</span><span>' + BD.Badges.earned(p).length + ' of ' + BD.Badges.BADGES.length + ' earned' + (BD.Badges.earned(p).length ? ' · newest: ' + esc(BD.Badges.gearName(BD.Badges.earned(p).slice(-1)[0])) : '') + '</span></div>' +
       '</div>';

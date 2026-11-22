@@ -34,6 +34,18 @@ BD.Quick = (function () {
   }
 
   function grammar(grade) {
+    // endless sentences from the generator first (never the same one twice for this student)
+    if (BD.SentenceGen && BD.SentenceGen.choice) {
+      try {
+        const c = BD.SentenceGen.choice(grade, BD.Store && BD.Store.current());
+        if (c && c.right && c.wrong && c.wrong[0] && c.wrong[0] !== c.right) {
+          const right = c.right, wrong = [c.wrong[0]];
+          const slip = right.replace(/[.!?]$/, "");
+          if (slip !== right && wrong.indexOf(slip) === -1) wrong.push(slip);
+          return { kind: "grammar", label: "Reading", prompt: "Which sentence is written correctly?", choices: shuffle([right].concat(wrong)), answer: right, long: true, say: "Which sentence is written correctly?" };
+        }
+      } catch (e) { /* fall back to the hand-written bank */ }
+    }
     const g = Math.max(1, grade);
     let pool = (BD.SENTENCES || []).filter(function (s) { return s.grade === g; });
     if (!pool.length) pool = (BD.SENTENCES || []).filter(function (s) { return Math.abs(s.grade - g) <= 1; });

@@ -123,6 +123,14 @@ After finished learning rounds, the results screen offers a **⚡ Power Break**:
 - **Number Punch:** punch the numbers in order (1 to 8, or skip counting by 2s, 5s, 10s, 3s, 4s, 6s, 7s by grade).
 - **Dojo Memory:** flip cards to find the matching pairs.
 
+## Endless, adaptive content
+
+Nothing should feel repeated, and practice leans toward what each child needs. It adapts within a session even when nothing is saved; when progress is saved it also remembers across sessions.
+
+- **Fix-It Sentences** (`js/sentence-gen.js`): about 230 sentence patterns with large word lists; thousands of different sentences and 6,800 to 18,000+ different questions per grade. Each student's recent sentences are remembered (`p.sentSeen`) so they don't come back. Mistakes are planted by skill (capitals, end marks, 8 kinds of commas, apostrophes, sound-alikes, verb tense, pronouns, quotation marks, semicolons and colons...), and a skill under 70% gets about half the next round, with a "Training: commas in a list" line. Boss-match reading questions use the same generator.
+- **Story Scrolls** (`js/story-gen.js`): hand-written passages first, then generated passages (realistic stories, dojo stories, animal facts for 82 animals, how-to steps, community helpers, "long ago" history), sized for each grade band; tens of thousands of possible passages per grade. No repeats for a student, no same genre twice in a row, and more questions of the type a child misses (main idea, details, reading between the lines, word meaning).
+- **Spelling Bee** (`data/spelling-bank.js`, `js/phonics.js`): 500+ words per grade, each with its own sentence, tagged by phonics pattern (short and long vowels, vowel teams, r-controlled, digraphs, blends, soft c/g, prefixes, suffixes, roots, homophones...). Words don't repeat until a grade's list is used up, except when the app sees a weak pattern: then missed words come back in the next round or two and again later (spaced repetition) alongside new words of that pattern, with a "Training: long a (ai, ay, a_e)" line. The parent report shows "Spelling focus" when a pattern needs practice.
+
 ## Tournaments
 
 Tap **🏆 Tournaments** on the home screen. Each one is a single-elimination bracket of **6 to 12** competitors (computer opponents with nicknames). Byes go into round 2 when the numbers are uneven, and you can enter as many as you like.

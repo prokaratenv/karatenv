@@ -4766,3 +4766,16 @@ totalitarian|A ___ government controls every part of life.
 veto|The governor may ___ the bill.
 `);
 })();
+
+/* Pre-K and K reach 500+ words by adding the simplest words from the grade
+   above (4 letters or fewer), so the youngest have plenty of variety too. */
+(function () {
+  function fill(g, from, target) {
+    const have = new Set(BD.SPELLING[g].map(function (x) { return x[0]; }));
+    from.forEach(function (src) {
+      (BD.SPELLING[src] || []).forEach(function (x) { if (BD.SPELLING[g].length < target && x[0].length <= 4 && !have.has(x[0])) { have.add(x[0]); BD.SPELLING[g].push(x); } });
+    });
+  }
+  fill("0", ["1"], 500);
+  fill("-1", ["0", "1"], 500);
+})();
