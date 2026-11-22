@@ -118,12 +118,14 @@ BD.SPELLING = {
   ]
 });
 
-/* THE BIG WORD BANK — about 100 words for Pre-K, 150 for K and 250 to 300
-   for 1st to 8th grade, following each grade's spelling patterns (short
-   vowels and digraphs early, then silent e, vowel teams, r-controlled vowels,
+/* THE BIG WORD BANK — about 250 words for Pre-K, 350 for K and 500+ for
+   1st to 8th grade, following each grade's spelling patterns (short vowels
+   and digraphs early, then silent e, vowel teams, r-controlled vowels,
    diphthongs, suffixes and prefixes, homophones, and Greek and Latin roots).
    One word per line:   word|a sentence with ___ where the word goes
-   The ___ must appear exactly once. A word already in that grade is skipped. */
+   The ___ must appear exactly once. A word already in that grade is skipped.
+   BD.Phonics (js/phonics.js) tags every word with its spelling patterns
+   automatically, so new words need no extra labels. */
 (function () {
   function add(g, text) {
     const list = BD.SPELLING[g] = BD.SPELLING[g] || [];
@@ -220,7 +222,7 @@ ox|An ___ can pull a heavy cart.
 `);
   add("0", `
 he|Dad said ___ will cook dinner.
-do|What do you want to ___ today?
+do|What will we ___ at the park today?
 so|I am ___ happy to see you!
 get|Can you ___ me a cup?
 has|The cat ___ a soft tail.
@@ -346,6 +348,352 @@ long|A snake is very ___.
 song|We sang a happy ___.
 quack|The duck says ___.
 yell|Do not ___ inside.
+`);
+  add("-1", `
+gap|Mind the ___ between the train and the platform.
+jab|In karate, a ___ is a quick punch with your front hand.
+lab|The scientist works in a ___.
+pad|I kick the ___ that my teacher holds.
+rag|Wipe the spill with a ___.
+yam|A ___ is an orange root we can bake.
+sap|Sticky ___ drips from the maple tree.
+dab|Put a ___ of glue on the paper.
+pat|Give the puppy a gentle ___.
+vat|The farmer made cheese in a big ___.
+wed|My aunt and uncle will ___ in June.
+den|The fox sleeps in its ___.
+fed|I ___ the fish this morning.
+peg|Hang your coat on the ___.
+let|Please ___ me have a turn.
+met|We ___ a new friend at the park.
+set|Help me ___ the table for dinner.
+kit|I have a first aid ___.
+lit|Dad ___ the candles on the cake.
+pit|A peach has a big ___ in the middle.
+bin|Put the cans in the recycling ___.
+rib|You have a ___ bone in your chest.
+rim|The ball rolled around the ___ of the hoop.
+tin|The cookies are in a ___ box.
+jig|We danced a happy ___.
+fog|We could not see far in the ___.
+jog|Dad and I ___ around the block.
+bog|Frogs live in the wet ___.
+cob|I ate corn on the ___.
+pod|Peas grow in a ___.
+pop|I heard the balloon ___!
+nod|___ your head if you agree.
+lot|We parked in the parking ___.
+tot|A ___ is a very little child.
+rub|___ the lotion on your hands.
+tug|We play ___ of war.
+bud|A flower ___ will open soon.
+sum|The ___ of two and two is four.
+hub|The middle of a wheel is the ___.
+sub|We ate a turkey ___ for lunch.
+pug|A ___ is a small dog with a flat face.
+tax|We paid ___ on the new toy.
+kiss|Mom gave me a goodnight ___.
+hiss|Snakes ___.
+buzz|Bees ___ in the garden.
+fizz|The soda has lots of ___.
+jazz|Grandpa likes to listen to ___ music.
+fuzz|A peach has soft ___ on its skin.
+pass|___ the ball to me!
+toss|___ the beanbag into the bucket.
+moss|Green ___ grows on the rock.
+miss|I ___ my grandma when she is away.
+tuck|Mom will ___ me into bed.
+deck|We sat on the back ___.
+peck|A hen will ___ at the corn.
+pick|___ a card, any card!
+lick|My dog likes to ___ my face.
+sack|Santa carries a big ___ of toys.
+rack|Hang your towel on the ___.
+dock|The boat is tied to the ___.
+shed|The rake is in the ___.
+shut|Please ___ the door.
+rush|We had to ___ to catch the bus.
+hush|___, the baby is sleeping.
+cash|I paid with ___.
+dash|Make a mad ___ to the finish line!
+mash|Let's ___ the potatoes.
+such|You are ___ a good helper!
+rich|The cake is very ___ and sweet.
+chat|I like to ___ with my friends.
+thud|The book fell with a ___.
+when|___ is lunch?
+bang|I heard a loud ___.
+hang|___ your coat on the hook.
+sang|We ___ happy birthday.
+rang|The bell ___ for recess.
+fang|The snake has a sharp ___.
+wing|The bird hurt its ___.
+lung|You breathe with each ___.
+hung|We ___ the picture on the wall.
+lion|The ___ has a big mane.
+tiger|The ___ has orange and black stripes.
+horse|I rode a ___ at the farm.
+seal|The ___ balanced a ball on its nose.
+whale|A ___ is a huge sea animal.
+zebra|A ___ has black and white stripes.
+panda|The ___ eats bamboo.
+kitty|The ___ purrs on my lap.
+worm|The bird caught a ___.
+ear|I hear with my ___.
+head|I wear a hat on my ___.
+tummy|My ___ is full after dinner.
+pie|We baked an apple ___.
+pea|A ___ is a small green ball you can eat.
+bread|We made toast from the ___.
+soup|I ate hot ___ on a cold day.
+pizza|We eat ___ on Friday nights.
+taco|I ate a ___ with cheese.
+gold|The crown is made of ___.
+papa|My ___ gives the best hugs.
+mama|The baby said "___" for the first time.
+nana|My ___ bakes cookies with me.
+wind|The ___ blew my hat away.
+door|Knock on the ___.
+sofa|We sat on the ___ to read.
+cheese|Mice like ___.
+hippo|A ___ likes to sit in the mud.
+koala|A ___ sleeps in a tree.
+otter|The ___ floats on its back.
+moose|A ___ has big antlers.
+pony|I rode a ___ at the fair.
+jelly|I like peanut butter and ___.
+pasta|We had ___ with sauce.
+salad|I ate a green ___.
+lime|A ___ is a little green fruit.
+kiwi|A ___ is brown on the outside and green inside.
+melon|We cut the ___ into slices.
+belly|The puppy rolled over to get a ___ rub.
+crib|The baby sleeps in a ___.
+wall|We hung art on the ___.
+roof|The cat sat on the ___.
+pants|I put on my ___ and shirt.
+vest|He wore a puffy ___.
+glove|I lost my left ___.
+taxi|We rode in a ___.
+grandpa|My ___ takes me fishing.
+grandma|My ___ reads me stories.
+uncle|My ___ is my dad's brother.
+man|The ___ fixed our sink.
+tall|A giraffe is very ___.
+call|I will ___ you on the phone.
+fall|Leaves ___ from the trees.
+fill|___ the cup with water.
+fell|I tripped and ___ down.
+moo|A cow says ___.
+oink|A pig says ___.
+meow|A kitten says ___.
+woof|A dog says ___.
+spider|The ___ has eight legs.
+teddy|I hug my ___ bear.
+crayon|I color with a red ___.
+music|We dance to the ___.
+love|I ___ my family.
+hi|Say ___ to your new friend.
+`);
+  add("0", `
+bad|The milk smells ___ so we threw it out.
+hit|I ___ the ball with my bat.
+jot|___ down your name on the list.
+rot|Old apples will ___.
+cod|A ___ is a kind of fish.
+mob|A ___ of fans ran onto the field.
+pun|My dad loves to tell a silly ___.
+lug|I had to ___ the heavy bag up the stairs.
+clam|A ___ has a shell that opens and shuts.
+clip|___ the papers together.
+clog|Hair can ___ the drain.
+club|I joined the book ___.
+crop|The farmer picked the corn ___.
+drag|Don't ___ your bag on the floor.
+drip|I heard the faucet ___.
+drop|Don't ___ the eggs!
+flap|The bird will ___ its wings.
+flat|My bike has a ___ tire.
+flip|Can you do a ___ on the trampoline?
+flop|The fish began to ___ on the dock.
+grab|___ a cup and get some water.
+grip|Keep a good ___ on the rope.
+plop|The frog jumped in with a ___.
+plug|___ in the lamp.
+plus|Two ___ two is four.
+skid|The car began to ___ on the ice.
+skin|Put sunscreen on your ___.
+slam|Please don't ___ the door.
+slim|The snake is long and ___.
+slip|Be careful not to ___ on the ice.
+slot|Put a coin in the ___.
+slug|A ___ is slimy and slow.
+snip|___ the string with the scissors.
+snug|I am ___ in my warm bed.
+spun|The top ___ around and around.
+stem|A flower has a long green ___.
+stub|I ___ my toe on the chair.
+swam|The duck ___ across the pond.
+trap|The spider's web is a ___ for flies.
+trim|Mom will ___ my bangs.
+trot|The pony began to ___.
+twig|The bird used a ___ to build its nest.
+twin|My ___ brother looks just like me.
+brick|The house is made of red ___.
+click|___ the mouse to start the game.
+crack|There is a ___ in the sidewalk.
+quick|The rabbit is very ___.
+stack|___ the blocks up high.
+stuck|My kite got ___ in a tree.
+trick|My dog can do a ___.
+band|The ___ played at the parade.
+bend|___ your knees when you jump.
+bent|I ___ down to tie my shoe.
+dent|There is a ___ in the car door.
+desk|I do my work at my ___.
+disk|The ___ spun in the air like a frisbee.
+dust|Wipe the ___ off the shelf.
+fist|Make a ___ and punch the pad.
+gasp|We heard a ___ from the crowd.
+golf|Grandpa plays ___ on Saturdays.
+gust|A ___ of wind blew my hat off.
+hunt|We went on an egg ___.
+just|I ___ finished my snack.
+kept|I ___ my room clean all week.
+land|The plane will ___ soon.
+last|Z is the ___ letter.
+left|Raise your ___ hand.
+lend|Can you ___ me a pencil?
+lift|Can you ___ this box?
+list|Make a ___ of things to pack.
+lost|I ___ my mitten.
+melt|The ice cream will ___ in the sun.
+mend|Grandma will ___ the hole in my sock.
+mint|A ___ makes your breath fresh.
+pump|Use a ___ to fill the tire with air.
+raft|We floated down the river on a ___.
+rest|Take a ___ after you run.
+rust|The old bike is covered in ___.
+send|I will ___ you a card.
+silk|The scarf is made of ___.
+soft|The kitten is ___.
+tusk|An elephant has a long white ___.
+west|The sun sets in the ___.
+must|You ___ wear a helmet.
+honk|The car horn went ___!
+wink|___ one eye.
+dunk|I like to ___ my cookie in milk.
+bunk|I sleep on the top ___.
+chunk|I ate a big ___ of cheese.
+plank|We walked across the wooden ___.
+blink|Don't ___ or you'll miss it!
+strong|Karate makes me ___.
+spring|Flowers bloom in the ___.
+sting|A bee can ___ you.
+chest|The pirate found a treasure ___.
+chimp|The ___ swung from the tree.
+champ|You are the ___!
+check|Let me ___ your work.
+chess|We play ___ on a board with kings and queens.
+crunch|Carrots ___ when you bite them.
+munch|Rabbits ___ on carrots.
+pinch|Add a ___ of salt.
+punch|Throw a straight ___.
+bunch|We picked a ___ of grapes.
+ranch|Cowboys work on a ___.
+branch|The bird sat on a ___.
+flash|I saw a ___ of lightning.
+fresh|We picked ___ strawberries.
+smash|Don't ___ the cookies in your bag.
+crash|We heard a loud ___.
+trash|Put the ___ in the can.
+blush|My cheeks ___ when I'm shy.
+shelf|Put the book on the ___.
+shift|The wind began to ___.
+shrimp|A ___ has lots of legs.
+shrub|A ___ is a small bush.
+thump|The big box hit the floor with a ___.
+sixth|My cousin is in ___ grade.
+tenth|This is my ___ birthday!
+whisk|Use a ___ to mix the eggs.
+grill|Dad cooks burgers on the ___.
+pill|The vet gave my dog a ___.
+chill|There is a ___ in the air.
+drill|We had a fire ___ today.
+gull|A sea ___ flew over the beach.
+bull|The ___ has big horns.
+pull|Push the door, don't ___.
+full|My plate is ___.
+stuff|Put your ___ in your cubby.
+fluff|___ up your pillow.
+sniff|The dog likes to ___ the flowers.
+stiff|My legs are ___ after the long ride.
+off|Turn ___ the light.
+floss|___ your teeth every night.
+cross|Look both ways before you ___ the street.
+press|___ the button.
+by|I sat ___ my friend.
+did|I ___ my homework.
+had|I ___ a great day.
+if|___ it rains, we will stay inside.
+ran|I ___ all the way home.
+saw|I ___ a rainbow.
+us|Come with ___ to the park.
+soon|We will be there ___.
+please|May I ___ have a cookie?
+ate|I ___ all my peas.
+new|I got ___ shoes.
+or|Do you want milk ___ juice?
+cats|The two ___ are napping.
+dogs|The ___ barked at the mail truck.
+hats|We wore party ___.
+beds|We made our ___ this morning.
+bugs|We looked for ___ under the rock.
+pigs|The ___ rolled in the mud.
+hens|The ___ laid eggs.
+pens|I have red and blue ___.
+cups|Set out four ___ for the juice.
+maps|We looked at ___ of the world.
+nuts|Squirrels hide ___.
+bats|The ___ fly at night.
+caps|The team wore red ___.
+fans|The ___ cheered for the team.
+jets|Two ___ flew over the stadium.
+legs|A dog has four ___.
+pots|We planted seeds in clay ___.
+rugs|We shook the dusty ___ outside.
+vans|Three ___ took us on the field trip.
+webs|Spiders spin ___.
+wigs|The actors wore funny ___.
+kids|The ___ played tag.
+logs|We put ___ on the fire.
+mops|We used ___ to clean the floor.
+bags|We packed our ___ for the trip.
+sits|The cat ___ in the window.
+runs|My dog ___ fast.
+hops|The bunny ___ in the grass.
+digs|The dog ___ in the yard.
+naps|The baby ___ after lunch.
+hugs|My mom gives the best ___.
+pumpkin|We carved a ___.
+sunset|We watched the ___ at the beach.
+laptop|Dad works on his ___.
+zigzag|The path goes in a ___.
+upset|The baby was ___ because she was hungry.
+cobweb|There is a ___ in the corner.
+hilltop|We flew a kite on the ___.
+pigpen|The pigs play in the muddy ___.
+padlock|The gate has a ___.
+gumdrop|I ate a red ___.
+chipmunk|A ___ has stripes on its back.
+catfish|A ___ has whiskers.
+magnet|The ___ stuck to the fridge.
+trumpet|He plays the ___ in the band.
+helmet|Wear a ___ when you ride your bike.
+dragon|The ___ in the story breathed fire.
+wagon|I pulled my sister in a red ___.
+sorry|I am ___ I bumped you.
+gym|We play games in the ___.
 `);
   add("1", `
 cake|We had chocolate ___ at my party.
@@ -644,6 +992,261 @@ muffin|I ate a blueberry ___.
 lemon|A ___ is sour and yellow.
 robot|The ___ can walk and talk.
 `);
+  add("1", `
+bake|Let's ___ cookies in the oven.
+lane|Stay in your ___ when you swim laps.
+cave|The bear sleeps in a dark ___.
+wake|Please ___ me up at seven.
+date|What is the ___ today?
+late|Hurry or we will be ___!
+safe|Wear a helmet to stay ___.
+vase|Put the flowers in a ___.
+base|He ran to first ___.
+cane|Grandpa walks with a ___.
+mane|The horse has a long ___.
+crane|A tall ___ lifted the steel beams.
+flame|The candle has a tiny ___.
+frame|Put the photo in a ___.
+chase|Dogs like to ___ balls.
+trade|Do you want to ___ stickers?
+grade|My sister is in third ___.
+spade|Dig a hole with the ___.
+ape|A gorilla is a big ___.
+gave|Grandma ___ me a new book.
+save|I ___ my coins in a jar.
+cape|The superhero wore a red ___.
+pile|Rake the leaves into a big ___.
+mile|We walked a ___ to the park.
+tile|The kitchen floor has white ___.
+hike|We went on a ___ up the hill.
+fine|I feel ___, thank you.
+mine|That pencil is ___.
+vine|Grapes grow on a ___.
+wipe|___ your feet on the mat.
+pipe|Water runs through the ___.
+ripe|The banana is yellow and ___.
+dive|I can ___ into the pool.
+hive|Bees live in a ___.
+wise|The ___ old owl knew the answer.
+spine|Your ___ runs down your back.
+stripe|A skunk has a white ___.
+twice|I read the book ___.
+dime|A ___ is worth ten cents.
+bride|The ___ wore a white dress.
+side|Stand on the left ___.
+glide|Eagles ___ through the sky.
+cone|I ate an ice cream ___.
+zone|This is a quiet ___.
+robe|I wear my ___ after my bath.
+code|We wrote a secret ___.
+mole|A ___ digs tunnels under the ground.
+pole|The flag hangs on a ___.
+poke|Don't ___ the sleeping dog.
+smoke|___ rose from the campfire.
+spoke|She ___ to the class.
+stove|The pot is on the ___.
+drove|Dad ___ us to the beach.
+froze|The pond ___ in the winter.
+hose|Water the garden with the ___.
+throne|The king sat on his ___.
+phone|Mom talked on the ___.
+alone|The kitten did not want to be ___.
+vote|We will ___ for class pet.
+slope|We sledded down the ___.
+rule|Follow the ___ and wait your turn.
+tune|Hum a happy ___.
+dune|We climbed a sand ___.
+prune|A ___ is a dried plum.
+beep|The microwave will ___ when it is done.
+jeep|We rode in a ___ on the safari.
+peek|Don't ___ at your present!
+seek|Let's play hide and ___.
+creek|We caught frogs in the ___.
+cheek|Grandma kissed my ___.
+feed|It is my job to ___ the fish.
+weed|Pull the ___ out of the garden.
+sheet|Put a clean ___ on the bed.
+tweet|The baby bird said ___.
+greet|Shake hands to ___ your guest.
+beef|We had ___ tacos for dinner.
+reef|Colorful fish swim by the coral ___.
+peel|___ the orange before you eat it.
+screen|Turn off the ___ at bedtime.
+speed|The car went at a high ___.
+bead|I put each ___ on a string.
+beak|A bird has a ___.
+leap|Frogs can ___ high.
+heap|There was a ___ of clothes on the floor.
+meal|Breakfast is my favorite ___.
+deal|It's a ___! Let's shake on it.
+real|Is that a ___ diamond?
+steam|___ rose from the hot soup.
+cream|I like ___ in my cocoa.
+scream|We ___ on the roller coaster!
+treat|The dog got a ___ for sitting.
+wheat|Bread is made from ___.
+neat|Keep your desk ___.
+east|The sun rises in the ___.
+least|I like peas the ___.
+feast|We had a big ___ on Thanksgiving.
+beast|The ___ in the story was really a prince.
+pail|Fill the ___ with sand.
+bait|Put the ___ on the hook.
+braid|Mom put my hair in a ___.
+brain|Your ___ helps you think.
+drain|The water went down the ___.
+grain|Rice is a ___.
+main|The ___ idea is the most important one.
+trail|We hiked on the ___.
+aim|Take ___ and throw.
+paid|I ___ for my snack.
+hail|___ fell from the stormy sky.
+stain|There is a juice ___ on my shirt.
+bay|Boats sail in the ___.
+pay|I will ___ for the ice cream.
+ray|A ___ of sunshine came through the window.
+lay|___ the baby down gently.
+spray|The waves ___ us with water.
+sway|The trees ___ in the wind.
+Sunday|___ is the first day of the week.
+Monday|We go back to school on ___.
+loaf|Dad bought a ___ of bread.
+foam|The waves left ___ on the sand.
+oak|An acorn grows into an ___ tree.
+load|Help me ___ the car.
+coal|The train burns ___.
+roast|We ___ marshmallows by the fire.
+low|The bridge is too ___ for the bus.
+row|We sat in the front ___.
+mow|Dad will ___ the grass.
+crow|The black ___ cawed.
+flow|Rivers ___ to the sea.
+glow|Fireflies ___ at night.
+sigh|I let out a happy ___.
+thigh|Your ___ is the top part of your leg.
+fright|The loud bang gave me a ___.
+flight|Our ___ leaves at noon.
+sight|The rainbow was a beautiful ___.
+tie|Can you ___ your shoes?
+lie|Never tell a ___.
+spy|I ___ something blue!
+cart|Push the shopping ___.
+part|This is my favorite ___ of the book.
+start|Get ready, set, ___!
+smart|You are so ___!
+chart|We made a ___ of our favorite fruits.
+scarf|Wear a ___ to keep your neck warm.
+sharp|Be careful, the knife is ___.
+march|The band will ___ in the parade.
+spark|A ___ flew from the campfire.
+sort|___ the blocks by color.
+torn|My paper is ___.
+worn|My old shoes are ___ out.
+porch|We sat on the front ___.
+thorn|The rose has a sharp ___.
+fort|We built a blanket ___.
+chore|Feeding the dog is my ___.
+core|Throw away the apple ___.
+perch|The bird sat on its ___.
+clerk|The ___ rang up our groceries.
+germ|Wash your hands so you don't spread a ___.
+verb|Run is an action word, or ___.
+serve|I will ___ the cake.
+stir|___ the soup with a spoon.
+firm|The bed is soft, but the pillow is ___.
+birth|We celebrate the day of my ___.
+chirp|Baby birds ___ for food.
+twirl|Watch me ___ in my skirt.
+swirl|There is a chocolate ___ in my ice cream.
+squirt|___ some ketchup on your fries.
+curb|Wait at the ___ before you cross.
+church|The bells rang at the ___.
+purse|Mom put her keys in her ___.
+curve|Slow down on the ___ in the road.
+burst|The balloon will ___ if you poke it.
+surf|We watched people ___ on the big waves.
+hoop|Shoot the ball through the ___.
+loop|Make a ___ with the string.
+tool|A hammer is a ___.
+stool|Sit on the ___.
+broom|Sweep the floor with a ___.
+zoom|Watch the race cars ___!
+noon|We eat lunch at ___.
+mood|I am in a happy ___.
+hood|Pull up your ___ when it rains.
+brook|We waded in the ___.
+took|I ___ my dog for a walk.
+wool|My sweater is made of ___.
+snout|A pig has a pink ___.
+trout|Dad caught a ___ in the stream.
+ouch|___! I stubbed my toe.
+wow|___, that is a big cake!
+gown|The princess wore a long ___.
+frown|Turn that ___ upside down!
+coil|The snake made a ___.
+foil|Wrap the leftovers in ___.
+soil|Plant the seeds in the ___.
+spoil|Milk will ___ if you leave it out.
+moist|The cake is soft and ___.
+joint|Your elbow is a ___.
+quilt|Grandma made me a ___.
+quiz|We have a spelling ___ on Friday.
+squid|A ___ has ten arms.
+squash|We grew a big yellow ___.
+sprint|We will ___ to the finish line.
+strap|Buckle the ___ on your helmet.
+scrub|___ the pot until it shines.
+strip|Cut a ___ of paper.
+split|Let's ___ the cookie in half.
+thread|Use a needle and ___ to sew.
+throw|___ the ball to me.
+about|The book is ___ a dog.
+push|___ the door to open it.
+warm|My coat keeps me ___.
+wash|___ your hands before you eat.
+better|I feel ___ today.
+far|The moon is very ___ away.
+small|A mouse is ___.
+shall|___ we dance?
+family|My ___ eats dinner together.
+eating|We are ___ lunch.
+going|We are ___ to the zoo.
+reading|I love ___ books.
+sleeping|The baby is ___.
+walking|We are ___ to school.
+camping|We went ___ in the woods.
+thinking|I am ___ about my answer.
+flying|The birds are ___ south.
+jumped|The cow ___ over the moon.
+pushed|I ___ my sister on the swing.
+pulled|We ___ the wagon up the hill.
+filled|I ___ the bucket with water.
+called|Grandma ___ to say hello.
+picked|We ___ apples at the farm.
+spilled|I ___ my juice.
+glasses|Grandpa wears ___ to read.
+lunches|We packed our ___.
+benches|There are two ___ in the park.
+brushes|Wash the paint ___.
+bedtime|It is ___, so put on your pajamas.
+cannot|I ___ reach the top shelf.
+himself|He made the bed by ___.
+herself|She tied her shoes by ___.
+itself|The door shut by ___.
+maybe|___ we can go tomorrow.
+snowball|We had a ___ fight.
+uphill|We rode our bikes ___.
+bulldog|The ___ has a wrinkly face.
+lady|The ___ at the library helped me.
+body|Exercise keeps your ___ healthy.
+sandy|The beach is ___.
+windy|It is ___, so let's fly a kite.
+messy|My room is ___.
+lucky|I found a ___ penny.
+muddy|My boots are ___.
+fuzzy|The caterpillar is ___.
+fry|Dad will ___ the eggs.
+`);
   add("2", `
 city|New buildings rise high in the busy ___.
 ice|The pond froze into solid ___.
@@ -932,6 +1535,233 @@ shook|The dog ___ water all over me.
 stood|We ___ in line for lunch.
 cookie|May I have a ___?
 `);
+  add("2", `
+lace|My shoe ___ came untied.
+trace|___ the shape with your finger.
+spice|Cinnamon is a sweet ___.
+ounce|Every ___ of effort counts.
+pounce|The cat crouched, ready to ___ on the toy.
+prince|The ___ rode a white horse.
+since|I have known her ___ kindergarten.
+chance|Everyone gets a ___ to play.
+glance|Take a quick ___ at the clock.
+fancy|We wore ___ clothes to the wedding.
+icy|Walk slowly on the ___ sidewalk.
+spicy|The salsa is too ___ for me.
+cider|We drank warm apple ___.
+gerbil|Our class pet is a ___.
+ginger|The cookies taste like ___.
+hinge|The door ___ squeaks.
+fringe|Her jacket has ___ on the sleeves.
+sponge|Wipe the table with a ___.
+plunge|Hold your nose and ___ into the pool.
+cottage|We stayed in a little ___ by the lake.
+bandage|Put a ___ on the cut.
+garbage|Take out the ___ on Tuesday.
+package|A ___ came in the mail.
+luggage|We packed our ___ for the trip.
+cabbage|The rabbit nibbled the ___.
+dodge|Try to ___ the ball!
+ridge|We hiked along the mountain ___.
+fridge|Put the milk back in the ___.
+nudge|Give your partner a gentle ___.
+smudge|There is a ___ on the window.
+wedge|I ate a ___ of cheese.
+pledge|We say the ___ every morning.
+budge|The stuck door won't ___.
+itch|The bug bite made my arm ___.
+hatch|The chicks will ___ soon.
+latch|Close the ___ on the gate.
+batch|We baked a ___ of cookies.
+notch|Cut a ___ in the stick.
+hutch|The rabbit lives in a ___.
+clutch|She held her purse in a tight ___.
+crutch|He walked with a ___ after he hurt his leg.
+stitch|Grandma sewed one more ___.
+twitch|The bunny's nose began to ___.
+dawn|The rooster crows at ___.
+fawn|A baby deer is a ___.
+shawl|Grandma wrapped a ___ around her shoulders.
+squawk|The parrot gave a loud ___.
+thaw|The ice will ___ in the spring.
+raw|Don't eat ___ eggs.
+jaw|The shark has a strong ___.
+law|It is the ___ to wear a seat belt.
+awesome|That magic trick was ___!
+faucet|Turn off the ___ while you brush.
+laundry|I help fold the ___.
+sausage|We had eggs and ___ for breakfast.
+August|School starts in ___.
+cowboy|The ___ rode his horse across the plains.
+noisy|The cafeteria is ___ at lunch.
+avoid|Try to ___ the puddles.
+mount|Climb up and ___ the horse.
+amount|Add the right ___ of sugar.
+spout|Water poured out of the ___.
+pound|The puppy weighs one ___.
+hound|The ___ followed the scent.
+mound|The ants built a ___ of dirt.
+blouse|She wore a white ___.
+noun|A person, place, or thing is a ___.
+outfit|I picked out my ___ for the party.
+powder|Snow fell like ___.
+chowder|We ate clam ___.
+prowl|Cats ___ around at night.
+plow|The farmer used a ___ in the field.
+dare|I ___ you to try the spicy pepper!
+glare|The sun's ___ hurt my eyes.
+rare|This stamp is very ___.
+stare|It is rude to ___.
+spare|Do you have a ___ pencil?
+bare|I walked on the sand in ___ feet.
+prepare|___ for the test by studying.
+airport|We flew out of the ___.
+dairy|Milk and cheese are ___ foods.
+fairy|The ___ had sparkly wings.
+repair|Dad will ___ the broken chair.
+pearl|She wore a ___ necklace.
+search|Let's ___ for the lost cat.
+gear|Pack your camping ___.
+spear|The statue held a ___.
+tear|A ___ rolled down her cheek.
+beard|Grandpa has a white ___.
+cheer|Let's ___ for our team!
+steer|Use the wheel to ___ the boat.
+adore|I ___ my baby brother.
+ignore|___ the noise and focus.
+sore|My legs are ___ from running.
+tore|I ___ my pants on the fence.
+forest|Deer live in the ___.
+corner|Turn left at the ___.
+order|Put the numbers in ___.
+border|Draw a ___ around your picture.
+acorn|The squirrel buried an ___.
+dirty|Wash your ___ hands.
+circus|We saw clowns at the ___.
+skirt|She wore a purple ___.
+thirteen|Twelve plus one is ___.
+thirty|There are ___ days in June.
+turnip|The ___ grew under the ground.
+hurdle|The runner jumped over the ___.
+curly|My hair is ___.
+furry|The bunny is soft and ___.
+jersey|I wear number ten on my soccer ___.
+mermaid|The ___ swam with the dolphins.
+termite|A ___ eats wood.
+expert|My grandma is an ___ baker.
+bacon|We had ___ and eggs.
+lazy|The ___ cat slept all day.
+crazy|We had a ___ hair day at school.
+navy|He wore a ___ blue jacket.
+student|Every ___ got a new book.
+human|A ___ has two arms and two legs.
+unit|We finished the ___ on plants.
+tulip|A red ___ bloomed in spring.
+pilot|The ___ flew the airplane.
+tiny|An ant is ___.
+silent|The room was ___ during the test.
+item|Pick one ___ from the menu.
+iron|Dad used an ___ to smooth his shirt.
+hero|The firefighter is a ___.
+motor|The boat has a ___.
+frozen|The lake is ___ solid.
+even|Two, four, and six are ___ numbers.
+equal|Cut the cake into ___ pieces.
+secret|Can you keep a ___?
+female|A ___ lion is called a lioness.
+fever|I stayed home with a ___.
+few|I have a ___ cookies left.
+dew|The grass is wet with morning ___.
+screw|Tighten the ___ on the chair.
+jewel|The crown has a red ___.
+nephew|My aunt says I am her favorite ___.
+cashew|A ___ is a curved nut.
+argue|Let's not ___ about whose turn it is.
+rescue|The firefighters will ___ the cat.
+statue|A bronze ___ stands in the park.
+value|What is the ___ of this coin?
+avenue|We live on Maple ___.
+smooth|The stone is ___.
+groom|The bride and ___ cut the cake.
+bloom|Roses ___ in June.
+booth|We sat in a ___ at the diner.
+proof|Show me ___ that you finished.
+scoop|I want one ___ of ice cream.
+swoop|The owl will ___ down.
+rooster|The ___ crowed at sunrise.
+igloo|The ___ is made of snow.
+kangaroo|A ___ hops on its back legs.
+shampoo|Wash your hair with ___.
+bamboo|Pandas eat ___.
+cartoon|We watched a ___ on Saturday.
+cocoon|The caterpillar made a ___.
+wooden|We have a ___ fence.
+hoped|I ___ it would snow.
+liked|I ___ the movie a lot.
+smiled|She ___ at me.
+skipped|We ___ down the hall.
+dropped|I ___ my pencil.
+grabbed|He ___ his coat and ran.
+jogging|Mom goes ___ every morning.
+digging|The dog is ___ in the yard.
+winning|Our team is ___!
+cutting|Be careful when you are ___ paper.
+chopped|Dad ___ the onions.
+spotted|I ___ a deer in the woods.
+longest|This is the ___ snake at the zoo.
+smaller|A mouse is ___ than a cat.
+hotter|Today is ___ than yesterday.
+elves|The ___ helped make the toys.
+halves|Cut the apple into two ___.
+oxen|Two ___ pulled the wagon.
+peaches|We picked ___ from the tree.
+dresses|The girls wore party ___.
+beaches|We visited two sandy ___.
+buses|Yellow ___ lined up after school.
+parties|We go to lots of birthday ___.
+pennies|I saved fifty ___.
+bunnies|The ___ hopped across the lawn.
+fries|I ate a burger and ___.
+won|Our team ___ the game!
+meet|Nice to ___ you!
+bye|Wave ___ to Grandma.
+tow|The truck will ___ the broken car.
+another|May I have ___ cookie?
+anyone|Does ___ have a pencil?
+become|I want to ___ a vet.
+belong|These books ___ to the library.
+beside|Sit ___ me.
+bottom|The coin sank to the ___ of the pool.
+during|Don't talk ___ the movie.
+group|Our ___ made a poster.
+hello|Say ___ to our new student.
+later|I'll call you ___.
+leave|We ___ for school at eight.
+nothing|There is ___ in the box.
+second|I came in ___ place.
+tried|I ___ my best.
+woman|The ___ walked her dog.
+world|We live in a big ___.
+dentist|The ___ cleaned my teeth.
+plastic|The cup is made of ___.
+contest|She won the drawing ___.
+velvet|The dress is made of soft ___.
+cactus|A ___ has sharp spines.
+hiccup|A loud ___ popped out in the middle of my sentence.
+tadpole|A ___ turns into a frog.
+sunrise|We woke up at ___.
+raincoat|Wear your ___ today.
+seaweed|Fish hide in the ___.
+beehive|The ___ was full of honey.
+daylight|We hiked while there was ___.
+teapot|The ___ whistled on the stove.
+doghouse|My dog sleeps in a ___.
+rowboat|We paddled the ___ across the lake.
+treetop|A bird sang from the ___.
+classmate|My ___ sits next to me.
+lunchbox|I packed my ___.
+railroad|The ___ runs through town.
+`);
   add("3", `
 unhappy|The lost puppy looked ___ until we found its owner.
 unlock|Use the key to ___ the door.
@@ -1202,6 +2032,237 @@ breakfast|I eat ___ every morning.
 desert|Camels live in the hot, dry ___.
 dessert|We had ice cream for ___.
 `);
+  add("3", `
+unlucky|We were ___ and missed the bus by one minute.
+unkind|It is ___ to leave someone out of a game.
+unsure|I was ___ of the answer, so I checked again.
+unequal|The two pieces of cake were ___ in size.
+unclear|The directions were ___, so I asked a question.
+undone|My chores are still ___.
+unload|Help me ___ the groceries from the car.
+unplug|___ the toaster when you are done.
+unbutton|___ your coat when you come inside.
+uneven|The sidewalk is cracked and ___.
+untidy|My closet is ___ and needs cleaning.
+reuse|We ___ our shopping bags.
+reheat|___ the leftovers for lunch.
+rewind|___ the song so we can hear it again.
+retell|Can you ___ the story in your own words?
+repaint|We will ___ the fence this summer.
+refresh|A cool shower will ___ you.
+restart|___ the game from the beginning.
+react|How did your dog ___ to the new kitten?
+dishonest|Cheating on a test is ___.
+misprint|The ___ in the newspaper was fixed the next day.
+playful|The ___ puppy chased its tail.
+useful|A flashlight is ___ when the power goes out.
+skillful|The ___ potter made a perfect bowl.
+truthful|Always be ___, even when it is hard.
+handful|She grabbed a ___ of popcorn.
+mouthful|Don't talk with a ___ of food.
+spoonful|Add one ___ of sugar.
+forgetful|My ___ brother left his lunch at home again.
+useless|A pen with no ink is ___.
+helpless|A newborn kitten is ___.
+sleepless|The storm gave us a ___ night.
+hopeless|Never feel ___; keep trying.
+speechless|The surprise left me ___.
+wireless|The ___ speaker plays music from my tablet.
+illness|He missed a week of school because of an ___.
+softness|I love the ___ of my new blanket.
+fitness|Running and jumping improve your ___.
+sadness|There was ___ when our friend moved away.
+weakness|Spelling used to be my ___, but now it's a strength.
+pavement|The hot ___ burned my bare feet.
+amusement|We went to an ___ park.
+baker|The ___ sells fresh bread.
+dancer|The ___ spun on her toes.
+singer|The ___ sang a lovely song.
+player|Each ___ on the team got a medal.
+helper|Today I am the line ___.
+painter|The ___ painted our house blue.
+reader|She is a fast ___.
+writer|The ___ wrote a book about dragons.
+builder|The ___ put up the walls.
+driver|The bus ___ waved to us.
+swimmer|The ___ dove into the pool.
+runner|The fastest ___ won the race.
+winner|The ___ got a gold medal.
+busier|The store is ___ on weekends.
+easier|Math is ___ when you practice.
+prettier|The garden looks ___ in spring.
+sillier|His jokes get ___ every day.
+luckiest|I'm the ___ kid in the world!
+funniest|That was the ___ movie ever.
+happiest|My birthday was the ___ day of the year.
+tiniest|The ___ kitten was the runt.
+carried|Dad ___ me on his shoulders.
+hurried|We ___ to catch the bus.
+worried|I was ___ about the test.
+studied|I ___ my spelling words.
+copied|I ___ the notes from the board.
+cried|The baby ___ all night.
+replied|She ___ to my letter.
+pale|He looked ___ when he felt sick.
+pain|I have a ___ in my stomach.
+pane|The ball broke a window ___.
+rein|Pull the ___ to turn the horse.
+steak|Dad grilled a ___ for dinner.
+grate|___ the cheese for the pizza.
+paws|The puppy has muddy ___.
+hall|Walk quietly in the ___.
+haul|The truck will ___ the dirt away.
+cent|A penny is worth one ___.
+chews|My dog ___ on his toys.
+dye|We used ___ to color the eggs.
+fir|A ___ tree stays green all year.
+higher|The kite flew ___ than the tree.
+maid|The ___ cleaned the hotel room.
+poor|The ___ puppy was cold and wet.
+rows|We planted the seeds in ___.
+tea|Grandma drinks hot ___.
+creak|The old stairs ___ when you step on them.
+due|My library book is ___ today.
+fare|We paid the bus ___.
+loan|The bank gave Dad a ___.
+roll|___ the ball to me.
+role|She got the lead ___ in the play.
+seem|You ___ happy today.
+seam|The ___ of my shirt ripped.
+sew|Grandma will ___ a button on my coat.
+groan|The class let out a ___ when it rained at recess.
+anybody|Is ___ home?
+barefoot|We walked ___ on the beach.
+cardboard|We built a fort out of ___ boxes.
+cookbook|Mom found the recipe in a ___.
+cupboard|The cups are in the ___.
+daytime|Owls sleep in the ___.
+doorway|The dog stood in the ___.
+eggshell|Don't get any ___ in the batter.
+farmhouse|The family lives in a white ___.
+flagpole|The flag waves from the ___.
+greenhouse|Plants grow in the warm ___.
+hallway|Our lockers are in the ___.
+homemade|Grandma made ___ jam.
+jellyfish|A ___ floated in the water.
+pinecone|We painted a ___.
+sawdust|The floor was covered in ___.
+shipwreck|Divers explored the old ___.
+spaceship|The ___ blasted off to Mars.
+sunburn|Wear sunscreen so you don't get a ___.
+teammate|My ___ passed me the ball.
+teaspoon|Add a ___ of salt.
+tiptoe|___ so you don't wake the baby.
+toothpick|Grandpa used a ___ after dinner.
+wallpaper|My room has striped ___.
+windmill|The ___ turned in the breeze.
+riddle|Can you solve this ___?
+fiddle|He played a tune on his ___.
+kettle|The ___ whistled on the stove.
+beetle|A shiny black ___ crawled on the leaf.
+nibble|The mouse began to ___ the cheese.
+puddle|I jumped in a ___.
+cuddle|I like to ___ with my puppy.
+huddle|The team got in a ___.
+poodle|The ___ has curly fur.
+bundle|We tied the sticks in a ___.
+cradle|The baby slept in a ___.
+wiggle|___ your toes.
+juggle|The clown can ___ three balls.
+struggle|It was a ___ to open the jar.
+tangle|My kite string is in a ___.
+jingle|The bells ___ on the sleigh.
+sample|Try a ___ of the soup.
+temple|We visited an ancient ___.
+dimple|She has a ___ when she smiles.
+sprinkle|___ sugar on top.
+twinkle|The stars ___ at night.
+chuckle|The joke made Dad ___.
+buckle|___ your seat belt.
+simple|The recipe is ___.
+rattle|The baby shook her ___.
+settle|The snow began to ___ on the ground.
+lettuce|Put ___ and tomato on the sandwich.
+ribbon|I won a blue ___.
+common|Robins are ___ birds.
+gallop|Horses ___ across the field.
+pollen|Bees carry ___ from flower to flower.
+sudden|There was a ___ clap of thunder.
+attic|We store old toys in the ___.
+comma|Put a ___ between the items in a list.
+dizzy|Spinning makes me ___.
+fluffy|The clouds are white and ___.
+grassy|We sat on a ___ hill.
+hollow|The owl lives in a ___ tree.
+mammal|A whale is a ___.
+parrot|The ___ can talk.
+pudding|We had chocolate ___.
+rubber|Tires are made of ___.
+shallow|Little kids swim in the ___ end.
+skinny|The ___ cat needed food.
+soccer|We play ___ on Saturdays.
+tissue|Use a ___ when you sneeze.
+waffle|I had a ___ with syrup.
+wallet|Dad keeps his money in his ___.
+ought|You ___ to wear a coat.
+drought|The ___ dried up the river.
+naughty|The ___ puppy chewed my shoe.
+applause|The crowd burst into ___.
+cause|What was the ___ of the fire?
+fault|It was nobody's ___.
+vault|The bank keeps money in a ___.
+haunted|We walked through a pretend ___ house.
+neigh|Horses ___.
+eighty|Grandpa is ___ years old.
+freight|The ___ train carried coal.
+knob|Turn the ___ to open the door.
+knuckle|I bumped my ___ on the table.
+knapsack|I carried my lunch in a ___.
+knit|Grandma will ___ me a scarf.
+wreck|The storm left the yard a ___.
+wrinkle|Iron out the ___ in your shirt.
+wren|A tiny ___ built a nest.
+wrench|Use a ___ to tighten the bolt.
+sword|The knight drew his ___.
+gnat|A tiny ___ buzzed by my ear.
+crumb|Wipe the ___ off your lip.
+limb|The tree ___ broke in the storm.
+plumber|The ___ fixed the leaky pipe.
+fasten|___ the clasp on your bracelet so it stays on.
+glisten|The snow will ___ in the sun.
+calm|Stay ___ and take a deep breath.
+palm|Hold the coin in the ___ of your hand.
+folk|We listened to ___ music at the fair.
+capture|Take a photo to ___ the moment.
+pasture|The cows graze in the ___.
+posture|Sit up straight with good ___.
+texture|Sandpaper has a rough ___.
+vulture|A ___ circled overhead.
+sculpture|The artist made a clay ___.
+moisture|The plants need ___.
+furniture|We moved the ___ into the new house.
+signature|Write your ___ at the bottom.
+January|___ is the first month of the year.
+April|___ showers bring May flowers.
+October|We pick pumpkins in ___.
+November|Thanksgiving is in ___.
+December|___ is the last month of the year.
+minus|Ten ___ three is seven.
+graph|We made a bar ___ of our favorite pets.
+ruler|Use a ___ to draw a straight line.
+scale|Stand on the ___ to see how much you weigh.
+gravity|___ pulls things down to Earth.
+habitat|A pond is a ___ for frogs.
+fossil|We found a ___ of a shell in the rock.
+orbit|The moon is in ___ around Earth.
+liquid|Water is a ___.
+solid|Ice is a ___.
+climate|The desert has a hot, dry ___.
+canyon|The river carved a deep ___.
+harbor|The boats are docked in the ___.
+compass|A ___ shows which way is north.
+citizen|A good ___ follows the laws.
+`);
   add("4", `
 incorrect|Cross out the ___ answer and write the right one.
 invisible|The ghost in the story was ___, so nobody could see it.
@@ -1458,6 +2519,247 @@ system|Our solar ___ has eight planets.
 universe|The ___ is full of galaxies.
 volcano|Lava poured out of the ___.
 `);
+  add("4", `
+unaware|I was ___ that the store had closed early.
+unlikely|Snow in July is very ___.
+unpopular|The new lunch menu was ___ with students.
+unselfish|Sharing your snack is an ___ thing to do.
+unexpected|We had an ___ visitor at the door.
+unhealthy|Eating only candy is ___.
+unable|I was ___ to reach the top shelf.
+discourage|Don't let one mistake ___ you.
+disorder|The room was in total ___ after the party.
+distrust|Broken promises cause ___.
+inactive|The volcano has been ___ for years.
+inexpensive|The toy was ___, only one dollar.
+informal|Jeans are fine for an ___ party.
+impolite|It is ___ to interrupt.
+improper|Using a knife as a screwdriver is ___.
+preteen|My eleven-year-old cousin is a ___.
+recharge|___ the tablet overnight.
+revisit|We will ___ the museum next summer.
+misfortune|Losing the game was a small ___.
+overcast|The sky was gray and ___.
+overdue|My library book is ___.
+overhead|A plane flew ___.
+overlook|Don't ___ the small details.
+overjoyed|We were ___ to see our new puppy.
+overboard|The captain shouted, "Man ___!"
+underneath|The cat hid ___ the porch.
+underdog|Everyone cheered for the ___.
+understand|Do you ___ the directions?
+subzero|Antarctica has ___ temperatures.
+subheading|Each ___ tells what the section is about.
+intersection|Stop at the busy ___.
+interstate|We drove on the ___ highway.
+midway|We stopped for lunch ___ through the trip.
+midair|The cat twisted in ___.
+lotion|Put ___ on your dry hands.
+potion|The wizard brewed a magic ___.
+portion|Eat a healthy ___ of vegetables.
+caution|Use ___ near the stove.
+creation|The robot was her own ___.
+donation|We made a ___ to the animal shelter.
+selection|The library has a great ___ of books.
+election|We held a class ___.
+correction|Make a ___ in red pen.
+connection|The video stopped because of a bad ___.
+construction|The road is under ___.
+section|Read the first ___ of the chapter.
+fiction|A ___ book tells a made-up story.
+friction|Rubbing your hands makes ___.
+condition|The used bike is in good ___.
+mansion|The ___ had twenty rooms.
+erosion|Wind and water cause ___.
+joyous|The wedding was a ___ celebration.
+hazardous|Smoke can be ___ to your health.
+victorious|The ___ team lifted the trophy.
+studious|The ___ girl read every night.
+lovable|The puppy is so ___.
+likable|Our new neighbor is very ___.
+readable|Make your handwriting ___.
+fixable|The broken toy is ___.
+laughable|His excuse was ___.
+drinkable|The stream water is not ___.
+movable|The desks are ___ so we can work in groups.
+usable|The old phone is still ___.
+affordable|The bike was ___.
+honorable|Telling the truth was the ___ thing to do.
+horrible|The smell was ___.
+audible|Her whisper was barely ___.
+entertainment|The clown provided ___ at the party.
+measurement|Write each ___ in centimeters.
+arrangement|The flower ___ was beautiful.
+announcement|The principal made an ___ over the speaker.
+disappointment|The canceled trip was a big ___.
+encouragement|Thanks for the ___!
+improvement|Your handwriting shows great ___.
+awareness|The poster raises ___ about recycling.
+emptiness|The ___ of the house felt strange after we moved.
+friendliness|Her ___ made the new student feel welcome.
+loneliness|The puppy whined from ___.
+politeness|Saying please shows ___.
+stillness|The ___ of the lake was peaceful.
+thickness|Measure the ___ of the board.
+delightful|We had a ___ afternoon.
+faithful|My dog is a ___ friend.
+fearful|The ___ kitten hid under the bed.
+meaningful|The gift was small but ___.
+plentiful|Apples are ___ in the fall.
+respectful|Be ___ to your elders.
+successful|The bake sale was ___.
+angrily|The goose honked ___.
+eagerly|We waited ___ for the show.
+honestly|Answer the questions ___.
+luckily|___, we found the lost ring.
+merrily|We sang ___ around the campfire.
+noisily|The kids ___ ran outside.
+politely|She ___ asked for help.
+proudly|He ___ showed off his new belt.
+rapidly|The river flowed ___.
+recently|We ___ moved to a new town.
+seriously|Take your training ___.
+steadily|The rain fell ___.
+wisely|Spend your money ___.
+nearly|I ___ forgot my lunch.
+hardly|I could ___ see in the fog.
+mostly|The sky was ___ clear.
+barely|We ___ made it on time.
+boulder|A giant ___ blocked the trail.
+bolder|She grew ___ as she practiced.
+chord|He strummed a ___ on the guitar.
+cord|Plug in the ___.
+duel|The two knights fought a ___.
+dual|The car has ___ airbags.
+phase|The moon has a new ___ each week.
+gorilla|The ___ beat its chest.
+hanger|Put your shirt on a ___.
+hangar|The plane is parked in the ___.
+miner|The ___ dug for gold.
+minor|It was only a ___ scratch.
+peer|___ through the keyhole.
+prey|The hawk watched its ___.
+sole|The ___ of my shoe has a hole.
+soul|She sang with heart and ___.
+suite|We stayed in a hotel ___.
+thrown|The ball was ___ too far.
+vain|The ___ prince looked in the mirror all day.
+vane|The weather ___ points the way the wind blows.
+burrow|Rabbits live in a ___.
+cellar|We store potatoes in the ___.
+seller|The ___ set up a booth at the market.
+doe|A ___ is a female deer.
+feat|Climbing the mountain was quite a ___.
+manner|She spoke in a friendly ___.
+presents|We opened ___ on my birthday.
+raise|___ your hand to answer.
+afterward|We ate dinner, and ___ we watched a movie.
+backbone|Your ___ is also called your spine.
+backyard|We have a swing set in the ___.
+billboard|A huge ___ stood by the highway.
+bookmark|Put a ___ in your book.
+brainstorm|Let's ___ ideas for our story.
+campground|We pitched our tent at the ___.
+carpool|We ___ to school with our neighbors.
+clockwise|Turn the lid ___ to close it.
+cornfield|We got lost in the ___ maze.
+dishwasher|Load the plates into the ___.
+dragonfly|A ___ hovered over the pond.
+drawbridge|The castle has a ___.
+eyesight|Carrots are said to help your ___.
+fireworks|We watched ___ on the Fourth of July.
+forehead|Mom felt my ___ for a fever.
+gingerbread|We built a ___ house.
+hairbrush|I lost my ___.
+handshake|Greet the judge with a firm ___.
+headlight|One ___ on the car is out.
+heartbeat|The doctor listened to my ___.
+homesick|I felt ___ at summer camp.
+horseshoe|The blacksmith made a ___.
+iceberg|The ship steered around the ___.
+lifetime|This is the chance of a ___.
+nickname|My ___ is Bear.
+postcard|Send Grandma a ___ from the beach.
+quicksand|The explorer got stuck in ___.
+rattlesnake|A ___ shakes its tail as a warning.
+seashore|We collected shells along the ___.
+shortcut|We took a ___ through the park.
+skyscraper|The ___ is one hundred stories tall.
+snowboard|I ride my ___ down the mountain.
+suitcase|Pack your ___ for the trip.
+sunlight|Plants need ___.
+tablespoon|Add one ___ of butter.
+warehouse|The boxes are stored in a ___.
+wheelbarrow|Push the dirt in the ___.
+windshield|Rain splashed on the ___.
+worldwide|The game is popular ___.
+camera|Smile for the ___!
+carpet|The new ___ is soft.
+comedy|We watched a funny ___.
+lemonade|We sold ___ at our stand.
+magazine|I read a ___ about animals.
+melody|Hum the ___ of the song.
+museum|We saw dinosaur bones at the ___.
+orchard|We picked apples at the ___.
+pajamas|Put on your ___ for bed.
+pelican|A ___ scoops fish with its big beak.
+penguin|A ___ cannot fly but can swim.
+pirate|The ___ had a parrot on his shoulder.
+pyramid|The ancient ___ was made of stone.
+recipe|Follow the ___ to bake the cake.
+sandal|I lost a ___ at the beach.
+spinach|___ is a leafy green vegetable.
+tornado|The ___ twisted across the field.
+trophy|Our team won a ___.
+violin|She plays the ___ in the orchestra.
+wizard|The ___ waved his wand.
+yogurt|I eat ___ with berries.
+colony|An ant ___ can have thousands of ants.
+continent|Africa is a large ___.
+explorer|The ___ sailed to new lands.
+settler|The ___ built a log cabin.
+pioneer|The ___ traveled west in a covered wagon.
+landform|A mountain is a ___.
+nutrient|Calcium is a ___ that builds strong bones.
+organism|Every living thing is an ___.
+predator|A wolf is a ___.
+adaptation|Thick fur is an ___ to cold weather.
+hibernate|Bears ___ in winter.
+evaporate|Puddles ___ in the sun.
+circuit|The bulb lit up when we closed the ___.
+magnetic|Iron is ___.
+force|A push or a pull is a ___.
+lever|A seesaw is a kind of ___.
+pulley|We lifted the bucket with a ___.
+axle|The wheels turn on an ___.
+rotate|The Earth will ___ once each day.
+revolve|The planets ___ around the sun.
+galaxy|Our ___ is called the Milky Way.
+comet|A ___ has a glowing tail.
+meteor|A ___ streaked across the sky.
+crater|The falling rock left a huge ___ in the ground.
+happened|What ___ at recess?
+writing|I love ___ stories.
+friendly|Our ___ mail carrier waves to us.
+decided|We ___ to walk to school.
+noticed|I ___ a bird's nest in the tree.
+surely|You will ___ do well.
+dolphin|A ___ jumped out of the water.
+falcon|The ___ dove at great speed.
+flamingo|A pink ___ stood on one leg.
+hamster|My ___ runs on its wheel.
+jaguar|The ___ is a big spotted cat.
+leopard|A ___ rested in the tree.
+lobster|A ___ has big claws.
+ostrich|The ___ is the largest bird.
+panther|The black ___ crept through the jungle.
+peacock|The ___ spread its colorful tail.
+porcupine|A ___ has sharp quills.
+scorpion|A ___ has a stinger on its tail.
+sparrow|A little ___ hopped on the ground.
+walrus|A ___ has long tusks.
+coyote|We heard a ___ howl.
+`);
   add("5", `
 autograph|The author signed her ___ in my book.
 photograph|We framed a ___ of our family trip.
@@ -1706,6 +3008,245 @@ breath|Take a deep ___ before you start.
 advice|My coach gave me good ___.
 advise|I ___ you to study for the test.
 device|A phone is a handy ___.
+`);
+  add("5", `
+calligraphy|She wrote the invitations in elegant ___.
+graphite|Pencil "lead" is really ___.
+seismograph|A ___ records the shaking of an earthquake.
+homophone|"Pair" is a ___ of "pear."
+megaphone|The coach shouted through a ___.
+stethoscope|The doctor listened to my heart with a ___.
+barometer|A ___ measures air pressure.
+speedometer|The ___ showed we were going fifty miles per hour.
+pedometer|My ___ counted ten thousand steps.
+metric|Scientists use the ___ system.
+symmetry|A butterfly's wings show ___.
+photocopy|Make a ___ of the worksheet.
+biome|The desert is a dry ___.
+antibiotic|The doctor gave me an ___ for my ear infection.
+geometry|In ___ we study shapes and angles.
+hydrant|Firefighters hooked the hose to the ___.
+cyclone|A ___ is a storm with spinning winds.
+thermal|She wore ___ socks on the ski trip.
+thermostat|Turn up the ___ if you are cold.
+porter|The ___ carried our bags to the room.
+portfolio|The artist showed her ___ of drawings.
+projector|The teacher turned on the ___.
+objection|Does anyone have an ___ to the plan?
+structure|The bridge is a strong ___.
+instructor|My karate ___ showed us a new kata.
+obstruct|Don't ___ the doorway with your bag.
+eruption|The ___ of the volcano lit up the sky.
+interruption|Sorry for the ___.
+bankrupt|The failing store went ___.
+prediction|My ___ is that it will snow tomorrow.
+scribble|Don't ___ on the wall.
+subscribe|We ___ to a science magazine.
+transcript|Read the ___ of the speech.
+prescription|The pharmacist filled my ___.
+spectacles|Grandpa put on his ___ to read.
+inspector|The health ___ checked the kitchen.
+perspective|Try to see it from her ___.
+prospect|The ___ of summer vacation made us smile.
+suspect|The detective questioned the ___.
+video|We made a ___ for our project.
+provide|The school will ___ lunch.
+supervisor|The ___ checked our work.
+revision|Your second ___ is much better.
+terrarium|The lizard lives in a ___.
+century|A ___ is one hundred years.
+centennial|The town celebrated its ___, its 100th birthday.
+manicure|She got a ___ before the wedding.
+pedicure|Mom painted my toenails like a real ___.
+vacant|The house next door is ___.
+motivate|A good coach can ___ the team.
+promote|The posters ___ the school play.
+remote|Where is the TV ___?
+locomotive|The ___ pulled twenty train cars.
+formula|The scientist wrote the ___ on the board.
+reform|The town voted to ___ its parking rules.
+formation|The geese flew in a V ___.
+attract|Flowers ___ bees.
+admiration|I have great ___ for my teacher.
+affection|The cat showed ___ by purring.
+calculation|Check your ___ with a calculator.
+circulation|Exercise improves blood ___.
+combination|Don't forget the ___ to your locker.
+comparison|Make a ___ of the two stories.
+concentration|Chess takes a lot of ___.
+cooperation|Teamwork needs ___.
+decoration|We hung a ___ on the door.
+dedication|Her ___ to practice earned her a black belt.
+destination|Our ___ is the Grand Canyon.
+digestion|Fiber helps your ___.
+distraction|Turn off the TV; it's a ___.
+evolution|The ___ of the bicycle took many years.
+examination|The doctor did a full ___.
+exception|Everyone must wear a helmet, without ___.
+exploration|Space ___ teaches us about the universe.
+foundation|The house sits on a concrete ___.
+frustration|She sighed in ___.
+graduation|My brother's high school ___ is in June.
+hesitation|She answered without ___.
+imitation|My little brother does a funny ___ of our dog.
+infection|Clean the cut to prevent ___.
+injection|The nurse gave me an ___.
+inspiration|Nature is my ___ for painting.
+instruction|Read each ___ carefully.
+intention|My ___ was to help.
+irrigation|Farmers use ___ to water crops.
+migration|We studied the ___ of whales.
+motivation|A goal gives you ___.
+navigation|Sailors used the stars for ___.
+occupation|Her ___ is teaching.
+operation|The doctor did an ___ on my knee.
+opposition|The plan faced strong ___.
+pollination|Bees help with ___.
+presentation|I gave a ___ about volcanoes.
+production|The school ___ of the play was great.
+quotation|Put the ___ in quotation marks.
+relaxation|Yoga is good for ___.
+reservation|We made a dinner ___.
+revolution|The ___ changed the country forever.
+rotation|One ___ of Earth takes a day.
+separation|There is a ___ between the two rooms.
+subtraction|We practiced ___ with regrouping.
+temptation|The cookies were a big ___.
+translation|Read the English ___ of the poem.
+vibration|I felt the ___ of the phone.
+explosion|The fireworks ended with a huge ___.
+passion|She has a ___ for music.
+precision|The surgeon worked with ___.
+suspension|The bridge is a ___ bridge.
+envious|I was a little ___ of his new bike.
+harmonious|The choir sang in ___ voices.
+luminous|The ___ moon lit the path.
+perilous|The climbers made a ___ journey.
+scrumptious|The pie was ___.
+strenuous|The hike was long and ___.
+luxurious|The hotel was ___.
+industrious|The ___ ants worked all day.
+acceptable|Is this answer ___?
+fashionable|Her new boots are ___.
+forgivable|An honest mistake is ___.
+miserable|I felt ___ with a cold.
+presentable|Comb your hair to look ___.
+profitable|The bake sale was ___.
+questionable|That shortcut is ___.
+recyclable|Plastic bottles are ___.
+unforgettable|Our trip was ___.
+unstoppable|Our team was ___ this season.
+compatible|The charger is not ___ with my phone.
+gullible|The ___ kid believed the silly story.
+invincible|The hero seemed ___.
+ambulance|The ___ rushed to the hospital.
+appliance|A toaster is a kitchen ___.
+circumstance|Under no ___ should you touch the stove.
+fragrance|The ___ of the roses filled the room.
+ignorance|Learning helps us overcome ___.
+instance|For ___, a robin is a bird.
+inheritance|The old clock was an ___ from Grandpa.
+remembrance|We planted a tree in ___ of our friend.
+substance|Water is a clear ___.
+coincidence|What a ___ that we wore the same shirt!
+innocence|The puppy's eyes were full of ___.
+accountant|The ___ helped with taxes.
+attendant|The flight ___ served drinks.
+distant|We saw a ___ mountain.
+infant|An ___ is a baby.
+merchant|The ___ sold spices at the market.
+occupant|The ___ of the apartment is away.
+participant|Each ___ got a T-shirt.
+peasant|The ___ worked in the king's fields.
+pheasant|A ___ ran across the field.
+radiant|Her smile was ___.
+vibrant|The painting has ___ colors.
+absent|Three students were ___ today.
+content|The cat is ___ on my lap.
+current|The ___ pulled the boat downstream.
+decent|He got a ___ grade on the test.
+dependent|A puppy is ___ on its mother.
+fluent|She is ___ in Spanish.
+ingredient|Flour is the main ___.
+instrument|The piano is my favorite ___.
+moment|Wait a ___, please.
+obedient|The ___ dog sat when told.
+parent|A ___ must sign the form.
+talent|She has a ___ for drawing.
+urgent|The message was ___.
+binoculars|We watched birds with ___.
+triathlon|A ___ has swimming, biking, and running.
+trilogy|I read all three books in the ___.
+trio|A ___ of singers performed.
+decimal|Put the ___ point in the right place.
+hexagon|A ___ has six sides.
+kilogram|The bag of rice weighs one ___.
+millimeter|A ___ is very small.
+monorail|We rode the ___ at the airport.
+monotone|He spoke in a boring ___.
+monarch|The ___ butterfly is orange and black.
+duet|The two singers performed a ___.
+dozen|A ___ eggs is twelve eggs.
+absolutely|I ___ love this song!
+basically|___, we need more time.
+career|She wants a ___ in science.
+disappoint|I don't want to ___ my coach.
+extreme|The desert has ___ heat.
+immediate|We need an ___ answer.
+medieval|Knights lived in ___ times.
+speech|She gave a ___ to the class.
+wherever|I'll follow you ___ you go.
+agriculture|Farming is also called ___.
+ancestor|My ___ came from Ireland.
+architect|The ___ designed the new library.
+artifact|The museum displays an ancient ___.
+civilization|The Maya built a great ___.
+colonist|Each ___ worked hard to build the town.
+congress|___ makes the nation's laws.
+culture|Food is a big part of every ___.
+currency|The dollar is our ___.
+debate|The class held a ___ about homework.
+delegate|Each state sent a ___ to the meeting.
+economy|Tourism helps the town's ___.
+empire|The Roman ___ was huge.
+federal|The ___ government is in Washington, D.C.
+heritage|We celebrate our family's ___.
+industry|The car ___ employs many people.
+monument|We visited the ___ in the park.
+patriot|The ___ loved his country.
+petition|We signed a ___ for a new playground.
+republic|A ___ has elected leaders.
+treaty|The countries signed a peace ___.
+veteran|We thanked the ___ for her service.
+volunteer|I ___ at the animal shelter.
+absorb|A sponge can ___ water.
+atom|An ___ is very tiny.
+bacteria|Wash your hands to remove ___.
+carbon|Diamonds are made of ___.
+chemical|Bleach is a strong ___.
+conductor|Copper is a good ___ of electricity.
+consumer|A rabbit is a ___ that eats plants.
+decompose|Leaves ___ into soil.
+density|Oil floats on water because of its lower ___.
+experiment|We did a science ___.
+extinct|Dinosaurs are ___.
+inherit|Children ___ traits from their parents.
+insulator|Rubber is a good ___.
+nucleus|The ___ is the center of a cell.
+observe|___ the bird with your binoculars.
+particle|A ___ of dust floated in the light.
+producer|A plant is a ___ because it makes food.
+species|There are many ___ of birds.
+vapor|Water ___ rose from the pot.
+variable|Change one ___ at a time in your experiment.
+volume|Turn down the ___.
+commute|My dad has a long ___ to work.
+compute|Use a calculator to ___ the total.
+dispute|The referee settled the ___.
+pollute|Don't ___ the river.
+salute|The soldiers ___ the flag.
+contribute|Everyone can ___ to the food drive.
+distribute|Please ___ the papers.
 `);
   add("6", `
 benefit|Regular exercise is a great ___ to your health.
@@ -2020,6 +3561,219 @@ unnecessary|Bring only what you need; skip anything ___.
 withhold|Don't ___ important information.
 yield|___ to pedestrians at the crosswalk.
 `);
+  add("6", `
+malnutrition|Without healthy food, people can suffer from ___.
+biodegradable|Paper bags are ___ and break down in the soil.
+biologist|The ___ studied frogs in the rain forest.
+biosphere|Every living thing on Earth is part of the ___.
+chronicle|The book is a ___ of the town's history.
+creed|The dojo ___ reminds us to be humble and kind.
+reduce|We can ___ waste by recycling.
+factor|Sleep is one ___ in staying healthy.
+defect|The toy was returned because of a ___.
+confide|You can ___ in a trusted friend.
+fidelity|The dog's ___ to its owner was touching.
+confidential|Keep your password ___.
+deflect|Use your forearm to ___ the strike.
+reflex|The doctor tapped my knee to test my ___.
+fracture|The X-ray showed a small ___ in my wrist.
+junction|The two railroads meet at a ___.
+conjunction|"And" is a ___.
+lecture|The scientist gave a ___ on space.
+locate|Can you ___ Peru on the map?
+relocate|The company will ___ to another city.
+logic|Use ___ to solve the puzzle.
+geologist|The ___ studied the rock layers.
+command|The dog obeyed every ___.
+demand|There is a high ___ for the new game.
+maritime|The ___ museum has old ships.
+maternal|My ___ grandmother is my mom's mom.
+paternal|My ___ grandfather is my dad's dad.
+navigate|Sailors ___ by the stars.
+pacify|A lullaby can ___ a crying baby.
+telepathy|In the story, the twins talked by ___.
+popularity|The game's ___ grew quickly.
+populate|Many birds ___ the island.
+dissect|In biology class we will ___ a flower.
+intersect|The two streets ___ at the park.
+bisect|___ the angle into two equal parts.
+consent|A parent must give ___ for the field trip.
+sentiment|The card expressed a kind ___.
+contact|Stay in ___ with your friends.
+intact|The vase arrived ___.
+tempo|The song has a fast ___.
+terrain|The jeep handled the rocky ___.
+thermos|I keep hot soup in my ___.
+tortoise|The ___ beat the hare.
+turbine|The wind ___ makes electricity.
+disturb|Please do not ___ the sleeping baby.
+turbulent|The plane shook in ___ air.
+convention|We went to a comic book ___.
+prevent|Brushing helps ___ cavities.
+intervene|The teacher had to ___ in the argument.
+venture|They will ___ into the cave.
+event|The race is the biggest ___ of the year.
+versus|Tonight it's the Tigers ___ the Bears.
+visibility|Fog reduced ___ on the road.
+evoke|The smell of cookies can ___ happy memories.
+provoke|Don't ___ the angry dog.
+involve|The project will ___ the whole class.
+evolve|Ideas ___ over time.
+improvise|We had to ___ when we forgot the script.
+disguise|He wore a mustache as a ___.
+merchandise|The store sells sports ___.
+enterprise|Her lemonade stand was a successful ___.
+summary|Write a short ___ of the chapter.
+salary|Her ___ went up this year.
+glossary|Look up the word in the ___ at the back of the book.
+commentary|The announcer gave ___ during the game.
+visionary|The ___ inventor imagined flying cars.
+pottery|We made ___ out of clay.
+gallery|The art ___ has paintings and sculptures.
+mastery|Black belts show ___ of the basics.
+recovery|His ___ from the surgery was quick.
+flattery|___ won't change my mind.
+slippery|The wet floor is ___.
+directory|Look for the store in the mall ___.
+victory|The team celebrated its ___.
+sensory|The museum has a ___ room for touching things.
+fungi|Mushrooms are ___.
+cacti|Many ___ grow in the desert.
+radius|The ___ is half the diameter.
+larva|A caterpillar is the ___ of a butterfly.
+larvae|Mosquito ___ live in water.
+antenna|The radio has a long ___.
+antennae|An ant uses its ___ to smell.
+gnome|A garden ___ stood by the flowers.
+heir|The prince is the ___ to the throne.
+honor|It is an ___ to meet you.
+knack|She has a ___ for fixing things.
+mortgage|My parents pay a ___ on our house.
+scenic|We took the ___ route along the coast.
+tomb|The pharaoh's ___ was full of treasure.
+guilt|He felt ___ after breaking the vase.
+vague|The directions were too ___.
+league|I play in a soccer ___.
+intrigue|The mystery is full of ___.
+serial|Every computer has a ___ number.
+cite|___ your sources in the report.
+council|The city ___ voted on the new park.
+counsel|The coach will ___ you on your goals.
+emigrate|Her grandparents chose to ___ from Korea.
+flair|She has a ___ for fashion.
+flare|The ship fired a ___ for help.
+forth|The swing moved back and ___.
+forward|Step ___ with your right foot.
+foreword|Read the ___ before chapter one.
+hoard|Squirrels ___ nuts for winter.
+horde|A ___ of fans rushed the stage.
+idle|Don't leave the car engine running ___.
+idol|The singer was her ___.
+passed|I ___ my belt test!
+past|In the ___, people wrote letters by hand.
+peak|We climbed to the mountain ___.
+wring|___ out your wet towel.
+isle|The ship landed on a tiny ___.
+mussel|A ___ is a shellfish.
+barren|The ___ land had no trees.
+baron|The ___ lived in a castle.
+cache|The squirrel found its ___ of acorns.
+academy|She goes to a music ___.
+accuracy|Check your work for ___.
+algebra|In ___ we solve for x.
+alphabetical|Put the words in ___ order.
+anxiety|Deep breaths can calm ___.
+assignment|Turn in your ___ on Friday.
+astonish|The magician will ___ the crowd.
+authority|The principal has ___ over the school.
+autobiography|She wrote an ___ about her life.
+bargain|The jacket was a ___ at half price.
+calorie|A ___ is a unit of energy in food.
+catalog|We ordered from a ___.
+cathedral|The old ___ has stained glass windows.
+chorus|Everyone joined in the ___.
+commotion|The ___ in the hallway was loud.
+competitor|Each ___ bowed before the match.
+concrete|The sidewalk is made of ___.
+consonant|B is a ___.
+corridor|Walk quietly down the ___.
+coupon|Mom used a ___ at the store.
+crystal|The ___ sparkled in the sun.
+dandelion|I blew on the ___ and made a wish.
+delicate|The butterfly's wings are ___.
+denominator|In one-half, two is the ___.
+diagram|Label the parts on the ___.
+domestic|A dog is a ___ animal.
+emerald|An ___ is a green gem.
+emergency|Call 911 in an ___.
+encounter|We had an ___ with a moose.
+episode|I watched the last ___ of the show.
+escalator|We rode the ___ to the second floor.
+expedition|The ___ reached the North Pole.
+flourish|Plants ___ in sunlight.
+forecast|The ___ calls for rain.
+fortunate|We are ___ to have a great teacher.
+gadget|This kitchen ___ peels apples.
+glimpse|I caught a ___ of the deer.
+gymnast|The ___ did a backflip.
+horizon|The sun sank below the ___.
+humid|The air is hot and ___.
+identical|The twins are ___.
+illustrate|She will ___ the book.
+immune|After the shot, I'm ___ to measles.
+impact|Recycling has a big ___.
+interval|Run in short bursts with a rest ___ between them.
+investigate|The detective will ___.
+isolate|The nurse had to ___ the sick patient.
+journal|I write in my ___ every night.
+kayak|We paddled a ___ on the river.
+landscape|The painting shows a mountain ___.
+lantern|We lit a ___ in the tent.
+legend|The ___ tells of a hidden city.
+mammoth|The woolly ___ lived in the Ice Age.
+marathon|A ___ is over twenty-six miles.
+mascot|Our school ___ is a tiger.
+maximum|The ___ speed is fifty-five.
+meadow|Wildflowers grew in the ___.
+mechanic|The ___ fixed our car.
+minimum|You need a ___ of three players.
+mural|We painted a ___ on the wall.
+myth|The Greek ___ tells about Zeus.
+numerator|In three-fourths, three is the ___.
+orangutan|An ___ swung through the trees.
+original|This painting is the ___, not a copy.
+panorama|The ___ from the top was amazing.
+parchment|The old map was drawn on ___.
+physics|In ___ we study force and motion.
+poetry|We read ___ in English class.
+portrait|The artist painted my ___.
+prairie|Bison roamed the ___.
+prism|A ___ splits light into colors.
+quartz|___ is a clear crystal.
+radar|The pilot watched the ___.
+realistic|Set ___ goals.
+rectangle|A door is shaped like a ___.
+rehearse|We ___ the play every day.
+resource|Water is a precious ___.
+sapphire|A ___ is a blue gem.
+scholar|The ___ studied ancient languages.
+spaghetti|We had ___ and meatballs.
+stadium|The ___ was packed with fans.
+strategy|Our team needs a new ___.
+suburb|We live in a quiet ___.
+summit|They reached the ___ at noon.
+tarantula|A ___ is a big hairy spider.
+thesaurus|Use a ___ to find synonyms.
+trapezoid|A ___ has one pair of parallel sides.
+trombone|He slides the ___ to change notes.
+tropical|Parrots live in ___ forests.
+tsunami|The earthquake caused a ___.
+typhoon|A ___ hit the island.
+utensil|A fork is an eating ___.
+vertical|Draw a ___ line from top to bottom.
+vineyard|Grapes grow in the ___.
+virus|The flu is caused by a ___.
+`);
   add("7", `
 accelerate|Press the gas pedal to ___.
 accumulate|Snow will ___ quickly during the storm.
@@ -2315,6 +4069,211 @@ morale|The win boosted team ___.
 respectfully|Bow ___ to your instructor.
 respectively|Tom and Ana scored ten and twelve points, ___.
 `);
+  add("7", `
+ambidextrous|An ___ person can write well with either hand.
+amphibian|A frog is an ___ that lives in water and on land.
+antidote|The doctor gave the hiker an ___ for the snake bite.
+apathy|Voter ___ means few people show up to vote.
+aquifer|The town's well water comes from an underground ___.
+benefactor|A generous ___ paid for the new playground.
+circumnavigate|The sailors set out to ___ the globe.
+deforestation|___ destroys the homes of many animals.
+dermatologist|A ___ is a skin doctor.
+diagnose|The doctor will ___ what is causing the rash.
+epidermis|The ___ is the outer layer of your skin.
+equinox|On the ___, day and night are about the same length.
+extraterrestrial|The movie was about a friendly ___ from another planet.
+fluctuate|Prices ___ from week to week.
+geothermal|___ energy comes from heat inside the Earth.
+hydroelectric|The dam produces ___ power.
+infrared|Night-vision goggles detect ___ light.
+insomnia|People with ___ have trouble sleeping.
+interact|The zoo lets kids ___ with goats.
+intercept|The safety jumped to ___ the pass.
+malevolent|The ___ villain wanted to rule the world.
+metabolism|Exercise speeds up your ___.
+microorganism|A ___ can only be seen with a microscope.
+monosyllable|"Cat" is a ___.
+multilingual|The ___ guide spoke five languages.
+orthodontist|The ___ put braces on my teeth.
+pathogen|A ___ is a germ that causes disease.
+philosopher|The ancient ___ asked big questions about life.
+photographer|The ___ took our class picture.
+postscript|She added a ___ at the bottom of the letter.
+precaution|Wear a helmet as a ___.
+subconscious|Dreams may come from the ___ mind.
+submerge|Whales can ___ for a long time.
+subterranean|Moles build ___ tunnels.
+superficial|It was only a ___ scratch.
+supernatural|The story had ___ creatures.
+symbiosis|The clownfish and the sea anemone live in ___.
+transcribe|Please ___ the interview into writing.
+translucent|The ___ curtain let in soft light.
+ultraviolet|Sunscreen blocks ___ rays.
+vocation|Teaching was her true ___.
+voracious|He is a ___ reader who finishes a book a day.
+ability|She has the ___ to sing beautifully.
+activity|Hiking is a fun outdoor ___.
+capacity|The stadium has a ___ of fifty thousand.
+celebrity|The ___ signed autographs.
+charity|We raised money for ___.
+creativity|Art class encourages ___.
+dignity|Treat everyone with ___.
+diversity|Our school celebrates ___.
+equality|They marched for ___.
+generosity|Her ___ helped many families.
+humanity|Kindness is the best part of ___.
+humidity|The ___ made my hair frizzy.
+identity|The spy kept his ___ secret.
+majority|The ___ of the class voted for pizza.
+maturity|He handled the loss with ___.
+minority|Only a ___ of students walk to school.
+necessity|Water is a ___.
+personality|My dog has a big ___.
+possibility|There is a ___ of rain.
+priority|Safety is our top ___.
+probability|The ___ of rolling a six is one in six.
+publicity|The event got a lot of ___.
+quality|These shoes are good ___.
+quantity|We need a large ___ of food.
+reality|Her dream became a ___.
+responsibility|Feeding the dog is my ___.
+security|Airport ___ checked our bags.
+sincerity|I believed him because of his ___.
+society|Laws help ___ run smoothly.
+university|My sister goes to a ___.
+velocity|The ___ of the rocket increased.
+abundance|The garden produced an ___ of tomatoes.
+arrogance|His ___ made him hard to coach.
+compliance|The building is in ___ with safety rules.
+defiance|The toddler stomped her foot in ___.
+dependence|The baby bird's ___ on its mother is total.
+diligence|Her ___ earned her top grades.
+eloquence|The speaker's ___ moved the crowd.
+emergence|The ___ of the butterfly from its cocoon was beautiful.
+exuberance|The puppy's ___ made us laugh.
+grievance|The workers filed a ___.
+impatience|His ___ grew as the line got longer.
+inconvenience|Sorry for the ___.
+indifference|She shrugged with ___.
+insistence|At my mom's ___, I wore a coat.
+interference|The radio had static ___.
+magnificence|We admired the ___ of the waterfall.
+negligence|The accident was caused by ___.
+prominence|The young scientist rose to ___.
+recurrence|We want to prevent a ___ of the problem.
+reluctance|He agreed with some ___.
+reverence|We bow with ___ in the dojo.
+vigilance|Lifeguards watch with ___.
+accommodation|The hotel offers ___ for large groups.
+aggravate|Running will ___ your sore ankle.
+annihilate|The comet could ___ everything in its path in the movie.
+commitment|Training takes ___.
+collectible|The old coin is a valuable ___.
+deductible|Donations to charity may be tax ___.
+desirable|A quiet room is ___ for studying.
+despair|Don't give in to ___; keep trying.
+dilapidated|The ___ barn leaned to one side.
+exhilarating|The zip line was ___.
+harassment|The school does not allow ___.
+hindrance|The heavy backpack was a ___ on the hike.
+incidentally|___, I found your lost glove.
+jealousy|___ can hurt a friendship.
+memento|I kept the ticket as a ___.
+relevant|Include only ___ details.
+therefore|It rained; ___, the game was canceled.
+vicious|The ___ storm knocked out power.
+anticipate|We ___ a big crowd.
+assumption|Don't make an ___ without facts.
+attribute|Patience is a good ___ in a teacher.
+bias|A judge should not show ___.
+climax|The ___ of the story was exciting.
+conflict|The main ___ is between the hero and the dragon.
+consequently|He studied hard; ___, he passed.
+context|Use ___ clues to find the meaning.
+contrast|Compare and ___ the two characters.
+convey|Pictures can ___ strong feelings.
+critical|Clean water is ___ for health.
+deduce|From the clues, we can ___ the answer.
+derive|Many English words ___ from Latin.
+evaluate|___ your work before you turn it in.
+excerpt|We read an ___ from the novel.
+imply|What does the author ___?
+indicate|Dark clouds ___ rain.
+interpret|How do you ___ the poem?
+narrator|The ___ tells the story.
+objective|A news report should be ___.
+precise|Give a ___ measurement.
+resolution|The ___ of the story was happy.
+speculate|Scientists ___ about life on other planets.
+stanza|The poem has four lines in each ___.
+subjective|Taste in music is ___.
+symbolism|The author uses ___ throughout the book.
+thesis|State your ___ in the first paragraph.
+acceleration|The car's ___ pushed me back in my seat.
+anatomy|We studied human ___.
+asteroid|An ___ orbits the sun.
+astronomer|The ___ discovered a new comet.
+buoyancy|Salt water increases ___.
+capillary|A ___ is a tiny blood vessel.
+carbohydrate|Bread is a ___.
+circulatory|The heart is part of the ___ system.
+compound|Water is a ___ of hydrogen and oxygen.
+condensation|___ formed on the cold glass.
+conservation|Wildlife ___ protects animals.
+crust|Earth's ___ is the outer layer.
+cytoplasm|The ___ fills the cell.
+digestive|The stomach is part of the ___ system.
+electron|An ___ has a negative charge.
+embryo|The chick ___ grew inside the egg.
+endangered|The panda is an ___ species.
+enzyme|An ___ helps break down food.
+fertilizer|The farmer spread ___ on the field.
+heredity|Eye color is passed on through ___.
+inertia|___ keeps a moving object moving.
+invertebrate|A jellyfish is an ___.
+kinetic|A moving car has ___ energy.
+magma|___ is melted rock under the ground.
+mantle|The ___ lies beneath Earth's crust.
+membrane|The cell ___ controls what goes in and out.
+meteorite|A ___ landed in the field.
+mitosis|Cells divide through ___.
+momentum|The team gained ___ in the second half.
+neutron|A ___ has no charge.
+nocturnal|Owls are ___ animals.
+osmosis|Water enters the cell by ___.
+parasite|A tick is a ___.
+pigment|Chlorophyll is a green ___.
+plankton|Whales eat tiny ___.
+potential|You have great ___.
+proton|A ___ has a positive charge.
+recessive|Blue eyes are a ___ trait.
+respiratory|The lungs are part of the ___ system.
+sediment|___ settled at the bottom of the river.
+solvent|Water is a common ___.
+spectrum|A rainbow shows the color ___.
+tectonic|___ plates move very slowly.
+vertebrate|A fish is a ___.
+wavelength|Red light has a longer ___ than blue light.
+census|The ___ counts the population every ten years.
+colonial|We visited a ___ village.
+commerce|The river was important for ___.
+dynasty|The ___ ruled China for centuries.
+embargo|The country placed an ___ on trade.
+feudalism|Under ___, peasants worked the lord's land.
+immigration|___ brought many cultures to the city.
+imperialism|___ led to colonies around the world.
+legislative|Congress is the ___ branch.
+monarchy|A ___ is ruled by a king or queen.
+nationalism|___ grew stronger during the war.
+nomad|A ___ moves from place to place.
+propaganda|The posters were wartime ___.
+province|Ontario is a ___ of Canada.
+rebellion|The colonists started a ___.
+suffrage|Women fought for ___, the right to vote.
+urban|The city is an ___ area.
+rural|The farm is in a ___ area.
+`);
   add("8", `
 alliteration|"Silly snakes slither slowly" is an example of ___.
 allegory|The story of the tortoise and the hare is an ___ about patience.
@@ -2550,5 +4509,260 @@ emancipation|The ___ freed enslaved people.
 legislation|New ___ protects endangered species.
 municipal|The ___ pool opens in June.
 ratify|The states voted to ___ the amendment.
+`);
+  add("8", `
+abstract|The museum displays ___ art made of shapes and colors.
+acclimate|It takes a few days to ___ to the high altitude.
+accolade|Winning the science fair was a well-earned ___.
+acquisition|The museum's newest ___ is a rare painting.
+adamant|She was ___ that she had locked the door.
+adept|He is ___ at solving puzzles quickly.
+affluent|The ___ neighborhood has large houses.
+alleviate|Ice can ___ the pain of a sprain.
+altruistic|Volunteering at the shelter is an ___ act.
+amiable|Our ___ neighbor always waves hello.
+anachronism|A cell phone in a medieval movie is an ___.
+antiquated|The ___ computer took forever to start.
+apathetic|The ___ crowd barely clapped.
+appease|The babysitter tried to ___ the fussy toddler with a snack.
+arduous|Climbing the mountain was an ___ journey.
+assertive|Be ___ and say no to peer pressure.
+astute|The ___ detective noticed the tiny clue.
+audacious|The ___ plan surprised everyone.
+austere|The monk lived in an ___ room with a single bed.
+authentic|This is an ___ dinosaur bone, not a copy.
+aversion|My cat has an ___ to baths.
+blatant|Copying the answers was a ___ rule violation.
+boisterous|The ___ crowd cheered loudly.
+bolster|Good grades will ___ your application.
+brazen|The ___ squirrel stole food right off my plate.
+brusque|His ___ reply sounded rude.
+cajole|She tried to ___ her brother into doing her chores.
+callous|Laughing at someone's injury is ___.
+candid|Thank you for your ___ feedback.
+capricious|The ___ weather changed every hour.
+censure|The council voted to ___ the member for breaking the rules.
+clandestine|The spies held a ___ meeting.
+coerce|You should never ___ someone into agreeing.
+cognizant|Be ___ of the time limit.
+complacent|Don't become ___ after one win.
+condone|The school does not ___ cheating.
+conducive|A quiet room is ___ to studying.
+confiscate|The teacher will ___ phones used during class.
+conjecture|Without evidence, it's just ___.
+consolidate|Let's ___ our notes into one document.
+conspicuous|The bright orange vest made him ___.
+contemplate|I sat by the lake to ___ my choices.
+contentious|The new rule was a ___ issue.
+contrite|The ___ student apologized sincerely.
+conventional|They chose a ___ design for the house.
+copious|She took ___ notes during the lecture.
+corroborate|The video will ___ her story.
+cumbersome|The ___ costume made it hard to walk.
+cursory|A ___ glance won't catch every mistake.
+debilitate|The illness can ___ a person for weeks.
+deference|He spoke to the elders with ___.
+deplete|Don't ___ the water supply.
+deride|It is unkind to ___ someone's ideas.
+despondent|He was ___ after losing the match, but he bounced back.
+destitute|The charity helps ___ families.
+deter|Lights can ___ raccoons from the yard.
+devious|The ___ fox tricked the crow.
+didactic|The ___ story was meant to teach a lesson.
+diminish|The pain will ___ over time.
+discern|It's hard to ___ the difference between the twins.
+disdain|The cat looked at the bath with ___.
+disparage|Don't ___ others' efforts.
+disparity|There is a ___ between the two test scores.
+dissipate|The fog will ___ by noon.
+docile|The ___ horse let the kids ride it.
+dogmatic|A ___ person refuses to consider other views.
+dubious|I was ___ about the shortcut.
+duplicity|The spy's ___ was finally exposed.
+elated|She was ___ when she earned her black belt.
+elusive|The ___ snow leopard is rarely seen.
+emulate|Younger students ___ the black belts.
+endorse|The coach will ___ the new training plan.
+enhance|Spices ___ the flavor of food.
+enumerate|___ the reasons in a numbered list.
+epitome|She is the ___ of kindness.
+eradicate|Vaccines helped ___ smallpox.
+erratic|The ___ driver swerved across lanes.
+esoteric|The professor's lecture was full of ___ terms.
+euphoria|The team felt pure ___ after the win.
+exasperate|Constant interruptions ___ the speaker.
+exemplify|Black belts ___ discipline.
+exonerate|New evidence helped ___ the innocent man.
+expedite|Paying extra will ___ shipping.
+exploit|The villain tried to ___ the weakness in the wall.
+fabricate|Never ___ data in a science experiment.
+fallacy|It's a ___ that we use only ten percent of our brains.
+fastidious|She is ___ about keeping her room neat.
+fervent|He is a ___ supporter of the team.
+flagrant|The referee called a ___ foul.
+fortitude|It took great ___ to finish the race.
+frivolous|Don't spend money on ___ things.
+frugal|My ___ uncle saves every penny.
+futile|Arguing with the referee is ___.
+garrulous|The ___ passenger talked the whole flight.
+gratuitous|The movie had ___ explosions that added nothing.
+haphazard|The books were stacked in a ___ pile.
+idealistic|The ___ student wanted to change the world.
+immutable|The laws of physics are ___.
+impede|Fallen trees ___ traffic.
+impetuous|His ___ decision surprised us all.
+inane|The ___ joke made no sense.
+incisive|Her ___ question cut to the heart of the issue.
+incongruous|A tuxedo at the beach looks ___.
+indignant|She was ___ when accused unfairly.
+indolent|The ___ cat slept all afternoon.
+ineffable|The beauty of the sunset was ___.
+inept|The ___ thief got caught right away.
+inherent|There is ___ risk in rock climbing.
+innocuous|The question seemed ___.
+insatiable|She has an ___ curiosity.
+insinuate|Are you trying to ___ that I cheated?
+instigate|Don't ___ an argument.
+intrepid|The ___ explorer crossed the desert.
+intuitive|The app is ___ and easy to use.
+irate|The ___ customer demanded a refund.
+jeopardize|Skipping practice will ___ your spot on the team.
+judicious|Make ___ use of your time.
+laborious|Copying the book by hand was ___.
+lament|The poem is a ___ for a lost friend.
+languid|We spent a ___ afternoon by the pool.
+lethargic|The heat made everyone ___.
+lucid|Her explanation was clear and ___.
+malleable|Gold is a ___ metal.
+mediate|The counselor will ___ the disagreement.
+melancholy|The rainy day made her feel ___.
+mundane|Doing laundry is a ___ task.
+negligible|The cost difference is ___.
+nostalgia|Old photos fill me with ___.
+nurture|Parents ___ their children.
+oblivious|He was ___ to the noise around him.
+obstinate|The ___ mule refused to move.
+omnipotent|In the myth, the god was ___.
+opulent|The palace was ___.
+ostracize|Never ___ someone for being different.
+partisan|The debate became very ___.
+perfunctory|He gave a ___ wave and kept walking.
+perpetual|The fountain seemed to be in ___ motion.
+pervasive|The smell of smoke was ___.
+philanthropist|The ___ donated millions to schools.
+placate|The manager tried to ___ the upset customer.
+poignant|The movie's ending was ___.
+pompous|The ___ knight bragged constantly.
+precedent|The ruling set a ___ for future cases.
+pretentious|The ___ critic used big words to sound smart.
+profound|The book had a ___ effect on me.
+prudent|It is ___ to save money.
+quell|The police worked to ___ the riot.
+raucous|The ___ party kept the neighbors awake.
+recluse|The ___ rarely left his cabin.
+rectify|Let's ___ the mistake.
+refute|Use evidence to ___ the claim.
+reiterate|Let me ___ the main point.
+remorse|He felt ___ for his harsh words.
+renounce|The prince chose to ___ the throne.
+resolute|She was ___ in her decision.
+reticent|The ___ student rarely spoke up.
+rudimentary|I have only a ___ knowledge of French.
+sagacious|The ___ old owl gave good advice.
+sanction|The league may ___ the team for breaking the rules.
+scrupulous|The ___ accountant checked every number.
+serene|The lake was ___ at dawn.
+solace|She found ___ in music.
+sporadic|We heard ___ thunder all night.
+squander|Don't ___ your allowance.
+stagnant|Mosquitoes breed in ___ water.
+steadfast|He was a ___ friend.
+stoic|She remained ___ despite the pain.
+subordinate|The manager gave the task to a ___.
+substantiate|Can you ___ your claim with facts?
+succumb|Don't ___ to peer pressure.
+surreptitious|He took a ___ glance at the clock.
+tactful|Be ___ when giving feedback.
+tedious|Sorting the coins was ___.
+temperate|The region has a ___ climate.
+tenuous|The bridge had a ___ hold on the cliff.
+trepidation|She approached the stage with ___.
+trivial|Don't worry about ___ details.
+turmoil|The storm left the town in ___.
+unscrupulous|The ___ salesman lied to customers.
+usurp|The villain tried to ___ the throne.
+vacillate|I ___ between pizza and tacos every Friday.
+venerate|Many cultures ___ their elders.
+veracity|The reporter checked the ___ of the story.
+vigilant|Stay ___ when crossing the street.
+vindicate|The test results will ___ her theory.
+virtuoso|The violin ___ amazed the audience.
+wary|Be ___ of strangers online.
+wistful|She gave a ___ smile as she looked at old photos.
+zenith|The sun reached its ___ at noon.
+coefficient|In 3x, the ___ is 3.
+exponent|In two cubed, three is the ___.
+hypotenuse|The ___ is the longest side of a right triangle.
+integer|Negative five is an ___.
+isosceles|An ___ triangle has two equal sides.
+linear|The graph shows a ___ relationship.
+parabola|The ball's path made a ___.
+polynomial|We factored the ___ in algebra.
+quadratic|We solved a ___ equation.
+scalene|A ___ triangle has no equal sides.
+theorem|The Pythagorean ___ is about right triangles.
+vertex|The ___ is the corner of an angle.
+algorithm|The computer follows an ___.
+binary|Computers use ___ code made of ones and zeros.
+isotope|Carbon-14 is an ___ of carbon.
+molecular|We studied the ___ structure of water.
+periodic|Look up gold on the ___ table.
+photon|A ___ is a particle of light.
+radioactive|Uranium is ___.
+electromagnet|An ___ works only when electricity flows.
+combustion|Fire is a form of ___.
+oxidation|Rust is caused by ___.
+homeostasis|Sweating helps your body maintain ___.
+taxonomy|___ is the science of classifying living things.
+genotype|An organism's ___ is its genetic makeup.
+phenotype|Eye color is part of a person's ___.
+mutation|A ___ is a change in DNA.
+sedimentary|Sandstone is a ___ rock.
+igneous|Granite is an ___ rock.
+metamorphic|Marble is a ___ rock.
+seismic|The ___ waves were recorded far away.
+topography|The map shows the ___ of the region.
+abolitionist|The ___ spoke out against slavery.
+ambassador|The ___ represented her country abroad.
+anarchy|Without rules, the game turned into ___.
+aristocracy|The ___ owned most of the land.
+autocracy|In an ___, one person holds all power.
+bicameral|Congress is a ___ legislature with two houses.
+bipartisan|The bill had ___ support.
+boycott|The students chose to ___ the cafeteria.
+civic|Voting is a ___ duty.
+coalition|A ___ of groups worked together.
+confederacy|The states formed a ___.
+delegation|A ___ from Japan visited our school.
+diplomacy|___ helped end the conflict.
+electoral|The ___ votes were counted.
+executive|The president leads the ___ branch.
+filibuster|The senator gave a long ___.
+impeachment|The House voted on ___.
+inauguration|The ___ of the new mayor was held downtown.
+judiciary|The ___ interprets the law.
+liberal|She took a ___ amount of whipped cream.
+lobbyist|The ___ met with lawmakers.
+mandate|The new law is a state ___.
+ordinance|A city ___ bans parking here overnight.
+preamble|The ___ begins with "We the People."
+precinct|Voters went to their ___.
+referendum|Citizens voted in a ___.
+secession|The ___ of southern states led to war.
+segregation|The law ended ___ in schools.
+sovereignty|Each nation has its own ___.
+statute|The ___ sets the speed limit.
+totalitarian|A ___ government controls every part of life.
+veto|The governor may ___ the bill.
 `);
 })();

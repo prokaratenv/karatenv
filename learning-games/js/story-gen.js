@@ -93,7 +93,7 @@ BD.StoryGen = (function () {
 
   /* ---------- people ---------- */
   const GIRLS = ("Maya Ava Lily Zoe Nora Ruby Mia Ivy Ella Grace Hana Lucia Amara Priya Sofia Chloe Layla Rosa Kimmy Mackenzie " +
-    "Lauryn Kyra Bridgette Jada Mei Elena Tessa Naomi Isla Aria Leah Gemma Talia Nina Daisy June Keira Anya Lena Willa").split(" ");
+    "Jada Mei Elena Tessa Naomi Isla Aria Leah Gemma Talia Nina Daisy June Keira Anya Lena Willa").split(" ");
   const BOYS = ("Leo Sam Eli Omar Ben Max Jack Theo Noah Mateo Kai Owen Ravi Jonah Luis Andre Felix Hugo Billy Tommy " +
     "Rylan Zumi Diego Ezra Kofi Jin Caleb Marcus Nico Aaron Milo Reed Isaac Dev Arlo Wyatt Emmett Tariq Simon Joel").split(" ");
   function pron(c, pre, girl) {
@@ -158,6 +158,26 @@ BD.StoryGen = (function () {
     vanished: [3, "went away completely", "gone|away|disappear|went|left|no longer|not there"],
     courage: [3, "being brave even when you are afraid", "brave|bold|not afraid|fear|scared|afraid|strong|hero"]
   };
+  Object.assign(VOC, {
+    hatch: [1, "come out of an egg", "egg|out|born|break"],
+    habitat: [2, "the natural home of an animal or plant", "home|live|where|place"],
+    nocturnal: [2, "awake and active at night", "night|dark"],
+    herbivore: [2, "an animal that eats only plants", "plant"],
+    carnivore: [2, "an animal that eats other animals", "meat|animal"],
+    omnivore: [2, "an animal that eats both plants and animals", "both|plant|animal|everything|anything"],
+    prey: [2, "an animal that is hunted and eaten by another animal", "hunt|eaten|food|caught|catch"],
+    predators: [2, "animals that hunt other animals for food", "hunt|eat|catch|kill|chase"],
+    adaptation: [3, "a body part or behavior that helps a living thing survive", "surviv|help|live|body|behav|trait"],
+    camouflage: [2, "colors or patterns that help an animal blend in and hide", "blend|hide|hidden|match|see|disguise"],
+    mammal: [2, "an animal with hair or fur that feeds its babies milk", "milk|hair|fur"],
+    reptile: [2, "an animal with dry, scaly skin", "scal|skin"],
+    amphibian: [2, "an animal that can live both in water and on land", "water|land|both"],
+    insect: [2, "a small animal with six legs and three body parts", "six|6|leg|three|3"],
+    remarkable: [3, "amazing or worth noticing", "amazing|special|unusual|surpris|notice|wow|great|impressive|interesting|cool"],
+    talons: [2, "sharp, curved claws", "claw|nail|sharp"],
+    proboscis: [2, "a long, tube-shaped mouth used like a straw", "mouth|tube|straw|tongue"],
+    blubber: [2, "a thick layer of fat", "fat"]
+  });
 
   /* ================= REALISTIC FICTION =================
      beats: [bands, chance, "flags", ...phrasings]   (flags: "x" sets x, "?x" needs x, "?!x" needs not x)
@@ -353,7 +373,7 @@ BD.StoryGen = (function () {
     title: ["{Name}'s {PlantN} Seeds", "Waiting for a Sprout", "The Little Seed", "Grow, Little Seed!", "{Name}'s Garden", "Good Things Take Time"],
     beats: [
       ["0", 1, "", "{Name} plants a {plantN} seed.", "{Name} and {helper} plant a {plantN} seed."],
-      ["0", 1, "", "{He} gives it water every day.", "{Name} waters the seed."],
+      ["0", 1, "", "{Name} gives it water every day.", "{Name} waters the seed."],
       ["0", 0.7, "", "{He} waits and waits.", "Nothing happens. {Name} has to wait."],
       ["0", 1, "", "Then a ^tiny green sprout pops up!", "One day, a ^tiny green sprout comes up!"],
       ["0", 0.8, "", "Now {Name} has {result}.", "It grows and grows. Now {Name} has {result}."],
@@ -561,7 +581,7 @@ BD.StoryGen = (function () {
     },
     title: ["A Rainy Day Plan", "Rain, Rain, Go Away", "Plan B", "{Name}'s Rainy Day", "The Best Rainy Day", "When It Rained"],
     beats: [
-      ["0", 1, "", "{Name} was ready for {plan}.", "Today was the day for {plan}!"],
+      ["0", 1, "", "{Name} was ready for {plan}.", "{Name} was so excited for {plan}!"],
       ["0", 1, "", "But then it started to rain.", "Drip, drop. Oh no, rain!"],
       ["0", 0.6, "", "{Name} felt sad.", "{Name} looked out the window and frowned."],
       ["0", 1, "", "So {Name} and {helper} {indoor}.", "{Helper} had an idea. They {indoor}."],
@@ -783,9 +803,766 @@ BD.StoryGen = (function () {
       ["infer", "1+", "", "How did {Name} feel when nobody stopped?", "{He} felt discouraged and wanted to give up.", "Look at what {Name} wanted to do.", SAD + "|discourag|give up|quit"],
       ["infer", "2+", "", "What would have happened if they had given up after the first hour?", "They would not have raised any money for {cause}.", "Think about what happened after the idea.", "no money|not raise|wouldn't|would not|nothing|no|not help"]
     ] });
-  const DOJO = STORY, FACTS = [];
-  function animalPassage(c) { return runPlot(c, STORY); }
-  const howtoPassage = animalPassage, commPassage = animalPassage, histPassage = animalPassage;
+
+  /* ================= DOJO STORIES =================
+     Karate is about respect, focus, self-control and kindness.
+     Nobody is ever hurt; weapons appear only in demonstrations. */
+  const DOJO = [];
+  const SENSEIS = [["Sensei Mara", 1], ["Sensei Joe", 0], ["Sensei Dana", 1], ["Sensei Ken", 0], ["Sensei Ana", 1], ["Sensei Sam", 0]];
+  const BELTS = [["white", "yellow"], ["yellow", "orange"], ["orange", "green"], ["green", "blue"], ["blue", "purple"], ["purple", "brown"]];
+  function dojoKid(c) {
+    kid(c); pal(c);
+    const s = P(SENSEIS); c.sensei = s[0]; c.senseiK = "sensei|teacher|instructor|" + s[0].split(" ")[1].toLowerCase(); pron(c, "s", !!s[1]);
+    const b = P(BELTS); c.belt = b[0]; c.next = b[1];
+    return c;
+  }
+
+  DOJO.push({ k: "kata", g: "dojo",
+    set: function (c) {
+      dojoKid(c);
+      slot(c, "trouble", ["kept forgetting the middle part~forget|forgot|middle", "kept turning the wrong way~turn|wrong way|direction", "kept mixing up two of the blocks~mix|block|wrong"]);
+      slot(c, "tip", ["break the kata into small parts and learn one part at a time~small|part|piece|one at a time|break", "say each move out loud while doing it~out loud|say|aloud|name", "go very slowly first, then a little faster each time~slow|faster|speed"]);
+      c.subject = "kata:" + c.troubleN;
+    },
+    title: ["{Name}'s New Kata", "One Move at a Time", "Practice in the Living Room", "The Tricky Kata", "{Name} Remembers", "Slow, Then Fast"],
+    beats: [
+      ["0", 1, "", "{Name} is learning a new kata at the dojo.", "At karate, {Name} learns a new kata."],
+      ["0", 1, "", "But {he} {trouble}.", "It is hard. {Name} {trouble}."],
+      ["0", 1, "", "{Sensei} says to {tip}.", "{Sensei} shows {him} how to {tip}."],
+      ["0", 0.8, "", "{Name} practices at home every day.", "{Name} practices and practices."],
+      ["0", 1, "", "Now {Name} can do the whole kata! {He} bows to {Sensei}.", "At class, {he} does the whole kata. {Sensei} smiles."],
+      ["1+", 1, "", "At the ^dojo, {Name} was learning a new ^kata for {his} {next} belt.", "@2 To earn {his} {next} belt, {Name} had to learn a new ^kata, a set of karate moves done in order."],
+      ["1+", 1, "", "But {he} {trouble}.", "@2 The first part was easy, but {Name} {trouble}."],
+      ["1+", 0.7, "", "{Name} felt ^frustrated.", "@2 Every time it went wrong, {Name} felt more ^frustrated.", "@3 After a week of mistakes, {Name} began to doubt {self}."],
+      ["1+", 1, "", "After class, {sensei} told {him} to {tip}.", "@2 After class, {sensei} knelt beside {him} and suggested that {he} {tip}."],
+      ["2+", 0.6, "", "\"Every black belt was once a beginner,\" {she} said.", "@3 \"A black belt is a white belt who never quit,\" {she} said with a smile."],
+      ["1+", 1, "", "{Name} practiced in {his} living room every night.", "@2 Every night, {Name} cleared a space in the living room and practiced the kata with great ^focus."],
+      ["1+", 0.6, "", "{His} little dog watched from the couch.", "@2 Sometimes {his} family watched and cheered {him} on."],
+      ["1+", 1, "", "At the next class, {Name} did the whole kata without a mistake.", "@2 At the next class, {Name} moved through the entire kata smoothly, from the first bow to the last."],
+      ["1+", 1, "", "{Sensei} bowed to {him} and said, \"Great work.\"", "@2 {Sensei} nodded and said, \"That is what practice looks like.\""],
+      ["2+", 0.6, "", "{Name} learned that hard things get easier with practice.", "@3 {Name} realized that patience and practice had turned something impossible into something {he} could do."]
+    ],
+    qs: [
+      ["main", "0", "", "What is this story about?", "{Name} learns a new kata at karate.", "What is {Name} learning?", "kata|karate|move|learn"],
+      ["main", "0", "", "Who is this story about?", "{Name}.", "Who is learning the kata?", "{nameK}"],
+      ["main", "1+", "", ["What happens in this story?", "What is this story mostly about?"], "{Name} had trouble learning a new kata, but {he} practiced every night until {he} could do it.", "Think about the problem and how {Name} solved it.", "kata|move|karate|learn", "practic|trouble|hard|forget|finally|could|did it|mistake|tip"],
+      ["main", "2+", "", ["What lesson does this story teach?", "What lesson does {Name} learn?"], "Practice and patience make hard things easier.", "Think about what changed between the first class and the last.", "practic|patien|give up|keep|try|easier|work"],
+      ["main", "3", "", "What is the theme of this story?", "Hard work and patience turn something difficult into something you can do.", "What did {sensei} mean about black belts?", "practic|patien|give up|quit|work|keep|try|persever"],
+      ["detail", "0", "", "Where does {Name} learn the kata?", "At the dojo, or karate class.", "Look at the first sentence.", "dojo|karate|class"],
+      ["detail", "0", "", "What does {sensei} tell {Name} to do?", "To {tip}.", "What does {sensei} say?", "{tipK}"],
+      ["detail", "1+", "", "What was hard for {Name}?", "{He} {trouble}.", "Find the word \"But.\"", "{troubleK}"],
+      ["detail", "1+", "", "What did {sensei} tell {Name} to do?", "To {tip}.", "Find what {sensei} said after class.", "{tipK}"],
+      ["detail", "1+", "", "Where did {Name} practice at home?", "In {his} living room.", "Find the word \"practiced.\"", "living room|home|house"],
+      ["detail", "1+", "", "What belt was {Name} working toward?", "{His} {next} belt.", "Reread the first sentence.", "{next}"],
+      ["infer", "0", "", "How does {Name} feel at the end?", "Proud and happy.", "{Name} did the whole kata!", HAPPY],
+      ["infer", "1+", "", "How did {Name} feel when {he} kept making mistakes?", "{He} felt frustrated.", "Look right after the problem.", SAD + "|doubt"],
+      ["infer", "1+", "", "Why do you think {sensei}'s tip helped?", "It made the kata easier to learn, so {Name} could focus on one thing at a time.", "Think about how the tip changed the practice.", "easier|easy|small|slow|one|focus|remember|time|simple|part|step"],
+      ["infer", "2+", "", "Why did {sensei} say that every black belt was once a beginner?", "To show {Name} that everyone struggles at first, so {he} should not give up.", "Who is {sensei} talking to, and how is that person feeling?", "everyone|beginner|start|give up|quit|keep|struggl|mistake|encourag|hard"]
+    ] });
+
+  DOJO.push({ k: "test", g: "dojo",
+    set: function (c) {
+      dojoKid(c);
+      slot(c, "calm", ["took a slow, deep breath~breath|breathe", "pictured {him}self doing every move perfectly~picture|imagine|see", "remembered all of {his} hard practice~remember|practic"]);
+      c.subject = "test:" + c.next;
+    },
+    title: ["Belt Test Day", "The {Next} Belt", "{Name}'s Big Test", "Ready, Set, Kiai!", "A New Belt for {Name}", "Test Day Jitters"],
+    beats: [
+      ["0", 1, "", "Today is {Name}'s belt test.", "{Name} has a belt test at the dojo today."],
+      ["0", 1, "", "{He} feels ^nervous.", "{Name}'s legs feel ^wobbly."],
+      ["0", 1, "", "{He} takes a big breath.", "{Name} {calm}."],
+      ["0", 1, "", "{He} kicks and punches and yells, \"Kiai!\"", "{He} does {his} kicks and blocks."],
+      ["0", 1, "", "{Name} gets a {next} belt! {He} is so ^proud.", "{Sensei} gives {him} a new {next} belt!"],
+      ["1+", 1, "", "Today was {Name}'s test for {his} {next} belt.", "@2 After three months of training, it was finally the day of {Name}'s {next} belt test."],
+      ["1+", 1, "", "{His} hands were sweaty, and {his} heart was pounding.", "@2 As {he} tied {his} {belt} belt, {his} fingers trembled.", "@3 {Name}'s stomach fluttered as families filled the chairs along the wall."],
+      ["1+", 0.8, "", "{Name} worried that {he} would forget {his} kata.", "@2 What if {he} forgot {his} kata in front of everyone?"],
+      ["1+", 1, "", "So {he} {calm}.", "@2 To calm down, {Name} closed {his} eyes and {calm}."],
+      ["1+", 1, "", "When {sensei} called {his} name, {Name} bowed and stepped onto the mat.", "@2 When {his} name was called, {Name} bowed, stepped onto the mat, and let {his} training take over."],
+      ["1+", 1, "", "{He} did {his} kicks, blocks, and kata with a loud ^kiai.", "@2 {He} moved through {his} kicks, blocks, and kata with sharp ^focus, finishing with a strong ^kiai."],
+      ["1+", 1, "", "At the end, {sensei} tied a new {next} belt around {his} waist.", "@2 At the end of the test, {sensei} handed {him} a crisp new {next} belt."],
+      ["1+", 1, "", "Everyone clapped, and {Name} bowed to {sensei}.", "@2 The room filled with ^applause, and {Name} bowed deeply to {sensei}."],
+      ["1+", 0.8, "", "{Name} could not stop smiling.", "@2 {Name} felt ten feet tall."],
+      ["2+", 0.6, "", "{Name} learned that all {his} practice had prepared {him} for this moment.", "@3 {Name} understood that ^confidence comes from preparation."]
+    ],
+    qs: [
+      ["main", "0", "", "What is this story about?", "{Name} takes a belt test and gets a new belt.", "What happens at the dojo today?", "belt|test"],
+      ["main", "0", "", "Who is this story about?", "{Name}.", "Whose test is it?", "{nameK}"],
+      ["main", "1+", "", ["What happens in this story?", "What is this story mostly about?"], "{Name} was nervous at {his} belt test, but {he} stayed calm and earned {his} {next} belt.", "Think about how {Name} felt at the start and what happened at the end.", "test|belt", "nervous|calm|earn|pass|new|got|{next}|did it"],
+      ["main", "2+", "", ["What lesson does this story teach?", "What is the lesson of this story?"], "If you prepare and stay calm, you can do your best even when you are nervous.", "Think about what helped {Name} succeed.", "practic|prepar|calm|breath|nervous|brave|train|focus|best"],
+      ["detail", "0", "", "What color is {Name}'s new belt?", "{Next}.", "Look at the end.", "{next}"],
+      ["detail", "0", "", "Where is the belt test?", "At the dojo.", "Where does {Name} do karate?", "dojo|karate|class"],
+      ["detail", "1+", "", "What belt was {Name} testing for?", "The {next} belt.", "Reread the first sentence.", "{next}"],
+      ["detail", "1+", "", "What did {Name} do to calm down?", "{He} {calm}.", "Find the word \"calm\" or \"So.\"", "{calmK}"],
+      ["detail", "1+", "", "What did {Name} do when {his} name was called?", "{He} bowed and stepped onto the mat.", "Find when {sensei} called {his} name.", "bow|mat|step"],
+      ["detail", "1+", "", "What did {sensei} give {Name} at the end?", "A new {next} belt.", "Look near the end.", "belt|{next}"],
+      ["infer", "0", "", "How does {Name} feel at first?", "Nervous.", "Look at the beginning.", "nervous|scared|afraid|worr|wobbl|shak"],
+      ["infer", "0", "", "How does {Name} feel at the end?", "Proud and happy.", "Look at the end.", HAPPY],
+      ["infer", "1+", "", "How did {Name} feel before the test? How do you know?", "{He} felt nervous, because {his} body was shaking or {his} heart was pounding.", "Look at what {Name}'s body was doing.", "nervous|scared|afraid|worr|anxious|fear|shak|sweat|pound|trembl"],
+      ["infer", "1+", "", "Why did {Name} bow to {sensei}?", "To show respect and thanks to {his} teacher.", "Think about what a bow means in the dojo.", "respect|thank|polite|honor|manners"],
+      ["infer", "2+", "", "Why do you think {Name} could not stop smiling?", "Because {he} was proud that {he} passed and earned {his} new belt.", "Think about how long {Name} had trained.", "proud|happy|pass|earn|new belt|did it|excit|glad"]
+    ] });
+
+  DOJO.push({ k: "newstudent", g: "dojo",
+    set: function (c) {
+      dojoKid(c);
+      slot(c, "showed", ["how to bow at the door~bow|door", "how to tie {palhis} belt~tie|belt|knot", "where to line up~line|stand|spot"]);
+      c.subject = "newstudent:" + c.showedN;
+    },
+    title: ["The New Student", "{Pal}'s First Class", "A Helping Hand at the Dojo", "Welcome to the Dojo", "{Name} Shows the Way"],
+    beats: [
+      ["0", 1, "", "A new kid named {pal} comes to karate.", "{Pal} is new at the dojo."],
+      ["0", 1, "", "{Pal} does not know what to do.", "{Pal} looks ^shy."],
+      ["0", 1, "", "{Name} shows {palhim} {showed}.", "{Name} helps {pal}. {He} shows {palhim} {showed}."],
+      ["0", 1, "", "They practice kicks together.", "They do jumping jacks side by side."],
+      ["0", 1, "", "{Pal} smiles. {Palhe} has a new friend!", "{Pal} says, \"Thank you, {name}!\""],
+      ["1+", 1, "", "One day, a new student named {pal} came to {Name}'s karate class.", "@2 On Tuesday, a new student named {pal} stood at the edge of the mat, looking unsure."],
+      ["1+", 1, "", "{Pal} did not know the rules of the ^dojo.", "@2 {Pal} did not know any of the dojo's customs, and {palhe} looked ^nervous."],
+      ["1+", 0.7, "", "{Palhe} stood alone and watched the other kids.", "@2 {Palhe} kept tugging at {palhis} brand-new white belt."],
+      ["1+", 0.7, "", "{Name} remembered {his} own first class.", "@2 {Name} remembered how confusing {his} own first class had been."],
+      ["1+", 1, "", "So {Name} walked over and showed {pal} {showed}.", "@2 So {Name} walked over, smiled, and quietly showed {pal} {showed}."],
+      ["2+", 0.6, "", "{He} also explained that everyone bows to show ^respect.", "@3 {He} explained that the bow is a way of showing ^respect to your teacher and your partners."],
+      ["1+", 1, "", "During class, {Name} stood next to {pal} so {palhe} could copy the moves.", "@2 During class, {Name} stayed beside {pal}, so {palhe} could follow along."],
+      ["1+", 1, "", "At the end, {pal} was smiling.", "@2 By the end of class, {pal} was laughing and trying every kick."],
+      ["1+", 0.8, "", "{Sensei} noticed and thanked {Name} for being so kind.", "@2 {Sensei} told {Name} that helping others is what a true martial artist does."],
+      ["2+", 0.6, "", "{Name} learned that kindness is part of karate.", "@3 {Name} realized that being a leader means helping others feel welcome."]
+    ],
+    qs: [
+      ["main", "0", "", "What is this story about?", "{Name} helps a new kid at karate.", "What does {Name} do for {pal}?", "help|show|friend|kind|new"],
+      ["main", "0", "", "Who is new at karate?", "{Pal}.", "Look at the first sentence.", "{palK}"],
+      ["main", "1+", "", ["What happens in this story?", "What is this story mostly about?"], "{Name} helped a new student named {pal} feel welcome at the dojo.", "Think about what {Name} did for {pal}.", "help|show|kind|welcome|friend|teach", "{palK}|new|student"],
+      ["main", "2+", "", ["What lesson does this story teach?", "What is the lesson of this story?"], "Being kind and helping others is part of being a good martial artist.", "Think about what {sensei} said to {Name}.", "kind|help|welcome|leader|respect|nice|care"],
+      ["detail", "0", "", "What does {Name} show {pal}?", "{Showed}.", "What does {Name} help with?", "{showedK}"],
+      ["detail", "1+", "", "Who was the new student?", "{Pal}.", "Reread the first sentence.", "{palK}"],
+      ["detail", "1+", "", "What did {Name} show {pal}?", "{Showed}.", "Find the word \"showed.\"", "{showedK}"],
+      ["detail", "1+", "", "Where did {Name} stand during class?", "Next to {pal}, so {palhe} could copy the moves.", "Find the words \"During class.\"", "next|beside|{palK}|side"],
+      ["infer", "0", "", "How does {pal} feel at the start?", "Shy or nervous.", "{Pal} does not know what to do.", "shy|nervous|scared|worr|afraid|sad|alone|lost"],
+      ["infer", "0", "", "How does {pal} feel at the end?", "Happy.", "Look at the end.", HAPPY],
+      ["infer", "1+", "", "How did {pal} feel at the beginning? How do you know?", "{Palhe} felt nervous, because {palhe} did not know what to do.", "Look at what {pal} did before class.", "nervous|shy|scared|worr|afraid|unsure|confus|alone|lost|sad"],
+      ["infer", "1+", "", "Why did {Name} help {pal}?", "{He} remembered how hard the first class was and wanted {pal} to feel welcome.", "Think about what {Name} remembered or noticed.", "remember|new|hard|confus|welcome|kind|nice|help|nervous|alone|first"],
+      ["infer", "2+", "", "Why do you think {sensei} thanked {Name}?", "Because {Name} was kind and acted like a leader.", "What did {sensei} see {Name} do?", "kind|help|leader|nice|respect|good|example"]
+    ] });
+
+  DOJO.push({ k: "board", g: "dojo",
+    set: function (c) {
+      dojoKid(c);
+      slot(c, "strike", ["palm strike~palm|strike|hand", "hammer fist~hammer|fist|hand", "front kick~kick|front|foot", "side kick~kick|side|foot"]);
+      slot(c, "tip", ["look at a spot just past the board~past|beyond|behind|through|spot", "breathe out and kiai as {he} strikes~breath|kiai|shout|yell", "keep {his} eyes on the target and trust {his} training~eye|target|trust|focus"]);
+      c.subject = "board:" + c.strikeN;
+    },
+    title: ["The Board Break", "Focus!", "{Name} Breaks the Board", "Through the Board", "The Second Try", "Snap!"],
+    beats: [
+      ["0", 1, "", "{Name} wants to break a board at karate.", "Today {Name} gets to break a wood board."],
+      ["0", 1, "", "{Sensei} holds the board.", "{Sensei} holds the board tight."],
+      ["0", 1, "", "{Name} tries a {strike}. The board does not break.", "The first time, the board does not break."],
+      ["0", 1, "", "{Sensei} says to {tip}.", "{Sensei} says, \"Try again. Focus!\""],
+      ["0", 1, "", "Snap! The board breaks! {Name} cheers.", "This time, snap! The board breaks in two."],
+      ["1+", 1, "", "Today was board-breaking day at the ^dojo.", "@2 For weeks, {Name} had practiced {his} {strike} for board-breaking day at the ^dojo."],
+      ["1+", 0.7, "", "Students only break boards with their instructor holding them, so everyone stays safe.", "@2 In {Name}'s dojo, students break boards only with an instructor, and only after learning how to do it safely."],
+      ["1+", 1, "", "{Sensei} held up a thin wood board.", "@2 {Sensei} held a thin pine board firmly at the right height."],
+      ["1+", 1, "", "{Name} tried {his} {strike}, but the board did not break.", "@2 {Name} struck the board with a {strike}, but it only wobbled."],
+      ["1+", 0.8, "", "{Name}'s face felt hot, and {he} wanted to sit down.", "@2 {Name} felt embarrassed, and {his} ^confidence began to shrink."],
+      ["1+", 1, "", "{Sensei} told {him} to {tip}.", "@2 \"You have the skill,\" {sensei} said. \"This time, {tip}.\""],
+      ["1+", 1, "", "{Name} took a breath, focused, and tried again.", "@2 {Name} took a deep breath and gathered all of {his} ^focus."],
+      ["1+", 1, "", "Snap! The board split in two.", "@2 With a loud snap, the board broke cleanly in half."],
+      ["1+", 1, "", "The class cheered, and {Name} bowed to {sensei}.", "@2 The class cheered, and {Name} bowed to {sensei} with a huge grin."],
+      ["2+", 0.6, "", "{Name} learned that focus and believing in {self} can make a big difference.", "@3 {Name} learned that ^focus and ^confidence matter as much as strength."]
+    ],
+    qs: [
+      ["main", "0", "", "What is this story about?", "{Name} breaks a board at karate.", "What does {Name} want to do?", "board|break"],
+      ["main", "0", "", "Who is this story about?", "{Name}.", "Who breaks the board?", "{nameK}"],
+      ["main", "1+", "", ["What happens in this story?", "What is this story mostly about?"], "{Name} could not break the board at first, but {he} focused and broke it on the second try.", "Think about the first try and the second try.", "board", "focus|again|second|try|break|broke|split"],
+      ["main", "2+", "", ["What lesson does this story teach?", "What is the lesson of this story?"], "Focus and believing in yourself can help you succeed.", "Think about what changed on the second try.", "focus|believ|confiden|try|again|give up|trust"],
+      ["detail", "0", "", "Who holds the board?", "{Sensei}.", "Look at the second sentence.", "{senseiK}"],
+      ["detail", "0", "", "What happens the first time?", "The board does not break.", "Listen to the first try.", "not break|doesn't break|did not break|didn't break|does not break|no"],
+      ["detail", "1+", "", "What kind of strike did {Name} use?", "A {strike}.", "Find the word \"tried\" or \"struck.\"", "{strikeK}"],
+      ["detail", "1+", "", "What happened on the first try?", "The board did not break.", "Find the first try.", "not break|didn't break|did not break|wobbl|no"],
+      ["detail", "1+", "", "What did {sensei} tell {Name} to do?", "To {tip}.", "Find what {sensei} said.", "{tipK}"],
+      ["detail", "1+", "", "How do students stay safe when they break boards?", "They only break boards with an instructor.", "Find the word \"safe\" or \"safely.\"", "instructor|teacher|sensei|hold|safe|learn"],
+      ["infer", "0", "", "How does {Name} feel at the end?", "Happy and proud.", "{Name} cheers!", HAPPY],
+      ["infer", "1+", "", "How did {Name} feel when the board did not break?", "{He} felt embarrassed and less sure of {self}.", "Look at {Name}'s face after the first try.", SAD + "|embarrass|hot|sit down|less sure|confiden"],
+      ["infer", "1+", "", "Why did the second try work?", "Because {Name} focused and followed {sensei}'s tip.", "What did {Name} do differently?", "focus|tip|breath|believ|{tipK}"],
+      ["infer", "2+", "", "Why does the dojo have rules about breaking boards?", "To keep everyone safe while they learn.", "Think about what could go wrong without an instructor.", "safe|hurt|injur|careful|learn"]
+    ] });
+
+  DOJO.push({ k: "showoff", g: "dojo",
+    set: function (c) {
+      dojoKid(c);
+      slot(c, "oops", ["knocked {pal}'s lunch tray out of {palhis} hands~tray|lunch|knock|drop", "knocked over the tower {pal} was building~tower|knock|block", "sent {pal}'s water bottle flying~bottle|water|knock"]);
+      c.subject = "showoff:" + c.oopsN;
+    },
+    title: ["Karate Is Not for Showing Off", "Self-Control", "{Name} Makes It Right", "A Lesson at Recess", "The Kick at Recess"],
+    beats: [
+      ["0", 1, "", "{Name} shows {his} kicks at school.", "At recess, {Name} does big karate kicks."],
+      ["0", 1, "", "Oops! {He} {oops}.", "Oh no! {His} kick {oops}."],
+      ["0", 1, "", "{Name} says, \"I am sorry.\" {He} helps clean up.", "{Name} says sorry to {pal} and helps {palhim}."],
+      ["0", 1, "", "{Sensei} says karate is for the dojo, not for showing off.", "{Sensei} says, \"We kick only in class.\""],
+      ["0", 0.8, "", "Now {Name} uses {his} kicks only in class.", "{Name} and {pal} are still friends."],
+      ["1+", 1, "", "At recess, {Name} wanted to show everyone {his} new jumping kick.", "@2 {Name} had just learned a jumping kick, and at recess {he} could not wait to show it off."],
+      ["1+", 1, "", "\"Watch this!\" {he} shouted, and {he} kicked high into the air.", "@2 \"Everyone, watch!\" {he} called, spinning into a high kick without checking who was nearby."],
+      ["1+", 1, "", "{His} foot {oops}.", "@2 {His} foot {oops}."],
+      ["1+", 0.8, "", "{Pal} looked upset, and some kids laughed.", "@2 {Pal}'s face fell, and a few kids giggled, which only made it worse."],
+      ["1+", 1, "", "{Name} felt terrible. {He} said sorry and helped {pal} clean up.", "@2 {Name}'s cheeks burned. {He} ^apologized right away and helped {pal} clean up."],
+      ["1+", 1, "", "At karate that night, {Name} told {sensei} what had happened.", "@2 That evening at the dojo, {Name} told {sensei} the whole story."],
+      ["1+", 1, "", "{Sensei} said, \"Karate is for ^self-control, not for showing off.\"", "@2 {Sensei} said, \"A martial artist uses ^self-control. We never use karate to show off or to hurt anyone.\""],
+      ["2+", 0.6, "", "{Sensei} was glad that {Name} had apologized and told the truth.", "@3 {Sensei} added that owning up to a mistake shows real ^respect."],
+      ["1+", 1, "", "From then on, {Name} saved {his} kicks for the dojo.", "@2 After that, {Name} practiced {his} kicks only in class, where it was safe."],
+      ["2+", 0.6, "", "{Name} learned that true strength means being in control.", "@3 {Name} learned that real strength is knowing when not to use it."]
+    ],
+    qs: [
+      ["main", "0", "", "What is this story about?", "{Name} shows off a kick and makes a mess, so {he} says sorry.", "What happened when {Name} showed {his} kicks?", "kick|show", "sorry|oops|knock|mess|help"],
+      ["main", "0", "", "Who is this story about?", "{Name} and {pal}.", "Who does the kick?", "{nameK}"],
+      ["main", "1+", "", ["What happens in this story?", "What is this story mostly about?"], "{Name} showed off a kick at recess and {oops}, so {he} apologized and learned to use self-control.", "Think about the mistake and what {Name} learned.", "show|kick|recess", "sorry|apolog|self-control|control|learn|lesson|class|dojo"],
+      ["main", "2+", "", ["What lesson does this story teach?", "What lesson does {Name} learn?"], "Karate is for self-control, not for showing off.", "Think about what {sensei} said.", "control|show off|showing off|careful|safe|respect|strength|hurt"],
+      ["main", "3", "", "What is the theme of this story?", "Real strength means using self-control and taking responsibility for mistakes.", "What does strength mean to {sensei}?", "control|strength|responsib|respect|mistake|apolog|show off"],
+      ["detail", "0", "", "What did {Name}'s kick do?", "It {oops}.", "Find the word \"Oops\" or \"Oh no.\"", "{oopsK}"],
+      ["detail", "0", "", "What did {Name} say to {pal}?", "\"I am sorry.\"", "What did {Name} do after the mess?", "sorry|apolog"],
+      ["detail", "1+", "", "What did {Name} want to show everyone?", "{His} new jumping kick.", "Reread the first sentence.", "kick"],
+      ["detail", "1+", "", "What happened when {Name} kicked?", "{His} foot {oops}.", "Find what {his} foot did.", "{oopsK}"],
+      ["detail", "1+", "", "What did {sensei} say karate is for?", "Self-control, not showing off.", "Find what {sensei} said.", "self-control|control"],
+      ["infer", "0", "", "How does {pal} feel after the kick?", "Sad or upset.", "How would you feel?", SAD],
+      ["infer", "1+", "", "How did {Name} feel after the accident?", "{He} felt terrible and embarrassed.", "Look at what {Name} felt and did right after.", SAD + "|embarrass|guilt|sorry|ashamed|burn"],
+      ["infer", "1+", "", "Why did {sensei} say karate is not for showing off?", "Because showing off can cause accidents, and karate should be used carefully.", "Think about what happened at recess.", "accident|hurt|safe|careful|mess|control|knock|respect|danger"],
+      ["infer", "2+", "", "Why do you think {Name} told {sensei} what happened?", "Because {he} wanted to be honest and learn from the mistake.", "Think about what kind of student {Name} is.", "honest|truth|learn|sorry|mistake|right|respect|help"]
+    ] });
+
+  DOJO.push({ k: "bo", g: "dojo",
+    set: function (c) {
+      dojoKid(c);
+      slot(c, "event", ["family night~family|night", "the town fall festival~festival|fall|town", "the school talent show~talent|show|school", "the dojo open house~open house|dojo"]);
+      c.subject = "bo:" + c.eventN;
+    },
+    title: ["The Bo Staff Show", "Spin, Twirl, Bow", "{Name}'s Big Demo", "Slow Is Smooth", "Practice With the Bo"],
+    beats: [
+      ["0", 1, "", "{Name} has a long wood stick called a bo.", "At the dojo, {Name} learns to spin a bo staff."],
+      ["0", 1, "", "{Name} will spin it in a show at {event}.", "{He} practices for a show at {event}."],
+      ["0", 1, "", "Oops! {He} drops it.", "At first, the bo falls with a clunk."],
+      ["0", 1, "", "{Sensei} says, \"Go slow.\"", "{Sensei} says to spin it slowly."],
+      ["0", 1, "", "At the show, {Name} spins the bo and bows. Everyone claps!", "At {event}, {Name} does it! Everyone claps."],
+      ["1+", 1, "", "{Name}'s dojo was putting on a demonstration at {event}.", "@2 {Name}'s dojo had been invited to put on a ^demonstration at {event}."],
+      ["1+", 1, "", "{Name} would spin a bo staff, a long wooden pole, to music.", "@2 {Name}'s part was a bo staff routine, spinning a long wooden pole in smooth circles to music."],
+      ["1+", 0.8, "", "In karate, the bo is used for practice and shows, never to hurt anyone.", "@2 In {Name}'s dojo, students use the bo only for practice and shows, and they always check for plenty of space first."],
+      ["1+", 1, "", "At practice, {Name} tried to spin it fast, but it slipped and fell.", "@2 During practice, {Name} tried to spin the bo as fast as the older students, but it slipped from {his} hands and clattered to the floor."],
+      ["1+", 0.8, "", "{Name} felt ^frustrated.", "@2 {Name} sighed, picked it up, and dropped it again."],
+      ["1+", 1, "", "{Sensei} said, \"Slow is smooth, and smooth is fast.\"", "@2 {Sensei} reminded {him}, \"Slow is smooth, and smooth becomes fast.\""],
+      ["1+", 1, "", "So {Name} practiced slowly every day.", "@2 So {Name} practiced every move slowly, one spin at a time, until {his} hands knew the pattern."],
+      ["1+", 1, "", "At {event}, {Name} spun the bo smoothly and finished with a bow.", "@2 On the night of {event}, {Name} spun the bo in smooth, steady circles and finished with a respectful bow."],
+      ["1+", 1, "", "The crowd clapped and cheered.", "@2 The crowd burst into ^applause."],
+      ["2+", 0.6, "", "{Name} learned that going slow can help you get better faster.", "@3 {Name} learned that patience in practice leads to ^confidence on stage."]
+    ],
+    qs: [
+      ["main", "0", "", "What is this story about?", "{Name} learns to spin a bo for a show.", "What does {Name} practice?", "bo|staff|stick|spin|show"],
+      ["main", "0", "", "Who is this story about?", "{Name}.", "Who spins the bo?", "{nameK}"],
+      ["main", "1+", "", ["What happens in this story?", "What is this story mostly about?"], "{Name} kept dropping the bo staff, but {he} practiced slowly and did a great job in the show.", "Think about the problem and how {Name} solved it.", "bo|staff|spin|pole", "slow|practic|show|drop|did|great|smooth"],
+      ["main", "2+", "", ["What lesson does this story teach?", "What is the lesson of this story?"], "Practicing slowly and carefully helps you get better.", "Think about what {sensei} said.", "slow|careful|practic|patien|smooth"],
+      ["detail", "0", "", "What is a bo?", "A long wood stick.", "Look at the first sentence.", "stick|pole|wood|staff|long"],
+      ["detail", "0", "", "What does {sensei} tell {Name}?", "To go slow.", "What does {sensei} say?", "slow"],
+      ["detail", "1+", "", "What is a bo staff?", "A long wooden pole.", "Find the words \"bo staff.\"", "pole|stick|wood|long"],
+      ["detail", "1+", "", "Where was the show?", "At {event}.", "Reread the first sentence.", "{eventK}"],
+      ["detail", "1+", "", "What happened when {Name} spun the bo too fast?", "It slipped and fell.", "Find what happened at practice.", "slip|fell|drop|fall|clatter"],
+      ["detail", "1+", "", "What did {sensei} say?", "\"Slow is smooth, and smooth is fast.\"", "Find {sensei}'s words.", "slow|smooth"],
+      ["infer", "0", "", "How does {Name} feel at the end?", "Happy and proud.", "Everyone claps!", HAPPY],
+      ["infer", "1+", "", "What did {sensei} mean by \"slow is smooth\"?", "Practicing slowly helps you do the moves right, and then you can get faster.", "Think about what happened when {Name} went too fast.", "slow|right|careful|correct|faster|better|mistake|learn"],
+      ["infer", "1+", "", "Why do students check for space before using the bo?", "So they don't bump into anyone or anything.", "Think about how long the bo is.", "safe|hit|bump|hurt|space|room|anyone|careful"],
+      ["infer", "2+", "", "How do you think {Name} felt when the crowd cheered?", "Proud, because {his} slow practice had worked.", "Think about how hard {Name} practiced.", HAPPY]
+    ] });
+
+  DOJO.push({ k: "tourney", g: "dojo",
+    set: function (c) {
+      dojoKid(c);
+      slot(c, "place", ["second place~second|2nd|silver", "third place~third|3rd|bronze"]);
+      c.subject = "tourney:" + c.placeN;
+    },
+    title: ["The Kata Tournament", "{Name}'s Medal", "A Good Sport", "Win or Learn", "The Handshake"],
+    beats: [
+      ["0", 1, "", "{Name} did {his} kata at a tournament.", "{Name} went to a karate tournament."],
+      ["0", 1, "", "{Pal} won first place.", "Another kid, {pal}, won first place."],
+      ["0", 1, "", "{Name} got {place}.", "{Name} won {place}."],
+      ["0", 1, "", "{Name} shook {pal}'s hand and said, \"Great job!\"", "{Name} bowed to {pal} and smiled."],
+      ["0", 0.8, "", "{Sensei} was ^proud of {Name}.", "{Name} was a good sport."],
+      ["1+", 1, "", "{Name} had practiced {his} kata for months for the big tournament.", "@2 For two months, {Name} had trained for {his} first kata tournament."],
+      ["1+", 1, "", "When it was {his} turn, {Name} did {his} best.", "@2 When {his} name was called, {Name} bowed to the judges and performed {his} kata with strong ^focus."],
+      ["1+", 1, "", "Another student, {pal}, did an amazing kata too.", "@2 But another student, {pal}, performed a kata so sharp and powerful that the crowd gasped."],
+      ["1+", 1, "", "{Pal} won first place, and {Name} won {place}.", "@2 When the scores came in, {pal} took first place, and {Name} earned {place}."],
+      ["1+", 0.8, "", "For a moment, {Name} felt ^disappointed.", "@2 For a moment, {Name}'s smile wobbled. {He} had really wanted to win."],
+      ["1+", 1, "", "Then {he} walked over, bowed, and shook {pal}'s hand.", "@2 Then {Name} walked across the mat, bowed to {pal}, and shook {palhis} hand."],
+      ["1+", 1, "", "\"Your kata was awesome,\" {Name} said.", "@2 \"Your kata was amazing. Can you show me how you do that turn?\" {Name} asked."],
+      ["1+", 0.8, "", "{Pal} smiled and thanked {him}.", "@2 {Pal} grinned, and the two started talking like old friends."],
+      ["1+", 1, "", "{Sensei} said {he} was proud of how {Name} acted.", "@2 Later, {sensei} told {Name} that {his} ^sportsmanship made {shim} prouder than any medal."],
+      ["2+", 0.6, "", "{Name} learned that how you act matters more than winning.", "@3 {Name} learned that being ^gracious when you lose is a kind of victory, too."]
+    ],
+    qs: [
+      ["main", "0", "", "What is this story about?", "{Name} goes to a tournament and is a good sport.", "What does {Name} do after {pal} wins?", "tournament|good sport|hand|great job|bow|kind"],
+      ["main", "0", "", "Who is this story about?", "{Name} and {pal}.", "Who went to the tournament?", "{nameK}"],
+      ["main", "1+", "", ["What happens in this story?", "What is this story mostly about?"], "{Name} won {place} at a kata tournament and was a good sport by congratulating {pal}, who won.", "Think about how the tournament ended and what {Name} did.", "tournament|kata|place|won|win|lost|lose", "good sport|sportsman|congrat|hand|shook|bow|kind|nice|respect"],
+      ["main", "2+", "", ["What lesson does this story teach?", "What is the lesson of this story?"], "Being a good sport and showing respect matters more than winning.", "Think about what made {sensei} proud.", "good sport|sportsman|respect|kind|more than|matter|win|lose|lost"],
+      ["main", "3", "", "What is the theme of this story?", "How you treat others when you lose shows your true character.", "Why was {sensei} proud even without a first-place win?", "character|respect|good sport|sportsman|gracious|kind|win|lose|treat"],
+      ["detail", "0", "", "Who won first place?", "{Pal}.", "Look at the second sentence.", "{palK}"],
+      ["detail", "0", "", "What place did {Name} get?", "{Place}.", "What did {Name} win?", "{placeK}"],
+      ["detail", "1+", "", "Who won first place?", "{Pal} won first place.", "Find the words \"first place.\"", "{palK}"],
+      ["detail", "1+", "", "What place did {Name} earn?", "{Place}.", "Find {Name}'s score.", "{placeK}"],
+      ["detail", "1+", "", "What did {Name} do after the scores came in?", "{He} bowed and shook {pal}'s hand.", "Find the word \"Then.\"", "bow|shook|shake|hand"],
+      ["infer", "0", "", "Was {Name} a good sport? How do you know?", "Yes, because {he} was kind to {pal}.", "What did {Name} do after {pal} won?", "yes|kind|nice|hand|great job|bow|smil"],
+      ["infer", "1+", "", "How did {Name} feel when {he} did not win first place?", "{He} felt disappointed at first.", "Look at the moment after the scores came in.", SAD + "|wobbl"],
+      ["infer", "1+", "", "Why was {sensei} proud of {Name}?", "Because {Name} was a good sport and showed respect even though {he} did not win.", "Think about what {Name} did after losing.", "good sport|sportsman|respect|kind|nice|hand|bow|congrat|acted"],
+      ["infer", "2+", "", "Why do you think {Name} asked {pal} about {palhis} kata?", "Because {Name} wanted to learn from {pal} and get better.", "What could {Name} gain from {pal}?", "learn|better|improve|friend|respect|teach|show"]
+    ] });
+
+  DOJO.push({ k: "kiai", g: "dojo",
+    set: function (c) {
+      dojoKid(c);
+      slot(c, "trick", ["shout from {his} belly, not {his} throat~belly|stomach|tummy|throat", "imagine cheering for {his} favorite team~cheer|team|imagine", "breathe in deep and push all the air out at once~breath|air|push"]);
+      c.subject = "kiai:" + c.trickN;
+    },
+    title: ["The Quiet Kiai", "{Name} Finds {His} Voice", "Louder!", "The Big Kiai", "From a Whisper to a Shout"],
+    beats: [
+      ["0", 1, "", "At karate, kids yell \"Kiai!\" when they kick.", "{Name} goes to karate. Everyone yells \"Kiai!\""],
+      ["0", 1, "", "But {Name}'s kiai is very quiet.", "{Name} is ^shy. {His} kiai is a whisper."],
+      ["0", 1, "", "{Sensei} says to {trick}.", "{Sensei} shows {him} how to {trick}."],
+      ["0", 1, "", "{Name} tries. \"KIAI!\" It is so loud!", "{Name} kicks and yells, \"KIAI!\""],
+      ["0", 1, "", "Everyone cheers for {Name}.", "{Name} smiles a big smile."],
+      ["1+", 1, "", "At {Name}'s ^dojo, students shout \"Kiai!\" when they kick or punch.", "@2 In karate, a ^kiai is a short, powerful shout that students use to show energy and ^focus."],
+      ["1+", 1, "", "But {Name} was ^shy, and {his} kiai came out as a tiny squeak.", "@2 {Name} was naturally quiet, and {his} kiai came out as a nervous squeak."],
+      ["1+", 0.7, "", "Some kids giggled, and {Name}'s face turned red.", "@2 {Name} felt {his} cheeks burn every time {he} tried."],
+      ["1+", 1, "", "After class, {sensei} told {him} to {trick}.", "@2 After class, {sensei} kneeled down and suggested that {Name} {trick}."],
+      ["2+", 0.6, "", "\"Your kiai is your spirit,\" {she} said. \"Let it out.\"", "@3 \"Your kiai shows the world your spirit,\" {sensei} explained. \"It is not about being loud. It is about being brave.\""],
+      ["1+", 1, "", "{Name} practiced at home, a little louder each day.", "@2 At home, {Name} practiced in the backyard, getting a little louder each day."],
+      ["1+", 1, "", "At the next class, {Name} did a front kick and shouted, \"KIAI!\"", "@2 At the next class, {Name} threw a sharp front kick and let out a kiai that echoed off the walls."],
+      ["1+", 1, "", "The whole class cheered.", "@2 For a second, the dojo was silent. Then the whole class cheered."],
+      ["1+", 0.8, "", "{Name} felt strong and brave.", "@2 {Name} felt stronger than ever."],
+      ["2+", 0.6, "", "{Name} learned that being brave can start with something small.", "@3 {Name} discovered that ^confidence grows when you practice being brave."]
+    ],
+    qs: [
+      ["main", "0", "", "What is this story about?", "{Name} learns to do a loud kiai.", "What is hard for {Name}?", "kiai|loud|yell|shout"],
+      ["main", "0", "", "Who is this story about?", "{Name}.", "Whose kiai is quiet?", "{nameK}"],
+      ["main", "1+", "", ["What happens in this story?", "What is this story mostly about?"], "{Name}'s kiai was very quiet, but {he} practiced and learned to shout it loudly.", "Think about how {Name}'s kiai changed.", "kiai|shout|yell|voice", "quiet|loud|practic|brave|learn|shy"],
+      ["main", "2+", "", ["What lesson does this story teach?", "What is the lesson of this story?"], "Practicing being brave helps you grow more confident.", "Think about how {Name} changed from the beginning to the end.", "brave|confiden|practic|try|shy|courage"],
+      ["detail", "0", "", "What do kids yell at karate?", "\"Kiai!\"", "Look at the first sentence.", "kiai"],
+      ["detail", "0", "", "What does {sensei} tell {Name}?", "To {trick}.", "What does {sensei} say?", "{trickK}"],
+      ["detail", "1+", "", "When do students shout \"Kiai\"?", "When they kick or punch.", "Reread the first sentence.", "kick|punch|move|strike"],
+      ["detail", "1+", "", "What did {sensei} tell {Name} to do?", "To {trick}.", "Find what {sensei} said after class.", "{trickK}"],
+      ["detail", "1+", "", "Where did {Name} practice?", "At home.", "Find the word \"practiced.\"", "home|backyard|yard"],
+      ["infer", "0", "", "How does {Name} feel at the end?", "Happy and brave.", "Everyone cheers!", HAPPY + "|brave|strong"],
+      ["infer", "1+", "", "How did {Name} feel about {his} quiet kiai?", "{He} felt shy and embarrassed.", "Look at {Name}'s face or cheeks.", SAD + "|shy|embarrass|red|burn"],
+      ["infer", "1+", "", "Why did the class cheer at the end?", "Because {Name} finally did a loud, strong kiai.", "What was different at the next class?", "loud|strong|kiai|finally|brave|did it|shout"],
+      ["infer", "2+", "", "What did {sensei} mean when {she} talked about spirit?", "That a kiai is about showing courage and energy, not just being loud.", "Reread what {sensei} said.", "brave|courage|energy|spirit|confiden|strong|inside|heart"]
+    ] });
+
+  /* ================= ANIMAL FACTS =================
+     [name, plural, group, home ("lives ..."), keys, food, keys, body feature ("+" = plural), keys,
+      what the feature helps it do, keys, babies (a sentence), keys, special skill ("it can ..."), keys,
+      why the skill helps, keys, flags (H/C/O diet, n = nocturnal), extra fact]
+     Facts are kept simple and true for the common kind of each animal. */
+  const FACTS = [
+    ["octopus", "octopuses", "", "in the ocean", "ocean|sea|water", "crabs, clams, and small fish", "crab|clam|fish", "+eight long arms covered with suckers", "arm|sucker|eight|8|tentacle",
+      "grab food and hold on to rocks", "grab|hold|food|catch|grip|rock", "A mother octopus guards her eggs in a rocky den until they ^hatch.", "egg|guard|den|hatch|protect",
+      "change color to blend in with rocks and plants", "color|colour|blend|camouflag|hide", "hide from sharks and other hunters", "hide|safe|shark|enemy|predator|hunter|danger|eaten|attack", "C",
+      "An octopus has three hearts and blue blood."],
+    ["frog", "frogs", "amphibian", "in and near ponds and other wet places", "pond|wet|water|swamp|marsh|lake|stream", "insects such as flies and crickets", "insect|bug|fly|flies|cricket",
+      "a long, sticky tongue", "tongue|sticky", "catch insects in a flash", "catch|grab|insect|bug|food|eat", "Frogs lay eggs in water, and the eggs ^hatch into tadpoles.", "tadpole|egg",
+      "jump many times the length of its own body", "jump|leap|hop", "escape from danger and catch food", "escape|away|safe|danger|food|catch", "C",
+      "Many frogs can breathe through their skin."],
+    ["honeybee", "honeybees", "insect", "in hives with thousands of other bees", "hive|nest|colony", "nectar and pollen from flowers", "nectar|pollen|flower|honey",
+      "a fuzzy body", "fuzz|hair|body", "carry pollen from flower to flower", "pollen|carry|flower", "The queen bee lays all of the eggs in the hive.", "queen|egg",
+      "do a waggle dance", "dance|waggle", "show other bees where to find flowers", "show|tell|where|flower|food|find|other bee", "H",
+      "Bees turn nectar into honey and store it for winter."],
+    ["penguin", "penguins", "bird", "along cold southern coasts and oceans", "cold|ice|ocean|sea|south|antarctic|coast|water|snow", "fish, squid, and tiny shrimp-like animals called krill", "fish|squid|krill|shrimp",
+      "+wings shaped like flippers", "flipper|wing", "swim fast through the water", "swim|water|fast|push|dive", "Penguin parents take turns keeping their egg warm.", "egg|warm|turn|parent|mom|dad",
+      "slide on its belly across the ice", "slid|belly|tummy|ice", "move quickly over snow and ice", "fast|quick|move|travel|speed|faster|energy", "C",
+      "Penguins are birds, but they cannot fly."],
+    ["elephant", "elephants", "mammal", "in grasslands and forests in Africa and Asia", "africa|asia|grass|forest|savanna", "grass, leaves, bark, and fruit", "grass|leaves|leaf|bark|fruit|plant",
+      "a long trunk", "trunk|nose", "pick up food, drink water, and smell", "pick|grab|food|drink|water|smell|spray|lift", "A baby elephant, called a calf, stays close to its mother for years.", "calf|mother|mom|close",
+      "flap its big ears", "ear|flap|fan", "cool off on hot days", "cool|hot|heat|temperature", "H",
+      "Elephants are the largest animals that live on land."],
+    ["giraffe", "giraffes", "mammal", "on the grasslands of Africa", "africa|grass|savanna|plain", "leaves from tall trees, especially acacia trees", "leaves|leaf|tree|acacia",
+      "a very long neck", "neck|long|tall", "reach leaves high in the trees", "reach|high|top|tall|leaves|leaf|food|eat", "A baby giraffe can stand up within about an hour of being born.", "stand|hour|born",
+      "see far across the grasslands from high up", "see|spot|watch|far|look", "spot lions and other danger from far away", "safe|lion|danger|predator|warn|escape|run|spot", "H",
+      "A giraffe's tongue is dark purple and very long."],
+    ["owl", "owls", "bird", "in forests, fields, and even deserts", "forest|wood|tree|field|desert|barn", "mice and other small animals", "mice|mouse|small animal|rodent|bug|insect",
+      "+soft feathers with fluffy edges", "feather|soft|fluff", "fly almost silently", "quiet|silent|sound|noise|hear", "Baby owls are called owlets.", "owlet",
+      "turn its head very far around", "turn|head|neck|twist|look", "look around without moving its body", "look|see|eye|around|behind|move", "Cn",
+      "Owls cannot move their eyes, so they turn their heads instead."],
+    ["bat", "bats", "mammal", "in caves, trees, and old buildings", "cave|tree|building|barn|attic", "insects, fruit, or flower nectar, depending on the kind of bat", "insect|bug|fruit|nectar|moth|mosquito",
+      "+wings made of thin skin stretched over long finger bones", "wing|skin|finger", "fly and turn quickly in the air", "fly|flying|air|turn", "A baby bat is called a pup, and it clings to its mother.", "pup|cling|hold|mother|mom",
+      "hang upside down to rest", "upside|hang", "drop into the air and fly off quickly", "fly|drop|quick|ready|escape|take off|safe", "n",
+      "Bats are the only mammals that can truly fly."],
+    ["beaver", "beavers", "mammal", "in streams, rivers, and ponds", "stream|river|pond|water|lake", "bark, twigs, leaves, and water plants", "bark|twig|leaves|leaf|plant|wood|tree",
+      "+strong orange teeth that never stop growing", "teeth|tooth", "chew through trees", "chew|cut|tree|wood|gnaw|bite", "Baby beavers are called kits, and they live in the family lodge.", "kit|lodge",
+      "build dams out of sticks and mud", "dam|build|stick|mud", "make a deep pond where it can build a safe home", "pond|home|lodge|safe|water|deep", "H",
+      "The door to a beaver's lodge is underwater."],
+    ["kangaroo", "kangaroos", "mammal", "in grasslands and open forests in Australia", "australia|grass|forest|bush", "grass and other plants", "grass|plant|leaves",
+      "+strong back legs and a long tail", "leg|tail", "hop and keep its balance", "hop|jump|balance|bounce", "A baby kangaroo, called a joey, grows inside its mother's pouch.", "joey|pouch",
+      "hop very fast for long distances", "hop|jump|fast|far", "travel far to find food and water", "travel|far|food|water|move|escape|away", "H",
+      "A kangaroo cannot walk backward easily."],
+    ["polar bear", "polar bears", "mammal", "on the sea ice of the Arctic", "arctic|ice|north|snow|cold", "seals", "seal",
+      "a thick layer of fat and two layers of fur", "fat|fur|blubber|thick", "stay warm in freezing weather", "warm|cold|freez|heat", "Mother polar bears dig dens in the snow, where their cubs are born in winter.", "den|snow|cub",
+      "swim for many hours in icy water", "swim|water|paddle", "travel between pieces of ice and hunt seals", "hunt|seal|ice|food|travel|catch", "C",
+      "Under its white fur, a polar bear's skin is black."],
+    ["sea turtle", "sea turtles", "reptile", "in warm oceans around the world", "ocean|sea|water|warm", "sea grass, jellyfish, and other sea creatures, depending on the kind of turtle", "grass|jellyfish|jelly|crab|sponge|plant|sea",
+      "a hard, smooth shell", "shell", "protect its soft body", "protect|safe|body|cover|armor|hard", "Mother sea turtles crawl onto beaches to lay their eggs in the sand.", "egg|sand|beach",
+      "swim thousands of miles across the ocean", "swim|mile|far|ocean|travel", "reach places to feed and to nest", "food|feed|eat|nest|egg|beach|home|lay", "",
+      "Sea turtles cannot pull their heads into their shells."],
+    ["cheetah", "cheetahs", "mammal", "on the grasslands of Africa", "africa|grass|savanna|plain", "animals such as gazelles and antelope", "gazelle|antelope|impala|meat|animal",
+      "a long tail", "tail", "keep its balance and turn while running fast", "balance|turn|steer|run", "Cheetah cubs have fluffy gray fur on their backs when they are small.", "cub|fluff|fur",
+      "run faster than any other land animal", "fast|run|speed|quick", "catch quick animals for food", "catch|food|prey|hunt|eat|chase", "C",
+      "A cheetah can go from standing still to top speed in just a few seconds."],
+    ["hummingbird", "hummingbirds", "bird", "in gardens, forests, and meadows in North and South America", "garden|forest|meadow|flower|america", "nectar from flowers and tiny insects", "nectar|flower|insect|bug|sugar",
+      "a long, thin beak", "beak|bill", "reach the nectar deep inside flowers", "nectar|reach|flower|drink|inside|deep", "Hummingbirds build tiny nests about the size of half a walnut shell.", "nest|tiny|small|walnut",
+      "hover in one spot and even fly backward", "hover|backward|still|one spot|fly", "sip from flowers while flying", "flower|sip|drink|nectar|eat|food", "",
+      "A hummingbird's wings beat so fast that they hum."],
+    ["monarch butterfly", "monarch butterflies", "insect", "in fields and meadows across North America", "field|meadow|flower|america|garden", "nectar from flowers", "nectar|flower",
+      "a long, tube-shaped mouth called a ^proboscis", "proboscis|tube|straw|mouth|tongue", "sip nectar like a straw", "sip|drink|nectar|straw|suck", "Monarch caterpillars eat only milkweed leaves.", "milkweed|caterpillar",
+      "fly thousands of miles each fall", "fly|mile|far|travel|migrat|south|mexico", "reach warm places to spend the winter", "warm|winter|cold|south|mexico", "H",
+      "A monarch starts life as a tiny egg, then becomes a caterpillar, then a chrysalis, and finally a butterfly."],
+    ["raccoon", "raccoons", "mammal", "in forests, near streams, and in towns and cities", "forest|stream|town|city|tree|wood", "fruit, nuts, insects, fish, and frogs", "fruit|nut|insect|bug|fish|frog|anything|everything|crayfish",
+      "+nimble front paws that work almost like hands", "paw|hand|finger", "open things and grab food", "open|grab|hold|pick|food|feel", "Baby raccoons are called kits.", "kit",
+      "climb trees easily", "climb|tree", "rest and stay safe up high", "rest|sleep|safe|high|hide|danger", "On",
+      "Raccoons often dip their food in water before they eat it."],
+    ["hedgehog", "hedgehogs", "mammal", "in hedges, gardens, fields, and woods", "hedge|garden|field|wood|forest", "insects, worms, and beetles", "insect|bug|worm|beetle|slug",
+      "+thousands of sharp spines on its back", "spine|spike|quill|prickl|sharp", "protect it from hungry animals", "protect|safe|hungry|predator|enemy|danger|attack|hurt", "Baby hedgehogs are called hoglets.", "hoglet",
+      "roll up into a tight, prickly ball", "roll|ball|curl", "keep its soft belly safe", "belly|safe|protect|soft|hide|danger|tummy", "n",
+      "A hedgehog snuffles and grunts like a tiny pig while it looks for food."],
+    ["koala", "koalas", "mammal", "in eucalyptus forests in Australia", "eucalyptus|gum|forest|tree|australia", "eucalyptus leaves", "eucalyptus|leaves|leaf|gum",
+      "+sharp claws and a strong grip", "claw|grip|hand|paw", "hold on to tree branches", "hold|grip|climb|branch|tree|fall", "A baby koala, called a joey, lives in its mother's pouch for about six months.", "joey|pouch",
+      "sleep up to eighteen hours a day", "sleep|rest|hour", "save energy, because its leafy food gives it very little energy", "energy|tired|save|leaves|food|little|rest", "Hn",
+      "Koalas get most of the water they need from leaves."],
+    ["giant panda", "giant pandas", "mammal", "in cool, misty mountain forests in China", "china|mountain|forest|bamboo", "bamboo shoots, stems, and leaves", "bamboo",
+      "a special wrist bone that works like a thumb", "thumb|wrist|bone|hand", "grip bamboo stems while eating", "grip|hold|grab|bamboo|eat", "A newborn panda cub is tiny and pink, about the size of a stick of butter.", "tiny|small|pink|butter|cub",
+      "eat for up to fourteen hours a day", "eat|hour|chew|bamboo|day", "get enough energy, because bamboo is not very filling", "energy|enough|full|bamboo|need|food|nutri|hungry", "",
+      "A panda can eat more than twenty pounds of bamboo in one day."],
+    ["sloth", "sloths", "mammal", "in the rainforests of Central and South America", "rainforest|forest|jungle|tree|america", "leaves and buds", "leaves|leaf|bud|plant",
+      "+long, curved claws", "claw|hook", "hang from branches", "hang|hold|branch|tree|grip", "A baby sloth clings to its mother's belly.", "cling|hold|belly|mother|mom|ride",
+      "move very slowly and stay still for a long time", "slow|still|quiet", "save energy and stay hidden from hunters such as eagles", "hide|hidden|energy|safe|notice|see|eagle|predator", "H",
+      "Tiny green plants called algae can grow in a sloth's fur."],
+    ["zebra", "zebras", "mammal", "on the grasslands of Africa", "africa|grass|savanna|plain", "grass", "grass",
+      "+strong, flat teeth", "teeth|tooth", "grind tough grass", "grind|chew|grass|eat|food", "A baby zebra, called a foal, can stand and walk soon after it is born.", "foal|stand|walk",
+      "live and travel in large groups called herds", "herd|group|together", "watch for lions and stay safer", "safe|lion|danger|watch|predator|protect", "H",
+      "No two zebras have exactly the same stripes."],
+    ["crocodile", "crocodiles", "reptile", "in rivers, lakes, and swamps in warm places", "river|lake|swamp|water|warm", "fish, birds, and other animals", "fish|bird|animal|meat",
+      "+eyes and nostrils on top of its head", "eye|nostril|nose|top|head", "see and breathe while the rest of its body hides underwater", "see|breath|underwater|hide|water", "Mother crocodiles gently carry their babies in their mouths.", "mouth|carry",
+      "stay underwater for a long time without breathing", "underwater|breath|water", "wait quietly for food to come close", "wait|food|hunt|catch|sneak|surprise|close|hide", "C",
+      "Crocodiles often lie in the sun to warm up."],
+    ["chameleon", "chameleons", "reptile", "in trees in warm places such as Africa and Madagascar", "tree|forest|africa|madagascar|warm", "insects such as crickets and grasshoppers", "insect|bug|cricket|grasshopper",
+      "+eyes that can move in two different directions at once", "eye|two|direction", "look for insects all around it", "look|see|insect|bug|around|food|watch", "Most chameleons ^hatch from eggs.", "egg|hatch",
+      "shoot out a long, sticky tongue", "tongue|sticky", "catch insects from far away", "catch|insect|bug|food|eat|grab", "C",
+      "Chameleons change color to show their mood and to warm up or cool down."],
+    ["humpback whale", "humpback whales", "mammal", "in oceans all around the world", "ocean|sea|water", "tiny shrimp-like animals called krill and small fish", "krill|shrimp|fish",
+      "+baleen plates instead of teeth", "baleen|plate|filter", "strain food from big gulps of water", "strain|filter|food|water|catch|sift", "A baby whale, called a calf, drinks its mother's milk.", "calf|milk",
+      "sing long, complex songs", "sing|song|sound", "communicate with other whales", "communicat|talk|other whale|call|message|mate", "C",
+      "Humpback whales travel thousands of miles between their feeding and breeding waters."],
+    ["ant", "ants", "insect", "in underground nests called colonies", "nest|underground|colony|ground|tunnel|dirt|hill", "seeds, leaves, other insects, and sweet foods", "seed|leaves|leaf|insect|bug|sweet|sugar|crumb|food",
+      "+strong jaws", "jaw|mouth|mandible", "carry food and dig tunnels", "carry|dig|food|tunnel|hold|bite", "The queen ant lays the eggs, and worker ants care for the young.", "queen|egg|worker",
+      "carry things much heavier than its own body", "carry|lift|heavy|strong", "bring food back to the nest", "food|nest|home|colony|bring|back", "",
+      "Ants leave scent trails so other ants can follow them to food."],
+    ["dolphin", "dolphins", "mammal", "in oceans all around the world", "ocean|sea|water", "fish and squid", "fish|squid",
+      "a blowhole on top of its head", "blowhole|hole|head", "breathe air at the surface", "breath|air|surface", "A baby dolphin, called a calf, swims right beside its mother.", "calf|mother|mom|beside",
+      "use clicking sounds and echoes to find food", "click|sound|echo", "find fish even in dark or cloudy water", "find|fish|food|dark|see|murky|cloud|hunt", "C",
+      "Dolphins live and travel in groups called pods."],
+    ["camel", "camels", "mammal", "in deserts", "desert|sand|dry", "desert plants, even thorny ones", "plant|thorn|grass|leaves|bush",
+      "+humps that store fat", "hump|fat", "have energy when food is hard to find", "energy|food|hungry|without|store|save", "A baby camel, called a calf, can walk a few hours after it is born.", "calf|walk|hour",
+      "go for many days without drinking water", "water|drink|without|day|thirst", "survive in hot, dry places with little water", "desert|dry|hot|little water|no water|survive|live", "H",
+      "Camels have long eyelashes that keep sand out of their eyes."],
+    ["squirrel", "squirrels", "mammal", "in trees in forests, parks, and backyards", "tree|forest|park|yard|nest", "nuts, seeds, fruit, and acorns", "nut|seed|fruit|acorn",
+      "a big, bushy tail", "tail|bushy", "keep its balance as it jumps from branch to branch", "balance|jump|branch|climb|steady|fall", "Baby squirrels are born in a nest of leaves called a drey.", "nest|drey|leaves",
+      "bury nuts in many hiding spots", "bury|hide|dig|store|save", "have food to eat in winter", "winter|food|later|cold|save|eat|hungry", "",
+      "Some of the nuts squirrels forget grow into new trees."],
+    ["bald eagle", "bald eagles", "bird", "near lakes, rivers, and coasts in North America", "lake|river|coast|water|america|tree", "fish, along with some birds and small animals", "fish",
+      "+sharp, curved claws called ^talons", "talon|claw", "grab fish out of the water", "grab|catch|fish|hold|snatch", "Eagle parents build huge nests of sticks high in trees.", "nest|stick|tree|huge|big",
+      "see small animals from very far away", "see|eye|far|sight|spot", "spot food from high in the sky", "food|fish|hunt|spot|find|catch", "C",
+      "A bald eagle is not really bald. White feathers cover its head."],
+    ["snail", "snails", "", "in gardens, forests, and other damp places", "garden|forest|damp|wet|moist|leaf", "leaves and other plants", "leaves|leaf|plant|lettuce|flower",
+      "a hard, coiled shell", "shell", "protect its soft body and keep it from drying out", "protect|safe|hide|dry|cover|body", "Baby snails ^hatch from tiny eggs and already have thin shells.", "egg|shell|hatch",
+      "make slime to glide over the ground", "slime|slim|mucus|glide|slide", "move smoothly over rough or sharp things", "move|smooth|glide|slide|safe|sharp|rough|easy", "H",
+      "A snail moves on one big, muscular foot."],
+    ["seahorse", "seahorses", "fish", "in shallow, warm ocean waters with sea grass and coral", "ocean|sea|water|grass|coral|reef|shallow", "tiny shrimp and plankton", "shrimp|plankton|tiny",
+      "a curly tail", "tail|curl", "hold on to sea grass so the water does not push it away", "hold|grab|wrap|grass|hang on|grip|drift|away", "The father seahorse carries the eggs in a pouch until they ^hatch.", "father|dad|male|pouch",
+      "change color to match its surroundings", "color|colour|blend|match|camouflag|hide", "hide from fish and crabs that might eat it", "hide|safe|eat|enemy|danger|predator", "C",
+      "A seahorse is a kind of fish, even though it looks like a tiny horse."],
+    ["arctic fox", "arctic foxes", "mammal", "in the cold Arctic tundra", "arctic|tundra|cold|north|snow|ice", "lemmings, birds, eggs, and fish", "lemming|bird|egg|fish|rodent|small animal",
+      "thick fur, even on the bottoms of its feet", "fur|feet|foot|thick", "stay warm and walk on ice and snow", "warm|cold|ice|snow|walk", "Arctic fox babies, called kits, are born in dens.", "kit|den",
+      "change its fur color with the seasons", "fur|color|colour|season|white|brown|change", "blend in with snow in winter and with rocks and plants in summer", "blend|hide|camouflag|snow|match|see|notice", "",
+      "An arctic fox wraps its bushy tail around itself like a blanket."],
+    ["woodpecker", "woodpeckers", "bird", "in forests and wooded areas", "forest|wood|tree", "insects that live in tree bark", "insect|bug|beetle|ant|larva|grub|bark",
+      "a strong, sharp beak", "beak|bill", "drill holes in tree trunks", "drill|hole|peck|tree|wood|hammer", "Woodpeckers raise their babies in holes they carve in trees.", "hole|tree|carve",
+      "tap on trees very fast", "tap|peck|fast|drum|knock", "find insects and make homes", "insect|bug|food|home|nest|hole|find|eat", "",
+      "A woodpecker has a long tongue that reaches insects deep in the wood."],
+    ["sea star", "sea stars", "", "in oceans, often on rocks and in tide pools", "ocean|sea|rock|tide pool|pool|water", "clams, mussels, and oysters", "clam|mussel|oyster|shell",
+      "+rows of tiny tube feet under its arms", "tube|feet|foot|arm", "move slowly and pull open shells", "move|crawl|open|pry|pull|walk|grip", "Sea star babies drift in the ocean before they settle down.", "drift|float|ocean|settle",
+      "grow back an arm it has lost", "grow|regrow|arm|back|new", "survive after an injury", "surviv|attack|hurt|lost|lose|injur|heal|live", "C",
+      "Sea stars are not really fish, even though some people call them starfish."],
+    ["wolf", "wolves", "mammal", "in forests, mountains, and open plains", "forest|mountain|plain|tundra|wood", "deer, elk, and other large animals", "deer|elk|moose|meat|animal",
+      "a strong sense of smell", "smell|nose|sniff", "track animals from far away", "track|find|smell|follow|hunt|food|far", "Wolf pups are born in dens and are cared for by the whole pack.", "pup|den|pack",
+      "howl to talk to the rest of its pack", "howl|call|talk|communicat", "find each other and keep the pack together", "find|together|pack|family|other wolves|each other|warn|keep", "C",
+      "A wolf pack is a family that lives and hunts together."],
+    ["lion", "lions", "mammal", "on the grasslands of Africa", "africa|grass|savanna|plain", "zebras, antelope, and other large animals", "zebra|antelope|wildebeest|buffalo|meat|animal",
+      "a loud roar that can be heard miles away", "roar|loud", "warn other lions to stay out of its land", "warn|away|territory|land|stay out|other lion|keep", "Lion cubs are born with spots that fade as they grow.", "cub|spot",
+      "live and hunt in family groups called prides", "pride|group|family|together|team", "work together to catch large animals", "together|team|catch|large|big|hunt|share|food", "C",
+      "Lions rest for up to twenty hours a day."],
+    ["tiger", "tigers", "mammal", "in forests and grasslands in Asia", "asia|forest|jungle|grass|india", "deer, wild pigs, and other animals", "deer|pig|boar|meat|animal",
+      "orange fur with dark stripes", "stripe|fur|orange", "blend in with tall grass and shadows", "blend|hide|camouflag|grass|shadow|see|notice", "Tiger cubs stay with their mother for about two years.", "cub|mother|mom|two|year",
+      "swim well and often cool off in water", "swim|water|cool", "stay cool in hot weather and cross rivers", "cool|hot|heat|river|travel|cross", "C",
+      "Tigers are the biggest wild cats in the world."],
+    ["gorilla", "gorillas", "mammal", "in the rainforests of central Africa", "africa|rainforest|forest|jungle", "leaves, stems, and fruit", "leaves|leaf|stem|fruit|plant|bamboo",
+      "+strong arms and hands with thumbs", "arm|hand|thumb|strong", "climb, carry things, and pick food", "climb|carry|pick|grab|hold|food", "A baby gorilla often rides on its mother's back.", "ride|back|mother|mom|carry",
+      "build a new nest of leaves to sleep in each night", "nest|leaves|leaf|bed|build|sleep", "have a soft, safe place to rest", "soft|safe|rest|sleep|comfort|bed", "",
+      "Gorillas live in family groups called troops."],
+    ["skunk", "skunks", "mammal", "in forests, fields, and neighborhoods", "forest|field|neighbor|wood|yard", "insects, grubs, fruit, and small animals", "insect|bug|grub|fruit|small animal|mice|worm",
+      "a black coat with bold white stripes", "stripe|white|black", "warn other animals to stay away", "warn|away|stay|danger|back off", "Baby skunks are called kits.", "kit",
+      "spray a stinky liquid", "spray|stink|smell|liquid", "protect itself from danger", "protect|safe|danger|enemy|predator|away|scare|attack", "On",
+      "Before it sprays, a skunk stamps its feet as a warning."],
+    ["porcupine", "porcupines", "mammal", "in forests", "forest|tree|wood", "bark, twigs, leaves, and other plants", "bark|twig|leaves|leaf|plant",
+      "+thousands of sharp quills", "quill|spike|spine|sharp|needle", "protect it from animals that might attack it", "protect|safe|attack|danger|enemy|predator|hurt", "A baby porcupine is called a porcupette, and its quills are soft when it is born.", "porcupette|soft|quill",
+      "climb trees well", "climb|tree", "find food and rest safely", "food|eat|rest|safe|sleep|bark|leaves|leaf", "Hn",
+      "Porcupines cannot shoot their quills, but the quills come loose easily when touched."],
+    ["walrus", "walruses", "mammal", "on sea ice and rocky shores in the Arctic", "arctic|ice|shore|cold|north|rock|sea", "clams and other shellfish on the sea floor", "clam|shellfish|shell",
+      "+two long tusks", "tusk", "pull its heavy body up onto the ice", "pull|climb|ice|haul|lift", "A walrus calf stays with its mother for about two years.", "calf|mother|mom|year",
+      "find clams with its sensitive whiskers", "whisker|feel|find|clam", "find food in dark, muddy water", "food|find|dark|mud|see|eat|clam", "C",
+      "Walruses gather in big, noisy groups on the ice to rest."],
+    ["flamingo", "flamingos", "bird", "in shallow lakes and lagoons", "lake|lagoon|water|shallow|wetland|marsh", "tiny shrimp, algae, and other small creatures", "shrimp|algae|tiny|small",
+      "a bent beak", "beak|bill", "strain food from the water", "strain|filter|food|water|sift|scoop", "Flamingo chicks have gray feathers and turn pink later.", "gray|grey|chick|feather",
+      "stand on one leg for a long time", "one leg|stand|leg|balance", "rest while standing in the water", "rest|sleep|water|warm|energy|tired|heat", "",
+      "A flamingo's pink color comes from the food it eats."],
+    ["ostrich", "ostriches", "bird", "in dry grasslands and deserts in Africa", "africa|grass|desert|dry|savanna", "plants, seeds, and sometimes insects", "plant|seed|insect|bug|leaves|grass",
+      "+long, strong legs", "leg", "run very fast", "run|fast|speed|quick", "Ostriches lay the biggest eggs of any bird alive today.", "egg|big|biggest|large",
+      "run faster than any other bird", "run|fast|speed", "escape from lions and other hunters", "escape|away|safe|lion|danger|predator|hunter", "",
+      "Ostriches are the largest birds in the world, and they cannot fly."],
+    ["sea otter", "sea otters", "mammal", "in shallow ocean waters along the Pacific coast", "ocean|sea|coast|water|pacific|kelp", "sea urchins, crabs, and clams", "urchin|crab|clam|shell",
+      "the thickest fur of any animal", "fur|thick", "stay warm in cold water", "warm|cold|water|heat", "Sea otter pups float on their mothers' bellies.", "float|belly|mother|mom|pup|chest",
+      "use rocks as tools to crack open shells", "rock|tool|crack|open|shell|stone", "get to the food inside", "food|eat|inside|meat|get", "C",
+      "Sea otters sometimes hold paws while they sleep so they do not drift apart."],
+    ["hippo", "hippos", "mammal", "in rivers and lakes in Africa", "river|lake|water|africa|mud", "grass", "grass|plant",
+      "+eyes, ears, and nostrils on top of its head", "eye|ear|nostril|nose|top|head", "see, hear, and breathe while mostly underwater", "see|hear|breath|underwater|water", "Baby hippos can be born underwater.", "underwater|water|born",
+      "stay in the water for most of the day", "water|day|stay|underwater", "keep its skin cool and safe from the hot sun", "cool|hot|sun|skin|burn|heat|wet", "H",
+      "Hippos come out of the water at night to eat grass."],
+    ["rabbit", "rabbits", "mammal", "in meadows, woods, and fields, often in underground burrows", "meadow|wood|forest|field|burrow|underground|hole|warren|grass", "grass, clover, and other plants", "grass|clover|plant|carrot|vegetable|leaves|leaf",
+      "+long ears", "ear", "hear danger coming", "hear|listen|danger|sound|enemy", "Baby rabbits are called kits.", "kit",
+      "thump its back feet on the ground", "thump|stomp|feet|foot|stamp", "warn other rabbits that danger is near", "warn|danger|tell|other|signal|alert", "H",
+      "A rabbit's teeth never stop growing."],
+    ["red fox", "red foxes", "mammal", "in forests, fields, and even cities", "forest|field|city|town|wood|den", "mice, rabbits, berries, and insects", "mice|mouse|rabbit|berr|insect|bug|fruit",
+      "+excellent ears", "ear|hear", "hear mice moving under snow or grass", "hear|mice|mouse|under|snow|food|find|hunt", "Baby foxes are called kits, and they are born in a den.", "kit|den",
+      "pounce high into the air and dive onto its food", "pounce|jump|leap|dive", "catch mice hidden under snow or grass", "catch|mice|mouse|food|hunt|eat", "On",
+      "A fox uses its bushy tail to keep warm when it curls up."],
+    ["white-tailed deer", "white-tailed deer", "mammal", "in forests, fields, and at the edges of woods", "forest|field|wood|edge|meadow", "leaves, twigs, acorns, and grass", "leaves|leaf|twig|acorn|grass|plant",
+      "a white tail", "tail|white", "flash a warning to other deer", "warn|signal|flash|danger|tell|other", "Baby deer are called fawns, and they have white spots.", "fawn|spot",
+      "leap over tall fences and logs", "leap|jump", "escape from danger quickly", "escape|danger|away|safe|run|predator", "H",
+      "Male deer grow new antlers every year."],
+    ["salmon", "salmon", "fish", "in rivers and oceans", "river|ocean|sea|water|stream", "insects when young, and small fish and shrimp in the ocean", "insect|bug|fish|shrimp",
+      "a strong tail", "tail|fin", "swim upstream and leap up waterfalls", "swim|leap|jump|upstream|waterfall", "Salmon lay their eggs in gravel at the bottom of rivers.", "egg|gravel|river|bottom",
+      "find its way back to the river where it hatched", "back|home|river|return|find|way|hatch", "lay its own eggs there", "egg|lay|baby|babies", "C",
+      "Salmon are born in rivers, grow up in the ocean, and return to the river as adults."],
+    ["great white shark", "great white sharks", "fish", "in cool ocean waters around the world, often near coasts", "ocean|sea|coast|water", "seals, fish, and sea lions", "seal|fish|sea lion",
+      "+rows of sharp teeth that are replaced when they fall out", "teeth|tooth|row|sharp", "bite and tear food", "bite|tear|eat|food|catch|chew", "Great white shark pups are born ready to swim and hunt on their own.", "pup|swim|own|alone|hunt",
+      "sense tiny electric signals from other animals", "sense|electric|signal|feel", "find animals that are hiding", "find|prey|food|hunt|hiding|hidden|catch", "C",
+      "Sharks have skeletons made of bendy cartilage instead of bone."],
+    ["jellyfish", "jellyfish", "", "in oceans all over the world", "ocean|sea|water", "tiny fish, shrimp, and plankton", "fish|shrimp|plankton|tiny",
+      "+long tentacles that can sting", "tentacle|sting", "catch food and defend itself", "catch|food|defend|protect|safe|sting|grab", "Young jellyfish start out as tiny polyps attached to rocks.", "polyp|rock|attach",
+      "drift with the ocean currents", "drift|float|current|wave", "travel without using much energy", "energy|travel|move|easy|float|rest|without", "C",
+      "A jellyfish has no brain, no heart, and no bones."],
+    ["parrot", "parrots", "bird", "in warm rainforests and woodlands", "rainforest|forest|jungle|tree|warm|wood", "seeds, nuts, fruit, and flowers", "seed|nut|fruit|flower|berr",
+      "a strong, curved beak", "beak|bill", "crack open hard nuts and seeds", "crack|open|nut|seed|break", "Many parrots lay their eggs in holes in trees.", "egg|hole|tree",
+      "copy sounds it hears", "copy|sound|talk|repeat|mimic|word|voice", "fit in and communicate with its flock", "flock|fit|communicat|group|friend|family|belong|talk", "",
+      "Some parrots can live for more than fifty years."],
+    ["brown pelican", "brown pelicans", "bird", "along ocean coasts", "coast|ocean|sea|water|beach|shore", "fish", "fish",
+      "a big pouch under its bill", "pouch|bill|beak|throat", "scoop up fish and water", "scoop|catch|fish|hold|water|net", "Pelicans build nests, and both parents feed the chicks.", "nest|parent|chick|feed",
+      "dive into the water from high in the air", "dive|plunge|water|air|high", "catch fish swimming near the surface", "catch|fish|food|eat|hunt", "C",
+      "A pelican tips its bill to drain out the water before it swallows the fish."],
+    ["armadillo", "armadillos", "mammal", "in grasslands, forests, and deserts in the Americas", "grass|forest|desert|america|texas|burrow", "insects, grubs, and worms", "insect|bug|grub|worm|ant|beetle",
+      "a shell made of bony plates", "shell|armor|plate|bone", "protect its body", "protect|safe|body|hurt|shield", "Nine-banded armadillos almost always have four identical babies at once.", "four|4|identical|same",
+      "dig quickly with strong claws", "dig|claw|burrow", "find food and make burrows to hide in", "food|burrow|hide|home|safe|find|eat", "n",
+      "An armadillo can hold its breath for several minutes."],
+    ["platypus", "platypuses", "mammal", "in rivers and streams in eastern Australia", "river|stream|australia|water", "insects, worms, and shrimp from the riverbed", "insect|bug|worm|shrimp|crayfish",
+      "a bill like a duck's", "bill|beak|duck", "sense food in muddy water", "sense|feel|find|food|mud|water", "A platypus is a mammal that lays eggs.", "egg|mammal",
+      "swim with its eyes, ears, and nose closed", "swim|eye|close|shut", "keep water out while it hunts with its bill", "water|out|protect|hunt|bill|sense|feel", "Cn",
+      "Platypus babies drink milk, just like other mammal babies."],
+    ["bison", "bison", "mammal", "on the grasslands and prairies of North America", "grass|prairie|plain|america", "grass and other plants", "grass|plant|sedge",
+      "a big hump of muscle on its shoulders", "hump|muscle|shoulder", "swing its huge head to push snow out of the way", "push|snow|swing|head|plow|clear|dig", "A baby bison is called a calf and has reddish-orange fur.", "calf|red|orange",
+      "run as fast as a horse", "run|fast", "escape from wolves and other danger", "escape|wolf|wolves|danger|safe|away", "H",
+      "Bison are the heaviest land animals in North America."],
+    ["puffin", "puffins", "bird", "on rocky cliffs and islands by the cold northern ocean", "cliff|island|ocean|sea|rock|north|cold", "small fish", "fish|eel|herring",
+      "+wings that work for both flying and swimming", "wing", "fly in the air and swim underwater", "fly|swim|underwater|water|air", "A baby puffin is called a puffling.", "puffling",
+      "carry many small fish in its beak at once", "carry|fish|beak|many|hold|at once", "bring plenty of food back to its chick", "chick|food|baby|bring|feed|back", "C",
+      "Puffins dig burrows in the ground to make their nests."],
+    ["black bear", "black bears", "mammal", "in forests and mountains in North America", "forest|mountain|wood|america", "berries, nuts, plants, insects, and fish", "berr|nut|plant|insect|bug|fish|honey|fruit",
+      "+short, curved claws", "claw", "climb trees", "climb|tree", "Black bear cubs are born in winter while their mother rests in a den.", "cub|winter|den",
+      "sleep through much of the winter", "sleep|winter|hibernat|rest|den", "save energy when food is hard to find", "energy|food|hard|cold|little|save|hungry|scarce", "O",
+      "Black bears are not always black. Some are brown or even cinnamon colored."],
+    ["chicken", "chickens", "bird", "on farms", "farm|coop|barn", "seeds, grain, bugs, and worms", "seed|grain|corn|bug|worm|insect",
+      "a sharp beak", "beak", "peck food off the ground", "peck|food|eat|pick|ground", "Baby chickens, called chicks, ^hatch from eggs.", "chick|egg|hatch",
+      "scratch the ground with its feet", "scratch|dig|feet|foot|ground", "find bugs and seeds to eat", "bug|seed|food|find|eat|worm", "O",
+      "A mother hen clucks to call her chicks."],
+    ["cow", "cows", "mammal", "on farms and in grassy fields", "farm|field|grass|barn|pasture", "grass and hay", "grass|hay|plant",
+      "a stomach with four parts", "stomach|four|4|tummy|belly", "break down tough grass", "break|digest|grass|food|chew|tough", "A baby cow is called a calf.", "calf",
+      "chew its cud, which is food it brings back up to chew again", "cud|chew|again", "get more from tough grass", "food|digest|break|grass|tough|energy|more", "H",
+      "Cows spend many hours each day eating and chewing."],
+    ["duck", "ducks", "bird", "on ponds, lakes, and rivers", "pond|lake|river|water", "water plants, seeds, insects, and small fish", "plant|seed|insect|bug|fish|snail|weed",
+      "+webbed feet", "web|feet|foot", "paddle through the water", "paddle|swim|water|push", "Baby ducks, called ducklings, follow their mother in a line.", "duckling|follow|line|mother|mom",
+      "spread oil on its feathers", "oil|feather|preen", "keep its feathers waterproof", "waterproof|dry|water|wet|float", "O",
+      "A duck's feathers keep it warm even in cold water."],
+    ["sheep", "sheep", "mammal", "on farms and in hilly fields", "farm|field|hill|meadow|pasture|grass", "grass and clover", "grass|clover|hay|plant",
+      "a thick coat of wool", "wool|coat|fur|fleece", "keep warm", "warm|cold", "A baby sheep is called a lamb.", "lamb",
+      "remember the faces of other sheep", "face|recogni|remember|know", "stay close to its flock", "flock|friend|together|group|family|close", "H",
+      "Farmers cut a sheep's wool once a year, and it grows back."],
+    ["horse", "horses", "mammal", "on farms, ranches, and open grasslands", "farm|ranch|grass|field|stable|barn|pasture", "grass, hay, and oats", "grass|hay|oat|grain|carrot|apple",
+      "+strong legs and hard hooves", "leg|hoof|hooves", "run fast and walk on rough ground", "run|fast|walk|ground|gallop", "A baby horse, called a foal, can stand within an hour or two of being born.", "foal|stand|hour",
+      "sleep standing up", "sleep|stand", "be ready to run from danger right away", "run|danger|ready|escape|quick|safe|away", "H",
+      "Horses can see almost all the way around their bodies."],
+    ["goat", "goats", "mammal", "on farms and on rocky mountains", "farm|mountain|rock|hill|cliff", "grass, leaves, twigs, and shrubs", "grass|leaves|leaf|twig|shrub|bush|plant|hay",
+      "+split hooves with soft pads", "hoof|hooves|pad|feet|foot", "grip rocky ground", "grip|rock|climb|slip|hold|steep", "A baby goat is called a kid.", "kid",
+      "climb steep rocks and cliffs", "climb|rock|cliff|steep", "find food and stay away from danger", "food|danger|safe|away|escape|eat", "H",
+      "Goats are curious and like to explore everything."],
+    ["pig", "pigs", "mammal", "on farms", "farm|pen|barn|mud|sty", "corn, grains, vegetables, and fruit", "corn|grain|vegetable|fruit|food|scrap",
+      "a flat, round snout", "snout|nose", "dig in the dirt for food", "dig|dirt|ground|root|food|sniff|smell", "Baby pigs are called piglets.", "piglet",
+      "roll in mud", "mud|roll|wallow", "stay cool, because pigs cannot sweat much", "cool|sweat|hot|heat|sun|temperature", "O",
+      "Pigs are very smart and can learn tricks."],
+    ["dog", "dogs", "mammal", "in homes all around the world", "home|house|family|people", "dog food made from meat and grains", "food|meat|kibble|dog food",
+      "an amazing nose", "nose|smell|sniff", "smell things people cannot", "smell|sniff|find|track", "Baby dogs are called puppies.", "pupp",
+      "learn many words and commands", "learn|word|command|trick|sit|listen", "work and play with people", "people|help|work|play|human|owner|family", "O",
+      "Some dogs help people by guiding them, herding sheep, or finding lost hikers."],
+    ["cat", "cats", "mammal", "in homes, barns, and neighborhoods", "home|house|barn|neighbor|family", "cat food made from meat or fish", "food|meat|fish|mice|mouse",
+      "+long whiskers", "whisker", "feel things around it, even in the dark", "feel|touch|dark|sense|space|fit|squeeze", "Baby cats are called kittens.", "kitten",
+      "twist in the air to land on its feet", "land|feet|foot|fall|flip|twist|turn", "keep from getting hurt when it falls", "hurt|safe|injur|pain|keep", "C",
+      "A cat's rough tongue works like a comb to clean its fur."],
+    ["goldfish", "goldfish", "fish", "in ponds and fish tanks", "pond|tank|bowl|water|aquarium", "fish flakes, plants, and tiny bugs", "flake|food|plant|bug|insect",
+      "+gills", "gill", "breathe underwater", "breath|water|air|oxygen", "Goldfish lay eggs that stick to water plants.", "egg|plant",
+      "remember things for months", "remember|memory|month", "learn when it is feeding time", "food|feed|time|learn|eat", "O",
+      "Goldfish can grow much bigger in a pond than in a small bowl."],
+    ["box turtle", "box turtles", "reptile", "in forests and grassy fields, often near water", "forest|wood|field|grass|water", "worms, berries, mushrooms, and plants", "worm|berr|mushroom|plant|insect|bug|fruit",
+      "a hard, high shell", "shell", "protect its body", "protect|safe|body|hide|hard", "Box turtles ^hatch from eggs buried in the soil.", "egg|soil|dirt|bury|ground|hatch",
+      "close its shell up tight like a box", "close|shut|shell|tight|box|hide", "hide safely from danger", "hide|safe|danger|enemy|predator|protect", "O",
+      "Some box turtles live for more than fifty years."],
+    ["field mouse", "field mice", "mammal", "in fields, forests, and sometimes houses", "field|forest|house|nest|grass|barn|wood", "seeds, grains, and insects", "seed|grain|insect|bug|corn|nut",
+      "+long whiskers", "whisker", "feel its way in the dark", "feel|dark|way|sense|touch", "Baby mice are called pups.", "pup",
+      "squeeze through tiny holes", "squeeze|hole|tiny|small|fit|gap", "get to food and escape from cats and owls", "food|escape|safe|hide|cat|owl|danger|away", "On",
+      "A mouse's long tail helps it balance when it climbs."],
+    ["garter snake", "garter snakes", "reptile", "in fields, forests, gardens, and wet places", "field|forest|garden|grass|wet|water|marsh|pond", "worms, frogs, slugs, and small fish", "worm|frog|slug|fish|toad|bug",
+      "a forked tongue", "tongue|fork", "smell the air", "smell|sniff|scent|air|taste", "Garter snakes give birth to live babies instead of laying eggs.", "live|birth|born|not egg|no egg",
+      "shed its skin as it grows", "shed|skin|molt", "make room to grow bigger", "grow|room|bigger|big|tight|new", "C",
+      "Garter snakes warm up by lying in the sun."],
+    ["gecko", "geckos", "reptile", "in warm places around the world, often on walls and trees", "warm|wall|tree|rock|house|tropic|desert|forest", "insects such as crickets and moths", "insect|bug|cricket|moth|fly",
+      "+toes covered in tiny hairs", "toe|hair|feet|foot|pad", "stick to walls and even ceilings", "stick|wall|ceiling|climb|grip|cling", "Most geckos lay eggs, often two at a time.", "egg|two|2",
+      "drop its tail if something grabs it", "tail|drop|lose|break", "escape while the tail wiggles", "escape|away|run|safe|distract|trick|predator|danger", "C",
+      "A gecko can grow a new tail after losing one."],
+    ["earthworm", "earthworms", "", "underground in soil", "soil|dirt|ground|underground|mud|earth", "dead leaves and bits of plants in the soil", "leaves|leaf|plant|dead|soil|dirt",
+      "+tiny bristles on its body", "bristle|hair|body", "grip the soil as it moves", "grip|move|crawl|hold|dig|soil|push", "Baby worms ^hatch from small cocoons in the soil.", "cocoon|egg|hatch",
+      "dig tunnels in the soil", "tunnel|dig", "let air and water into the ground, which helps plants grow", "air|water|plant|grow|soil|help|garden", "",
+      "Earthworms have no eyes, but they can sense light."],
+    ["crab", "crabs", "", "on beaches, in tide pools, and on the ocean floor", "beach|tide|pool|ocean|sea|sand|shore|rock|floor", "algae, small animals, and bits of food", "algae|small|food|bits|plant|fish|worm|clam",
+      "+two strong claws", "claw|pincer|pinch", "grab food and protect itself", "grab|food|protect|pinch|hold|catch|defend", "Crabs ^hatch from eggs as tiny babies that float in the ocean.", "egg|float|tiny|hatch",
+      "walk sideways", "sideways|side", "move quickly, because of the way its legs bend", "quick|fast|leg|bend|move|easy|way", "O",
+      "A crab grows by shedding its old shell and making a bigger one."],
+    ["dragonfly", "dragonflies", "insect", "near ponds, lakes, and streams", "pond|lake|stream|water|river", "mosquitoes, flies, and other flying insects", "mosquito|fly|flies|insect|bug|gnat",
+      "+four see-through wings", "wing|four|4|clear|see-through", "fly forward, backward, and hover", "fly|forward|backward|hover|turn", "Young dragonflies, called nymphs, live underwater.", "nymph|underwater|water",
+      "catch insects while flying", "catch|insect|bug|fly|air|hunt", "eat without having to land", "eat|food|land|stop|fly|air|without", "C",
+      "Dragonflies have huge eyes that see in almost every direction."],
+    ["moose", "moose", "mammal", "in cold northern forests near lakes and wetlands", "forest|north|cold|lake|wet|swamp|marsh|pond|canada|alaska", "leaves, twigs, and water plants", "leaves|leaf|twig|plant|bark|water plant",
+      "+huge antlers on the males", "antler|horn", "show off their strength to other moose", "strength|strong|show|other|male|impress", "A baby moose, called a calf, can outrun a person when it is only a few days old.", "calf|run|day|fast",
+      "swim well and dive for water plants", "swim|dive|water", "reach food at the bottom of lakes", "food|plant|bottom|lake|eat|reach", "H",
+      "Moose are the largest members of the deer family."],
+    ["toucan", "toucans", "bird", "in rainforests of Central and South America", "rainforest|forest|jungle|tree|america", "fruit, insects, and small animals", "fruit|berr|insect|bug|small animal|egg",
+      "a huge, colorful bill that is light and hollow inside", "bill|beak|color", "reach fruit at the ends of branches", "reach|fruit|branch|food|pick|grab|eat", "Toucans nest in holes in trees.", "hole|tree|nest",
+      "give off heat through its big bill", "heat|bill|beak|cool", "stay cool in the hot rainforest", "cool|hot|heat|temperature", "O",
+      "A toucan tosses fruit into the air and catches it in its bill."],
+    ["snow leopard", "snow leopards", "mammal", "high in the cold, rocky mountains of Central Asia", "mountain|rock|cold|asia|snow|high|himalaya", "wild sheep and goats", "sheep|goat|animal|meat",
+      "a long, thick tail", "tail|thick|long", "keep its balance and wrap around its body for warmth", "balance|warm|wrap|cold|steady|fall", "Snow leopard cubs are born in rocky dens.", "cub|den|rock|cave",
+      "leap a long way across rocky ground", "leap|jump|far", "catch food on steep mountain slopes", "catch|food|hunt|prey|steep|mountain|slope|rock|chase", "C",
+      "Snow leopards have wide, furry paws that work like snowshoes."],
+    ["orangutan", "orangutans", "mammal", "in rainforests on islands in Southeast Asia", "rainforest|forest|jungle|asia|island|borneo|sumatra|tree", "fruit, leaves, and bark", "fruit|fig|leaves|leaf|bark",
+      "+very long, strong arms", "arm|long|strong", "swing and climb through the trees", "swing|climb|tree|branch|move", "A baby orangutan stays with its mother for about seven or eight years.", "mother|mom|year|seven|eight|7|8|long",
+      "use big leaves as umbrellas when it rains", "leaves|leaf|umbrella|rain|cover", "stay dry", "dry|wet|rain|cover|water", "",
+      "Orangutans spend most of their lives up in the trees."],
+    ["manatee", "manatees", "mammal", "in warm, shallow coastal waters and rivers", "warm|shallow|coast|water|river|ocean|sea|florida|spring", "sea grass and other water plants", "grass|plant|weed|seagrass",
+      "a flat, paddle-shaped tail", "tail|paddle|flat", "push itself slowly through the water", "push|swim|move|water|slow", "A manatee calf drinks its mother's milk underwater.", "calf|milk",
+      "hold its breath for up to twenty minutes while resting", "breath|minute|hold|underwater", "rest underwater", "rest|sleep|underwater|water|stay under", "H",
+      "Manatees are sometimes called sea cows because they graze on plants."],
+    ["harbor seal", "harbor seals", "mammal", "along cool ocean coasts", "ocean|sea|coast|shore|beach|rock|cold|cool", "fish, squid, and crabs", "fish|squid|crab|shrimp",
+      "a thick layer of fat called ^blubber", "blubber|fat|thick", "stay warm in cold water", "warm|cold|water", "A seal pup can swim within hours of being born.", "pup|swim|hour",
+      "sense moving fish with its whiskers", "whisker|sense|feel|fish", "find food in dark or cloudy water", "find|food|fish|dark|cloud|murky|see|hunt", "C",
+      "Seals rest on rocks and beaches between swims."],
+    ["ladybug", "ladybugs", "insect", "in gardens, fields, and forests", "garden|field|forest|plant|leaf|leaves", "tiny insects called aphids", "aphid|insect|bug",
+      "a bright red or orange shell with spots", "red|orange|spot|shell|color|bright", "warn birds that it tastes bad", "warn|bad|taste|bird|eat|danger|yuck", "Ladybugs lay their eggs on leaves near aphids.", "egg|leaves|leaf|aphid",
+      "play dead when it is in danger", "dead|still|play", "trick hungry animals into leaving it alone", "trick|alone|safe|eat|danger|predator|fool", "C",
+      "Gardeners like ladybugs because they eat bugs that harm plants."]
+  ];
+
+  const GROUPDEF = {
+    mammal: "an animal with hair or fur that feeds its babies milk", bird: "an animal with feathers that hatches from an egg",
+    reptile: "an animal with dry, scaly skin", amphibian: "an animal that can live both in water and on land",
+    insect: "a small animal with six legs and three body parts", fish: "an animal that lives in water and breathes with gills"
+  };
+  const DIET = { H: ["herbivore", "eats only plants"], C: ["carnivore", "eats other animals"], O: ["omnivore", "eats both plants and animals"] };
+  function lastWord(s) { return s.split(/[ -]/).pop().toLowerCase(); }
+  function animalPassage(c) {
+    const a = P(FACTS), b = c.band, fl = a[17] || "";
+    const featPl = a[7].charAt(0) === "+";
+    Object.assign(c, { kind: "passage", an: a[0], pl: a[1], grp: a[2], home: a[3], homeK: a[4], food: a[5], foodK: a[6],
+      feat: featPl ? a[7].slice(1) : a[7], featK: a[8], use: a[9], useK: a[10], baby: a[11], babyK: a[12], skill: a[13], skillK: a[14], why: a[15], whyK: a[16],
+      featIt: featPl ? "they" : "it", featHelps: featPl ? "help" : "helps", featDoes: featPl ? "do" : "does", hunt: fl.indexOf("C") !== -1 ? "hunt for" : "look for" });
+    const names = [lastWord(a[0]), stem(lastWord(a[1])), a[0].toLowerCase()];
+    ["bee", "fish", "worm", "bug", "bird", "star", "monarch"].forEach(function (x) { if (a[0].indexOf(x) !== -1) names.push(x); });
+    c.nK = uniq(names).join("|");
+    c.subject = "animal:" + a[0];
+    const f = c.f, s = [];
+    const say = function (t) { s.push(fill(t, c, true)); };
+    const omit = c.focus === "infer" ? 0.85 : 0.35;
+    const keepUse = !chance(omit), keepWhy = !chance(omit);
+    if (b === 0) {
+      if (chance(0.6)) say(P(["This is {a:an}.", "Look at the {an}!", "Have you ever seen {a:an}?", "Meet the {an}."]));
+      const drop = chance(0.5) ? P(["home", "food", "feat", "skill"]) : "";
+      if (drop !== "home") { f.home = 1; say(P(["{A:an} lives {home}.", "{Pl} live {home}."])); }
+      if (drop !== "food") { f.food = 1; say(P(["It eats {food}.", "{Pl} eat {food}."])); }
+      if (drop !== "feat") { f.feat = 1; say("It has {feat}."); }
+      if (drop !== "skill") { f.skill = 1; say(P(["It can {skill}!", "{A:an} can {skill}."])); }
+    } else {
+      const open = [["Have you ever seen {a:an}?", "{Pl} are amazing animals.", "Let's learn about {pl}.", "What do you know about {pl}?", "{A:an} is a very interesting animal."],
+        ["{Pl} are fascinating animals.", "Few animals are as interesting as the {an}.", "Scientists have learned a lot about how {pl} live.", "What lives {home}, eats {food}, and can {skill}? The {an} does!"],
+        ["Few animals are as well suited to their surroundings as the {an}.", "Every animal has its own ways of surviving, and the {an} is no exception.",
+          "Scientists who study {pl} have discovered many ^remarkable things about how they live.", "At first glance, {a:an} may seem ordinary, but its body and habits are full of surprises."]][Math.min(2, b - 1)];
+      if (chance(b === 1 ? 0.6 : 0.8)) say(P(open));
+      if (c.grp && chance(0.45)) { f.grp = 1; say(b === 1 ? "{A:an} is {a:grp}." : "{A:an} is " + an(c.grp).replace(/ (\w+)$/, " ^$1") + ", " + GROUPDEF[c.grp] + "."); }
+      f.home = 1;
+      say(b === 1 ? P(["{Pl} live {home}.", "You can find {pl} {home}."]) : P(["The {an} makes its home {home}.", "{Pl} are found {home}.", "The {an}'s ^habitat is {home}."]));
+      const diet = DIET[fl.replace(/[^HCO]/g, "")];
+      if (diet && b >= 2 && chance(0.5)) { f.diet = 1; c.dietW = diet[0]; say("{A:an} is " + an(diet[0]).replace(/ (\w+)$/, " ^$1") + ", which means it " + diet[1] + "."); }
+      if (chance(0.85)) { f.food = 1; say(b === 1 ? P(["They eat {food}.", "{Pl} eat {food}."]) : P(["{Pl} eat {food}.", "For food, {pl} {hunt} {food}."])); }
+      f.feat = 1;
+      if (keepUse) { f.use = 1; say(b === 1 ? "{A:an} has {feat}. " + (featPl ? "These help" : "This helps") + " it {use}." : P(["Thanks to {feat}, {a:an} can {use}.", "{A:an} has {feat}, and " + c.featIt + " " + c.featHelps + " it {use}."])); }
+      else say(P(["{A:an} has {feat}.", "One special thing about {a:an} is {feat}."]));
+      if (b === 3 && chance(0.45)) { f.adapt = 1; say("A helpful body part like this is called an ^adaptation."); }
+      f.skill = 1;
+      if (keepWhy) { f.why = 1; say(b === 1 ? P(["{A:an} can also {skill}. This helps it {why}.", "{A:an} can {skill}. It does this to {why}."]) : P(["{A:an} can {skill}, which helps it {why}.", "{A:an} is able to {skill}. This helps it {why}."])); }
+      else say(b === 1 ? "{A:an} can also {skill}." : P(["Another amazing fact is that {a:an} can {skill}.", "{A:an} can also {skill}."]));
+      if (b >= 2 && /blend/.test(c.skillK + c.useK) && chance(0.5)) say("Blending in like this is called ^camouflage.");
+      if (b >= 2 && fl.indexOf("n") !== -1 && chance(0.6)) { f.night = 1; say(P(["{Pl} are ^nocturnal, which means they are most active at night.", "{Pl} are ^nocturnal, so they rest during the day and are busy at night."])); }
+      if (b >= 2 && /predator/.test(c.whyK) && chance(0.35)) say("Animals that hunt other animals for food are called ^predators.");
+      if (chance(0.6)) { f.baby = 1; say(c.baby); }
+      if (a[18] && chance(b === 1 ? 0.3 : 0.5)) say(a[18]);
+      if (b >= 2 && chance(0.5)) say(P(["{Pl} are well suited for life {home}.", "The next time you see {a:an}, think about all the ways it is built to survive.",
+        "@3 Every part of the {an}'s body and behavior helps it survive.", "@3 Its body and habits work together to help it survive {home}."].map(function (v) { const r = parseVar(v, c); return r ? r.t : null; }).filter(Boolean)));
+    }
+    const Q = [
+      ["main", "0", "", "What animal is this about?", "It is about {a:an}.", "Look at the first sentence.", "{nK}"],
+      ["main", "0", "", "What is this mostly about?", "It is about {pl} and how they live.", "What animal is in every sentence?", "{nK}"],
+      ["main", "1+", "", ["What is this passage mostly about?", "What is the topic of this passage?"], "It is about {pl}: where they live, what they eat, and how they stay safe.", "What animal is in almost every sentence, and what do you learn about it?", "{nK}", "live|home|eat|food|safe|body|special|fact|grow|skill|surviv|how|baby|babies"],
+      ["main", "2+", "", "What is the main idea of this passage?", "{Pl} have special bodies and skills that help them live {home}.", "What do most of the facts have in common?", "{nK}", "body|skill|special|help|surviv|live|adapt|feature|built"],
+      ["main", "3", "", ["Why did the author write this passage?", "What is the author's purpose?"], "To inform readers about how {pl} live and survive.", "Is the author telling a story, giving facts, or trying to change your mind?", "inform|teach|learn|explain|tell|fact|show|know|educat"],
+      ["detail", "", "home", ["Where do {pl} live?", "Where can you find {pl}?"], "{Pl} live {home}.", "Find the sentence that tells where they live.", "{homeK}"],
+      ["detail", "", "food", "What do {pl} eat?", "They eat {food}.", "Look for the word \"eat\" or \"food.\"", "{foodK}"],
+      ["detail", "", "feat", ["What special body part does {a:an} have?", "What body part does the passage describe?"], "It has {feat}.", "Look for a part of the body.", "{featK}"],
+      ["detail", "", "use", "How " + c.featDoes + " {feat} help {a:an}?", cap(c.featIt) + " " + c.featHelps + " it {use}.", "Find the sentence about {feat}.", "{useK}"],
+      ["detail", "", "skill", ["What special thing can {a:an} do?", "What skill does the passage describe?"], "It can {skill}.", "Look for the word \"can.\"", "{skillK}"],
+      ["detail", "", "why", "Why is it helpful for {a:an} to {skill}?", "It helps it {why}.", "Find the sentence about what {a:an} can do.", "{whyK}"],
+      ["detail", "1+", "baby", "What does the passage tell you about baby {pl}?", c.baby, "Find the sentence about babies.", "{babyK}"],
+      ["detail", "1+", "grp", "What kind of animal is {a:an}?", "It is {a:grp}.", "Find the sentence that names the group.", "{grp}"],
+      ["detail", "2+", "night", "When are {pl} most active?", "At night.", "Find the word \"nocturnal.\"", "night|dark|evening"],
+      ["infer", "", "feat !use", "How do you think {feat} " + (featPl ? "help" : "helps") + " {a:an}?", cap(c.featIt) + " " + c.featHelps + " it {use}.", "Think about what {a:an} needs to do to eat and stay safe.", "{useK}"],
+      ["infer", "", "skill !why", "Why do you think it is useful for {a:an} to {skill}?", "So it can {why}.", "Think about what {a:an} needs to find food and stay safe.", "{whyK}"],
+      ["infer", "2+", "food", "What might happen to {pl} if they could not find the foods they eat?", "They would go hungry and might have to move somewhere else to find food.", "Think about what every animal needs to survive.", "hungry|starv|food|move|die|find|eat|weak|surviv"]
+    ];
+    return { title: fill(P(b === 0 ? ["The {An}", "Look at the {An}!", "Meet the {An}", "{Pl}!"] :
+      ["All About {Pl}", "The Amazing {An}", "{Pl} Up Close", "How {Pl} Live", "Meet the {An}", "{Pl}: Built to Survive", "The Secret Life of {Pl}", "Life as {a:an}"]), c),
+      sents: s, qs: runQs(c, Q), subject: c.subject };
+  }
+  function howtoPassage(c) { return animalPassage(c); }
+  const commPassage = howtoPassage, histPassage = howtoPassage;
 
   /* ================= BUILDING A PASSAGE ================= */
   function parseVar(v, c) {
