@@ -135,7 +135,7 @@ BD.UI = (function () {
         (np ? '<span class="sr-part">' + partDots(r, sj.key) + ' Part ' + (np.i + 1) + ' of 4: ' + esc(sk.label) + (np.open ? ' · ready!' : ' · unlocks at ' + np.need + ' XP') + '</span>' : '') +
         '<span class="mini-track">' + partTicks() + '<i style="width:' + x + '%"></i></span></div>' +
         '<div class="sr-actions"><button type="button" class="btn btn-small" data-stripe-practice="' + sj.key + '">Practice</button>' +
-        '<button type="button" class="btn btn-small' + (got || np.open ? " btn-primary" : " btn-quiet") + '" data-stripe-test="' + sj.key + '">' + (got ? "Retest" : "Part " + (np.i + 1) + " test") + '</button></div></div>';
+        '<button type="button" class="btn btn-small' + (got || np.open ? " btn-primary" : " btn-quiet") + '" data-stripe-test="' + sj.key + '">' + (got ? "Retest" : np.open ? "Part " + (np.i + 1) + " test" : "Part " + (np.i + 1) + " unlocks at " + np.need + " XP") + '</button></div></div>';
     }).join("");
     return '<div class="rank-card">' +
       '<div class="rank-top"><label class="grade-select"><span class="eyebrow">Dojo grade</span><select id="dojoGradeSel">' +
@@ -205,7 +205,13 @@ BD.UI = (function () {
     const p = BD.Store.current(), g = BD.Rank.dojoGrade(p), r = BD.Rank.rec(p, g);
     const stripe = { grade: g, belt: r.belt, test: !!test };
     // A stripe not earned yet is tested one part (one skill) at a time; Retest is one mixed test.
-    if (test && !r.stripes[key]) { const n = BD.Rank.nextPart(r, key); stripe.part = n.i; stripe.skill = BD.Rank.partSkills(key, g)[n.i]; }
+    // Practice comes first: a locked part shows the "unlocks at" sheet instead (the games gate it too).
+    if (test && !BD.Rank.canTest(p, key, g)) { confirmTest(key); return; }
+    if (test && !r.stripes[key]) {
+      const n = BD.Rank.nextPart(r, key);
+      if (!n.open) stripe.test = false; // practice first: a locked part can never start
+      else { stripe.part = n.i; stripe.skill = BD.Rank.partSkills(key, g)[n.i]; }
+    }
     if (key === "math") BD.MathGame.start("practice", null, stripe);
     else if (key === "reading") BD.SentenceGame.start(null, stripe);
     else if (key === "comprehension") BD.Reading.start(null, stripe);
@@ -351,7 +357,6 @@ BD.UI = (function () {
     const r = p.retry[game];
     if (r && g > r.grade) return false;
     if (r && g < r.grade) p.retry[game] = null;
-    if (g > p[GRADE_FIELD[game]]) BD.Rank.raise(p, game, g); // moving up raises the subject level; moving down never lowers it
     p[GRADE_FIELD[game]] = g;
     BD.Store.save(p);
     return true;
@@ -741,7 +746,7 @@ BD.UI = (function () {
     $("flashCard").addEventListener("click", function () { BD.MathGame.openFlash(); });
     $("parentHow").addEventListener("click", function () {
       sheet("How Brain Dojo works",
-        '<h4 class="label">Belts and stripes</h4><p>Each grade has its own belt path: White, Yellow, Orange, Blue, Green, Purple, Brown, Red, Black. A belt needs 4 stripes (Math, Reading, Spelling, Comprehension). Each stripe test comes in 4 parts, each a different skill (for example Capitals, Punctuation, Spelling and Grammar), unlocking at 25, 50, 75 and 100 practice XP. Passing all 4 parts (85% each) earns the stripe, and the 4th stripe graduates them to the next belt. Spanish is a bonus stripe. Practice below their level still builds that grade\'s belt, at fewer points (60% one grade below, 40% two below, 25% three or more), so the fastest way up is training at their own level.</p>' +
+        '<h4 class="label">Belts and stripes</h4><p>Each grade has its own belt path: White, Yellow, Orange, Blue, Green, Purple, Brown, Red, Black. A belt needs 4 stripes (Math, Reading, Spelling, Comprehension). Each stripe test comes in 4 parts, each a different skill (for example Capitals, Punctuation, Spelling and Grammar). Practice comes first: Part 1 unlocks at 25 practice XP, then 50, 75 and 100, and a locked part cannot be started. Passing all 4 parts (85% each) earns the stripe, and the 4th stripe graduates them to the next belt. Spanish is a bonus stripe. Practice below their level still builds that grade\'s belt, at fewer points (60% one grade below, 40% two below, 25% three or more), so the fastest way up is training at their own level.</p>' +
         '<h4 class="label">Practice and hints</h4><p>Points come from doing the work. Practice earns up to 100 XP per stripe; stripe tests add no XP (practice to 56, pass the test, and it stays 56). They can keep practicing a stripe after earning it, until they move up a belt. Graduating adds a bonus earned by practice: a quarter of the belt\'s practice XP (all 400 = +100; tests only = +0). The Dojo leaderboard ranks XP earned this week, so practice beats rushing tests. White through Purple belts can use hints. Brown, Red and Black belts work without them. Pre-K to 1st grade hear instructions read aloud.</p>' +
         '<h4 class="label">Badges and gear</h4><p>Gear unlocks the way it does at Engage: a mouthguard on sign-up, the Engage shirt after 3 days of training, MMA shorts after 10 days, MMA gloves with the first stripe, a sparring gear bag at the first graduation, then sparring gloves, boots, headgear and chest gear with each Yellow Belt stripe. The full Sparring Gear outfit unlocks at the Yellow to Orange Belt graduation, when sparring starts in class.</p>' +
         '<h4 class="label">Weapons, judo and tournaments</h4><p>Weapons are for show only: Nunchucks at Green Belt, Kamas at Purple, Bo Staff at Brown and a Wooden Sword at Red. They are performed in Weapons tournaments and never used against anyone or any boss. At Green Belt they earn Boxing Gloves and Judo Moves (every 5 right in a row is a judo throw). Tournaments are single-elimination brackets of 6 to 12: Kata opens at Yellow Belt with 2 stripes, Sparring at Orange and Weapons at Green. Gold +10 XP, Silver +7.5, Bronze +5, double on weekends.</p>' +

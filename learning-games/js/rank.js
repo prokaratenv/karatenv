@@ -71,6 +71,12 @@ BD.Rank = (function () {
     const r = rec(p, grade);
     const out = { subject: key, grade: grade, pct: pct, passed: pct >= PASS, beltBefore: r.belt, graduated: null, already: !!r.stripes[key] };
     /* One part of a 4-part stripe test: the stripe comes when all 4 are passed. */
+    if (!r.stripes[key] && (typeof part !== "number" || (r.xp[key] || 0) < partNeed(part))) {
+      // practice comes first: no stripe credit for a locked part or an un-parted test
+      out.passed = false; out.partOnly = true; out.locked = true; out.part = typeof part === "number" ? part : 0; out.partPassed = false;
+      out.parts = partList(r, key).slice(); out.partsDone = out.parts.filter(Boolean).length;
+      out.belt = BD.BELTS[r.belt]; out.stripes = Object.assign({}, r.stripes); return out;
+    }
     if (typeof part === "number" && part >= 0 && part < PARTS && !r.stripes[key]) {
       const list = partList(r, key);
       out.part = part; out.partPassed = out.passed;
@@ -118,6 +124,21 @@ BD.Rank = (function () {
     if (i >= PARTS) i = PARTS - 1;
     return { i: i, open: (r.xp[key] || 0) >= partNeed(i), need: partNeed(i) };
   }
+  /* Strict gate: practice comes first. Given the stripe a game is about to
+     start, returns the stripe it may really start. A test for a stripe not
+     earned yet always becomes the next part, and a part that isn't unlocked
+     (N x 25 practice XP) becomes stripe practice instead. Earned stripes can
+     always Retest (one mixed test). */
+  function gate(p, gameOrKey, stripe) {
+    if (!stripe || !stripe.test || !p) return stripe;
+    const key = BY_GAME[gameOrKey] || gameOrKey, r = rec(p, stripe.grade);
+    if (r.stripes[key]) { const o = Object.assign({}, stripe); delete o.part; delete o.skill; return o; }
+    const n = nextPart(r, key);
+    if (!n || !n.open) { const o = Object.assign({}, stripe, { test: false, blocked: true }); delete o.part; delete o.skill; return o; }
+    return Object.assign({}, stripe, { part: n.i, skill: partSkills(key, stripe.grade)[n.i] });
+  }
+  function canTest(p, key, grade) { const r = rec(p, grade); if (r.stripes[key]) return true; const n = nextPart(r, key); return !!(n && n.open); }
+
   /* What each part tests, by subject and grade. */
   function partSkills(key, grade) {
     grade = Number(grade);
@@ -267,9 +288,18 @@ BD.Rank = (function () {
   /* White through Purple may use hints; Brown, Red and Black do it on their own. */
   function hintsAllowed(p, grade) { return rec(p, grade).belt <= 5; }
 
+  /* The level rises only when a round at a higher grade goes well (70%+, 5+ items),
+     so tapping up just to look never lowers the points at their old grade. */
+  if (BD.on) BD.on("results", function (e) {
+    const p = e && e.p, s = p && p.sessions && p.sessions[0];
+    if (!s || !BD_GAME_OK(s) || (Number(s.total) || 0) < 5) return;
+    if (s.correct / s.total >= 0.7 && Number(s.grade) > level(p, BY_GAME[s.game] || s.game)) { raise(p, s.game, Number(s.grade)); BD.Store.save(p); }
+  });
+  function BD_GAME_OK(s) { return !!BY_GAME[s.game] && !s.school; }
+
   return {
     bank: bank, hintsAllowed: hintsAllowed, PASS: PASS, PRACTICE_MAX: PRACTICE_MAX, GRAD_XP: GRAD_XP, SUBJECTS: SUBJECTS, REQUIRED: REQUIRED, BY_GAME: BY_GAME,
     subject: subject, gradBonus: gradBonus, rec: rec, dojoGrade: dojoGrade, belt: belt, stripeCount: stripeCount, beltXP: beltXP,
-    practice: practice, testDone: testDone, PARTS: PARTS, partNeed: partNeed, nextPart: nextPart, partsDone: partsDone, partSkills: partSkills, level: level, raise: raise, setLevel: setLevel, factor: factor, factorFor: factorFor, peek: peek, sanitize: sanitize, at: null, itemGrade: itemGrade, levelNote: levelNote, beltSVG: beltSVG, planItems: planItems
+    practice: practice, testDone: testDone, PARTS: PARTS, partNeed: partNeed, nextPart: nextPart, gate: gate, canTest: canTest, partsDone: partsDone, partSkills: partSkills, level: level, raise: raise, setLevel: setLevel, factor: factor, factorFor: factorFor, peek: peek, sanitize: sanitize, at: null, itemGrade: itemGrade, levelNote: levelNote, beltSVG: beltSVG, planItems: planItems
   };
 })();
