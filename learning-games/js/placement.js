@@ -205,6 +205,7 @@ BD.Placement = (function () {
     S = { p: p, isNew: !!opts.isNew, from: opts.from || "", idx: -1, stairs: {}, used: { spelling: {}, comprehension: {} }, item: null, locked: false, results: {} };
     SUBJECTS.forEach(function (s) { const g = clampG(p[s.field] === undefined ? 3 : p[s.field]); S.stairs[s.key] = stair(s.key, g); });
     root().hidden = false;
+    root().querySelector("#placeSkip").textContent = "Skip for now";
     document.body.classList.add("sheet-lock");
     intro();
     return true;
@@ -334,6 +335,7 @@ BD.Placement = (function () {
       '<p class="muted small">Levels keep adjusting as you train. Grown-ups can change them in the Parents area.</p>' +
       '<button type="button" class="btn btn-primary btn-big" data-pl="done">Start training!</button></div>';
     S.finished = true;
+    root().querySelector("#placeSkip").textContent = "Close";
     const say = SUBJECTS.filter(function (s) { return S.results[s.key] !== undefined && S.results[s.key] !== null; }).map(function (s) { return s.label + ": " + gradeWords(S.results[s.key]); }).join(". ");
     if (BD.ReadAloud.auto(Math.min.apply(null, SUBJECTS.map(function (s) { return S.stairs[s.key].start; })))) BD.ReadAloud.say("Your training levels are set! " + say);
   }
