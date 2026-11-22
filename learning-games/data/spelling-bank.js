@@ -3104,7 +3104,7 @@ opposition|The plan faced strong ___.
 pollination|Bees help with ___.
 presentation|I gave a ___ about volcanoes.
 production|The school ___ of the play was great.
-quotation|Put the ___ in quotation marks.
+quotation|A famous ___ from the speech is painted on the wall.
 relaxation|Yoga is good for ___.
 reservation|We made a dinner ___.
 revolution|The ___ changed the country forever.

@@ -118,9 +118,17 @@ BD.WordQuiz = (function () {
     "write wrote rite right writ white whit wit with wish wash which witch watch match much such touch thought though through threw three thrown throne tough trough cough enough rough laugh " +
     "lightening lighting liking lifting weight wait wade waste waist way weigh whey hey hay heir air err ere sight site cite night knight nit knit know now no knew new kneel kneed need knead " +
     "peace piece pace pacer price prize pride bride ride rid red read reed lead led lid laid paid pail pale peel pole pool pull poll pile pill pine pain pane pin pen pan pun").split(" "));
+  /* Every word in the spelling bank, rebuilt only if the bank grows. */
+  let bankSet = null, bankN = -1;
   function isRealWord(c) {
     c = c.toLowerCase();
-    return COMMON.has(c) || Object.keys(BD.SPELLING).some(function (g) { return BD.SPELLING[g].some(function (x) { return x[0].toLowerCase() === c; }); });
+    if (COMMON.has(c)) return true;
+    let n = 0; Object.keys(BD.SPELLING).forEach(function (g) { n += BD.SPELLING[g].length; });
+    if (!bankSet || n !== bankN) {
+      bankSet = new Set(); bankN = n;
+      Object.keys(BD.SPELLING).forEach(function (g) { BD.SPELLING[g].forEach(function (x) { bankSet.add(x[0].toLowerCase()); }); });
+    }
+    return bankSet.has(c);
   }
   function misspellings(word) {
     const w = word.toLowerCase(), sound = [], other = [];
@@ -166,18 +174,117 @@ BD.WordQuiz = (function () {
     return { ans: ans, choices: shuffle(choices), html: BD.UI.esc(shown) + '<span class="spell-blank">?</span>' + BD.UI.esc(after), plainShow: shown + "_".repeat(len) + after };
   }
 
+  /* ---------- choosing spelling words ----------
+     - Fresh words first: a word is not shown again until the student has
+       seen the rest of the grade's list (recent window of RECENT words).
+     - Spaced repetition: a missed word comes back next round, then a few
+       rounds later, until it has been spelled right three times.
+     - Weak patterns (BD.Phonics.weakest): about 40-50% of a round practices
+       them, with missed words of that pattern plus new ones.
+     - Otherwise a balanced spread of patterns. */
+  const RECENT = 600;
+  const Ph = function () { return BD.Phonics || null; };
+  function seenList(p) {
+    p.seenWords = p.seenWords || {};
+    if (!Array.isArray(p.seenWords.spelling)) p.seenWords.spelling = [];
+    return p.seenWords.spelling;
+  }
+  function markSeen(p, words) {
+    const s = seenList(p);
+    words.forEach(function (w) { const i = s.indexOf(w); if (i !== -1) s.splice(i, 1); s.push(w); });
+    if (s.length > RECENT) s.splice(0, s.length - RECENT);
+  }
+  const tagsOf = function (w) { return Ph() ? Ph().tags(w) : []; };
+  /* Pick words for one round. Returns { words: [[word, sentence]...], targeted: {word: true}, weak: [tags] } */
+  function pickSpelling(p, grade, len, adapt) {
+    const list = BD.SPELLING[String(grade)] || [];
+    if (!list.length) return { words: [], targeted: {}, weak: [] };
+    const byWord = {}; list.forEach(function (x) { byWord[x[0].toLowerCase()] = x; });
+    const seq = Number(p.spellSeq) || 0;
+    let seen = seenList(p);
+    let seenSet = new Set(seen);
+    let fresh = list.filter(function (x) { return !seenSet.has(x[0]); });
+    if (fresh.length < len) {             // the whole list has been used: start it over
+      const mine = new Set(list.map(function (x) { return x[0]; }));
+      p.seenWords.spelling = seen = seen.filter(function (w) { return !mine.has(w); });
+      seenSet = new Set(seen); fresh = list.slice();
+    }
+    const bucket = (p.wordMissed && p.wordMissed.spelling) || {};
+    const missed = Object.keys(bucket).map(function (k) { return bucket[k]; })
+      .filter(function (m) { return m && m.grade === grade && typeof m.word === "string" && byWord[m.word.toLowerCase()]; });
+    const waiting = new Set(missed.filter(function (m) { return Number(m.due) > seq; }).map(function (m) { return m.word.toLowerCase(); }));
+    const due = missed.filter(function (m) { return !(Number(m.due) > seq); })
+      .sort(function (a, b) { return (Number(a.due) || 0) - (Number(b.due) || 0) || b.misses - a.misses; })
+      .map(function (m) { return byWord[m.word.toLowerCase()]; });
+    const weak = adapt && Ph() ? Ph().weakest(p, grade, 2) : [];
+    const hasWeak = function (x) { const t = tagsOf(x[0]); return weak.some(function (w) { return t.indexOf(w) !== -1; }); };
+    const out = [], used = {}, targeted = {}, tagCount = {};
+    const take = function (x, isTarget) {
+      if (!x || out.length >= len || used[x[0].toLowerCase()]) return false;
+      used[x[0].toLowerCase()] = 1; out.push(x);
+      if (isTarget) targeted[x[0]] = true;
+      tagsOf(x[0]).forEach(function (t) { tagCount[t] = (tagCount[t] || 0) + 1; });
+      return true;
+    };
+    const usable = function (x) { return !used[x[0].toLowerCase()] && !waiting.has(x[0].toLowerCase()); };
+    /* 1. missed words that are due (weak-pattern ones first), up to 40% of the round */
+    const dueMax = Math.max(1, Math.round(len * 0.4));
+    const main = function (x) { return !!weak.length && tagsOf(x[0]).indexOf(weak[0]) !== -1; };
+    due.filter(main).concat(due.filter(function (x) { return !main(x) && hasWeak(x); }), due.filter(function (x) { return !hasWeak(x); }))
+      .slice(0, dueMax).forEach(function (x) { take(x, hasWeak(x)); });
+    /* 2. weak patterns: fill to about 45% of the round with new words of that pattern
+          (or, once those run out, the words of that pattern seen longest ago) */
+    if (weak.length) {
+      /* about 45%, and always at least one new word next to the ones coming back */
+      const goal = Math.min(Math.max(Math.max(2, Math.round(len * 0.45)), out.filter(hasWeak).length + 1), Math.ceil(len * 0.6));
+      const has = function (tag) { return function (x) { return tagsOf(x[0]).indexOf(tag) !== -1; }; };
+      const have = function () { return out.filter(hasWeak).length; };
+      /* the weakest pattern first (new words in a weighted random order, then the
+         words of that pattern seen longest ago); the second one only fills gaps */
+      weak.forEach(function (tag) {
+        const pool = fresh.filter(function (x) { return usable(x) && has(tag)(x); })
+          .map(function (x) { return [Math.pow(Math.random(), 1 / Ph().weight(x[0], weak)), x]; })
+          .sort(function (a, b) { return b[0] - a[0]; }).map(function (k) { return k[1]; });
+        const older = seen.map(function (w) { return byWord[w.toLowerCase()]; }).filter(function (x) { return x && usable(x) && has(tag)(x); });
+        pool.concat(older).forEach(function (x) { if (have() < goal || (tag === weak[0] && out.filter(has(tag)).length < goal)) take(x, true); });
+      });
+    }
+    /* 3. the rest: fresh words, spreading the patterns out */
+    let rest = shuffle(fresh.filter(usable));
+    while (out.length < len && rest.length) {
+      const sample = rest.slice(0, 6);
+      let best = sample[0], bestScore = Infinity;
+      sample.forEach(function (x) {
+        const sc = tagsOf(x[0]).reduce(function (t, tag) { return t + (tagCount[tag] || 0); }, 0) + Math.random() * 0.5;
+        if (sc < bestScore) { bestScore = sc; best = x; }
+      });
+      take(best, false);
+      rest = rest.filter(function (x) { return x !== best; });
+    }
+    /* tiny lists: allow repeats rather than a short round */
+    shuffle(list).forEach(function (x) { if (out.length < len) take(x, false); });
+    return { words: shuffle(out), targeted: targeted, weak: Object.keys(targeted).length ? weak : [] };
+  }
+  /* Build the items and the "Training:" line for a picked round. */
+  function spellingItems(p, grade, pick, styleFor) {
+    const train = Ph() && pick.weak.length ? Ph().trainingLine(pick.weak) : "";
+    const short = pick.weak.length ? " · Training: " + Ph().label(pick.weak[0]).replace(/ \(.*\)$/, "") : "";
+    const items = pick.words.map(function (x) {
+      const q = makeSpelling(x, grade, styleFor());
+      if (pick.targeted[x[0]]) { q.label += short; q.train = true; }
+      return q;
+    });
+    items.train = train;
+    markSeen(p, pick.words.map(function (x) { return x[0]; }));
+    return items;
+  }
+
   const spelling = {
     key: "spelling", title: "Spelling Bee", coach: "lauryn", field: "spellingGrade",
     round: function (p, grade) {
-      const list = BD.SPELLING[String(grade)] || [];
-      const seen = (p.seenWords.spelling = p.seenWords.spelling || []);
-      const missed = Object.values(p.wordMissed.spelling || {}).filter(function (m) { return m.grade === grade; }).map(function (m) { return m.word; });
-      const fresh = list.filter(function (x) { return seen.indexOf(x[0]) === -1 && missed.indexOf(x[0]) === -1; });
-      const order = missed.slice(0, 4).map(function (wd) { return list.find(function (x) { return x[0] === wd; }); }).filter(Boolean)
-        .concat(shuffle(fresh)).concat(shuffle(list));
-      const out = [], used = new Set(), bag = styleBag(grade, isQuiet(p));
-      order.forEach(function (x) { if (out.length < roundLen(grade) && !used.has(x[0])) { used.add(x[0]); out.push(makeSpelling(x, grade, bag())); } });
-      return out;
+      p.spellSeq = (Number(p.spellSeq) || 0) + 1;
+      const bag = styleBag(grade, isQuiet(p));
+      return spellingItems(p, grade, pickSpelling(p, grade, roundLen(grade), true), function () { return bag(); });
     }
   };
 
@@ -188,7 +295,14 @@ BD.WordQuiz = (function () {
     const underline = function (shown) { return BD.UI.esc(sentence).replace("___", '<u class="spell-u">' + BD.UI.esc(shown) + '</u>'); };
     const quiet = isQuiet(BD.Store.current && BD.Store.current());
     if (style === "listen" && quiet) style = "missing";
-    if ((style === "check" || style === "fix" || style === "pick") && !misspellings(word).length) style = "missing";
+    if ((style === "check" || style === "fix") && !misspellings(word).length) style = "missing";
+    if (style === "pick" && misspellings(word).length < 2) style = "missing";
+    /* missing letter needs 3+ choices: try other spots, else unscramble */
+    let miss = null;
+    if (style === "missing") {
+      for (let k = 0; k < 12 && (!miss || miss.choices.length < 3); k++) miss = missingItem(word, grade);
+      if (miss.choices.length < 3) style = "scramble";
+    }
     const base = {
       id: "spell:" + word, word: word, src: x, mode: style, label: STYLE_INFO[style], choices: null, answer: word,
       speakNow: null, speakAfter: quiet ? null : { text: word, lang: "en-US" },
@@ -201,7 +315,7 @@ BD.WordQuiz = (function () {
       speakNow: { text: word + ". " + full + " " + word + ".", lang: "en-US" }
     });
     if (style === "missing") {
-      const m = missingItem(word, grade);
+      const m = miss;
       return Object.assign(base, {
         promptHTML: m.html, sub: blankSent, answer: m.ans, choices: m.choices.map(function (c) { return { value: c }; }),
         explain: word + ": the missing " + (m.ans.length > 1 ? "letters are" : "letter is") + " \"" + m.ans + "\" (" + word.split("").join("-") + ")",
@@ -284,12 +398,8 @@ BD.WordQuiz = (function () {
     return p.flashSpell;
   }
   function flashRound(p, grade, style) {
-    const list = BD.SPELLING[String(grade)] || [];
-    const seen = (p.seenWords.spelling = p.seenWords.spelling || []);
-    const fresh = shuffle(list.filter(function (x) { return seen.indexOf(x[0]) === -1; })).concat(shuffle(list));
-    const out = [], used = new Set();
-    fresh.forEach(function (x) { if (out.length < roundLen(grade) && !used.has(x[0])) { used.add(x[0]); out.push(makeSpelling(x, grade, style)); } });
-    return out;
+    p.spellSeq = (Number(p.spellSeq) || 0) + 1;
+    return spellingItems(p, grade, pickSpelling(p, grade, roundLen(grade), true), function () { return style; });
   }
   function flashHTML(p) {
     const done = flashToday(p).styles;
@@ -319,6 +429,7 @@ BD.WordQuiz = (function () {
     BD.UI.syncGradeSelect("wordGradeSel", game);
     BD.UI.show("screen-word-play");
     BD.Cast.say("wordSay", "start");
+    if (game === "spelling" && W.items.train) BD.Cast.say("wordSay", "start", W.items.train + ". You've got this!");
     load();
   }
 
@@ -407,12 +518,20 @@ BD.WordQuiz = (function () {
     const st = ((p.wordStats[W.game] = p.wordStats[W.game] || {})[W.grade] = (p.wordStats[W.game][W.grade] || { r: 0, w: 0 }));
     const missKey = q.id;
     const bucket = (p.wordMissed[W.game] = p.wordMissed[W.game] || {});
+    const spellSR = W.game === "spelling" && !!q.word, seq = Number(p.spellSeq) || 0;
+    if (spellSR && BD.Phonics) BD.Phonics.note(q.word, ok && W.tries === 1, p);
     if (ok) {
       W.correct++; if (W.tries === 1) W.firstTry++;
       W.streak++; W.best = Math.max(W.best, W.streak);
       const gain = (W.tries === 1 ? 10 + Math.min(W.streak - 1, 10) : 5) - (W.usedTiles ? 5 : 0);
       W.xp += Math.max(2, gain); st.r++;
-      if (bucket[missKey]) { bucket[missKey].misses--; if (bucket[missKey].misses <= 0) delete bucket[missKey]; }
+      if (bucket[missKey]) {
+        const m = bucket[missKey];
+        m.misses--;
+        /* spaced repetition: back next round after a retry, then a few rounds later */
+        if (spellSR) { m.ok = (Number(m.ok) || 0) + 1; m.due = seq + (q.retry ? 1 : 3); }
+        if (m.misses <= 0) delete bucket[missKey];
+      }
       BD.Sound.right(); BD.Cast.say("wordSay", W.streak >= 3 && W.streak % 3 === 0 ? "streak" : "right");
       if (BD.Kid && BD.Kid.young(W.grade)) BD.Kid.celebrate($("wordPrompt"), W.grade);
       $("wordFeedback").className = "word-feedback solved";
@@ -421,7 +540,8 @@ BD.WordQuiz = (function () {
         '<p>' + BD.UI.esc(q.explain) + '</p>';
     } else {
       W.streak = 0; st.w++; W.missed.push(q);
-      bucket[missKey] = { grade: W.grade, misses: Math.min(3, ((bucket[missKey] && bucket[missKey].misses) || 0) + 2), topic: q.topic, es: q.es, word: q.word };
+      bucket[missKey] = { grade: W.grade, misses: spellSR ? 3 : Math.min(3, ((bucket[missKey] && bucket[missKey].misses) || 0) + 2), topic: q.topic, es: q.es, word: q.word };
+      if (spellSR) { bucket[missKey].due = seq + 1; bucket[missKey].ok = 0; }
       if (!q.retry && !W.test && !W.noRetry) W.items.splice(Math.min(W.i + 3, W.items.length), 0,
         W.game === "spelling" ? Object.assign(makeSpelling(q.src, W.grade, styleBag(W.grade, isQuiet(p))(q.mode)), { retry: true, school: q.school, label: q.label }) : Object.assign({}, q, { retry: true }));
       BD.Sound.wrong(); BD.Cast.say("wordSay", "wrong");
@@ -543,9 +663,7 @@ BD.WordQuiz = (function () {
     }
     if (school === "test") BD.School.recordTest(p, W.correct, W.answered);
     if (game === "spelling") {
-      const seen = p.seenWords.spelling = p.seenWords.spelling || [];
-      W.items.forEach(function (q) { if (q.word && seen.indexOf(q.word) === -1) seen.push(q.word); });
-      p.seenWords.spelling = seen.slice(-300);
+      markSeen(p, W.items.filter(function (q) { return q.word && !q.retry; }).map(function (q) { return q.word; }));
     }
     const belt = BD.Rank.practice(p, game, grade, W.xp - (W.banked || 0)); W.banked = W.xp;
     BD.Store.recordSession(p, Object.assign({ game: game, grade: grade, correct: W.correct, total: W.answered, xp: W.xp }, school ? { school: school } : {}));

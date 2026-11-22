@@ -149,7 +149,7 @@ BD.StoryGen = (function () {
     determination: [3, "not giving up, even when something is hard", "give up|quit|keep|hard|stick|focus|try|persist"],
     withdrawn: [3, "quiet and keeping to yourself", "quiet|shy|alone|keep|to himself|to herself|not talk|didn't talk|not want|lonely|sad"],
     welcome: [3, "happy to be included and wanted", "includ|want|happy|belong|glad|accept|part of|home|friend|good"],
-    impatient: [1, "not wanting to wait", "wait|hurry|now|rush|can't|couldn't|annoy|quick|fast|soon"],
+    impatient: [1, "not wanting to wait", "wait|hurry| now |rush|can't|couldn't|annoy|quick|fast|soon"],
     sprout: [1, "a new little plant just starting to grow", "plant|grow|baby|new|little|small|shoot|green|seedling|leaf"],
     harvest: [2, "the food or crops that are picked when they are ready", "food|crop|pick|vegetable|fruit|grew|grow|ready|plant|gather"],
     patience: [3, "being able to wait calmly", "wait|calm|without|time|slow|not rush|don't rush|not upset"],
@@ -177,6 +177,89 @@ BD.StoryGen = (function () {
     talons: [2, "sharp, curved claws", "claw|nail|sharp"],
     proboscis: [2, "a long, tube-shaped mouth used like a straw", "mouth|tube|straw|tongue"],
     blubber: [2, "a thick layer of fat", "fat"]
+  });
+  Object.assign(VOC, {
+    community: [1, "a group of people who live and work in the same area", "people|live|town|place|neighbor|together|group|area|city"],
+    equipment: [1, "the tools and things needed to do a job", "tool|thing|need|gear|stuff|supplies"],
+    dim: [1, "not very bright", "not bright|dark|low|faint|weak|little light"],
+    common: [3, "found in many places or used by many people", "many|lot|most|everywhere|usual|normal|regular"],
+    slates: [1, "small chalkboards", "chalkboard|board|write"],
+    rare: [1, "hard to find, because there are not many", "not many|few|hard to find|uncommon|special|scarce"],
+    automatic: [1, "working by itself", "itself|own|without|machine|no one|nobody|alone"],
+    inventions: [2, "new things that people made for the first time", "new|first|made|create|thought of|machine|idea"],
+    damp: [1, "a little wet", "wet|moist"],
+    soggy: [1, "very wet and soft", "wet|soak|mush|soft"],
+    crease: [2, "a line made by folding", "line|fold|mark"],
+    dissolves: [2, "mixes into a liquid until you cannot see it", "mix|disappear|melt|gone|can't see|cannot see|blend"],
+    moat: [2, "a ditch filled with water around a castle", "ditch|water|around|trench|hole"],
+    invented: [1, "made something new for the first time", "new|first|made|create|thought of|came up|built|build"],
+    costly: [1, "costing a lot of money", "money|expensive|cost|price|lot"],
+    circuit: [3, "a complete loop that electricity flows through", "loop|path|circle|flow|electric|complete"]
+  });
+  Object.assign(VOC, {
+    gently: [0, "in a soft and careful way", "soft|careful|slow|easy|not hard|light"],
+    huge: [0, "very, very big", "big|large|giant|enormous"],
+    whispered: [1, "spoke very quietly", "quiet|soft|low|softly"],
+    giggled: [1, "laughed in a light, silly way", "laugh"],
+    grumbled: [2, "complained in a low, unhappy voice", "complain|unhappy|grump|mad|upset|annoy|whin|mutter"],
+    shallow: [1, "not deep", "not deep|low|little water"],
+    burrows: [1, "holes or tunnels that animals dig to live in", "hole|tunnel|dig|underground|home"],
+    den: [1, "a hidden home where a wild animal rests", "home|hidden|cave|hole|rest|sleep|shelter"],
+    herds: [1, "big groups of animals that live together", "group|together|many|bunch"],
+    flock: [1, "a group of birds or sheep", "group|together|bunch|many"],
+    pouch: [1, "a pocket of skin or a bag", "pocket|bag|skin"],
+    hover: [1, "stay in one place in the air", "one place|one spot|stay|still|air|float"],
+    deliver: [1, "bring something to someone", "bring|give|take|drop off|carry"],
+    rescue: [1, "save someone from danger", "save|help|danger"],
+    protect: [1, "keep safe", "safe|guard|keep"],
+    rinse: [1, "wash with clean water", "wash|water|clean"],
+    scrub: [1, "rub hard to clean", "rub|clean|wash"],
+    gather: [1, "bring things together in one place", "collect|together|get|bring|pick"],
+    plenty: [1, "a lot, or more than enough", "lot|enough|many|much"],
+    curious: [2, "wanting to learn or know more", "learn|knows|find out|wonder|interest|question"],
+    noticed: [1, "saw or became aware of", "saw|see|spot|realiz|found|look|aware"],
+    suggested: [2, "gave an idea", "idea|said|told|advice|recommend"],
+    trembled: [2, "shook a little", "shook|shake|shaking|shiver|wobbl"],
+    fluttered: [2, "moved with quick, light flaps", "flap|flutter|wiggle|move|shake|quick"],
+    sturdy: [2, "strong and hard to knock over", "strong|solid|firm|steady|tough"],
+    cozy: [0, "warm and comfy", "warm|comf|snug|soft|nice"],
+    yummy: [0, "tasting very good", "taste|good|delicious|tasty|yum"],
+    wobbly: [0, "shaky and not steady", "shak|not steady|wiggl|wobbl|unsteady"],
+    focus: [1, "paying close attention to one thing", "attention|concentrat|think|mind|careful|one thing"],
+    respect: [1, "showing that you care about and honor someone", "care|honor|polite|kind|value|manners|nice"],
+    dojo: [1, "a place where people practice karate", "karate|martial|practice|train|school|class|place"],
+    kata: [1, "a set of karate moves done in order", "move|order|pattern|form|set|routine|step"],
+    kiai: [1, "a short, loud shout made with a karate move", "shout|yell|loud|scream|voice"],
+    "self-control": [2, "being in charge of what you do and say", "control|charge|calm|stop|choose|careful|behav"],
+    confidence: [2, "believing in yourself", "believ|sure|trust|brave|yourself|can do"],
+    sportsmanship: [2, "being fair and kind when you win or lose", "fair|kind|win|lose|nice|respect|good sport"],
+    gracious: [3, "kind and polite, even when it is hard", "kind|polite|nice|respect|good|fair"],
+    demonstration: [2, "a show that teaches how something is done", "show|perform|present|display|teach"],
+    accident: [1, "something bad that happens without meaning to", "not mean|didn't mean|did not mean|mistake|by accident|oops|not on purpose"],
+    guilty: [2, "feeling bad because you did something wrong", "bad|wrong|sorry|shame|bad about"],
+    confessed: [2, "told the truth about something you did", "told|truth|admit|said|tell"],
+    honest: [1, "telling the truth", "truth|true|not lying|not lie|honest"],
+    honesty: [3, "telling the truth", "truth|true|not lying|not lie"],
+    embarrassed: [2, "feeling silly or ashamed in front of others", "silly|ashamed|shy|uncomfortable|red|awkward|bad"],
+    delicious: [1, "tasting very good", "taste|good|yummy|tasty"],
+    recipe: [2, "directions for making a food", "direction|instruction|steps|how to|make|cook"],
+    measured: [2, "found out how much of something there is", "how much|amount|cup|spoon|size|count|exact"],
+    ingredient: [2, "one of the foods that go into a recipe", "food|thing|part|recipe|go into|put in"],
+    exhausted: [2, "very, very tired", "tired|sleepy|worn|no energy"],
+    grateful: [2, "thankful", "thank|appreciat|glad|happy"],
+    kindness: [2, "being nice and caring to others", "nice|caring|care|kind|friendly|help"],
+    disappointed: [1, "sad because something did not happen the way you hoped", "sad|upset|let down|not happy|unhappy|hoped|wanted"],
+    discouraged: [2, "feeling like giving up", "give up|quit|sad|hopeless|down|not want|upset"],
+    collapsed: [2, "fell down suddenly", "fell|fall|broke|crash|down|tumbl"],
+    drizzle: [2, "a light rain", "light rain|little rain|rain|sprinkl"],
+    downpour: [2, "a very heavy rain", "heavy rain|lot of rain|hard rain|rain"],
+    gloomy: [3, "dark and sad-looking", "dark|sad|gray|grey|dull|dreary"],
+    flexible: [3, "able to change plans easily", "change|adjust|easy|adapt|bend"],
+    argued: [2, "disagreed in an angry way", "fight|disagree|yell|angry|mad|quarrel|fought"],
+    argument: [2, "an angry disagreement", "fight|disagree|yell|angry|mad|quarrel"],
+    customers: [2, "people who buy things", "buy|bought|shopper|people|pay"],
+    donated: [2, "gave something to help others", "gave|give|help|share"],
+    apologized: [2, "said you were sorry", "sorry"]
   });
 
   /* ================= REALISTIC FICTION =================
@@ -308,7 +391,7 @@ BD.StoryGen = (function () {
       ["infer", "0", "", "Why is it hard for {Name} at first?", "Because {fail}.", "What happens when {he} tries?", "{failK}|new|learn|first"],
       ["infer", "1+", "", "How did {Name} feel after {his} first tries?", "{He} felt frustrated and wanted to give up.", "Look at what {Name} said or did after it went wrong.", SAD + "|give up|quit|grumpy|annoy"],
       ["infer", "1+", "", "Why did {Name} feel proud at the end?", "Because {he} finally learned to {skill} after working hard.", "Think about how hard {Name} worked.", "learn|did it|practic|work|could|able|finally|succe|{winK}|{skillK}"],
-      ["infer", "2+", "", "What would have happened if {Name} had given up?", "{He} would never have learned to {skill}.", "Think about what the practice gave {him}.", "never|not learn|wouldn't|would not|couldn't|could not|not be able|still|no"]
+      ["infer", "2+", "", "What would have happened if {Name} had given up?", "{He} would never have learned to {skill}.", "Think about what the practice gave {him}.", "never|not learn|wouldn't|would not|couldn't|could not|not be able|still| no "]
     ] });
 
   STORY.push({ k: "newkid", g: "story",
@@ -568,7 +651,7 @@ BD.StoryGen = (function () {
 
   const PLANS = [["a picnic at the park~picnic|park", "had a picnic on the living room floor~picnic|floor|living room|inside|indoor"],
     ["a trip to the beach~beach|trip", "made a pretend beach with towels and buckets in the living room~pretend|beach|towel|bucket|living room"],
-    ["a soccer game~soccer|game", "played balloon soccer in the hallway~balloon|hallway|soccer"],
+    ["a soccer game~soccer", "played balloon soccer in the hallway~balloon|hallway|soccer"],
     ["a bike ride~bike|ride", "built a cozy fort out of couch cushions~fort|cushion|pillow|couch"],
     ["a day at the zoo~zoo", "made animal masks out of paper plates~mask|plate|paper|animal"],
     ["camping in the backyard~camp|tent|backyard", "set up the tent in the living room and told stories with a flashlight~tent|flashlight|stor|living room|inside"],
@@ -703,7 +786,7 @@ BD.StoryGen = (function () {
       ["infer", "0", "", "How did they feel at the end?", "Happy.", "Look at the end.", HAPPY],
       ["infer", "1+", "", "Why didn't yelling work?", "Because when they fought, nobody got to play at all.", "Think about what happened while they were shouting.", "nobody|no one|neither|couldn't play|could not play|didn't play|not play|fight|argu|mad"],
       ["infer", "1+", "", "How do you think {Name} felt while {pal} went first?", "{He} felt impatient, but {he} waited.", "Was waiting easy or hard?", "impatient|hard|wait|bored|annoy|sad|grumpy|frustrat|antsy|patient"],
-      ["infer", "2+", "", "Why do you think the timer helped?", "It made the turns fair, so nobody had to argue about whose turn it was.", "Think about what they were fighting about before.", "fair|same|equal|argu|fight|both|turn|know|whose"]
+      ["infer", "2+", "", "Why do you think the timer helped?", "It made the turns fair, so nobody had to argue about whose turn it was.", "Think about what they were fighting about before.", "fair|same|equal|argu|fight|both|turn|knows|whose"]
     ] });
 
   const RECIPES = ["chocolate chip cookies~cookie", "blueberry muffins~muffin|blueberr", "banana bread~bread|banana", "pancakes~pancake", "a birthday cake~cake", "oatmeal cookies~cookie|oatmeal"];
@@ -750,7 +833,7 @@ BD.StoryGen = (function () {
       ["detail", "1+", "", "What did they do differently the second time?", "They {fix}.", "Find the words \"this time.\"", "{fixK}"],
       ["infer", "0", "", "How did {Name} feel at the end?", "Happy.", "The new ones were yummy!", HAPPY],
       ["infer", "1+", "", "How did {Name} feel about the mistake?", "{He} felt bad and embarrassed.", "Look at {Name}'s face.", SAD + "|embarrass|silly|red|ashamed"],
-      ["infer", "1+", "", "Why do you think {helper} laughed?", "To show {Name} that the mistake was not a big deal and could be fixed.", "Think about what {helper} said right after.", "okay|ok|not a big deal|fine|everyone|mistake|fix|feel better|cheer|funny|silly"],
+      ["infer", "1+", "", "Why do you think {helper} laughed?", "To show {Name} that the mistake was not a big deal and could be fixed.", "Think about what {helper} said right after.", "okay| ok |not a big deal|fine|everyone|mistake|fix|feel better|cheer|funny|silly"],
       ["infer", "2+", "", "Why did the second batch turn out better?", "Because they slowed down and {fix}.", "Think about what changed.", "slow|careful|{fixK}"]
     ] });
 
@@ -772,9 +855,9 @@ BD.StoryGen = (function () {
     beats: [
       ["0", 1, "", "{Name} and {pal} sold {sell}.", "{Name} and {pal} made a stand to sell {sell}."],
       ["0", 1, "", "They wanted to help {cause}.", "The money was for {cause}."],
-      ["0", 0.7, "", "At first, nobody came.", "Nobody stopped. {Name} was sad."],
+      ["0", 1, "", "At first, nobody came.", "Nobody stopped. {Name} was sad."],
       ["0", 1, "", "Then they {idea}.", "So they {idea}."],
-      ["0", 1, "", "Lots of people came! They gave the money to {cause}.", "Then people came! The friends felt ^proud."],
+      ["0", 1, "", "Lots of people came! They gave the money to {cause}.", "Soon many people came! The friends felt ^proud."],
       ["1+", 1, "", "{Name} and {pal} wanted to raise money for {cause}.", "@2 When {Name} and {pal} learned that {cause} needed help, they made a plan."],
       ["1+", 1, "", "They set up a stand to sell {sell}.", "@2 On Saturday, they set up a table on the sidewalk to sell {sell}."],
       ["1+", 1, "", "For the first hour, nobody stopped.", "@2 For a whole hour, people walked right past without stopping."],
@@ -782,7 +865,7 @@ BD.StoryGen = (function () {
       ["1+", 1, "", "Then {pal} had an idea, and they {idea}.", "@2 \"Wait, I have an idea!\" {pal} said. So they {idea}."],
       ["1+", 1, "", "Soon, people began to stop.", "@2 Before long, ^customers were lining up."],
       ["1+", 1, "", "By the end of the day, they had raised {money}.", "@2 By sunset, they had sold everything and raised {money}."],
-      ["1+", 1, "", "They gave all the money to {cause} to {use}.", "@2 The next day, they ^donated every dollar to {cause} to help {use}."],
+      ["1+", 1, "", "They gave all the money to {cause} to {use}.", "@2 The next day, they ^donated every dollar to {cause} to {use}."],
       ["1+", 0.8, "", "{Name} and {pal} felt very proud.", "@2 {Name} and {pal} felt proud that they had made a real difference."],
       ["2+", 0.6, "", "They learned that kids can help their community, too.", "@3 They learned that teamwork and a good idea can help a whole ^community."]
     ],
@@ -799,9 +882,9 @@ BD.StoryGen = (function () {
       ["detail", "1+", "", "What was {pal}'s idea?", "They {idea}.", "Find the word \"idea.\"", "{ideaK}"],
       ["detail", "1+", "", "What would the money be used for?", "To {use}.", "Find where the money went.", "{useK}"],
       ["infer", "0", "", "How do they feel at the end?", "Proud and happy.", "Look at the end.", HAPPY],
-      ["infer", "1+", "", "Why do you think people started to stop after the idea?", "Because now people could see what the stand was for.", "Think about what changed.", "see|notice|saw|know|knew|sign|closer|attention|for|help"],
+      ["infer", "1+", "", "Why do you think people started to stop after the idea?", "Because now people could see what the stand was for.", "Think about what changed.", "see|notice|saw|knows|knew|sign|closer|attention|for|help"],
       ["infer", "1+", "", "How did {Name} feel when nobody stopped?", "{He} felt discouraged and wanted to give up.", "Look at what {Name} wanted to do.", SAD + "|discourag|give up|quit"],
-      ["infer", "2+", "", "What would have happened if they had given up after the first hour?", "They would not have raised any money for {cause}.", "Think about what happened after the idea.", "no money|not raise|wouldn't|would not|nothing|no|not help"]
+      ["infer", "2+", "", "What would have happened if they had given up after the first hour?", "They would not have raised any money for {cause}.", "Think about what happened after the idea.", "no money|not raise|wouldn't|would not|nothing| no |not help"]
     ] });
 
   /* ================= DOJO STORIES =================
@@ -833,13 +916,13 @@ BD.StoryGen = (function () {
       ["0", 1, "", "Now {Name} can do the whole kata! {He} bows to {Sensei}.", "At class, {he} does the whole kata. {Sensei} smiles."],
       ["1+", 1, "", "At the ^dojo, {Name} was learning a new ^kata for {his} {next} belt.", "@2 To earn {his} {next} belt, {Name} had to learn a new ^kata, a set of karate moves done in order."],
       ["1+", 1, "", "But {he} {trouble}.", "@2 The first part was easy, but {Name} {trouble}."],
-      ["1+", 0.7, "", "{Name} felt ^frustrated.", "@2 Every time it went wrong, {Name} felt more ^frustrated.", "@3 After a week of mistakes, {Name} began to doubt {self}."],
+      ["1+", 0.5, "", "{Name} felt ^frustrated.", "@2 Every time it went wrong, {Name} felt more ^frustrated.", "@3 After a week of mistakes, {Name} began to doubt {self}."],
       ["1+", 1, "", "After class, {sensei} told {him} to {tip}.", "@2 After class, {sensei} knelt beside {him} and suggested that {he} {tip}."],
       ["2+", 0.6, "", "\"Every black belt was once a beginner,\" {she} said.", "@3 \"A black belt is a white belt who never quit,\" {she} said with a smile."],
       ["1+", 1, "", "{Name} practiced in {his} living room every night.", "@2 Every night, {Name} cleared a space in the living room and practiced the kata with great ^focus."],
-      ["1+", 0.6, "", "{His} little dog watched from the couch.", "@2 Sometimes {his} family watched and cheered {him} on."],
+      ["2+", 0.6, "", "{His} little dog watched from the couch.", "@2 Sometimes {his} family watched and cheered {him} on."],
       ["1+", 1, "", "At the next class, {Name} did the whole kata without a mistake.", "@2 At the next class, {Name} moved through the entire kata smoothly, from the first bow to the last."],
-      ["1+", 1, "", "{Sensei} bowed to {him} and said, \"Great work.\"", "@2 {Sensei} nodded and said, \"That is what practice looks like.\""],
+      ["1+", 0.5, "", "{Sensei} bowed to {him} and said, \"Great work.\"", "@2 {Sensei} nodded and said, \"That is what practice looks like.\""],
       ["2+", 0.6, "", "{Name} learned that hard things get easier with practice.", "@3 {Name} realized that patience and practice had turned something impossible into something {he} could do."]
     ],
     qs: [
@@ -870,18 +953,18 @@ BD.StoryGen = (function () {
     beats: [
       ["0", 1, "", "Today is {Name}'s belt test.", "{Name} has a belt test at the dojo today."],
       ["0", 1, "", "{He} feels ^nervous.", "{Name}'s legs feel ^wobbly."],
-      ["0", 1, "", "{He} takes a big breath.", "{Name} {calm}."],
+      ["0", 1, "", "{He} takes a big breath.", "{Name} takes a slow, deep breath."],
       ["0", 1, "", "{He} kicks and punches and yells, \"Kiai!\"", "{He} does {his} kicks and blocks."],
       ["0", 1, "", "{Name} gets a {next} belt! {He} is so ^proud.", "{Sensei} gives {him} a new {next} belt!"],
       ["1+", 1, "", "Today was {Name}'s test for {his} {next} belt.", "@2 After three months of training, it was finally the day of {Name}'s {next} belt test."],
       ["1+", 1, "", "{His} hands were sweaty, and {his} heart was pounding.", "@2 As {he} tied {his} {belt} belt, {his} fingers trembled.", "@3 {Name}'s stomach fluttered as families filled the chairs along the wall."],
-      ["1+", 0.8, "", "{Name} worried that {he} would forget {his} kata.", "@2 What if {he} forgot {his} kata in front of everyone?"],
+      ["1+", 0.5, "", "{Name} worried that {he} would forget {his} kata.", "@2 What if {he} forgot {his} kata in front of everyone?"],
       ["1+", 1, "", "So {he} {calm}.", "@2 To calm down, {Name} closed {his} eyes and {calm}."],
       ["1+", 1, "", "When {sensei} called {his} name, {Name} bowed and stepped onto the mat.", "@2 When {his} name was called, {Name} bowed, stepped onto the mat, and let {his} training take over."],
       ["1+", 1, "", "{He} did {his} kicks, blocks, and kata with a loud ^kiai.", "@2 {He} moved through {his} kicks, blocks, and kata with sharp ^focus, finishing with a strong ^kiai."],
       ["1+", 1, "", "At the end, {sensei} tied a new {next} belt around {his} waist.", "@2 At the end of the test, {sensei} handed {him} a crisp new {next} belt."],
-      ["1+", 1, "", "Everyone clapped, and {Name} bowed to {sensei}.", "@2 The room filled with ^applause, and {Name} bowed deeply to {sensei}."],
-      ["1+", 0.8, "", "{Name} could not stop smiling.", "@2 {Name} felt ten feet tall."],
+      ["1+", 0.7, "", "Everyone clapped, and {Name} bowed to {sensei}.", "@2 The room filled with ^applause, and {Name} bowed deeply to {sensei}."],
+      ["1+", 0.6, "smile", "{Name} could not stop smiling.", "@2 {Name} felt ten feet tall."],
       ["2+", 0.6, "", "{Name} learned that all {his} practice had prepared {him} for this moment.", "@3 {Name} understood that ^confidence comes from preparation."]
     ],
     qs: [
@@ -899,7 +982,7 @@ BD.StoryGen = (function () {
       ["infer", "0", "", "How does {Name} feel at the end?", "Proud and happy.", "Look at the end.", HAPPY],
       ["infer", "1+", "", "How did {Name} feel before the test? How do you know?", "{He} felt nervous, because {his} body was shaking or {his} heart was pounding.", "Look at what {Name}'s body was doing.", "nervous|scared|afraid|worr|anxious|fear|shak|sweat|pound|trembl"],
       ["infer", "1+", "", "Why did {Name} bow to {sensei}?", "To show respect and thanks to {his} teacher.", "Think about what a bow means in the dojo.", "respect|thank|polite|honor|manners"],
-      ["infer", "2+", "", "Why do you think {Name} could not stop smiling?", "Because {he} was proud that {he} passed and earned {his} new belt.", "Think about how long {Name} had trained.", "proud|happy|pass|earn|new belt|did it|excit|glad"]
+      ["infer", "2+", "smile", "Why do you think {Name} could not stop smiling?", "Because {he} was proud that {he} passed and earned {his} new belt.", "Think about how long {Name} had trained.", "proud|happy|pass|earn|new belt|did it|excit|glad"]
     ] });
 
   DOJO.push({ k: "newstudent", g: "dojo",
@@ -917,13 +1000,13 @@ BD.StoryGen = (function () {
       ["0", 1, "", "{Pal} smiles. {Palhe} has a new friend!", "{Pal} says, \"Thank you, {name}!\""],
       ["1+", 1, "", "One day, a new student named {pal} came to {Name}'s karate class.", "@2 On Tuesday, a new student named {pal} stood at the edge of the mat, looking unsure."],
       ["1+", 1, "", "{Pal} did not know the rules of the ^dojo.", "@2 {Pal} did not know any of the dojo's customs, and {palhe} looked ^nervous."],
-      ["1+", 0.7, "", "{Palhe} stood alone and watched the other kids.", "@2 {Palhe} kept tugging at {palhis} brand-new white belt."],
-      ["1+", 0.7, "", "{Name} remembered {his} own first class.", "@2 {Name} remembered how confusing {his} own first class had been."],
+      ["1+", 0.4, "", "{Palhe} stood alone and watched the other kids.", "@2 {Palhe} kept tugging at {palhis} brand-new white belt."],
+      ["1+", 0.5, "", "{Name} remembered {his} own first class.", "@2 {Name} remembered how confusing {his} own first class had been."],
       ["1+", 1, "", "So {Name} walked over and showed {pal} {showed}.", "@2 So {Name} walked over, smiled, and quietly showed {pal} {showed}."],
       ["2+", 0.6, "", "{He} also explained that everyone bows to show ^respect.", "@3 {He} explained that the bow is a way of showing ^respect to your teacher and your partners."],
       ["1+", 1, "", "During class, {Name} stood next to {pal} so {palhe} could copy the moves.", "@2 During class, {Name} stayed beside {pal}, so {palhe} could follow along."],
       ["1+", 1, "", "At the end, {pal} was smiling.", "@2 By the end of class, {pal} was laughing and trying every kick."],
-      ["1+", 0.8, "", "{Sensei} noticed and thanked {Name} for being so kind.", "@2 {Sensei} told {Name} that helping others is what a true martial artist does."],
+      ["1+", 0.7, "thank", "{Sensei} noticed and thanked {Name} for being so kind.", "@2 {Sensei} told {Name} that helping others is what a true martial artist does."],
       ["2+", 0.6, "", "{Name} learned that kindness is part of karate.", "@3 {Name} realized that being a leader means helping others feel welcome."]
     ],
     qs: [
@@ -939,7 +1022,7 @@ BD.StoryGen = (function () {
       ["infer", "0", "", "How does {pal} feel at the end?", "Happy.", "Look at the end.", HAPPY],
       ["infer", "1+", "", "How did {pal} feel at the beginning? How do you know?", "{Palhe} felt nervous, because {palhe} did not know what to do.", "Look at what {pal} did before class.", "nervous|shy|scared|worr|afraid|unsure|confus|alone|lost|sad"],
       ["infer", "1+", "", "Why did {Name} help {pal}?", "{He} remembered how hard the first class was and wanted {pal} to feel welcome.", "Think about what {Name} remembered or noticed.", "remember|new|hard|confus|welcome|kind|nice|help|nervous|alone|first"],
-      ["infer", "2+", "", "Why do you think {sensei} thanked {Name}?", "Because {Name} was kind and acted like a leader.", "What did {sensei} see {Name} do?", "kind|help|leader|nice|respect|good|example"]
+      ["infer", "2+", "thank", "Why do you think {sensei} thanked {Name}?", "Because {Name} was kind and acted like a leader.", "What did {sensei} see {Name} do?", "kind|help|leader|nice|respect|good|example"]
     ] });
 
   DOJO.push({ k: "board", g: "dojo",
@@ -957,12 +1040,12 @@ BD.StoryGen = (function () {
       ["0", 1, "", "{Sensei} says to {tip}.", "{Sensei} says, \"Try again. Focus!\""],
       ["0", 1, "", "Snap! The board breaks! {Name} cheers.", "This time, snap! The board breaks in two."],
       ["1+", 1, "", "Today was board-breaking day at the ^dojo.", "@2 For weeks, {Name} had practiced {his} {strike} for board-breaking day at the ^dojo."],
-      ["1+", 0.7, "", "Students only break boards with their instructor holding them, so everyone stays safe.", "@2 In {Name}'s dojo, students break boards only with an instructor, and only after learning how to do it safely."],
+      ["1+", 0.6, "safe", "Students only break boards with their instructor holding them, so everyone stays safe.", "@2 In {Name}'s dojo, students break boards only with an instructor, and only after learning how to do it safely."],
       ["1+", 1, "", "{Sensei} held up a thin wood board.", "@2 {Sensei} held a thin pine board firmly at the right height."],
       ["1+", 1, "", "{Name} tried {his} {strike}, but the board did not break.", "@2 {Name} struck the board with a {strike}, but it only wobbled."],
-      ["1+", 0.8, "", "{Name}'s face felt hot, and {he} wanted to sit down.", "@2 {Name} felt embarrassed, and {his} ^confidence began to shrink."],
+      ["1+", 0.5, "", "{Name}'s face felt hot, and {he} wanted to sit down.", "@2 {Name} felt embarrassed, and {his} ^confidence began to shrink."],
       ["1+", 1, "", "{Sensei} told {him} to {tip}.", "@2 \"You have the skill,\" {sensei} said. \"This time, {tip}.\""],
-      ["1+", 1, "", "{Name} took a breath, focused, and tried again.", "@2 {Name} took a deep breath and gathered all of {his} ^focus."],
+      ["1+", 0.6, "", "{Name} took a breath, focused, and tried again.", "@2 {Name} took a deep breath and gathered all of {his} ^focus."],
       ["1+", 1, "", "Snap! The board split in two.", "@2 With a loud snap, the board broke cleanly in half."],
       ["1+", 1, "", "The class cheered, and {Name} bowed to {sensei}.", "@2 The class cheered, and {Name} bowed to {sensei} with a huge grin."],
       ["2+", 0.6, "", "{Name} learned that focus and believing in {self} can make a big difference.", "@3 {Name} learned that ^focus and ^confidence matter as much as strength."]
@@ -973,15 +1056,15 @@ BD.StoryGen = (function () {
       ["main", "1+", "", ["What happens in this story?", "What is this story mostly about?"], "{Name} could not break the board at first, but {he} focused and broke it on the second try.", "Think about the first try and the second try.", "board", "focus|again|second|try|break|broke|split"],
       ["main", "2+", "", ["What lesson does this story teach?", "What is the lesson of this story?"], "Focus and believing in yourself can help you succeed.", "Think about what changed on the second try.", "focus|believ|confiden|try|again|give up|trust"],
       ["detail", "0", "", "Who holds the board?", "{Sensei}.", "Look at the second sentence.", "{senseiK}"],
-      ["detail", "0", "", "What happens the first time?", "The board does not break.", "Listen to the first try.", "not break|doesn't break|did not break|didn't break|does not break|no"],
+      ["detail", "0", "", "What happens the first time?", "The board does not break.", "Listen to the first try.", "not break|doesn't break|did not break|didn't break|does not break| no "],
       ["detail", "1+", "", "What kind of strike did {Name} use?", "A {strike}.", "Find the word \"tried\" or \"struck.\"", "{strikeK}"],
-      ["detail", "1+", "", "What happened on the first try?", "The board did not break.", "Find the first try.", "not break|didn't break|did not break|wobbl|no"],
+      ["detail", "1+", "", "What happened on the first try?", "The board did not break.", "Find the first try.", "not break|didn't break|did not break|wobbl| no "],
       ["detail", "1+", "", "What did {sensei} tell {Name} to do?", "To {tip}.", "Find what {sensei} said.", "{tipK}"],
-      ["detail", "1+", "", "How do students stay safe when they break boards?", "They only break boards with an instructor.", "Find the word \"safe\" or \"safely.\"", "instructor|teacher|sensei|hold|safe|learn"],
+      ["detail", "1+", "safe", "How do students stay safe when they break boards?", "They only break boards with an instructor.", "Find the word \"safe\" or \"safely.\"", "instructor|teacher|sensei|hold|safe|learn"],
       ["infer", "0", "", "How does {Name} feel at the end?", "Happy and proud.", "{Name} cheers!", HAPPY],
       ["infer", "1+", "", "How did {Name} feel when the board did not break?", "{He} felt embarrassed and less sure of {self}.", "Look at {Name}'s face after the first try.", SAD + "|embarrass|hot|sit down|less sure|confiden"],
       ["infer", "1+", "", "Why did the second try work?", "Because {Name} focused and followed {sensei}'s tip.", "What did {Name} do differently?", "focus|tip|breath|believ|{tipK}"],
-      ["infer", "2+", "", "Why does the dojo have rules about breaking boards?", "To keep everyone safe while they learn.", "Think about what could go wrong without an instructor.", "safe|hurt|injur|careful|learn"]
+      ["infer", "2+", "safe", "Why does the dojo have rules about breaking boards?", "To keep everyone safe while they learn.", "Think about what could go wrong without an instructor.", "safe|hurt|injur|careful|learn"]
     ] });
 
   DOJO.push({ k: "showoff", g: "dojo",
@@ -1000,9 +1083,9 @@ BD.StoryGen = (function () {
       ["1+", 1, "", "At recess, {Name} wanted to show everyone {his} new jumping kick.", "@2 {Name} had just learned a jumping kick, and at recess {he} could not wait to show it off."],
       ["1+", 1, "", "\"Watch this!\" {he} shouted, and {he} kicked high into the air.", "@2 \"Everyone, watch!\" {he} called, spinning into a high kick without checking who was nearby."],
       ["1+", 1, "", "{His} foot {oops}.", "@2 {His} foot {oops}."],
-      ["1+", 0.8, "", "{Pal} looked upset, and some kids laughed.", "@2 {Pal}'s face fell, and a few kids giggled, which only made it worse."],
+      ["1+", 0.5, "", "{Pal} looked upset, and some kids laughed.", "@2 {Pal}'s face fell, and a few kids giggled, which only made it worse."],
       ["1+", 1, "", "{Name} felt terrible. {He} said sorry and helped {pal} clean up.", "@2 {Name}'s cheeks burned. {He} ^apologized right away and helped {pal} clean up."],
-      ["1+", 1, "", "At karate that night, {Name} told {sensei} what had happened.", "@2 That evening at the dojo, {Name} told {sensei} the whole story."],
+      ["1+", 0.7, "told", "At karate that night, {Name} told {sensei} what had happened.", "@2 That evening at the dojo, {Name} told {sensei} the whole story."],
       ["1+", 1, "", "{Sensei} said, \"Karate is for ^self-control, not for showing off.\"", "@2 {Sensei} said, \"A martial artist uses ^self-control. We never use karate to show off or to hurt anyone.\""],
       ["2+", 0.6, "", "{Sensei} was glad that {Name} had apologized and told the truth.", "@3 {Sensei} added that owning up to a mistake shows real ^respect."],
       ["1+", 1, "", "From then on, {Name} saved {his} kicks for the dojo.", "@2 After that, {Name} practiced {his} kicks only in class, where it was safe."],
@@ -1022,7 +1105,7 @@ BD.StoryGen = (function () {
       ["infer", "0", "", "How does {pal} feel after the kick?", "Sad or upset.", "How would you feel?", SAD],
       ["infer", "1+", "", "How did {Name} feel after the accident?", "{He} felt terrible and embarrassed.", "Look at what {Name} felt and did right after.", SAD + "|embarrass|guilt|sorry|ashamed|burn"],
       ["infer", "1+", "", "Why did {sensei} say karate is not for showing off?", "Because showing off can cause accidents, and karate should be used carefully.", "Think about what happened at recess.", "accident|hurt|safe|careful|mess|control|knock|respect|danger"],
-      ["infer", "2+", "", "Why do you think {Name} told {sensei} what happened?", "Because {he} wanted to be honest and learn from the mistake.", "Think about what kind of student {Name} is.", "honest|truth|learn|sorry|mistake|right|respect|help"]
+      ["infer", "2+", "told", "Why do you think {Name} told {sensei} what happened?", "Because {he} wanted to be honest and learn from the mistake.", "Think about what kind of student {Name} is.", "honest|truth|learn|sorry|mistake|right|respect|help"]
     ] });
 
   DOJO.push({ k: "bo", g: "dojo",
@@ -1040,19 +1123,19 @@ BD.StoryGen = (function () {
       ["0", 1, "", "At the show, {Name} spins the bo and bows. Everyone claps!", "At {event}, {Name} does it! Everyone claps."],
       ["1+", 1, "", "{Name}'s dojo was putting on a demonstration at {event}.", "@2 {Name}'s dojo had been invited to put on a ^demonstration at {event}."],
       ["1+", 1, "", "{Name} would spin a bo staff, a long wooden pole, to music.", "@2 {Name}'s part was a bo staff routine, spinning a long wooden pole in smooth circles to music."],
-      ["1+", 0.8, "", "In karate, the bo is used for practice and shows, never to hurt anyone.", "@2 In {Name}'s dojo, students use the bo only for practice and shows, and they always check for plenty of space first."],
+      ["1+", 0.6, "space", "In karate, the bo is used for practice and shows, never to hurt anyone.", "@2 In {Name}'s dojo, students use the bo only for practice and shows, and they always check for plenty of space first."],
       ["1+", 1, "", "At practice, {Name} tried to spin it fast, but it slipped and fell.", "@2 During practice, {Name} tried to spin the bo as fast as the older students, but it slipped from {his} hands and clattered to the floor."],
-      ["1+", 0.8, "", "{Name} felt ^frustrated.", "@2 {Name} sighed, picked it up, and dropped it again."],
+      ["1+", 0.5, "", "{Name} felt ^frustrated.", "@2 {Name} sighed, picked it up, and dropped it again."],
       ["1+", 1, "", "{Sensei} said, \"Slow is smooth, and smooth is fast.\"", "@2 {Sensei} reminded {him}, \"Slow is smooth, and smooth becomes fast.\""],
       ["1+", 1, "", "So {Name} practiced slowly every day.", "@2 So {Name} practiced every move slowly, one spin at a time, until {his} hands knew the pattern."],
       ["1+", 1, "", "At {event}, {Name} spun the bo smoothly and finished with a bow.", "@2 On the night of {event}, {Name} spun the bo in smooth, steady circles and finished with a respectful bow."],
-      ["1+", 1, "", "The crowd clapped and cheered.", "@2 The crowd burst into ^applause."],
+      ["1+", 0.6, "", "The crowd clapped and cheered.", "@2 The crowd burst into ^applause."],
       ["2+", 0.6, "", "{Name} learned that going slow can help you get better faster.", "@3 {Name} learned that patience in practice leads to ^confidence on stage."]
     ],
     qs: [
-      ["main", "0", "", "What is this story about?", "{Name} learns to spin a bo for a show.", "What does {Name} practice?", "bo|staff|stick|spin|show"],
+      ["main", "0", "", "What is this story about?", "{Name} learns to spin a bo for a show.", "What does {Name} practice?", " bo |staff|stick|spin|show"],
       ["main", "0", "", "Who is this story about?", "{Name}.", "Who spins the bo?", "{nameK}"],
-      ["main", "1+", "", ["What happens in this story?", "What is this story mostly about?"], "{Name} kept dropping the bo staff, but {he} practiced slowly and did a great job in the show.", "Think about the problem and how {Name} solved it.", "bo|staff|spin|pole", "slow|practic|show|drop|did|great|smooth"],
+      ["main", "1+", "", ["What happens in this story?", "What is this story mostly about?"], "{Name} kept dropping the bo staff, but {he} practiced slowly and did a great job in the show.", "Think about the problem and how {Name} solved it.", " bo |staff|spin|pole", "slow|practic|show|drop|did|great|smooth"],
       ["main", "2+", "", ["What lesson does this story teach?", "What is the lesson of this story?"], "Practicing slowly and carefully helps you get better.", "Think about what {sensei} said.", "slow|careful|practic|patien|smooth"],
       ["detail", "0", "", "What is a bo?", "A long wood stick.", "Look at the first sentence.", "stick|pole|wood|staff|long"],
       ["detail", "0", "", "What does {sensei} tell {Name}?", "To go slow.", "What does {sensei} say?", "slow"],
@@ -1062,7 +1145,7 @@ BD.StoryGen = (function () {
       ["detail", "1+", "", "What did {sensei} say?", "\"Slow is smooth, and smooth is fast.\"", "Find {sensei}'s words.", "slow|smooth"],
       ["infer", "0", "", "How does {Name} feel at the end?", "Happy and proud.", "Everyone claps!", HAPPY],
       ["infer", "1+", "", "What did {sensei} mean by \"slow is smooth\"?", "Practicing slowly helps you do the moves right, and then you can get faster.", "Think about what happened when {Name} went too fast.", "slow|right|careful|correct|faster|better|mistake|learn"],
-      ["infer", "1+", "", "Why do students check for space before using the bo?", "So they don't bump into anyone or anything.", "Think about how long the bo is.", "safe|hit|bump|hurt|space|room|anyone|careful"],
+      ["infer", "1+", "space", "Why do students check for space before using the bo?", "So they don't bump into anyone or anything.", "Think about how long the bo is.", "safe|hit|bump|hurt|space|room|anyone|careful"],
       ["infer", "2+", "", "How do you think {Name} felt when the crowd cheered?", "Proud, because {his} slow practice had worked.", "Think about how hard {Name} practiced.", HAPPY]
     ] });
 
@@ -1081,12 +1164,12 @@ BD.StoryGen = (function () {
       ["0", 0.8, "", "{Sensei} was ^proud of {Name}.", "{Name} was a good sport."],
       ["1+", 1, "", "{Name} had practiced {his} kata for months for the big tournament.", "@2 For two months, {Name} had trained for {his} first kata tournament."],
       ["1+", 1, "", "When it was {his} turn, {Name} did {his} best.", "@2 When {his} name was called, {Name} bowed to the judges and performed {his} kata with strong ^focus."],
-      ["1+", 1, "", "Another student, {pal}, did an amazing kata too.", "@2 But another student, {pal}, performed a kata so sharp and powerful that the crowd gasped."],
+      ["2+", 1, "", "Another student, {pal}, did an amazing kata too.", "@2 But another student, {pal}, performed a kata so sharp and powerful that the crowd gasped."],
       ["1+", 1, "", "{Pal} won first place, and {Name} won {place}.", "@2 When the scores came in, {pal} took first place, and {Name} earned {place}."],
       ["1+", 0.8, "", "For a moment, {Name} felt ^disappointed.", "@2 For a moment, {Name}'s smile wobbled. {He} had really wanted to win."],
       ["1+", 1, "", "Then {he} walked over, bowed, and shook {pal}'s hand.", "@2 Then {Name} walked across the mat, bowed to {pal}, and shook {palhis} hand."],
-      ["1+", 1, "", "\"Your kata was awesome,\" {Name} said.", "@2 \"Your kata was amazing. Can you show me how you do that turn?\" {Name} asked."],
-      ["1+", 0.8, "", "{Pal} smiled and thanked {him}.", "@2 {Pal} grinned, and the two started talking like old friends."],
+      ["1+", 0.6, "", "\"Your kata was awesome,\" {Name} said.", "#ask @2 \"Your kata was amazing. Can you show me how you do that turn?\" {Name} asked."],
+      ["1+", 0.5, "", "{Pal} smiled and thanked {him}.", "@2 {Pal} grinned, and the two started talking like old friends."],
       ["1+", 1, "", "{Sensei} said {he} was proud of how {Name} acted.", "@2 Later, {sensei} told {Name} that {his} ^sportsmanship made {shim} prouder than any medal."],
       ["2+", 0.6, "", "{Name} learned that how you act matters more than winning.", "@3 {Name} learned that being ^gracious when you lose is a kind of victory, too."]
     ],
@@ -1104,7 +1187,7 @@ BD.StoryGen = (function () {
       ["infer", "0", "", "Was {Name} a good sport? How do you know?", "Yes, because {he} was kind to {pal}.", "What did {Name} do after {pal} won?", "yes|kind|nice|hand|great job|bow|smil"],
       ["infer", "1+", "", "How did {Name} feel when {he} did not win first place?", "{He} felt disappointed at first.", "Look at the moment after the scores came in.", SAD + "|wobbl"],
       ["infer", "1+", "", "Why was {sensei} proud of {Name}?", "Because {Name} was a good sport and showed respect even though {he} did not win.", "Think about what {Name} did after losing.", "good sport|sportsman|respect|kind|nice|hand|bow|congrat|acted"],
-      ["infer", "2+", "", "Why do you think {Name} asked {pal} about {palhis} kata?", "Because {Name} wanted to learn from {pal} and get better.", "What could {Name} gain from {pal}?", "learn|better|improve|friend|respect|teach|show"]
+      ["infer", "2+", "ask", "Why do you think {Name} asked {pal} about {palhis} kata?", "Because {Name} wanted to learn from {pal} and get better.", "What could {Name} gain from {pal}?", "learn|better|improve|friend|respect|teach|show"]
     ] });
 
   DOJO.push({ k: "kiai", g: "dojo",
@@ -1122,13 +1205,13 @@ BD.StoryGen = (function () {
       ["0", 1, "", "Everyone cheers for {Name}.", "{Name} smiles a big smile."],
       ["1+", 1, "", "At {Name}'s ^dojo, students shout \"Kiai!\" when they kick or punch.", "@2 In karate, a ^kiai is a short, powerful shout that students use to show energy and ^focus."],
       ["1+", 1, "", "But {Name} was ^shy, and {his} kiai came out as a tiny squeak.", "@2 {Name} was naturally quiet, and {his} kiai came out as a nervous squeak."],
-      ["1+", 0.7, "", "Some kids giggled, and {Name}'s face turned red.", "@2 {Name} felt {his} cheeks burn every time {he} tried."],
+      ["1+", 0.5, "", "Some kids giggled, and {Name}'s face turned red.", "@2 {Name} felt {his} cheeks burn every time {he} tried."],
       ["1+", 1, "", "After class, {sensei} told {him} to {trick}.", "@2 After class, {sensei} kneeled down and suggested that {Name} {trick}."],
       ["2+", 0.6, "", "\"Your kiai is your spirit,\" {she} said. \"Let it out.\"", "@3 \"Your kiai shows the world your spirit,\" {sensei} explained. \"It is not about being loud. It is about being brave.\""],
       ["1+", 1, "", "{Name} practiced at home, a little louder each day.", "@2 At home, {Name} practiced in the backyard, getting a little louder each day."],
       ["1+", 1, "", "At the next class, {Name} did a front kick and shouted, \"KIAI!\"", "@2 At the next class, {Name} threw a sharp front kick and let out a kiai that echoed off the walls."],
       ["1+", 1, "", "The whole class cheered.", "@2 For a second, the dojo was silent. Then the whole class cheered."],
-      ["1+", 0.8, "", "{Name} felt strong and brave.", "@2 {Name} felt stronger than ever."],
+      ["1+", 0.5, "", "{Name} felt strong and brave.", "@2 {Name} felt stronger than ever."],
       ["2+", 0.6, "", "{Name} learned that being brave can start with something small.", "@3 {Name} discovered that ^confidence grows when you practice being brave."]
     ],
     qs: [
@@ -1218,7 +1301,7 @@ BD.StoryGen = (function () {
       "climb trees easily", "climb|tree", "rest and stay safe up high", "rest|sleep|safe|high|hide|danger", "On",
       "Raccoons often dip their food in water before they eat it."],
     ["hedgehog", "hedgehogs", "mammal", "in hedges, gardens, fields, and woods", "hedge|garden|field|wood|forest", "insects, worms, and beetles", "insect|bug|worm|beetle|slug",
-      "+thousands of sharp spines on its back", "spine|spike|quill|prickl|sharp", "protect it from hungry animals", "protect|safe|hungry|predator|enemy|danger|attack|hurt", "Baby hedgehogs are called hoglets.", "hoglet",
+      "+thousands of sharp spines on its back", "spine|spike|quill|prickl|sharp", "stay safe from hungry animals", "protect|safe|hungry|predator|enemy|danger|attack|hurt", "Baby hedgehogs are called hoglets.", "hoglet",
       "roll up into a tight, prickly ball", "roll|ball|curl", "keep its soft belly safe", "belly|safe|protect|soft|hide|danger|tummy", "n",
       "A hedgehog snuffles and grunts like a tiny pig while it looks for food."],
     ["koala", "koalas", "mammal", "in eucalyptus forests in Australia", "eucalyptus|gum|forest|tree|australia", "eucalyptus leaves", "eucalyptus|leaves|leaf|gum",
@@ -1310,7 +1393,7 @@ BD.StoryGen = (function () {
       "spray a stinky liquid", "spray|stink|smell|liquid", "protect itself from danger", "protect|safe|danger|enemy|predator|away|scare|attack", "On",
       "Before it sprays, a skunk stamps its feet as a warning."],
     ["porcupine", "porcupines", "mammal", "in forests", "forest|tree|wood", "bark, twigs, leaves, and other plants", "bark|twig|leaves|leaf|plant",
-      "+thousands of sharp quills", "quill|spike|spine|sharp|needle", "protect it from animals that might attack it", "protect|safe|attack|danger|enemy|predator|hurt", "A baby porcupine is called a porcupette, and its quills are soft when it is born.", "porcupette|soft|quill",
+      "+thousands of sharp quills", "quill|spike|spine|sharp|needle", "stay safe from animals that might attack it", "protect|safe|attack|danger|enemy|predator|hurt", "A baby porcupine is called a porcupette, and its quills are soft when it is born.", "porcupette|soft|quill",
       "climb trees well", "climb|tree", "find food and rest safely", "food|eat|rest|safe|sleep|bark|leaves|leaf", "Hn",
       "Porcupines cannot shoot their quills, but the quills come loose easily when touched."],
     ["walrus", "walruses", "mammal", "on sea ice and rocky shores in the Arctic", "arctic|ice|shore|cold|north|rock|sea", "clams and other shellfish on the sea floor", "clam|shellfish|shell",
@@ -1399,7 +1482,7 @@ BD.StoryGen = (function () {
       "A duck's feathers keep it warm even in cold water."],
     ["sheep", "sheep", "mammal", "on farms and in hilly fields", "farm|field|hill|meadow|pasture|grass", "grass and clover", "grass|clover|hay|plant",
       "a thick coat of wool", "wool|coat|fur|fleece", "keep warm", "warm|cold", "A baby sheep is called a lamb.", "lamb",
-      "remember the faces of other sheep", "face|recogni|remember|know", "stay close to its flock", "flock|friend|together|group|family|close", "H",
+      "remember the faces of other sheep", "face|recogni|remember|knows", "stay close to its flock", "flock|friend|together|group|family|close", "H",
       "Farmers cut a sheep's wool once a year, and it grows back."],
     ["horse", "horses", "mammal", "on farms, ranches, and open grasslands", "farm|ranch|grass|field|stable|barn|pasture", "grass, hay, and oats", "grass|hay|oat|grain|carrot|apple",
       "+strong legs and hard hooves", "leg|hoof|hooves", "run fast and walk on rough ground", "run|fast|walk|ground|gallop", "A baby horse, called a foal, can stand within an hour or two of being born.", "foal|stand|hour",
@@ -1507,8 +1590,8 @@ BD.StoryGen = (function () {
     if (b === 0) {
       if (chance(0.6)) say(P(["This is {a:an}.", "Look at the {an}!", "Have you ever seen {a:an}?", "Meet the {an}."]));
       const drop = chance(0.5) ? P(["home", "food", "feat", "skill"]) : "";
-      if (drop !== "home") { f.home = 1; say(P(["{A:an} lives {home}.", "{Pl} live {home}."])); }
-      if (drop !== "food") { f.food = 1; say(P(["It eats {food}.", "{Pl} eat {food}."])); }
+      if (drop !== "home") { f.home = 1; say("{A:an} lives {home}."); }
+      if (drop !== "food") { f.food = 1; say("It eats {food}."); }
       if (drop !== "feat") { f.feat = 1; say("It has {feat}."); }
       if (drop !== "skill") { f.skill = 1; say(P(["It can {skill}!", "{A:an} can {skill}."])); }
     } else {
@@ -1525,7 +1608,7 @@ BD.StoryGen = (function () {
       if (chance(0.85)) { f.food = 1; say(b === 1 ? P(["They eat {food}.", "{Pl} eat {food}."]) : P(["{Pl} eat {food}.", "For food, {pl} {hunt} {food}."])); }
       f.feat = 1;
       if (keepUse) { f.use = 1; say(b === 1 ? "{A:an} has {feat}. " + (featPl ? "These help" : "This helps") + " it {use}." : P(["Thanks to {feat}, {a:an} can {use}.", "{A:an} has {feat}, and " + c.featIt + " " + c.featHelps + " it {use}."])); }
-      else say(P(["{A:an} has {feat}.", "One special thing about {a:an} is {feat}."]));
+      else say(featPl ? "{A:an} has {feat}." : P(["{A:an} has {feat}.", "One special thing about {a:an} is {feat}."]));
       if (b === 3 && chance(0.45)) { f.adapt = 1; say("A helpful body part like this is called an ^adaptation."); }
       f.skill = 1;
       if (keepWhy) { f.why = 1; say(b === 1 ? P(["{A:an} can also {skill}. This helps it {why}.", "{A:an} can {skill}. It does this to {why}."]) : P(["{A:an} can {skill}, which helps it {why}.", "{A:an} is able to {skill}. This helps it {why}."])); }
@@ -1542,8 +1625,9 @@ BD.StoryGen = (function () {
       ["main", "0", "", "What animal is this about?", "It is about {a:an}.", "Look at the first sentence.", "{nK}"],
       ["main", "0", "", "What is this mostly about?", "It is about {pl} and how they live.", "What animal is in every sentence?", "{nK}"],
       ["main", "1+", "", ["What is this passage mostly about?", "What is the topic of this passage?"], "It is about {pl}: where they live, what they eat, and how they stay safe.", "What animal is in almost every sentence, and what do you learn about it?", "{nK}", "live|home|eat|food|safe|body|special|fact|grow|skill|surviv|how|baby|babies"],
+      ["main", "1-2", "", "What would be a good title for this passage?", "A good title would be \"All About {Pl}.\"", "What is every sentence about?", "{nK}"],
       ["main", "2+", "", "What is the main idea of this passage?", "{Pl} have special bodies and skills that help them live {home}.", "What do most of the facts have in common?", "{nK}", "body|skill|special|help|surviv|live|adapt|feature|built"],
-      ["main", "3", "", ["Why did the author write this passage?", "What is the author's purpose?"], "To inform readers about how {pl} live and survive.", "Is the author telling a story, giving facts, or trying to change your mind?", "inform|teach|learn|explain|tell|fact|show|know|educat"],
+      ["main", "3", "", ["Why did the author write this passage?", "What is the author's purpose?"], "To inform readers about how {pl} live and survive.", "Is the author telling a story, giving facts, or trying to change your mind?", "inform|teach|learn|explain|tell|fact|show|knows|educat"],
       ["detail", "", "home", ["Where do {pl} live?", "Where can you find {pl}?"], "{Pl} live {home}.", "Find the sentence that tells where they live.", "{homeK}"],
       ["detail", "", "food", "What do {pl} eat?", "They eat {food}.", "Look for the word \"eat\" or \"food.\"", "{foodK}"],
       ["detail", "", "feat", ["What special body part does {a:an} have?", "What body part does the passage describe?"], "It has {feat}.", "Look for a part of the body.", "{featK}"],
@@ -1561,8 +1645,333 @@ BD.StoryGen = (function () {
       ["All About {Pl}", "The Amazing {An}", "{Pl} Up Close", "How {Pl} Live", "Meet the {An}", "{Pl}: Built to Survive", "The Secret Life of {Pl}", "Life as {a:an}"]), c),
       sents: s, qs: runQs(c, Q), subject: c.subject };
   }
-  function howtoPassage(c) { return animalPassage(c); }
-  const commPassage = howtoPassage, histPassage = howtoPassage;
+
+  /* ================= HOW-TO TEXTS =================
+     [bands, task ("how to ..."), keys, you will need, keys, purpose ("so you can ..."), result sentence, safety note,
+      young step numbers, ...steps "do this~short name~keys~reason (so/because/to ...)~keys"] */
+  const HOWTO = [
+    ["", "plant a bean seed", "plant|seed|grow|bean", "a paper cup, some soil, a bean seed, and water", "cup|soil|dirt|seed|water", "watch a plant grow", "In about a week, a tiny green sprout should poke up.", "", "1,2,3",
+      "poke a few small holes in the bottom of a paper cup~poke holes in the cup~hole|poke|bottom~so extra water can drain out~water|drain|out|extra|too much",
+      "fill the cup with soil~fill the cup~soil|dirt|fill~so the seed has a place to grow roots~root|grow|place|home",
+      "push the seed about one inch into the soil~push in the seed~seed|push|inch~so it stays dark and ^damp while it starts to grow~dark|damp|wet|cover|safe",
+      "water the soil until it is damp but not ^soggy~water the soil~water|damp~because seeds need water to start growing~water|need|grow|drink",
+      "set the cup in a sunny window~set the cup in the window~sun|window|light~because plants need sunlight to make food~sun|light|food|grow"],
+    ["", "wash your hands", "wash|hand|clean", "soap, clean water, and a towel", "soap|water|towel", "keep germs away", "Now your hands are clean and ready.", "", "0,1,3,4",
+      "wet your hands with clean water~wet your hands~wet|water~so the soap can spread easily~soap|spread|easy|bubbl",
+      "rub soap all over your hands, even between your fingers~rub on soap~soap|rub|finger~because soap helps lift germs off your skin~germ|dirt|clean|lift",
+      "scrub for twenty seconds, about as long as humming a short song twice~scrub for twenty seconds~scrub|twenty|20|second|song~because it takes time to get rid of germs~time|germ|long|clean",
+      "rinse off all the soap~rinse off the soap~rinse|soap|water~to wash the germs down the drain~germ|drain|away|wash|off",
+      "dry your hands with a clean towel~dry your hands~dry|towel~because germs spread more easily from wet hands~germ|wet|spread"],
+    ["2+", "make a paper airplane", "airplane|plane|paper|fly", "one sheet of paper", "paper|sheet", "fly a plane across the room", "With a little practice, your plane will glide across the room.", "", "0,3,5",
+      "fold the paper in half the long way, then open it back up~fold it in half~fold|half~to make a ^crease down the middle~crease|line|middle|center",
+      "fold the two top corners down to the middle crease~fold the corners~corner|fold|top~to make a pointed nose~point|nose|front",
+      "fold the slanted edges to the middle again~fold the edges again~edge|fold|again~to make the nose narrow and strong~narrow|thin|strong|sharp|point",
+      "fold the plane in half along the first crease~fold it in half again~half|fold~so both sides match~match|same|even|both",
+      "fold each side down to make the wings~fold down the wings~wing|fold~so the plane can float on the air~float|air|fly|glide|lift",
+      "throw it gently, straight ahead~throw it gently~throw|gentl|toss~because a hard throw makes it crash~crash|hard|fall|dive"],
+    ["", "make lemonade", "lemonade|lemon", "lemons, sugar, cold water, ice, and a pitcher", "lemon|sugar|water|ice|pitcher", "cool off on a hot day", "Pour a glass and enjoy your lemonade!", "Ask a grown-up to cut the lemons, because knives are sharp.", "0,1,2,3",
+      "ask a grown-up to cut the lemons in half~ask a grown-up to cut the lemons~cut|lemon|half~because knives are sharp~sharp|knife|safe|cut|hurt",
+      "squeeze the juice into a pitcher~squeeze the juice~squeez|juice~because the juice gives lemonade its flavor~flavor|taste|lemon|sour",
+      "stir in the sugar until it ^dissolves~stir in the sugar~stir|sugar|dissolv~so the lemonade is sweet instead of sour~sweet|sour|taste",
+      "add cold water and stir again~add the water~water|cold~because plain lemon juice is too strong~strong|sour|too|juice",
+      "add ice and take a sip to taste it~add ice~ice|taste|sip~so you can check if it needs more sugar~sugar|sweet|check|taste|right"],
+    ["", "make a pinecone bird feeder", "bird|feeder|pinecone|pine cone", "a pinecone, string, sunflower seed butter, birdseed, and a plate", "pinecone|pine cone|string|butter|birdseed|seed|plate", "help birds in winter", "Soon, hungry birds will come to visit.", "", "0,1,2,3",
+      "tie a long string around the top of the pinecone~tie on the string~tie|string~so you can hang it up later~hang|later|up",
+      "spread sunflower seed butter all over the pinecone with a spoon~spread on the seed butter~spread|butter|spoon~so the seeds will stick~stick|seed|glue",
+      "roll the pinecone in birdseed on a plate~roll it in birdseed~roll|birdseed|seed~so birds have plenty to eat~bird|eat|food|plenty",
+      "hang it on a tree branch~hang it on a branch~hang|tree|branch~so birds can find it~bird|find|see|reach",
+      "watch quietly from a window~watch from a window~watch|window|quiet~so you do not scare the birds away~scare|bird|away|fly"],
+    ["", "brush your teeth", "brush|teeth|tooth", "a toothbrush, toothpaste, and water", "toothbrush|brush|toothpaste|paste|water", "keep your teeth healthy", "Now your smile is clean and fresh.", "", "0,1,2,4",
+      "squeeze a pea-sized bit of toothpaste onto your toothbrush~add the toothpaste~toothpaste|paste|pea~because a little toothpaste is enough~little|enough|small|too much",
+      "brush the fronts of your teeth in small, gentle circles~brush the fronts~front|circle|gentl~because brushing too hard can hurt your gums~gum|hurt|hard|gentl",
+      "brush the backs and tops of your teeth too~brush the backs and tops~back|top~because food hides in the back teeth~food|hide|back|germ|stuck",
+      "keep brushing for two minutes~brush for two minutes~two|2|minute~because it takes time to clean every tooth~time|every|clean|all",
+      "spit out the toothpaste and rinse your brush~spit and rinse~spit|rinse~to get the leftover toothpaste out~clean|out|leftover|paste|germ"],
+    ["", "set the table", "table|set|dinner|meal", "plates, forks, knives, spoons, cups, and napkins", "plate|fork|knife|knives|spoon|cup|napkin", "get ready for a family dinner", "Now the table is ready, and everyone can sit down to eat.", "", "0,1,2,3",
+      "put a plate in front of each chair~put out the plates~plate|chair~so everyone has a place to eat~everyone|place|each|eat",
+      "set a fork on the left side of each plate~set the forks~fork|left~because that is where people expect to find it~expect|find|reach|hand|always|usual",
+      "put a knife and a spoon on the right side~put out the knives and spoons~knife|knives|spoon|right~so they are easy to reach~reach|easy|hand",
+      "place a cup above the knife~place the cups~cup|above|glass~so it is easy to grab without spilling~spill|grab|easy|reach",
+      "fold a napkin and put it beside each plate~add the napkins~napkin|fold~so people can wipe their hands and mouths~wipe|clean|hand|mouth|mess"],
+    ["", "build a snowman", "snowman|snow", "lots of sticky snow, two sticks, small stones, and a carrot", "snow|stick|stone|rock|carrot", "make a friendly snow figure", "Now your snowman is ready to wave hello.", "", "1,2,3,4",
+      "pack some snow into a small, hard ball~pack a small snowball~pack|ball|snowball~because a hard ball holds together~hold|together|hard|fall apart",
+      "roll the ball across the snow until it is big and round~roll the snowball~roll|big~so it picks up more snow and grows~grow|bigger|pick|more",
+      "make a second ball and a third, smaller ball the same way~make two more balls~second|third|small|two|more~because a snowman has three parts~three|3|part|body|head",
+      "stack the balls with the biggest on the bottom~stack the balls~stack|bottom|big~so the snowman does not tip over~tip|fall|over|balance|steady",
+      "add stones for eyes, a carrot nose, and stick arms~add the face and arms~stone|rock|carrot|stick|arm|eye|nose~to give it a face and arms~face|arm|look|friend"],
+    ["", "make a thank-you card", "card|thank", "paper, crayons or markers, and an envelope", "paper|crayon|marker|envelope", "show someone you are grateful", "When you give your card, you will make someone smile.", "", "0,1,2,3",
+      "fold a sheet of paper in half~fold the paper~fold|half|paper~so it opens like a book~open|book|card",
+      "draw a bright picture on the front~draw on the front~draw|picture|front~to make the card cheerful~cheer|pretty|happy|bright|nice",
+      "write a thank-you message inside~write a message~write|message|inside|thank~so the person knows why you are thankful~knows|why|thank",
+      "sign your name at the bottom~sign your name~sign|name~so they know who it is from~who|knows|from",
+      "put the card in an envelope and give it to the person~give the card~envelope|give|deliver~so it stays clean until they open it~clean|safe|surprise|open"],
+    ["", "build a sandcastle", "sandcastle|castle|sand", "a bucket, a shovel, sand, and water", "bucket|shovel|sand|water", "build a castle at the beach", "Now you have a castle fit for a crab king.", "", "0,1,2,4",
+      "mix water into the sand until it is damp~wet the sand~water|wet|damp~because damp sand sticks together~stick|together|hold|shape",
+      "pack the damp sand tightly into a bucket~pack the bucket~pack|bucket|tight~so the tower keeps its shape~shape|hold|strong|fall",
+      "flip the bucket over and lift it slowly~flip the bucket~flip|lift|over~so the tower slides out in one piece~piece|whole|break|crumbl|slide",
+      "dig a ^moat around the castle with your shovel~dig a moat~dig|moat|ditch~to protect the castle from waves~wave|water|protect",
+      "decorate the towers with shells and pebbles~decorate it~shell|pebble|decorat~to make the castle beautiful~beautiful|pretty|fancy|nice|cool"],
+    ["", "bow in the dojo", "bow|dojo|karate|respect", "just yourself and a place to stand", "yourself|place|stand", "show respect in karate class", "A good bow shows respect to everyone in the dojo.", "", "0,1,3,4",
+      "stand up tall with your feet together~stand tall~stand|tall|feet|together~so you look ready and calm~ready|calm|still|attention",
+      "put your hands flat against your sides~put your hands at your sides~hand|side|flat~to show you are not distracted~distract|still|calm|focus|ready|attention",
+      "look toward your teacher or partner~look at your partner~look|partner|teacher~to show you are paying attention~attention|respect|focus|listen",
+      "bend forward from your waist and pause~bend from the waist~bend|waist|forward~because the bow is the sign of respect~respect|polite|honor|thank",
+      "stand back up slowly~stand back up~stand|up|slow~so the bow looks calm and careful~calm|careful|respect|slow|smooth"],
+    ["", "warm up before exercise", "warm|exercise|stretch", "comfortable clothes and a little space", "clothes|space|room|shoe", "get your body ready to move", "Now your muscles are warm and ready for action.", "", "0,1,2,4",
+      "jog in place for one minute~jog in place~jog|run|minute~to get your heart pumping~heart|pump|blood|warm",
+      "make ten big arm circles forward and ten backward~do arm circles~arm|circle~to loosen up your shoulders~shoulder|loose|arm",
+      "do ten jumping jacks~do jumping jacks~jumping jack|jump~to warm up your whole body~whole|body|warm|muscle",
+      "swing each leg forward and back ten times~swing your legs~leg|swing~to loosen your hips and legs~hip|leg|loose",
+      "stretch gently, without bouncing~stretch gently~stretch|gentl~because bouncing can strain your muscles~muscle|hurt|strain|pull|injur"],
+    ["", "recycle at home", "recycl|bin", "a recycling bin and a few empty containers", "bin|container|recycl", "help the planet", "Recycling turns old things into new ones and keeps trash out of landfills.", "", "0,1,3,4",
+      "rinse out cans, jars, and bottles~rinse the containers~rinse|can|jar|bottle|clean~because food left inside can spoil a whole load~food|spoil|dirty|mess|smell",
+      "flatten cardboard boxes~flatten the boxes~flat|cardboard|box~so they take up less space~space|room|fit|less",
+      "check the recycling symbol on plastic containers~check the symbol~check|symbol|plastic|number~because not every plastic can be recycled~not every|some|can't|cannot|plastic",
+      "keep plastic bags out of the bin~keep out plastic bags~bag|plastic~because bags can tangle the sorting machines~tangle|machine|stuck|jam",
+      "put everything in the recycling bin on collection day~put out the bin~bin|collect|truck~so the truck can pick it up~truck|pick|collect"],
+    ["2+", "make a rain gauge", "rain|gauge|measur", "a clear plastic bottle, a ruler, tape, and a handful of pebbles", "bottle|ruler|tape|pebble", "measure how much rain falls", "Over a month, you can keep a record of how much rain fell.", "Ask a grown-up to cut the bottle, because cut plastic can be sharp.", "0,3,5",
+      "ask a grown-up to cut the top off the bottle~ask a grown-up to cut the bottle~cut|top~because the cut edge can be sharp~sharp|safe|cut|hurt",
+      "put a layer of pebbles in the bottom~add the pebbles~pebble|bottom|stone~so the gauge will not blow over~blow|tip|fall|wind|heavy|steady",
+      "turn the top upside down and set it in the bottle like a funnel~add the funnel~funnel|upside|top~to catch the rain and keep leaves out~catch|rain|leaves|leaf|out",
+      "tape a ruler to the side of the bottle~tape on the ruler~tape|ruler|side~so you can read how high the water is~measure|read|high|level|water|how much",
+      "set the gauge outside in an open spot~set it outside~outside|open|spot~so trees and roofs do not block the rain~tree|roof|block|catch",
+      "check the water level after each rain and write it down~record the rain~check|record|write|level~so you can compare rainfalls over time~compare|track|record|time|remember"],
+    ["2+", "start a compost bin", "compost|bin|soil", "a bin with a lid, dry leaves, fruit and vegetable scraps, and a shovel", "bin|lid|leaves|leaf|scrap|shovel", "turn kitchen scraps into rich soil", "In a few months, the pile will turn into dark, crumbly soil for a garden.", "Never add meat or dairy foods, because they smell bad and attract pests.", "0,1,3",
+      "put a thick layer of dry leaves in the bottom of the bin~add dry leaves~leaves|leaf|dry|bottom~because dry leaves add carbon and let air in~air|carbon|dry|brown",
+      "add fruit and vegetable scraps on top~add the scraps~scrap|fruit|vegetable|peel~because scraps add nitrogen that helps the pile break down~nitrogen|break|rot|decompos|food",
+      "keep the pile about as damp as a wrung-out sponge~keep it damp~damp|wet|sponge|water~because the tiny living things that break it down need water~water|living|need|tiny|microbe|worm|bacteria",
+      "turn the pile with a shovel once a week~turn the pile~turn|mix|stir|shovel|week~to mix in fresh air~air|oxygen|mix|faster"],
+    ["3", "build a simple circuit", "circuit|electric|bulb|battery", "a battery in a holder, two wires, and a small bulb in a holder", "battery|wire|bulb|holder", "make a bulb light up", "When the loop is complete, the bulb glows.", "Use only a small battery for this activity, never a wall outlet.", "0,2,3",
+      "connect one wire from the positive end of the battery to the bulb holder~connect the first wire~wire|positive|plus|battery|bulb~so electricity can flow out of the battery~electric|flow|current|out",
+      "connect a second wire from the bulb holder to the negative end of the battery~connect the second wire~second|negative|minus|wire~to complete the loop~loop|circle|complete|close|path",
+      "watch the bulb light up~watch the bulb~light|glow|bulb~because electricity now flows in a complete ^circuit~circuit|loop|flow|complete|path",
+      "unhook one wire~unhook a wire~unhook|disconnect|wire|remove~to break the loop and turn the light off~break|off|open|stop"],
+    ["2+", "write a friendly letter", "letter|write", "paper, a pencil, and an envelope", "paper|pencil|pen|envelope", "share news with someone far away", "A letter is a gift that someone can read again and again.", "", "0,2,4",
+      "write the date in the top right corner~write the date~date|top|corner~so the reader knows when you wrote it~when|day|knows",
+      "write a greeting, such as \"Dear Grandma,\"~write the greeting~greeting|dear~to show who the letter is for~who|for|name|person",
+      "write the body of the letter with your news and questions~write the body~body|news|question~because this is the main part of the letter~main|news|tell|share|most important",
+      "add a closing, such as \"Love\" or \"Your friend\"~add the closing~closing|love|friend~to end the letter kindly~ end |ending|kind|nice|finish|polite",
+      "sign your name under the closing~sign your name~sign|name~so the reader knows who wrote it~who|wrote|knows|from"],
+    ["3", "make a water filter model", "filter|water|clean", "a plastic bottle, cotton balls, sand, small gravel, and big gravel", "bottle|cotton|sand|gravel|rock", "see how layers can clean muddy water", "The water that drips out looks clearer, but it is still not safe to drink.", "Ask a grown-up to cut the bottle, and never drink the water from this model.", "0,2,4",
+      "ask a grown-up to cut a plastic bottle in half~ask a grown-up to cut the bottle~cut|bottle|half~because cut plastic can be sharp~sharp|safe|cut",
+      "turn the top half upside down and push cotton balls into the neck~add the cotton~cotton|neck|upside~to catch the tiniest bits of dirt~tiny|small|dirt|catch|bits",
+      "pour in a layer of sand, then small gravel, then big gravel~add the layers~sand|gravel|layer~because each layer traps different sizes of dirt~size|trap|catch|dirt|different",
+      "slowly pour muddy water over the top~pour in muddy water~pour|muddy|mud|water~so it has time to trickle through every layer~time|slow|layer|through|trickle",
+      "compare the water that drips out with the muddy water~compare the water~compare|clear|drip~to see how much dirt the filter removed~dirt|remov|clean|clear|differen"]
+  ];
+  function howtoPassage(c) {
+    const list = HOWTO.filter(function (t) { return inBand(t[0], c.band); }), t = P(list), b = c.band;
+    c.kind = b === 0 ? "story" : "text"; c.task = t[1]; c.taskK = t[2]; c.need = t[3]; c.needK = t[4]; c.purpose = t[5]; c.subject = "howto:" + t[1];
+    let steps = t.slice(9).map(function (x) { const p = x.split("~"); return { t: p[0], ref: p[1], k: p[2], why: p[3], whyK: p[4] }; });
+    if (b === 0) steps = t[8].split(",").map(function (i) { return steps[+i]; });
+    else if (b === 1 && chance(0.5)) steps = t[8].split(",").map(function (i) { return steps[+i]; });
+    const s = [], f = c.f, say = function (x) { s.push(fill(x, c, true)); };
+    if (b === 0) {
+      if (chance(0.5)) { kid(c); c.task2 = t[1].replace(/\byour\b/g, c.his); say(P(["{Name} wants to {task2}.", "{Name} likes to {task2}."])); }
+      else say(P(["Here is how to " + t[1] + ".", "Do you want to " + t[1] + "?"]));
+    } else {
+      if (chance(0.5)) {
+        kid(c); f.kid = 1;
+        const mine = function (x) { return x.replace(/\byourself\b/g, c.self).replace(/\byour\b/g, c.his); };
+        c.purpose2 = mine(t[5]); c.task2 = mine(t[1]);
+        say(P(["{Name} wanted to {purpose2}, so {he} learned how to {task2}.", "When {Name} wanted to {purpose2}, {his} family showed {him} how to {task2}."]));
+      }
+      else say(P(["Do you want to {purpose}? Here is how to {task}.", "It is easy to {task} if you follow these steps.", "@2 Learning how to {task} takes only a few simple steps.", "@3 With a few simple materials and a little patience, you can {task}."].map(function (v) { const r = parseVar(v, c); return r ? r.t : null; }).filter(Boolean)));
+      if (chance(0.8)) { f.need = 1; say(P(["You will need {need}.", "Before you start, gather {need}."])); }
+      if (t[7] && chance(0.7)) say(t[7]);
+    }
+    const n = steps.length, stated = [];
+    let lastTr = "";
+    steps.forEach(function (st, i) {
+      const tr = i === 0 ? P(["First, ", b ? "To begin, " : "First, "]) : i === n - 1 ? P(["Last, ", "Finally, "]) : P(["Next, ", "Then ", "After that, "].filter(function (x) { return x !== lastTr; }));
+      lastTr = tr;
+      const why = b >= 2 && chance(b === 3 ? 0.45 : 0.3) && !(c.focus === "infer" && stated.length >= n - 2);
+      stated[i] = why;
+      say(tr + st.t + (why ? (/^because/.test(st.why) ? ", " : " ") + st.why : "") + ".");
+    });
+    if (chance(b === 0 ? 0.5 : 0.8)) { f.end = 1; say(t[6]); }
+    if (b >= 2 && chance(0.5)) say(P(["Now you know how to {task}!", "With a little practice, you will be able to {task} all by yourself."]));
+    c.first = steps[0]; c.last = steps[n - 1];
+    const Q = [
+      ["main", "", "", b === 0 ? "What is this about?" : ["What does this text teach you to do?", "What is this text mostly about?"], "It teaches how to {task}.", "Look at the first sentence.", "{taskK}"],
+      ["main", "2+", "", ["What is the author's purpose?", "Why did the author write this text?"], "To explain how to {task}, step by step.", "Does the text tell a story, give facts, or give directions?", "explain|teach|how|instruct|direction|step|show|tell"],
+      ["main", "0-1", "", b === 0 ? "What do you do in this?" : "What would you make or do if you followed these steps?", "You would {task}.", "What is every step about?", "{taskK}"],
+      ["detail", "", "", ["What is the first step?", "What do you do first?"], cap(steps[0].t) + ".", "Find the word \"First\" or \"To begin.\"", steps[0].k],
+      ["detail", "", "", ["What is the last step?", "What do you do last?"], cap(steps[n - 1].t) + ".", "Find the word \"Last\" or \"Finally.\"", steps[n - 1].k],
+      ["detail", "1+", "need", "What will you need?", "You will need {need}.", "Find the list of things you need.", "{needK}"]
+    ];
+    for (let i = 0; i < n - 1; i++) Q.push(["detail", i === 0 ? "1+" : "", "", "What do you do right after you " + steps[i].ref + "?", cap(steps[i + 1].t) + ".", "Find the step that comes after you " + steps[i].ref + ".", steps[i + 1].k]);
+    steps.forEach(function (st, i) {
+      Q.push([stated[i] ? "detail" : "infer", "", "", (stated[i] ? "Why should you " : "Why do you think you should ") + st.ref + "?", cap(st.why) + ".", stated[i] ? "Reread the step where you " + st.ref + "." : "Think about what would go wrong if you skipped that step.", st.whyK]);
+    });
+    if (b >= 1) Q.push(["infer", "", "", "Why is it important to do the steps in order?", "Because each step gets things ready for the next one.", "What would happen if you did the last step first?", "order|next|ready|before|after|work|wrong|mess|first"]);
+    const title = b === 0 ? ["How to " + titleCase(t[1]), "Let's " + titleCase(t[1]) + "!"] : ["How to " + titleCase(t[1]), "Step by Step: " + titleCase(t[1]), "You Can " + titleCase(t[1]), titleCase(t[1]) + " in " + n + " Steps"];
+    return { title: P(title), sents: s, qs: runQs(c, Q), subject: c.subject };
+  }
+
+  /* ================= COMMUNITY HELPERS =================
+     [job, plural, keys, works ..., keys, tools, keys, does (verb phrase), keys, also, keys, safety tip, keys, why it matters, keys] */
+  const HELPS = [
+    ["firefighter", "firefighters", "firefight|fire", "at a fire station", "station|fire", "a fire truck, long hoses, and tall ladders", "truck|hose|ladder",
+      "put out fires and rescue people", "fire|rescue|save|put out", "teach kids about fire safety", "safety|teach|safe", "get low and go outside if there is smoke", "low|crawl|outside|get out|go", "keep everyone safe", "safe|help|protect"],
+    ["librarian", "librarians", "librarian|library", "at the library", "library", "computers, book carts, and a scanner for library cards", "computer|cart|book|scan",
+      "help people find books and information", "find|book|information|help", "lead story times for young children", "story|read", "treat library books gently and return them on time", "gentl|return|on time|care", "help everyone learn and enjoy reading", "learn|read|book"],
+    ["mail carrier", "mail carriers", "mail|carrier|postal", "at the post office and along a mail route", "post office|route|mail", "a mail bag, a mail truck, and a scanner", "bag|truck|scan",
+      "deliver letters and packages to homes and businesses", "deliver|letter|package|mail", "walk or drive many miles each day", "walk|drive|mile", "write the address clearly on every letter", "address|clear", "help people stay in touch", "touch|connect|send|get|mail|letter"],
+    ["doctor", "doctors", "doctor", "at a clinic or hospital", "clinic|hospital|office", "a stethoscope, a thermometer, and a blood pressure cuff", "stethoscope|thermometer|cuff",
+      "check people's health and help them get well", "health|well|better|check|sick|heal", "give check-ups to make sure people are growing strong", "check|grow|strong", "wash your hands and get plenty of sleep", "wash|hand|sleep", "keep people healthy", "health|well|sick"],
+    ["veterinarian", "veterinarians", "vet|veterinarian|animal doctor", "at an animal clinic", "clinic|animal|hospital", "a stethoscope, a scale, and a bag of treats", "stethoscope|scale|treat",
+      "take care of sick and hurt animals", "animal|pet|sick|hurt|care", "give pets check-ups and shots", "check|shot|pet", "bring pets for a check-up every year", "check|year|bring", "keep pets and other animals healthy", "animal|pet|health"],
+    ["farmer", "farmers", "farmer|farm", "on a farm", "farm", "a tractor, a plow, and lots of seeds", "tractor|plow|seed",
+      "grow food such as corn, wheat, fruit, and vegetables", "grow|food|crop|corn|wheat|vegetable|fruit", "care for animals such as cows and chickens", "animal|cow|chicken|care", "wash fruits and vegetables before you eat them", "wash", "grow the food that families eat", "food|eat|grow"],
+    ["crossing guard", "crossing guards", "guard|crossing", "at busy street corners near schools", "corner|street|school|crosswalk", "a bright vest and a stop sign", "vest|sign|stop",
+      "help children cross the street safely", "cross|street|safe", "watch for cars in every kind of weather", "car|weather|watch", "look left, right, and left again before you cross", "look|left|right", "keep walkers safe from cars", "safe|car|walk"],
+    ["baker", "bakers", "baker|bak", "at a bakery", "bakery", "big ovens, mixers, and measuring cups", "oven|mixer|measur",
+      "bake bread, muffins, and cakes", "bak|bread|cake|muffin", "start work very early in the morning", "early|morning", "measure ingredients carefully when you bake", "measur|careful", "make fresh food for the town", "food|fresh|bread|eat"],
+    ["dentist", "dentists", "dentist", "at a dental office", "office|dental|clinic", "a tiny mirror, a bright light, and special cleaning tools", "mirror|light|tool",
+      "check and clean people's teeth", "teeth|tooth|clean|check", "fix small holes in teeth called cavities", "cavit|fix|hole", "brush twice a day and floss", "brush|floss", "keep teeth healthy and strong", "teeth|tooth|health|strong"],
+    ["park ranger", "park rangers", "ranger|park", "at state and national parks", "park", "maps, radios, and binoculars", "map|radio|binocular",
+      "protect plants, animals, and trails", "protect|plant|animal|trail", "teach visitors about nature", "teach|nature|visitor", "stay on the trail and never feed wild animals", "trail|feed|wild", "keep parks safe and beautiful", "safe|beautiful|protect|nature|clean"],
+    ["bus driver", "bus drivers", "bus|driver", "on a school bus route", "bus|route|school|road", "a big yellow bus with mirrors and flashing lights", "bus|mirror|light",
+      "drive children to and from school safely", "drive|school|safe", "check the bus before every trip", "check|trip", "stay seated and keep your hands inside the bus", "seat|sit|inside|hand", "help kids get to school safely and on time", "school|time|safe"],
+    ["sanitation worker", "sanitation workers", "sanitation|trash|garbage|worker", "on trash and recycling routes", "trash|recycl|route|street", "a large truck with a lifting arm", "truck|arm|lift",
+      "collect trash and recycling from homes", "collect|trash|recycl|garbage|pick", "start work before the sun comes up", "early|sun|morning", "put only clean, empty items in the recycling bin", "clean|empty|recycl", "keep the town clean and healthy", "clean|health"],
+    ["nurse", "nurses", "nurse", "at hospitals, clinics, and schools", "hospital|clinic|school", "bandages, thermometers, and charts", "bandage|thermometer|chart",
+      "care for patients and help them feel better", "care|patient|better|help|sick", "explain to families how to care for someone who is sick", "explain|famil|care", "cover your cough with your elbow", "cough|elbow|cover", "help sick people heal", "heal|better|health|sick|well"],
+    ["teacher", "teachers", "teacher", "at a school", "school|class", "books, whiteboards, and computers", "book|whiteboard|board|computer",
+      "help students learn to read, write, and solve problems", "learn|read|write|teach|problem", "plan lessons every week", "plan|lesson", "ask questions when you do not understand", "ask|question", "help kids learn and grow", "learn|grow"],
+    ["lifeguard", "lifeguards", "lifeguard|guard", "at pools and beaches", "pool|beach", "a whistle, a rescue tube, and a tall chair", "whistle|tube|chair",
+      "watch swimmers and help anyone in trouble", "watch|swim|help|rescue|trouble", "practice rescues to stay ready", "practic|rescue|ready", "always swim where a lifeguard can see you", "lifeguard|see|swim", "keep swimmers safe", "safe|swim"],
+    ["zookeeper", "zookeepers", "zookeeper|keeper|zoo", "at a zoo", "zoo", "buckets of food, hoses, and brooms", "bucket|food|hose|broom",
+      "feed the animals and keep their homes clean", "feed|food|clean|animal", "watch for signs that an animal is sick", "sick|sign|watch", "never tap on the glass at animal exhibits", "tap|glass", "keep zoo animals healthy", "animal|health"],
+    ["police officer", "police officers", "police|officer", "at a police station and around town", "station|police|town", "a radio, a patrol car, and a map", "radio|car|map",
+      "help keep the community safe", "safe|help|protect|community", "help people who are lost or in trouble", "lost|trouble|help", "find a police officer or another trusted grown-up if you are ever lost", "police|grown|adult|trust|officer", "keep people safe", "safe|help|protect"],
+    ["pilot", "pilots", "pilot", "at airports and up in the sky", "airport|sky|plane", "a cockpit full of controls, maps, and radios", "cockpit|control|map|radio",
+      "fly airplanes that carry people and packages", "fly|plane|carry", "check the weather before every flight", "weather|check", "keep your seat belt on during a flight", "seat belt|seatbelt|belt", "help people travel far away quickly", "travel|far|quick|fast"]
+  ];
+  function commPassage(c) {
+    const h = P(HELPS), b = c.band, s = [], f = c.f, say = function (x) { s.push(fill(x, c, true)); };
+    Object.assign(c, { kind: b === 0 ? "story" : "passage", job: h[0], jobs: h[1], jobK: h[2], where: h[3], whereK: h[4], tools: h[5], toolsK: h[6], does: h[7], doesK: h[8], also: h[9], alsoK: h[10], tip: h[11], tipK: h[12], why: h[13], whyK: h[14] });
+    c.subject = "comm:" + h[0];
+    const visit = chance(0.55);
+    if (visit) { kid(c); f.visit = 1; }
+    if (b === 0) {
+      say(visit ? "{A:job} came to {Name}'s class." : P(["This is {a:job}.", "{A:job} is a helper in our town."]));
+      say(P(["The {job} works {where}.", "{Jobs} work {where}."]));
+      if (chance(0.7)) { f.tools = 1; say("{Jobs} use {tools}."); }
+      say("{Jobs} {does}.");
+      if (chance(0.5)) { f.tip = 1; say("{A:job} says, \"Remember to {tip}.\""); }
+      else if (visit) say(P(["{Name} said, \"Thank you!\"", "{Name} waved goodbye."]));
+    } else {
+      if (visit) say(P(["On Friday, {a:job} visited {Name}'s class.", "@2 {Name}'s class had a special guest on Friday: {a:job} from their town."].map(function (v) { const r = parseVar(v, c); return r ? r.t : null; }).filter(Boolean)));
+      else say(P(["{Jobs} are important helpers in a ^community.", "Every town needs {jobs}.", "@2 Have you ever wondered what {jobs} do all day?"].map(function (v) { const r = parseVar(v, c); return r ? r.t : null; }).filter(Boolean)));
+      say(P(["{Jobs} work {where}.", "Most {jobs} work {where}."]));
+      say(P(["Their main job is to {does}.", "{Jobs} {does}."]));
+      if (chance(0.8)) { f.tools = 1; say(P(["They use {tools}.", "They use special ^equipment, such as {tools}.", "@2 To do their work, they use ^equipment such as {tools}."].map(function (v) { const r = parseVar(v, c); return r ? r.t : null; }).filter(Boolean))); }
+      if (chance(0.7)) { f.also = 1; say(P(["{Jobs} also {also}.", "Many {jobs} also {also}."])); }
+      if (chance(0.75)) { f.tip = 1; say(visit ? "The {job} told the class, \"Remember to {tip}.\"" : "{Jobs} often say, \"Remember to {tip}.\""); }
+      if (b >= 2 && chance(0.6)) { f.whyS = 1; say(P(["{Jobs} work hard to {why}.", "Without {jobs}, it would be much harder to {why}."])); }
+      if (visit && chance(0.7)) { f.feel = 1; say(P(["{Name} thought the visit was exciting.", "{Name} asked lots of questions and listened carefully.", "@2 After the visit, {Name} decided that {he} might want to be {a:job} someday."].map(function (v) { const r = parseVar(v, c); return r ? r.t : null; }).filter(Boolean))); }
+      if (b === 3) say(P(["Being {a:job} takes skill, training, and a lot of patience.", "Most {jobs} train for a long time before they start working.", "The job can be tiring, but many {jobs} say that helping others makes it worthwhile."]));
+      if (b === 1 && !visit && chance(0.5)) say("Every ^community needs helpers like {jobs}.");
+      if (b >= 2 && chance(b === 3 ? 0.7 : 0.4)) say("Community helpers like {jobs} make life better for everyone.");
+    }
+    const Q = [
+      ["main", "0", "visit", "Who came to {Name}'s class?", "{A:job} came.", "Look at the first sentence.", "{jobK}"],
+      ["main", "0", "", "What is this mostly about?", "It is about {a:job} and the work {jobs} do.", "What helper is this about?", "{jobK}"],
+      ["main", "1+", "", ["What is this passage mostly about?", "What is the main idea of this passage?"], "It is about how {jobs} help the community.", "Think about what you learned about {jobs}.", "{jobK}", "help|work|job|do|community|keep|safe|care|town"],
+      ["main", "1-2", "", "What job is this passage about?", "It is about the job of {a:job}.", "Which helper is named again and again?", "{jobK}"],
+      ["main", "3", "", "Why did the author write this passage?", "To inform readers about the important work {jobs} do.", "Is this passage mostly facts or mostly made up?", "inform|teach|explain|tell|learn|show|fact"],
+      ["detail", "", "", "Where do {jobs} work?", "{Jobs} work {where}.", "Find the word \"work.\"", "{whereK}"],
+      ["detail", "", "tools", "What tools do {jobs} use?", "They use {tools}.", "Find the word \"use.\"", "{toolsK}"],
+      ["detail", "", "", "What do {jobs} do?", "{Jobs} {does}.", "Find what their main job is.", "{doesK}"],
+      ["detail", "1+", "also", "What else do many {jobs} do?", "They also {also}.", "Find the word \"also.\"", "{alsoK}"],
+      ["detail", "", "tip", "What safety tip does the passage give?", "Remember to {tip}.", "Find the word \"Remember.\"", "{tipK}"],
+      ["infer", "", "", "Why are {jobs} important to a town?", "Because they help {why}.", "Think about what would happen without them.", "{whyK}"],
+      ["infer", "1+", "tools", "Why do you think {jobs} need {tools}?", "Because those tools help them {does}.", "Think about what their main job is.", "{doesK}|help|job|work"],
+      ["infer", "", "visit", "How do you think {Name} felt about the visit?", "{He} felt excited and curious.", "Think about what {Name} did during the visit.", "excit|curious|interest|happy|fun|amaz|cool|glad|proud|thank"],
+      ["infer", "2+", "tip", "Why do you think the {job} gave that safety tip?", "To help people stay safe and healthy.", "Think about what the tip protects people from.", "safe|health|hurt|danger|careful|protect|sick"]
+    ];
+    return { title: P(b === 0 ? ["{A:job} Helps", "Our Friend the {Job}", "The {Job}"] : ["A Visit from {a:job}", "What Does {a:job} Do?", "Community Helpers: {Jobs}", "Meet {a:job}", "A Day with {a:job}"]).replace(/\{[^}]+\}/g, function (m) { return fill(m, c); }),
+      sents: s, qs: runQs(c, Q), subject: c.subject };
+  }
+
+  /* ================= LONG AGO =================
+     [title, people ___ ("light their homes"), keys, how it was done long ago (sentence), old-way keys, detail (sentence),
+      problem with the old way, keys, what replaced it, keys, when it changed (sentence), today (sentence), keys, effect (sentence), keys] */
+  const PAST = [
+    ["Lighting the Night", "light their homes", "light|lamp|candle", "Long ago, people lit their homes with candles and oil lamps.", "candle|lamp|oil", "People made candles from beeswax or animal fat.",
+      "the flames gave only ^dim light and could start fires", "dim|fire|dark|danger", "electric light bulbs", "electric|bulb|light", "In the late 1800s, electric lights began to brighten homes and streets.",
+      "Today, we flip a switch to light up a whole room.", "switch|flip|electric|bulb", "People could read, work, and play safely after dark.", "night|dark|later|safe|read|work"],
+    ["Keeping Food Cold", "keep food cold", "food|cold|ice|fridge|refrigerat", "Long ago, many families kept food cold in an icebox, a wooden cabinet that held a big block of ice.", "icebox|ice|block|cabinet", "Workers cut ice from frozen lakes in winter and packed it in sawdust so it would last into summer.",
+      "the ice melted, so someone had to deliver a new block every few days", "melt|deliver|new|ice", "electric refrigerators", "refrigerator|fridge|electric", "Electric refrigerators became ^common in American homes in the 1930s and 1940s.",
+      "Today, refrigerators keep food cold all day and all night.", "refrigerator|fridge|cold", "Food stayed fresh longer, and families no longer needed ice deliveries.", "fresh|longer|ice|safe|spoil"],
+    ["Wash Day", "wash their clothes", "wash|cloth|laundry", "Long ago, people washed clothes by hand in a tub with a washboard.", "washboard|tub|hand|scrub", "They scrubbed each piece of clothing against the bumpy board and then wrung out the water.",
+      "washing clothes could take a whole day of hard work", "day|hard|long|tir|work", "washing machines", "washing machine|machine", "Electric washing machines spread to many homes in the early 1900s.",
+      "Today, a machine can wash a load of clothes in about an hour.", "machine|hour", "Families had more free time for other things.", "time|free|easier|faster"],
+    ["The One-Room School", "go to school", "school|learn|class", "Long ago, many children went to one-room schoolhouses.", "one-room|one room|schoolhouse", "Students of all ages learned together with one teacher, and they wrote on small chalkboards called ^slates.",
+      "one teacher had to teach every grade at the same time", "every grade|all ages|one teacher|same time|busy|hard", "larger schools with a separate class for each grade", "grade|classroom|separate|bigger|larger", "As towns grew, they built bigger schools with many classrooms.",
+      "Today, most students have a class for their own grade and use paper, books, and computers.", "grade|paper|computer|book", "Teachers could plan lessons for one age group at a time.", "age|grade|one group|easier|plan"],
+    ["Crossing the Country", "travel long distances", "travel|trip|wagon|train", "Long ago, many families traveled across the country in covered wagons pulled by oxen or horses.", "wagon|horse|oxen|ox", "A trip from the middle of the country to the West Coast could take four to six months.",
+      "trips were slow, bumpy, and sometimes dangerous", "slow|bump|danger|long|month", "railroads, and later cars and airplanes", "train|railroad|car|plane", "In 1869, a railroad was finished that crossed the United States, and the trip took only about a week.",
+      "Today, an airplane can fly across the country in about six hours.", "plane|airplane|hour|fly", "People and goods could travel much faster.", "fast|quick|time"],
+    ["Sending a Message", "send messages", "message|letter|news|telegraph", "Long ago, letters were carried by horse, stagecoach, or ship.", "letter|horse|ship|stagecoach", "A letter could take weeks or even months to arrive.",
+      "news traveled very slowly", "slow|week|month|long", "the telegraph, which sent messages over wires using a code of dots and dashes", "telegraph|wire|code|dot|dash|morse", "By the 1860s, telegraph wires connected many cities across America.",
+      "Today, we can send a message across the world in seconds.", "second|phone|computer|email|text|fast", "News could travel across the country in minutes instead of weeks.", "minute|fast|quick"],
+    ["Fetching Water", "get water", "water|well|faucet", "Long ago, many families carried water in buckets from wells, springs, and streams.", "bucket|well|stream|spring|carr", "Children often helped by hauling heavy buckets home every day.",
+      "carrying water was heavy, tiring work, and the water was not always clean", "heavy|tir|clean|dirty|hard", "pipes that brought clean water into homes", "pipe|faucet|tap|plumbing", "Cities built water systems with pipes, pumps, and filters.",
+      "Today, we turn on a faucet to get clean water.", "faucet|tap|turn|sink", "People stayed healthier and saved hours of work each week.", "health|clean|time|save|sick"],
+    ["Books by Hand", "make books", "book|print|copy", "Long ago, every book was copied by hand, one page at a time.", "hand|copy|copied|write", "Making a single book could take months, so books were ^rare and costly.",
+      "only a few people could own books", "few|rare|expensive|cost", "the printing press with movable type", "printing press|press|print", "In the 1400s, printing presses in Europe began making many copies of a book quickly.",
+      "Today, millions of books are printed, and many can be read on screens.", "million|print|screen", "Books became cheaper, and many more people learned to read.", "cheap|more people|read|learn"],
+    ["Plowing the Fields", "plow their fields", "plow|farm|field|tractor", "Long ago, farmers plowed their fields with plows pulled by horses or oxen.", "plow|horse|ox", "A farmer walked behind the plow all day to break up the soil.",
+      "it took many weeks to plow a big field", "slow|week|long|hard|tir", "tractors with gas engines", "tractor|engine|machine", "In the early 1900s, tractors began to replace horses on many farms.",
+      "Today, one farmer with a tractor can plow a huge field in a day or two.", "tractor|day|huge", "Farms could grow much more food with fewer workers.", "more food|fewer|faster|bigger|more"],
+    ["The Lighthouse Keeper", "keep ships safe at night", "lighthouse|ship|light|keeper", "Long ago, lighthouse keepers climbed tall towers every evening to keep a lamp burning all night.", "keeper|lamp|climb|tower", "Keepers trimmed wicks, polished the glass, and watched for ships in trouble.",
+      "the work never stopped, even during storms", "storm|never|night|hard|every", "^automatic electric lights", "automatic|electric", "During the 1900s, most lighthouses in the United States were changed to automatic lights.",
+      "Today, many lighthouses run by themselves, and ships also use satellites to find their way.", "automatic|themselves|satellite|gps|by itself", "Ships still stay safe, but keepers no longer have to live at the lighthouse.", "safe|keeper|no longer|automatic"],
+    ["The General Store", "shop for food", "store|shop|food", "Long ago, most towns had a general store that sold everything from flour to nails.", "general store|store", "Shopkeepers scooped flour, sugar, and beans from big barrels.",
+      "shoppers had to ask a clerk for each item, which took a long time", "clerk|ask|time|wait|long", "self-service grocery stores", "self-service|grocery|supermarket|shelves", "In the early 1900s, stores began letting shoppers take items off the shelves themselves.",
+      "Today, we push carts through big supermarkets.", "cart|supermarket|grocery", "Shopping became faster, and stores could offer many more kinds of food.", "fast|more|choice|quick"],
+    ["Telling Time", "tell time", "time|clock|sundial", "Long ago, people told time with sundials, which used shadows to show the hour.", "sundial|shadow|sun", "As the sun moved across the sky, a shadow moved across the dial.",
+      "sundials did not work at night or on cloudy days", "night|cloud|dark", "mechanical clocks with gears", "clock|gear", "Clocks with gears and weights were built in Europe in the 1300s.",
+      "Today, clocks and phones show the exact time.", "clock|phone|watch", "People could tell time day or night, rain or shine.", "night|cloud|any time|always|day"],
+    ["Cooking Over a Fire", "cook their food", "cook|food|stove", "Long ago, people cooked over open fires and on wood-burning stoves.", "fire|wood|stove", "Someone had to chop wood and keep the fire going all day.",
+      "cooking was hot, smoky, and slow", "hot|smok|slow|wood", "gas and electric stoves", "gas|electric|stove", "Gas and electric stoves spread to many homes in the early 1900s.",
+      "Today, we can turn a knob and start cooking right away.", "knob|turn|right away|stove", "Cooking became faster, cleaner, and safer.", "fast|clean|safe|easy"],
+    ["Spinning and Weaving", "make cloth", "cloth|spin|weav|fabric", "Long ago, families made cloth at home with spinning wheels and looms.", "spinning|wheel|loom|spin|weav", "They spun wool into yarn and then wove the yarn into cloth by hand.",
+      "making enough cloth for one shirt took many hours", "hour|slow|long|time|hard", "factories with machines that spun and wove cloth", "factor|machine", "In the late 1700s and the 1800s, new machines in factories made cloth much faster.",
+      "Today, most clothes are made in factories and bought in stores.", "factor|store|buy", "Cloth became cheaper, and people could own more clothes.", "cheap|more|fast"]
+  ];
+  function histPassage(c) {
+    const h = P(PAST), b = c.band, s = [], f = c.f, say = function (x) { s.push(fill(x, c, true)); };
+    Object.assign(c, { kind: "passage", topic: h[1], topicK: h[2], oldK: h[4], prob: h[6], probK: h[7], neu: h[8], neuK: h[9], nowK: h[12], effK: h[14] });
+    c.subject = "hist:" + h[0];
+    if (b >= 2 && chance(0.6)) say(P(["Life long ago was very different from life today.", "Have you ever wondered how people managed to {topic} long ago?", "Imagine trying to {topic} without any modern tools.",
+      "@3 Many things we use every day began as answers to old problems."].map(function (v) { const r = parseVar(v, c); return r ? r.t : null; }).filter(Boolean)));
+    say(h[3]);
+    if (chance(b === 1 ? 0.5 : 0.85)) { f.det = 1; say(h[5]); }
+    say(b === 1 ? "But {prob}." : P(["There was a problem: {prob}.", "The trouble was that {prob}.", "@3 This way of life had a serious drawback: {prob}."].map(function (v) { const r = parseVar(v, c); return r ? r.t : null; }).filter(Boolean)));
+    say(b === 1 ? (/School|Store|Water/.test(h[0]) ? "Later, people began to use {neu}." : P(["Later, people began to use {neu}.", "Later, people ^invented {neu}."])) : P(["Over time, people switched to {neu}.", /School|Store|Water/.test(h[0]) ? "@2 In time, things changed, and people began to use {neu}." : "@2 In time, new ^inventions changed everything, including {neu}."].map(function (v) { const r = parseVar(v, c); return r ? r.t : null; }).filter(Boolean)));
+    if (b >= 2 && chance(0.8)) { f.when = 1; say(h[10]); }
+    if (b >= 2 || chance(0.6)) { f.eff = 1; say(h[13]); }
+    f.now = 1; say(h[11]);
+    if (b === 3 && chance(0.5)) say(P(["It is easy to take these changes for granted, but each one made daily life a little easier.", "Looking back helps us see how much everyday life has changed."]));
+    const Q = [
+      ["main", "1-2", "", "What is the topic of this passage?", "How people {topic} long ago and today.", "What is the first sentence about?", "{topicK}"],
+      ["main", "", "", ["What is this passage mostly about?", "What is the main idea of this passage?"], "It is about how people {topic} long ago and how that changed over time.", "Think about the beginning and the end of the passage.", "{topicK}", "long ago|past|old|before|chang|today| now |then|history|used to|different"],
+      ["main", "3", "", ["Why did the author write this passage?", "What is the author's purpose?"], "To explain how the way people {topic} changed over time.", "Does the author tell a story, give facts, or try to convince you?", "explain|inform|teach|show|tell|learn|fact"],
+      ["detail", "", "", "How did people {topic} long ago?", h[3].replace(/^Long ago, /, "").replace(/^./, function (x) { return x.toUpperCase(); }), "Find the words \"Long ago.\"", "{oldK}"],
+      ["detail", "", "", "What was the problem with the old way?", cap(h[6]) + ".", "Find the word \"problem,\" \"trouble,\" or \"But.\"", "{probK}"],
+      ["detail", "", "", "What did people begin to use instead?", cap(h[8]) + ".", "Find the words \"Later\" or \"Over time.\"", "{neuK}"],
+      ["detail", "", " now ", "How do we {topic} today?", h[11].replace(/^Today, /, "").replace(/^./, function (x) { return x.toUpperCase(); }), "Find the word \"Today.\"", "{nowK}"],
+      ["detail", "2+", "eff", "How did the change make life better?", h[13], "Find the sentence that tells what happened after the change.", "{effK}"],
+      ["infer", "", "", "Why do you think people switched to {neu}?", "Because the old way had a problem: {prob}.", "Think about the problem with the old way.", "{probK}"],
+      ["infer", "", "", "Would you rather {topic} the old way or the new way? Why?", "The new way, because the old way meant {prob}.", "Compare the problem with today.", "new|today| now |modern|old|easier|faster|safer|better|{probK}"],
+      ["infer", "2+", "!eff", "How do you think the change made people's lives better?", h[13], "Think about the problem it solved.", "{effK}|easier|better|faster"]
+    ];
+    return { title: P([h[0], h[0] + " Long Ago", "Then and Now: " + h[0]]), sents: s, qs: runQs(c, Q), subject: c.subject };
+  }
 
   /* ================= BUILDING A PASSAGE ================= */
   function parseVar(v, c) {
@@ -1609,12 +2018,15 @@ BD.StoryGen = (function () {
     return qs.filter(function (q) { return inBand(q[1], c.band) && needOk(q[2], c); })
       .map(function (q) { return mkQ(c, q[0], q[3], q[4], q[5], q.slice(6)); });
   }
-  function vocabQs(c) {
+  let vocRe = null;
+  function vocabQs(c, text) {
+    if (!vocRe) vocRe = Object.keys(VOC).map(function (w) { return [w, new RegExp("\\b" + w.replace(/ /g, "\\s+") + "\\b", "i")]; });
+    vocRe.forEach(function (x) { if (c._voc.indexOf(x[0]) === -1 && x[1].test(text)) c._voc.push(x[0]); });
     return c._voc.filter(function (w) { return VOC[w] && VOC[w][0] <= c.band; }).map(function (w) {
       const v = VOC[w], kind = c.kind || "story";
       const q = c.band === 0 ? P(["What does \"" + w + "\" mean?", "What does the word \"" + w + "\" mean?"])
         : P(["What does the word \"" + w + "\" mean in this " + kind + "?", "The " + kind + " uses the word \"" + w + "\". What does it mean?",
-          "What does \"" + w + "\" mean? Use clues from the " + kind + ".", "What is another way to say \"" + w + "\"?"]);
+          "What does \"" + w + "\" mean? Use clues from the " + kind + ".", "In this " + kind + ", what does \"" + w + "\" mean?"]);
       const h = c.band === 0 ? "Listen to the sentence with \"" + w + "\" again." : P(["Find \"" + w + "\" and reread the sentences around it.",
         "Reread the sentence with \"" + w + "\". Try putting your own word in its place.", "Look for clues right before and after \"" + w + "\"."]);
       return { type: "vocab", q: q, answer: "It means " + v[1] + ".", hint: h, keys: [v[2].split("|")] };
@@ -1625,11 +2037,14 @@ BD.StoryGen = (function () {
     c.kind = "story";
     pl.set(c);
     const sents = runBeats(c, pl.beats);
-    return { title: fill(P(pl.title), c), sents: sents, qs: runQs(c, pl.qs), subject: c.subject || pl.k };
+    const qs = runQs(c, pl.qs);
+    if (c.band >= 1 && c.band <= 2) qs.push(mkQ(c, "main", "Who is the main character in this story?", "{Name} is the main character.", "Think about who the story is mostly about.", ["{nameK}"]));
+    return { title: fill(P(pl.title), c), sents: sents, qs: qs, subject: c.subject || pl.k };
   }
   const SMALL = " a an the and or of to in on at for with from by but as ";
   function titleCase(t) {
-    return t.split(" ").map(function (w, i) { return i > 0 && SMALL.indexOf(" " + w.toLowerCase() + " ") !== -1 ? w.toLowerCase() : cap(w); }).join(" ");
+    const ws = t.split(" ");
+    return ws.map(function (w, i) { return i > 0 && !/:$/.test(ws[i - 1]) && SMALL.indexOf(" " + w.toLowerCase() + " ") !== -1 ? w.toLowerCase() : cap(w); }).join(" ");
   }
 
   /* own copy of the reading game's keyword check, used to prove each answer passes its own keys */
@@ -1656,7 +2071,7 @@ BD.StoryGen = (function () {
   ];
   const TYPES = ["main", "detail", "infer", "vocab"];
   const FOCI = [null, "main", "detail", "infer", "vocab"];
-  const LEN = { "-1": [3, 5], 0: [3, 5], 1: [5, 6], 2: [5, 7], 3: [6, 8], 4: [6, 9], 5: [7, 9], 6: [8, 10], 7: [8, 11], 8: [9, 12] };
+  const LEN = { "-1": [3, 5], 0: [3, 5], 1: [5, 7], 2: [5, 7], 3: [6, 8], 4: [6, 9], 5: [7, 9], 6: [8, 10], 7: [8, 11], 8: [9, 12] };
   function countSent(t) { const m = t.match(/[.!?]+["'”]?(?=\s|$)/g); return m ? m.length : 0; }
 
   function chooseQs(cands, band, focus) {
@@ -1702,7 +2117,7 @@ BD.StoryGen = (function () {
         const out = GEN[genre](c);
         const text = out.sents.join(" ").replace(/\s+/g, " ").trim();
         const n = countSent(text);
-        const cands = out.qs.concat(vocabQs(c)).filter(function (q) { return q.keys.length && kwScore(q.keys, q.answer) === 2; });
+        const cands = out.qs.concat(vocabQs(c, text)).filter(function (q) { return q.keys.length && kwScore(q.keys, q.answer) === 2; });
         const qs = chooseQs(cands, band, focus);
         const lenOk = n >= len[0] && n <= len[1];
         const focusOk = !focus || qs.filter(function (q) { return q.type === focus; }).length >= 2;
@@ -1714,7 +2129,7 @@ BD.StoryGen = (function () {
     const ps = { id: id, grade: grade, title: titleCase(best.out.title), text: best.text,
       questions: best.qs.map(function (q) { return { type: q.type, q: q.q, answer: q.answer, hint: q.hint, keys: q.keys }; }), source: "gen" };
     meta[id] = { genre: genre, subject: best.out.subject, focus: focus, cands: best.cands };
-    if (++cacheN > 3000) { Object.keys(cache).forEach(function (k) { delete cache[k]; delete meta[k]; }); cacheN = 0; }
+    if (++cacheN > 800) { Object.keys(cache).forEach(function (k) { delete cache[k]; delete meta[k]; }); cacheN = 0; }
     cache[id] = ps;
     return ps;
   }
@@ -1785,7 +2200,7 @@ BD.StoryGen = (function () {
     seen.forEach(function (id) {
       if (!/^sg-/.test(id)) return;
       const ps = fromId(id);
-      if (ps) { sigs.add(sig(ps)); }
+      if (ps) { sigs.add(sig(ps)); sigs.add(ps.text); }
     });
     seenList.slice(0, 12).forEach(function (id) { const ps = /^sg-/.test(id) && fromId(id); if (ps) recentSubj.push(info(ps).subject); });
     const weak = TYPES.indexOf(focus) !== -1 ? focus : weakType(p, grade);
@@ -1800,13 +2215,13 @@ BD.StoryGen = (function () {
         const sl = slotsFor(band, g);
         const ps = build(grade, makeSeed(randBase(), want, sl[Math.floor(Math.random() * sl.length)]));
         const m = info(ps);
-        if (seen.has(ps.id) || sigs.has(sig(ps))) continue;
+        if (seen.has(ps.id) || sigs.has(sig(ps)) || sigs.has(ps.text)) continue;
         if (tries < 60 && recentSubj.indexOf(m.subject) !== -1) continue;
         if (tries < 40 && want && ps.questions.filter(function (q) { return q.type === want; }).length < 2) continue;
         got = ps;
       }
       if (!got) got = generate(grade, { avoid: seen });
-      out.push(got); seen.add(got.id); sigs.add(sig(got));
+      out.push(got); seen.add(got.id); sigs.add(sig(got)); sigs.add(got.text);
       const gi = info(got);
       recentSubj.push(gi.subject); mem.recent.push(gi.subject);
       lastGenre = gi.genre;

@@ -45,12 +45,23 @@ BD.Reading = (function () {
     return out;
   }
 
-  function choose(p, grade, focus) {
+  /* Hand-written (and Claude-written) passages the student hasn't read come
+     first; after that, BD.StoryGen writes new ones, so the stories never run
+     out and never repeat. */
+  function unseenWritten(p, grade, focus, exclude) {
     const w = weights(p, grade, focus);
     const all = BD.PASSAGES.filter(function (x) { return x.grade === grade; }).concat(bankItems(grade));
-    const seen = p.seenPassages;
+    const seen = p.seenPassages || [], skip = (exclude || []).map(function (x) { return x.id; });
     const score = function (x) { return x.questions.reduce(function (a, q) { return a + (w[q.type] || 1); }, 0) * (0.7 + Math.random() * 0.6); };
-    let pool = all.filter(function (x) { return seen.indexOf(x.id) === -1; }).sort(function (a, b) { return score(b) - score(a); });
+    return all.filter(function (x) { return seen.indexOf(x.id) === -1 && skip.indexOf(x.id) === -1; }).sort(function (a, b) { return score(b) - score(a); });
+  }
+  function choose(p, grade, focus) {
+    const all = BD.PASSAGES.filter(function (x) { return x.grade === grade; }).concat(bankItems(grade));
+    const seen = p.seenPassages;
+    let pool = unseenWritten(p, grade, focus).slice(0, PASSAGES_PER_ROUND);
+    if (pool.length < PASSAGES_PER_ROUND && BD.StoryGen) {
+      try { pool = pool.concat(BD.StoryGen.pick(p, grade, PASSAGES_PER_ROUND - pool.length, focus || null, pool)); } catch (e) { /* fall back to rereading */ }
+    }
     if (pool.length < PASSAGES_PER_ROUND) {
       // Everything has been read: bring back the ones read longest ago.
       const old = all.filter(function (x) { return pool.indexOf(x) === -1; })
@@ -147,8 +158,10 @@ BD.Reading = (function () {
     const out = [];
     for (let i = 0; i < PASSAGES_PER_ROUND; i++) {
       const g = BD.Rank.itemGrade(grade, beltIndex);
-      const pool = choose(p, g, null).concat(choose(p, grade, null)).filter(function (x) { return out.indexOf(x) === -1; });
-      if (pool.length) out.push(pool[0]);
+      let next = unseenWritten(p, g, null, out)[0];
+      if (!next && BD.StoryGen) { try { next = BD.StoryGen.pick(p, g, 1, null, out)[0]; } catch (e) { next = null; } }
+      if (!next) next = choose(p, g, null).concat(choose(p, grade, null)).filter(function (x) { return out.indexOf(x) === -1; })[0];
+      if (next) out.push(next);
     }
     return out;
   }
@@ -242,6 +255,7 @@ BD.Reading = (function () {
       R.xp += gain;
       R.results.push({ type: q.type, best: R.best, q: q.q, answer: q.answer });
       record(p, R.grade, q.type, R.best === 2 && R.tries === 1 && !R.usedHint);
+      if (BD.StoryGen && BD.StoryGen.note) BD.StoryGen.note(q.type, R.best === 2 && R.tries === 1 && !R.usedHint, R.grade);
       const st = p.readStats[R.grade] || (p.readStats[R.grade] = { r: 0, w: 0 });
       if (R.best === 2) st.r++; else st.w++;
       BD.Store.save(p);
