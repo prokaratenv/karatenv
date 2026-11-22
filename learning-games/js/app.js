@@ -516,6 +516,7 @@ BD.UI = (function () {
     $("resSay").textContent = "Zumi: " + (o.failed ? BD.Cast.line("retry") : BD.Cast.line("right"));
     $("resSetup").hidden = !o.setup;
     show("screen-results");
+    if (quiet) $("resBreak").innerHTML = ""; else BD.Breaks.offer(p, o);
     BD.Dojo.push();
     setTimeout(function () { BD.Mini.react("bow"); }, 350);
     setTimeout(function () { if (currentScreen === "screen-results" && !sheetOpen()) BD.Badges.award(BD.Store.current()); }, 1400);
@@ -723,6 +724,7 @@ BD.UI = (function () {
     BD.Tourney.bind();
     if (BD.Teams) BD.Teams.bind();
     BD.Kid.bind();
+    $("infoClose").addEventListener("click", function () { BD.Breaks.stop(); });
     BD.MathGame.bind();
     BD.SentenceGame.bind();
     BD.Reading.bind();

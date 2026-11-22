@@ -107,6 +107,15 @@ The all-time and streak boards and cheers need the updated family script (see "U
 - **Little Champions (Pre-K to 2nd grade):** shorter rounds (Math Dojo 10 cards, Spelling, Spanish and Fix-It Sentences 5); in Math Dojo, problems up to 10 show pictures (apples, stars, fish…) that bounce and count out loud when tapped, and answers are three big buttons instead of a keypad; every right answer gets a burst of stars and a cheer ("Hi-ya!", "Way to go!"), spoken for Pre-K to 1st. Stripe tests stay the same.
 - **Sticker Book (everyone):** every finished round, boss match, tournament or team lesson earns a sticker, shown in a pop-up. 48 stickers on 6 pages (Dojo Animals, Champion Gear, Space and Sky, Brain Power, Snack Attack, Treasure); after the whole book, extras turn shiny. Open it from "📒 Sticker Book" on the home screen.
 
+## Power Breaks (learning first)
+
+After finished learning rounds, the results screen offers a **⚡ Power Break**: every round for Pre-K to 2nd grade, every 2nd round after that, at most 4 a day, never after a round that needs a redo. About 20 seconds, no XP, then **Back to training** starts the next round in Sensei's plan.
+
+- **Jumping Jacks, Push-ups, Sit-ups:** real movement with the champion, counted out loud (fewer reps for the youngest).
+- **Focus Pads:** hit the pad with the right answer to a quick math fact at their level, as many as they can in 20 seconds.
+- **Throwing Stars:** throw at the wooden target with the right letter (Pre-K to 1st) or the right spelling. Targets only, never a person.
+- **Board Break:** strike when the power meter is in the green; 1, then 2, then 3 boards.
+
 ## Tournaments
 
 Tap **🏆 Tournaments** on the home screen. Each one is a single-elimination bracket of **6 to 12** competitors (computer opponents with nicknames). Byes go into round 2 when the numbers are uneven, and you can enter as many as you like.
