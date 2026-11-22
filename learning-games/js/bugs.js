@@ -15,7 +15,14 @@ BD.Bugs = (function () {
   const MAX_SIDE = 1280, MAX_BYTES = 1500000, NOTE_MAX = 500;
   const inClaude = function () { return !!(window.claude && typeof window.claude.use === "function"); };
   const canSend = function () { return !inClaude() && !!(BD.Family && BD.Family.enabled && BD.Family.enabled()); };
-  let busy = false, shot = null, h2cLoad = null;
+  const SENT_KEY = "brainDojo.bugSent", SAME_WINDOW = 10 * 60e3;
+  const MSG_NEW = "Got it! Your report was received and we're working on it.";
+  const MSG_DUP = "Someone already reported this one. Thanks for letting us know. We're working on it!";
+  const MSG_MINE = "We already got your report from this screen. Thanks! We're working on it.";
+  let busy = false, shot = null, h2cLoad = null, info = null;
+  /* This device's last report (screen and time only), so a second tap on the same screen doesn't send twice. */
+  const lastSent = function () { try { return JSON.parse(localStorage.getItem(SENT_KEY) || "null"); } catch (e) { return null; } };
+  const markSent = function (screen) { try { localStorage.setItem(SENT_KEY, JSON.stringify({ screen: screen, at: Date.now() })); } catch (e) { /* storage blocked */ } };
 
   /* ---------- screenshot ---------- */
   function loadH2C() {
@@ -128,12 +135,16 @@ BD.Bugs = (function () {
     const btn = $("bugSend"), comment = $("bugNote").value.trim().slice(0, NOTE_MAX);
     if (!comment && !shot) { err(ERRORS.empty); return; }
     btn.disabled = true; btn.textContent = "Sending…"; err("");
+    const m = info || meta(), prev = lastSent();
+    if (prev && prev.screen === m.screen && Date.now() - (Number(prev.at) || 0) < SAME_WINDOW) {
+      shot = null; $("infoClose").click(); toast(MSG_MINE); return; // already sent from here a moment ago
+    }
     const linked = BD.Family.linked && BD.Family.linked();
-    const res = await BD.Family.call("bug", { token: linked ? BD.Family.token() : undefined, comment: comment, image: shot || "", meta: meta() });
+    const res = await BD.Family.call("bug", { token: linked ? BD.Family.token() : undefined, comment: comment, image: shot || "", meta: m });
     if (res && res.ok) {
-      shot = null;
+      shot = null; markSent(m.screen);
       $("infoClose").click();
-      toast("Thanks! The Engage team got your report.");
+      toast(res.dup ? MSG_DUP : MSG_NEW);
       return;
     }
     btn.disabled = false; btn.textContent = "Send report";
@@ -151,6 +162,7 @@ BD.Bugs = (function () {
     const b = $("bugBtn"); if (b) b.classList.add("busy");
     try {
       if (BD.Sound) BD.Sound.tap();
+      info = meta(); // which screen they were on when they tapped
       shot = canSend() ? await capture() : null; // picture first, before the sheet covers the screen
       open();
     } finally { busy = false; if (b) b.classList.remove("busy"); }

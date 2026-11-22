@@ -535,15 +535,18 @@ function bugReport(req) {
     blob = Utilities.newBlob(bytes, "image/" + im[1], "screenshot." + (im[1] === "png" ? "png" : "jpg"));
   }
   if (!comment && !blob) return { ok: false, error: "empty" };
+  meta.game = meta.game || meta.screen;
   var a = req.token ? auth(req) : null, fid = a ? String(req.token).slice(0, 32) : "";
   var cache = CacheService.getScriptCache(), hourKey = "bug:h:" + Math.floor(Date.now() / 3600000);
   var who = "bug:u:" + (fid || "anon:" + sha(meta.agent).slice(0, 16)) + ":" + Math.floor(Date.now() / 600000);
   var nh = Number(cache.get(hourKey) || 0), nu = Number(cache.get(who) || 0);
   if (nh >= BUG_PER_HOUR || nu >= BUG_PER_10MIN) return { ok: false, error: "limit" };
   cache.put(hourKey, String(nh + 1), 3600); cache.put(who, String(nu + 1), 600);
+  var id = sha(Utilities.getUuid()).slice(0, 8);
+  var seen = bugSeen(meta, comment);
   var short = comment.replace(/\s+/g, " ").slice(0, 40);
-  var subject = "Brain Dojo bug: " + meta.screen + (short ? " · " + short : "");
-  var rows = [["Screen", meta.screen], ["App version", meta.version], ["Grade", meta.grade], ["Belt", meta.belt], ["Game", meta.game], ["Screen size", meta.viewport], ["Device", meta.agent], ["Time on device", meta.time], ["Family", fid ? "signed in (" + fid.slice(0, 6) + ")" : "not signed in"]];
+  var subject = "Brain Dojo bug: " + (seen > 1 ? "Repeat (" + seen + "): " : "") + meta.screen + (short ? " · " + short : "");
+  var rows = [["Screen", meta.screen], ["App version", meta.version], ["Grade", meta.grade], ["Belt", meta.belt], ["Game", meta.game], ["Screen size", meta.viewport], ["Device", meta.agent], ["Time on device", meta.time], ["Family", fid ? "signed in (" + fid.slice(0, 6) + ")" : "not signed in"], ["Report ID", id], ["Times reported (14 days)", String(seen)]];
   var text = "New Brain Dojo bug report\n\n" + (comment || "(no note)") + "\n\n" + rows.map(function (r) { return r[0] + ": " + (r[1] || "-"); }).join("\n") + (blob ? "\n\nScreenshot attached." : "");
   var html = '<div style="font-family:Arial,sans-serif;font-size:14px;color:#111"><h2 style="margin:0 0 8px">Brain Dojo bug report</h2>' +
     '<p style="white-space:pre-wrap;background:#f4f4f6;border-radius:8px;padding:10px">' + (comment ? escH(comment) : "<em>(no note)</em>") + '</p>' +
@@ -552,5 +555,37 @@ function bugReport(req) {
   var opts = { htmlBody: html, name: "Brain Dojo by " + STUDIO, from: FROM_EMAIL, replyTo: FROM_EMAIL };
   if (blob) { opts.inlineImages = { shot: blob }; opts.attachments = [blob]; }
   GmailApp.sendEmail(BUG_EMAIL, subject, text, opts);
-  return { ok: true };
+  return { ok: true, id: id, dup: seen > 1 };
+}
+/* Repeat detection: a rolling list of recent reports, kept only as
+   { screen, game, grade, words (first few key words of the note, lowercased), n, first, last },
+   at most 200, dropped after 14 days. No names, no full notes. Returns how
+   many times this one has now been reported (1 = new). */
+var BUG_KEEP = 200, BUG_DAYS = 14;
+var BUG_STOP = ("the a an and or but i it is was to of in on at for with my me we our this that when then so just " +
+  "be been are were do did does not no can cant couldnt wont dont didnt doesnt isnt its im ive app game screen button " +
+  "please help hi hello thing stuff like really very got get gets").split(" ");
+function bugWords(comment) {
+  return String(comment || "").toLowerCase().replace(/[^a-z0-9 ]+/g, " ").split(/\s+/)
+    .filter(function (w) { return w.length > 2 && BUG_STOP.indexOf(w) === -1; }).slice(0, 4);
+}
+function bugsFile() { var f = folder(), it = f.getFilesByName("bug-reports.json"); return it.hasNext() ? it.next() : f.createFile("bug-reports.json", "{}", "application/json"); }
+function bugSeen(meta, comment) {
+  return locked(function () {
+    var file = bugsFile(), d = {}; try { d = JSON.parse(file.getBlob().getDataAsString() || "{}"); } catch (e) { d = {}; }
+    var now = Date.now(), list = (Array.isArray(d.r) ? d.r : []).filter(function (x) { return x && now - (Number(x.last) || 0) < BUG_DAYS * 864e5; });
+    var words = bugWords(comment), hit = null;
+    for (var i = 0; i < list.length && !hit; i++) {
+      var x = list[i]; if (x.screen !== meta.screen || x.game !== meta.game) continue;
+      var w = Array.isArray(x.words) ? x.words : [];
+      if (!words.length || !w.length) { if (!words.length) hit = x; continue; } // a picture-only report matches any report on that screen
+      var same = words.filter(function (k) { return w.indexOf(k) !== -1; }).length;
+      if (same >= Math.min(2, words.length, w.length)) hit = x;
+    }
+    if (hit) { hit.n = (Number(hit.n) || 1) + 1; hit.last = now; }
+    else list.push(hit = { screen: meta.screen, game: meta.game, grade: meta.grade, words: words, n: 1, first: now, last: now });
+    d.r = list.slice(-BUG_KEEP);
+    file.setContent(JSON.stringify(d));
+    return hit.n;
+  });
 }
