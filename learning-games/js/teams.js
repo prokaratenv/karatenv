@@ -105,7 +105,7 @@ BD.Teams = (function () {
     ]
   };
   const QUESTIONS = ["What could you do?", "What's the right response?", "What should you say?"];
-  const AGES = ["Little Champions", "Kids", "Juniors"];
+  const AGES = ["Engage Ninjas", "Core Kids", "Pre-Teen/Teens"]; // Pre-K to 1st, 2nd to 4th, 5th to 8th
 
   /* ---------- state ---------- */
   const esc = function (s) { return BD.UI.esc(s); };
@@ -237,7 +237,7 @@ BD.Teams = (function () {
     let q = 0, tries = 0;
     const intro = function () {
       BD.UI.sheet(t.name, '<div class="lesson">' +
-        '<p class="eyebrow">' + patch(t) + ' Week lesson · ' + esc(les.value) + '</p><h3>' + esc(les.title) + '</h3>' +
+        '<p class="eyebrow">' + patch(t) + ' Week lesson · ' + AGES[ag] + ' · ' + esc(les.value) + '</p><h3>' + esc(les.title) + '</h3>' +
         '<div class="coach-row"><img class="coach-face" src="img/face-cd.webp" alt=""><p class="coach-say">' + esc(les.talk) + '</p></div>' +
         '<p class="lesson-moment"><strong>The moment:</strong> ' + esc(mo[0]) + '</p>' +
         '<div class="res-actions"><button type="button" class="btn btn-primary" id="lessonGo">I\'m ready</button></div></div>');
