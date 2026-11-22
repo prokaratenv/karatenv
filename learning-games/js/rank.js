@@ -138,7 +138,7 @@ BD.Rank = (function () {
       return [0, 1, 2, 3].map(function (i) {
         const mine = names.filter(function (_, k) { return k % 4 === i; });
         const use = mine.length ? mine : names.length ? [names[i % names.length]] : [];
-        return { label: use.length ? use.slice(0, 2).join(" and ") + (use.length > 2 ? " and more" : "") : "Words " + (i + 1), topics: use };
+        return { label: use.length ? (use.length > 2 ? use.slice(0, 2).join(", ") + " and more" : use.join(" and ")) : "Words " + (i + 1), topics: use };
       });
     }
     return [0, 1, 2, 3].map(function (i) { return { label: "Part " + (i + 1) }; });
@@ -216,7 +216,7 @@ BD.Rank = (function () {
     const pr = opts.parts || {};
     const pips = function (key, y) {
       if (s[key] || !Array.isArray(pr[key])) return "";
-      return pr[key].map(function (on, i) { return '<rect x="' + (5 + i * 4.5) + '" y="' + (y + 2) + '" width="3" height="3" rx=".8" fill="' + (on ? "#FFFFFF" : "rgba(255,255,255,.28)") + '"/>'; }).join("");
+      return pr[key].map(function (on, i) { return '<rect x="' + (5 + i * 4.5) + '" y="' + (y + 2) + '" width="3.4" height="3.4" rx=".8" fill="' + (on ? "#E0BA77" : "rgba(255,255,255,.35)") + '" stroke="#22222A" stroke-width=".6"/>'; }).join("");
     };
     const slot = function (on, y, isNew) {
       return '<rect x="3" y="' + y + '" width="20" height="7" rx="1.5" fill="' + (on ? "#FFFFFF" : "rgba(0,0,0,.22)") + '" stroke="' + (on ? "#22222A" : "rgba(255,255,255,.35)") + '" stroke-width="' + (on ? 2 : 1.2) + '"' + (on ? "" : ' stroke-dasharray="2 2"') + (isNew ? ' class="stripe-new"' : "") + '/>';
