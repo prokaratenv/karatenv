@@ -56,6 +56,8 @@ BD.Cast = (function () {
   /* White-belt art and its belt mask for a character at a grade. */
   function art(key, grade, outfit) {
     if (isStudio(key)) { // one age for every grade
+      // The Claude version can hold only some files: Studio boxing and MMA show the gi there (the website has every outfit).
+      if ((outfit === "boxing" || outfit === "mma") && window.claude && typeof window.claude.use === "function") outfit = "gi";
       if (outfit && outfit !== "gi") return { src: "img/fit-" + key + "-" + outfit + ".webp", mask: key + "-" + outfit, collar: outfit === "highrank" ? key + "-hrcollar" : null, logo: outfit === "sparring" ? null : key + "-" + outfit + "-logo", band: 2 };
       return { src: "img/age-" + key + ".webp", mask: key, logo: key + "-logo", band: 2 };
     }
