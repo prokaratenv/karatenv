@@ -38,7 +38,9 @@ BD.Quest = (function () {
     if (!p.quest) delete p.quest;
     p.shields = Math.max(0, Math.min(MAX_SHIELDS, Math.round(Number(p.shields) || 0)));
     p.shielded = (Array.isArray(p.shielded) ? p.shielded : []).filter(function (d) { return typeof d === "string" && DAY_RE.test(d); }).slice(-30);
-    p.stickers = (Array.isArray(p.stickers) ? p.stickers : []).map(Number).filter(function (i, k, a) { return i >= 0 && i < STICKERS.length && Math.floor(i) === i && a.indexOf(i) === k; });
+    /* Map stickers live in p.mapStickers; p.stickers is the Sticker Book (kid.js). Move old map lists over. */
+    if (Array.isArray(p.stickers)) { p.mapStickers = (Array.isArray(p.mapStickers) ? p.mapStickers : []).concat(p.stickers); delete p.stickers; }
+    p.mapStickers = (Array.isArray(p.mapStickers) ? p.mapStickers : []).map(Number).filter(function (i, k, a) { return i >= 0 && i < STICKERS.length && Math.floor(i) === i && a.indexOf(i) === k; });
     p.chests = Math.max(0, Math.min(99999, Math.round(Number(p.chests) || 0)));
   }
 
@@ -97,10 +99,10 @@ BD.Quest = (function () {
     const xp = [20, 25, 30, 40, 50][Math.floor(Math.random() * 5)];
     BD.addXP(p, xp);
     p.quest.claimed = true; p.chests++;
-    const missing = STICKERS.map(function (_, i) { return i; }).filter(function (i) { return p.stickers.indexOf(i) === -1; });
+    const missing = STICKERS.map(function (_, i) { return i; }).filter(function (i) { return p.mapStickers.indexOf(i) === -1; });
     let prize;
     if (p.shields < MAX_SHIELDS && (Math.random() < 0.35 || !missing.length)) { p.shields++; prize = { kind: "shield" }; }
-    else if (missing.length) { const i = missing[Math.floor(Math.random() * missing.length)]; p.stickers.push(i); prize = { kind: "sticker", i: i }; }
+    else if (missing.length) { const i = missing[Math.floor(Math.random() * missing.length)]; p.mapStickers.push(i); prize = { kind: "sticker", i: i }; }
     else prize = { kind: "xp" };
     BD.Store.save(p);
     return { xp: xp, prize: prize };
@@ -115,7 +117,7 @@ BD.Quest = (function () {
       const pz = r.prize;
       document.getElementById("infoBody").innerHTML = '<div class="chest-wrap opened">' +
         (pz.kind === "shield" ? '<div class="chest-prize">🛡️</div><h3>Streak shield!</h3><p>If you miss a day, it saves your streak. You have ' + p.shields + ' of ' + MAX_SHIELDS + '.</p>' :
-          pz.kind === "sticker" ? '<div class="chest-prize">' + STICKERS[pz.i][0] + '</div><h3>New sticker: ' + STICKERS[pz.i][1] + '!</h3><p>It\'s in your sticker book on the Adventure Map (' + p.stickers.length + ' of ' + STICKERS.length + ').</p>' :
+          pz.kind === "sticker" ? '<div class="chest-prize">' + STICKERS[pz.i][0] + '</div><h3>New sticker: ' + STICKERS[pz.i][1] + '!</h3><p>It\'s on your Adventure Map (' + p.mapStickers.length + ' of ' + STICKERS.length + ').</p>' :
             '<div class="chest-prize">⭐</div><h3>Bonus treasure!</h3>') +
         '<p class="chest-xp">+' + r.xp + ' XP</p><p class="muted small">Come back tomorrow for a new quest.</p>' +
         '<div class="res-actions"><button type="button" class="btn btn-primary" id="chestDone">Awesome!</button><button type="button" class="btn btn-quiet" id="chestMap">See my map</button></div></div>';
@@ -173,8 +175,8 @@ BD.Quest = (function () {
           (st === "here" ? '<button type="button" class="btn btn-small btn-primary" id="mapBoss">Boss: ' + esc(b.name) + '</button>' : '') + '</div></li>';
       }).join("") + '</ol>' +
       (r.mastered ? '<p class="map-done">👑 You cleared every region in ' + BD.gradeLabel(g) + '!</p>' : '') +
-      '<h4 class="label">Sticker book · ' + p.stickers.length + ' of ' + STICKERS.length + '</h4><div class="stickers">' +
-      STICKERS.map(function (s, i) { const got = p.stickers.indexOf(i) !== -1; return '<span class="sticker' + (got ? " got" : "") + '" title="' + (got ? s[1] : "Not found yet") + '">' + (got ? s[0] : "?") + '</span>'; }).join("") + '</div>' +
+      '<h4 class="label">Map stickers · ' + p.mapStickers.length + ' of ' + STICKERS.length + '</h4><div class="stickers">' +
+      STICKERS.map(function (s, i) { const got = p.mapStickers.indexOf(i) !== -1; return '<span class="sticker' + (got ? " got" : "") + '" title="' + (got ? s[1] : "Not found yet") + '">' + (got ? s[0] : "?") + '</span>'; }).join("") + '</div>' +
       '<p class="muted small">Finish your daily quest to open a mystery chest: bonus XP plus a sticker or a 🛡️ streak shield (you have ' + p.shields + ' of ' + MAX_SHIELDS + ').</p>';
     BD.UI.sheet("Adventure Map", html);
     if (BD.Music) BD.Music.scene("map");
