@@ -101,6 +101,12 @@ The student's own card shows their rank, belt, XP this week, all-time XP, streak
 
 The all-time and streak boards and cheers need the updated family script (see "Updating the family script"); until it's redeployed, the weekly board shows as before.
 
+## Boss matches, Little Champions and the Sticker Book
+
+- **Boss matches come alive:** each match opens with "Round 1… Begin!" as both step onto the mat. A right answer sends the champion dashing in for a strike (the boss flashes and gets knocked back, with a 💥 and the damage number); power punches are a jumping kick with a screen shake; a judo throw spins the boss. A wrong answer has the boss lunge in. The champion glows brighter with every right answer in a row. The finish: the boss tips over with spinning stars and the champion celebrates (or the champion sits down, dizzy, to try again).
+- **Little Champions (Pre-K to 2nd grade):** shorter rounds (Math Dojo 10 cards, Spelling, Spanish and Fix-It Sentences 5); in Math Dojo, problems up to 10 show pictures (apples, stars, fish…) that bounce and count out loud when tapped, and answers are three big buttons instead of a keypad; every right answer gets a burst of stars and a cheer ("Hi-ya!", "Way to go!"), spoken for Pre-K to 1st. Stripe tests stay the same.
+- **Sticker Book (everyone):** every finished round, boss match, tournament or team lesson earns a sticker, shown in a pop-up. 48 stickers on 6 pages (Dojo Animals, Champion Gear, Space and Sky, Brain Power, Snack Attack, Treasure); after the whole book, extras turn shiny. Open it from "📒 Sticker Book" on the home screen.
+
 ## Tournaments
 
 Tap **🏆 Tournaments** on the home screen. Each one is a single-elimination bracket of **6 to 12** competitors (computer opponents with nicknames). Byes go into round 2 when the numbers are uneven, and you can enter as many as you like.

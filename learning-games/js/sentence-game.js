@@ -49,7 +49,7 @@ BD.SentenceGame = (function () {
     if (typeof focus !== "string") focus = null;
     if (stripe) p.sentenceGrade = stripe.grade;
     else if (p.retry && p.retry.sentence) p.sentenceGrade = p.retry.sentence.grade;
-    const items = stripe ? beltItems(stripe.grade, stripe.belt, 8) : BD.SentenceGen.round(p, p.sentenceGrade, ROUND, focus);
+    const items = stripe ? beltItems(stripe.grade, stripe.belt, 8) : BD.SentenceGen.round(p, p.sentenceGrade, BD.Kid && BD.Kid.young(p.sentenceGrade) ? 5 : ROUND, focus);
     S = { grade: p.sentenceGrade, items: items, focus: focus, i: 0, xp: 0, solved: 0, firstTry: 0, results: [], stripe: stripe || null, test: !!(stripe && stripe.test) };
     BD.UI.show("screen-sentence-play");
     BD.UI.testMode("screen-sentence-play", S.test ? "Reading stripe test" : stripe ? "Reading stripe practice · " + BD.BELTS[stripe.belt].name + " Belt" : "", !BD.Rank.hintsAllowed(BD.Store.current(), S.grade));
@@ -144,6 +144,7 @@ BD.SentenceGame = (function () {
     if (S.tries === 0) S.firstTry++;
     BD.Sound.right();
     BD.Cast.say("sentSay", "right");
+    if (BD.Kid && BD.Kid.young(S.grade)) BD.Kid.celebrate(document.getElementById("sentSay"), S.grade);
     reveal(true, gain);
   }
 

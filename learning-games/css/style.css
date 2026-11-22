@@ -1392,3 +1392,91 @@ body.duel-on .topbar, body.duel-on .footer { visibility: hidden; }
 .cheer-float { position: fixed; z-index: 9997; bottom: -40px; font-size: 2rem; pointer-events: none; animation: cheerFloat 3.4s ease-in forwards; }
 @keyframes cheerFloat { to { transform: translateY(-110vh) rotate(25deg); opacity: .2; } }
 @media (prefers-reduced-motion: reduce) { .cheer-float { display: none; } .cheer-pop, .cheer-toast { animation: none; } }
+
+/* ---------- Boss match: moves, impacts, combo glow, knockout ---------- */
+.boss-arena { position: relative; overflow: hidden; --dash: min(34vw, 230px); }
+.ba-mover { position: relative; display: inline-block; }
+.ba-boss-wrap { position: relative; display: inline-block; }
+.ba-mover .ba-champ { filter: drop-shadow(0 0 calc(var(--combo, 0) * 3px) rgba(255, 226, 122, .95)) drop-shadow(0 0 calc(var(--combo, 0) * 6px) rgba(101, 217, 74, .6)); transition: filter .3s; }
+.ba-dizzy { position: absolute; left: 50%; top: -6px; transform: translateX(-50%); font-size: 1.6rem; opacity: 0; pointer-events: none; }
+.ba-impact { position: absolute; left: 10%; top: 30%; font-size: 3rem; opacity: 0; pointer-events: none; }
+.ba-impact.go { animation: impact .45s ease-out; }
+@keyframes impact { 0% { opacity: 0; transform: scale(.3); } 30% { opacity: 1; transform: scale(1.3); } 100% { opacity: 0; transform: scale(1.6); } }
+/* right answer: dash in and strike */
+.fx-attack .ba-mover { animation: champDash .6s ease-in-out; }
+.fx-power .ba-mover { animation: champKick .7s ease-in-out; }
+.fx-judo .ba-mover { animation: champDash .8s ease-in-out; }
+@keyframes champDash { 0% { transform: none; } 35%, 55% { transform: translateX(var(--dash)) scale(1.06); } 100% { transform: none; } }
+@keyframes champKick { 0% { transform: none; } 30% { transform: translateX(calc(var(--dash) * .8)) translateY(-26px) rotate(-14deg); } 50% { transform: translateX(var(--dash)) translateY(-10px) rotate(-20deg) scale(1.1); } 100% { transform: none; } }
+.fx-attack .ba-boss-img { animation: bossKnock .55s ease-out .18s; }
+.fx-power .ba-boss-img { animation: bossKnockBig .7s ease-out .2s; }
+.fx-judo .ba-boss-img { animation: bossThrow 1s ease-in-out .22s; }
+@keyframes bossKnock { 0% { transform: none; filter: none; } 25% { transform: translateX(24px) rotate(8deg); filter: brightness(2.2) drop-shadow(0 0 12px #FFE27A); } 100% { transform: none; filter: none; } }
+@keyframes bossKnockBig { 0% { transform: none; } 25% { transform: translateX(48px) rotate(14deg) scale(.95); filter: brightness(2.4) drop-shadow(0 0 16px #FFE27A); } 100% { transform: none; filter: none; } }
+@keyframes bossThrow { 0% { transform: none; } 35% { transform: translateY(-40px) rotate(200deg); } 60% { transform: translateY(10px) rotate(360deg) scale(.9); filter: brightness(2); } 100% { transform: none; } }
+/* wrong answer: the boss lunges in */
+.fx-hurt .ba-boss-img { animation: bossLunge .65s ease-in-out; }
+.fx-hurt .ba-mover { animation: champHurt .5s ease-out .24s; }
+@keyframes bossLunge { 0% { transform: none; } 40%, 55% { transform: translateX(calc(var(--dash) * -1)) scale(1.1); } 100% { transform: none; } }
+@keyframes champHurt { 0% { transform: none; filter: none; } 30% { transform: translateX(-18px) rotate(-8deg); filter: drop-shadow(0 0 12px #FF5C6E) brightness(1.3); } 100% { transform: none; filter: none; } }
+.shake { animation: arenaShake .35s linear; }
+@keyframes arenaShake { 0%, 100% { transform: none; } 20% { transform: translate(-5px, 2px); } 40% { transform: translate(5px, -2px); } 60% { transform: translate(-4px, 1px); } 80% { transform: translate(3px, -1px); } }
+/* knockout and victory */
+.ko .ba-boss-img { animation: bossKO 1s ease-in forwards; }
+@keyframes bossKO { 0% { transform: none; } 30% { transform: translateX(20px) rotate(-10deg); } 100% { transform: translate(30px, 28px) rotate(84deg); opacity: .75; filter: grayscale(.4); } }
+.ko .ba-boss-wrap .ba-dizzy, .down .ba-mover .ba-dizzy { animation: dizzy 1s linear .6s infinite; }
+@keyframes dizzy { 0% { opacity: 1; transform: translateX(-50%) rotate(0); } 100% { opacity: 1; transform: translateX(-50%) rotate(360deg); } }
+.ko .ba-mover { animation: victory .5s ease-in-out .5s 3; }
+@keyframes victory { 0%, 100% { transform: none; } 50% { transform: translateY(-22px) scale(1.05); } }
+.down .ba-mover { animation: sitDown .8s ease-in forwards; }
+@keyframes sitDown { to { transform: translateY(14px) rotate(-12deg); opacity: .8; } }
+/* Round N… Begin! */
+.ba-intro { position: absolute; inset: 0; z-index: 5; display: grid; place-content: center; justify-items: center; gap: 4px; background: rgba(5, 10, 22, .55); pointer-events: none; }
+.ba-intro[hidden] { display: none; }
+.bi-round, .bi-begin { font-family: var(--font-display); font-weight: 900; font-style: italic; text-transform: uppercase; text-shadow: 0 3px 0 #0B1426, 0 0 18px rgba(224, 186, 119, .6); opacity: 0; }
+.bi-round { font-size: clamp(1.6rem, 7vw, 2.6rem); color: var(--ink); }
+.bi-begin { font-size: clamp(2.2rem, 10vw, 3.6rem); color: var(--gold-2); }
+.ba-intro.go .bi-round { animation: introIn .7s ease-out forwards; }
+.ba-intro.go .bi-begin { animation: introIn .6s ease-out .8s forwards; }
+@keyframes introIn { 0% { opacity: 0; transform: scale(2.2); } 60% { opacity: 1; transform: scale(.95); } 100% { opacity: 1; transform: scale(1); } }
+.intro .ba-mover { animation: enterLeft .7s ease-out; }
+.intro .ba-boss-wrap { animation: enterRight .7s ease-out; }
+@keyframes enterLeft { from { transform: translateX(-60vw); } }
+@keyframes enterRight { from { transform: translateX(60vw); } }
+@media (prefers-reduced-motion: reduce) {
+  .fx-attack .ba-mover, .fx-power .ba-mover, .fx-judo .ba-mover, .fx-hurt .ba-boss-img, .fx-hurt .ba-mover, .shake, .intro .ba-mover, .intro .ba-boss-wrap, .ko .ba-mover { animation: none; }
+}
+
+/* ---------- Little Champions: cheers, pictures, big answers, stickers ---------- */
+.kid-praise { position: fixed; z-index: 9999; transform: translate(-50%, -50%); font-family: var(--font-display); font-weight: 900; font-style: italic; font-size: 2rem; color: #FFE27A; text-shadow: 0 3px 0 #7A2433, 0 0 16px rgba(255, 226, 122, .7); pointer-events: none; animation: praiseUp 1.2s ease-out forwards; }
+@keyframes praiseUp { 0% { opacity: 0; transform: translate(-50%, -30%) scale(.5); } 25% { opacity: 1; transform: translate(-50%, -60%) scale(1.15); } 100% { opacity: 0; transform: translate(-50%, -140%) scale(1); } }
+.kid-star { position: fixed; z-index: 9998; font-size: 1.6rem; pointer-events: none; transform: translate(-50%, -50%); animation: starOut .9s ease-out forwards; }
+@keyframes starOut { to { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) rotate(180deg) scale(.6); opacity: 0; } }
+.dots.pics span { max-width: 190px; gap: 4px; }
+.count-it { border: 0; background: none; padding: 2px; font-size: 2rem; line-height: 1; cursor: pointer; position: relative; }
+.count-it.gone { opacity: .35; filter: grayscale(1); }
+.count-it.gone::after { content: "✕"; position: absolute; inset: 0; display: grid; place-items: center; color: var(--bad); font-weight: 900; font-size: 1.4rem; }
+.count-it.counted::before { content: attr(data-n); position: absolute; top: -6px; right: -4px; min-width: 18px; height: 18px; border-radius: 9px; background: var(--gold-2); color: #1B1205; font-size: .7rem; font-weight: 900; display: grid; place-items: center; }
+.count-it.bounce { animation: bounceIt .45s ease-out; }
+@keyframes bounceIt { 0% { transform: none; } 40% { transform: translateY(-14px) scale(1.25); } 100% { transform: none; } }
+.pic-choices { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; width: 100%; max-width: 460px; margin: 10px auto; }
+.pic-choices[hidden] { display: none; }
+.pic-choice { min-height: 84px; border-radius: 20px; border: 0; background: linear-gradient(160deg, #F2D39A, #E0BA77); color: #1B1205; font-family: var(--font-display); font-weight: 900; font-size: 2.4rem; box-shadow: 0 6px 0 #A6802E; cursor: pointer; }
+.pic-choice:active, .pic-choice.picked { transform: translateY(4px); box-shadow: 0 2px 0 #A6802E; }
+.sticker-link { display: inline-block; margin-top: 6px; padding: 6px 12px; border-radius: 99px; border: 1px solid rgba(224, 186, 119, .5); background: rgba(224, 186, 119, .1); color: var(--ink); font: inherit; font-size: .9rem; cursor: pointer; }
+.sticker-page { display: grid; grid-template-columns: repeat(auto-fill, minmax(76px, 1fr)); gap: 8px; margin-bottom: 12px; }
+.sticker { position: relative; display: grid; justify-items: center; gap: 2px; padding: 8px 4px; border-radius: 14px; border: 2px dashed rgba(255, 255, 255, .15); background: rgba(0, 0, 0, .2); text-align: center; }
+.sticker .st-icon { font-size: 2rem; line-height: 1.1; filter: grayscale(1); opacity: .35; }
+.sticker .st-name { font-size: .7rem; color: var(--muted); }
+.sticker.got { border-style: solid; border-color: rgba(224, 186, 119, .5); background: rgba(224, 186, 119, .1); }
+.sticker.got .st-icon { filter: none; opacity: 1; }
+.sticker.got .st-name { color: var(--ink); font-weight: 700; }
+.sticker.shiny { box-shadow: 0 0 14px rgba(255, 226, 122, .55); }
+.sticker.fresh { animation: bounceIt .6s ease-out 3; border-color: #65D94A; }
+.st-x { position: absolute; top: 2px; right: 6px; font-size: .7rem; font-weight: 900; color: var(--gold-2); }
+.sticker-toast { position: fixed; z-index: 9998; right: 16px; bottom: max(16px, env(safe-area-inset-bottom)); display: flex; gap: 10px; align-items: center; max-width: min(92vw, 360px); padding: 10px 14px; border-radius: 16px; border: 1px solid rgba(224, 186, 119, .6); background: linear-gradient(135deg, #1C2F52, #13213D); color: var(--ink); font: inherit; text-align: left; box-shadow: 0 10px 26px rgba(0, 0, 0, .5); animation: toastUp .4s ease-out; transition: opacity .4s; cursor: pointer; }
+.sticker-toast > span:last-child { display: grid; font-size: .85rem; }
+.sticker-toast.out { opacity: 0; }
+.st-big { font-size: 2.4rem; animation: bounceIt .6s ease-out .3s 2; }
+@keyframes toastUp { from { opacity: 0; transform: translateY(20px); } }
+@media (prefers-reduced-motion: reduce) { .kid-star, .count-it.bounce, .sticker.fresh, .st-big { animation: none; } }

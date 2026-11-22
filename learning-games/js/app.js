@@ -382,6 +382,7 @@ BD.UI = (function () {
     BD.Boss.card(p);
     BD.Tourney.card(p);
     if (BD.Teams) BD.Teams.card(p);
+    BD.Kid.homeLink(p);
     setTimeout(function () { if (currentScreen === "screen-home" && !sheetOpen()) BD.Badges.award(BD.Store.current(), refreshStage); }, 500);
     $("homeBelt").innerHTML = rankPanel(p);
     $("homeToday").textContent = todays ? todays + (todays === 1 ? " round" : " rounds") + " completed today" : "No rounds yet today";
@@ -721,6 +722,7 @@ BD.UI = (function () {
     BD.Duel.bind();
     BD.Tourney.bind();
     if (BD.Teams) BD.Teams.bind();
+    BD.Kid.bind();
     BD.MathGame.bind();
     BD.SentenceGame.bind();
     BD.Reading.bind();

@@ -45,7 +45,7 @@ BD.Boss = (function () {
     { name: "Rascal", title: "the Raccoon Ninja", img: "img/boss-0.webp", hits: 8, hi: "Hee hee! Bet you can't land a single kick!", lose: "No fair! You're way too quick!" },
     { name: "Professor Hoot", title: "the Wise Owl", img: "img/boss-1.webp", hits: 9, hi: "Whooo dares challenge my brain?", lose: "Whooo-ah! Brilliant work, young champion." },
     { name: "Blaze", title: "the Fire Fox", img: "img/boss-2.webp", hits: 10, hi: "I'm the fastest kicker in the forest!", lose: "You put out my fire! Respect." },
-    { name: "Glacier", title: "the Polar Bear", img: "img/boss-3.webp", hits: 11, hi: "Brrr! Time to freeze your brain!", lose: "You melted my ice! Great fight." },
+    { name: "Glacier", title: "the Polar Bear", img: "img/boss-3.webp", hits: 11, hi: "Brrr! Time to freeze your brain!", lose: "You melted my ice! Great match." },
     { name: "Bamboo", title: "the Panda Master", img: "img/boss-4.webp", hits: 12, hi: "My bamboo staff has never lost!", lose: "You have the heart of a true master." },
     { name: "Shadow", title: "the Ninja Cat", img: "img/boss-5.webp", hits: 12, hi: "You can't hit what you can't see!", lose: "Meow! You found me. Well done." },
     { name: "Agent Bridgette", title: "Secret Agent", img: "img/boss-6.webp", hits: 13, hi: "Mission: stop you. Ready, champion?", lose: "Mission failed... because you're amazing!", instructor: true },
@@ -82,7 +82,7 @@ BD.Boss = (function () {
     BD.UI.sheet("Boss ladder · " + BD.gradeLabel(b.grade),
       '<div class="boss-intro"><img src="' + b.boss.img + '" alt=""><div><p class="boss-k">' + label(b) + '</p><h3>' + esc(b.boss.name) + '</h3><p class="muted">' + esc(b.boss.title) + '</p><p class="boss-quote">“' + esc(b.boss.hi) + '”</p></div></div>' +
       '<p class="muted small">' + b.boss.hits + ' hits to win. You have ' + hearts(p) + ' hearts' + (hearts(p) > 3 ? ' (your gear adds extra!)' : '') + (gloves(p) ? '. Your gloves power up every 3rd hit in a row' : '') + (BD.Badges.hasSkill(p, "judo") ? '. 🥋 Every 5th hit in a row is a judo throw (−3)' : '') + '. Weapons are for show, never for fighting.</p>' +
-      '<div class="res-actions"><button type="button" class="btn btn-primary btn-big" id="bossFight">Fight ' + esc(b.boss.name) + '!</button></div>' +
+      '<div class="res-actions"><button type="button" class="btn btn-primary btn-big" id="bossFight">Begin vs ' + esc(b.boss.name) + '</button></div>' +
       '<h4 class="label">The ladder</h4><ol class="boss-ladder">' + BOSSES.map(function (x, i) {
         if (x.secret && b.idx !== 9 && w.indexOf(9) === -1) return '<li class="locked secret"><span class="belt-swatch" style="--belt:#17171C"></span><img src="' + x.img + '" alt=""><span>??? Secret boss</span><em>🔒</em></li>';
         const st = w.indexOf(i) !== -1 ? "beat" : i === b.idx ? "now" : i > b.idx ? "locked" : "";
@@ -111,9 +111,33 @@ BD.Boss = (function () {
     if (BD.Music) BD.Music.scene(b.boss.final || b.boss.secret ? "final" : "boss");
     BD.Mini.fill($("screen-boss"));
     hud();
+    const arena = $("bossArena");
+    arena.classList.remove("ko", "down", "fx-attack", "fx-power", "fx-judo", "fx-hurt", "shake");
+    arena.style.setProperty("--combo", 0);
     // the transformation, the first time Final Boss Master Young appears
-    if (b.boss.secret && wins(p, b.grade).indexOf(9) === -1) return morph(next);
-    next();
+    if (b.boss.secret && wins(p, b.grade).indexOf(9) === -1) return morph(intro);
+    intro();
+  }
+  /* "Round N… Begin!": both step onto the mat and bow, then the first question. */
+  function intro() {
+    if (!S) return;
+    const p = BD.Store.current(), today = BD.today();
+    const n = (p.sessions || []).filter(function (s) { return s.game === "boss" && s.date && s.date.slice(0, 10) === today; }).length + 1;
+    $("bossRound").textContent = "Round " + n;
+    $("bossQ").innerHTML = "";
+    const arena = $("bossArena"), box = $("bossIntro");
+    arena.classList.remove("intro"); void arena.offsetWidth; arena.classList.add("intro");
+    box.hidden = false; box.classList.remove("go"); void box.offsetWidth; box.classList.add("go");
+    BD.Sound.tap(); setTimeout(function () { BD.Sound.right(); }, 900);
+    setTimeout(function () { box.hidden = true; arena.classList.remove("intro"); if (S) next(); }, 1800);
+  }
+  /* One move of the match: the champion dashes in, or the boss does. */
+  function fx(kind) {
+    const arena = $("bossArena");
+    arena.classList.remove("fx-attack", "fx-power", "fx-judo", "fx-hurt", "shake"); void arena.offsetWidth;
+    arena.classList.add("fx-" + kind);
+    if (kind !== "attack") setTimeout(function () { arena.classList.add("shake"); }, kind === "hurt" ? 260 : 220);
+    if (kind !== "hurt") { const im = $("bossImpact"); im.classList.remove("go"); void im.offsetWidth; setTimeout(function () { im.classList.add("go"); }, 200); }
   }
   function morph(then) {
     const m = $("bossMorph");
@@ -149,23 +173,36 @@ BD.Boss = (function () {
       const dmg = judo ? 3 : power ? 2 : 1;
       S.hp -= dmg;
       BD.Sound.right();
-      arena.classList.remove("boss-hit", "boss-strike"); void arena.offsetWidth; arena.classList.add("boss-hit");
+      fx(judo ? "judo" : power ? "power" : "attack");
+      arena.style.setProperty("--combo", Math.min(5, S.streak));
       pop(judo ? "JUDO THROW! −3" : power ? "POWER PUNCH! −2" : "−1", "dmg");
       $("bossSay").textContent = judo ? "Whoa! What a judo throw!" : power ? "Oof! Those gloves pack a punch!" : ["Ow!", "Hey!", "Lucky shot!", "Not bad!", "Whoa!"][Math.floor(Math.random() * 5)];
     } else {
       S.streak = 0; S.hearts--;
       BD.Sound.wrong();
-      arena.classList.remove("boss-hit", "boss-strike"); void arena.offsetWidth; arena.classList.add("boss-strike");
+      fx("hurt");
+      arena.style.setProperty("--combo", 0);
       pop("−♥", "hurt");
       $("bossSay").textContent = "Ha! The answer was " + S.q.answer + ".";
     }
     hud();
     setTimeout(function () {
       if (!S) return;
-      if (S.hp <= 0) return end(true);
-      if (S.hearts <= 0) return end(false);
+      if (S.hp <= 0) return finale(true);
+      if (S.hearts <= 0) return finale(false);
       next();
-    }, v === S.q.answer ? 750 : 1500);
+    }, v === S.q.answer ? 900 : 1500);
+  }
+  /* The knockout (boss tips over, stars spin, champion celebrates) or the champion
+     sits down dizzy, then the results. */
+  function finale(won) {
+    const arena = $("bossArena"); $("bossQ").innerHTML = "";
+    arena.classList.remove("fx-attack", "fx-power", "fx-judo", "fx-hurt", "shake"); void arena.offsetWidth;
+    arena.classList.add(won ? "ko" : "down");
+    $("bossSay").textContent = won ? "K.O.! " + (S.boss.lose || "") : "Oof… I need a breather!";
+    if (won) { BD.Sound.belt(); BD.Mini.react("bow"); }
+    const s = S;
+    setTimeout(function () { if (S === s) end(won); }, won ? 1700 : 1300);
   }
   function end(won) {
     const p = BD.Store.current(), boss = S.boss, w = wins(p, S.grade), first = won && w.indexOf(S.idx) === -1;

@@ -137,7 +137,7 @@ BD.Tourney = (function () {
           return '<div class="tn-m">' + row(m.a) + row(m.b) + (m.score && m.score !== "bye" ? '<span class="tn-score">' + esc(m.score) + '</span>' : '') + '</div>';
         }).join("") + '</div>';
       }).join("") + '</div>' +
-      '<div class="res-actions">' + (mine ? '<button type="button" class="btn btn-primary btn-big" id="tnPlay">' + (roundName(T.r) === "Final" ? "🏆 Fight for gold!" : "Start your " + roundName(T.r).toLowerCase().replace(/s$/, "") + " match") + '</button>' : '') +
+      '<div class="res-actions">' + (mine ? '<button type="button" class="btn btn-primary btn-big" id="tnPlay">' + (roundName(T.r) === "Final" ? "🏆 Go for gold!" : "Start your " + roundName(T.r).toLowerCase().replace(/s$/, "") + " match") + '</button>' : '') +
       '<button type="button" class="btn btn-quiet" id="tnLeave">' + (mine ? "Leave tournament" : "Back") + '</button></div>';
     $("tnBody").onclick = function (e) {
       if (e.target.closest("#tnPlay")) return play(mine);

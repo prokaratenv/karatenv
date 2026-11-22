@@ -8,6 +8,8 @@ window.BD = window.BD || {};
 
 BD.WordQuiz = (function () {
   const ROUND = 10, PASS = 70;
+  /* Pre-K to 2nd grade: shorter rounds (5) so a round ends before attention does. */
+  const roundLen = function (grade) { return BD.Kid && BD.Kid.young(grade) ? 5 : ROUND; };
   const $ = function (id) { return document.getElementById(id); };
   const r = function (n) { return Math.floor(Math.random() * n); };
   const shuffle = function (a) { return a.map(function (x) { return [Math.random(), x]; }).sort(function (x, y) { return x[0] - y[0]; }).map(function (x) { return x[1]; }); };
@@ -26,7 +28,7 @@ BD.WordQuiz = (function () {
       const items = missed.map(function (m) { return makeSpanish(topics.find(function (t) { return t.topic === m.topic; }), m.es, grade); }).filter(Boolean);
       const used = new Set(items.map(function (x) { return x.id; }));
       let guard = 0;
-      while (items.length < ROUND && guard++ < 200) {
+      while (items.length < roundLen(grade) && guard++ < 200) {
         const t = weighted[r(weighted.length)], w = t.words[r(t.words.length)];
         if (used.has(t.topic + ":" + w[0])) continue;
         used.add(t.topic + ":" + w[0]);
@@ -174,7 +176,7 @@ BD.WordQuiz = (function () {
       const order = missed.slice(0, 4).map(function (wd) { return list.find(function (x) { return x[0] === wd; }); }).filter(Boolean)
         .concat(shuffle(fresh)).concat(shuffle(list));
       const out = [], used = new Set(), bag = styleBag(grade, isQuiet(p));
-      order.forEach(function (x) { if (out.length < ROUND && !used.has(x[0])) { used.add(x[0]); out.push(makeSpelling(x, grade, bag())); } });
+      order.forEach(function (x) { if (out.length < roundLen(grade) && !used.has(x[0])) { used.add(x[0]); out.push(makeSpelling(x, grade, bag())); } });
       return out;
     }
   };
@@ -286,7 +288,7 @@ BD.WordQuiz = (function () {
     const seen = (p.seenWords.spelling = p.seenWords.spelling || []);
     const fresh = shuffle(list.filter(function (x) { return seen.indexOf(x[0]) === -1; })).concat(shuffle(list));
     const out = [], used = new Set();
-    fresh.forEach(function (x) { if (out.length < ROUND && !used.has(x[0])) { used.add(x[0]); out.push(makeSpelling(x, grade, style)); } });
+    fresh.forEach(function (x) { if (out.length < roundLen(grade) && !used.has(x[0])) { used.add(x[0]); out.push(makeSpelling(x, grade, style)); } });
     return out;
   }
   function flashHTML(p) {
@@ -412,6 +414,7 @@ BD.WordQuiz = (function () {
       W.xp += Math.max(2, gain); st.r++;
       if (bucket[missKey]) { bucket[missKey].misses--; if (bucket[missKey].misses <= 0) delete bucket[missKey]; }
       BD.Sound.right(); BD.Cast.say("wordSay", W.streak >= 3 && W.streak % 3 === 0 ? "streak" : "right");
+      if (BD.Kid && BD.Kid.young(W.grade)) BD.Kid.celebrate($("wordPrompt"), W.grade);
       $("wordFeedback").className = "word-feedback solved";
       $("wordFeedback").innerHTML = '<p class="win-line">' + (W.game === "spanish" ? "¡Muy bien!" : q.mode === "check" ? "Sharp eyes!" : "Spelled it!") + ' +' + Math.max(2, gain) + ' XP</p>' +
         (verdict === "accent" ? '<p>Watch the accent: <strong>' + BD.UI.esc(q.answer) + '</strong></p>' : "") +
@@ -533,7 +536,7 @@ BD.WordQuiz = (function () {
     if (flash) {
       const ft = flashToday(p), left = flashStyles(p).filter(function (s) { return ft.styles.indexOf(s) === -1 && s !== flash; });
       let bonus = 0;
-      if (W.answered >= ROUND && acc >= PASS && ft.styles.indexOf(flash) === -1) { ft.styles.push(flash); bonus = BD.addXP(p, FLASH_BONUS); }
+      if (W.answered >= roundLen(grade) && acc >= PASS && ft.styles.indexOf(flash) === -1) { ft.styles.push(flash); bonus = BD.addXP(p, FLASH_BONUS); }
       flashNote = bonus ? "⚡ +" + FLASH_BONUS + " spelling flashcard bonus! Today: +" + (ft.styles.length * FLASH_BONUS) + " of +" + (FLASH_BONUS * 4) + "." + (left.length ? " Still open today: " + left.map(function (s) { return FLASH_NAMES[s].toLowerCase(); }).join(", ") + "." : " All four done today!")
         : acc < PASS ? "Score " + PASS + "% or better on a set to earn the +" + FLASH_BONUS + " bonus. Try again!"
         : "You already earned today's " + FLASH_NAMES[flash].toLowerCase() + " bonus. Great extra practice!";

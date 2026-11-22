@@ -122,6 +122,7 @@ BD.Store = (function () {
     if (p.nick !== undefined && (typeof p.nick !== "string" || !(BD.Dojo ? BD.Dojo.nickOk(p.nick, p.name) : /^[A-Za-z]+ [A-Za-z]+ [1-9][0-9]?$/.test(p.nick)))) delete p.nick;
     if (BD.School) BD.School.sanitize(p); else if (p.school && typeof p.school !== "object") delete p.school;
     if (BD.Quest) BD.Quest.sanitize(p);
+    if (BD.Kid) BD.Kid.sanitize(p); else if (p.stickers !== undefined && (typeof p.stickers !== "object" || p.stickers === null)) delete p.stickers;
     if (BD.Teams) BD.Teams.sanitize(p); else { if (p.teams !== undefined && (typeof p.teams !== "object" || p.teams === null)) delete p.teams; if (p.teamLog !== undefined && (typeof p.teamLog !== "object" || p.teamLog === null)) delete p.teamLog; }
     if (BD.Tourney) BD.Tourney.sanitize(p); else if (p.medals !== undefined && !Array.isArray(p.medals)) delete p.medals;
     return p;
@@ -219,6 +220,7 @@ BD.Store = (function () {
       const t = BD.today();
       if (p.days.indexOf(t) === -1) p.days.push(t);
       p.days = p.days.slice(-400);
+      if (BD.Kid) BD.Kid.earn(p, s); // a sticker for the Sticker Book
       save(p);
     }
   };

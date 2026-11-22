@@ -241,6 +241,7 @@ BD.MathGame = (function () {
         return want.length ? want : allowed.slice();
       })(), queue: [], i: 0,
       input: "", locked: false, correct: 0, answered: 0, streak: 0, bestStreak: 0,
+      young: BD.Kid.young(p.mathGrade) && !stripe && mode !== "clock", // Pre-K to 2nd: pictures and big answer buttons
       xp: 0, missed: [], timer: null, endsAt: 0, xpBefore: p.xp
     };
     if (S.test) {
@@ -249,7 +250,7 @@ BD.MathGame = (function () {
       for (let n = 0; n < FLASH_CARDS; n++) S.queue.push(freshProblem());
     } else if (mode === "practice") {
       const tricky = trickyFor(p, S.grade, S.ops).slice(0, 4).map(function (t) { return build(t.op, t.a, t.b, t.grade); });
-      for (let n = 0; n < PRACTICE_CARDS - tricky.length; n++) S.queue.push(freshProblem());
+      for (let n = 0; n < (S.young ? 10 : PRACTICE_CARDS) - tricky.length; n++) S.queue.push(freshProblem());
       tricky.forEach(function (t) { S.queue.splice(r(2, S.queue.length), 0, t); });
     } else {
       S.queue.push(freshProblem());
@@ -269,7 +270,7 @@ BD.MathGame = (function () {
   function readCard(auto) {
     if (!S || (auto && (S.mode === "clock" || !BD.ReadAloud.auto(S.grade)))) return;
     const q = current();
-    BD.ReadAloud.say((LEVELS[S.grade].dots ? "Count the dots. " : "") + "What is " + BD.ReadAloud.words(show(q)) + "?");
+    BD.ReadAloud.say((!$("mathDots").hidden ? ($("mathDots").classList.contains("pics") ? "Count the pictures. Tap them to count. " : "Count the dots. ") : "") + "What is " + BD.ReadAloud.words(show(q)) + "?");
   }
 
   function tick() {
@@ -284,10 +285,30 @@ BD.MathGame = (function () {
   function render() {
     const q = current();
     $("mathProblem").textContent = show(q) + " =";
-    // Pre-K and K: dots to count
-    const dots = LEVELS[S.grade].dots;
+    // Pre-K to 2nd: pictures to tap and count, and big answer buttons
+    const pics = S.young && (q.op === "add" || q.op === "sub") && q.a <= 10 && q.b <= 10;
+    const dots = LEVELS[S.grade].dots || pics;
     $("mathDots").hidden = !dots;
-    if (dots) {
+    $("mathDots").classList.toggle("pics", !!pics);
+    $("mathKeypad").hidden = !!S.young;
+    $("mathChoices").hidden = !S.young;
+    if (S.young) {
+      const opts = [q.answer], near = [1, -1, 2, -2, 3, -3];
+      for (let k = 0; opts.length < 3 && k < near.length; k++) { const v = q.answer + near[Math.floor(Math.random() * near.length)]; if (v >= 0 && opts.indexOf(v) === -1) opts.push(v); }
+      for (let v = q.answer + 1; opts.length < 3; v++) if (opts.indexOf(v) === -1) opts.push(v);
+      opts.sort(function () { return Math.random() - 0.5; });
+      $("mathChoices").innerHTML = opts.map(function (v) { return '<button type="button" class="pic-choice" data-pick="' + v + '">' + num(v) + '</button>'; }).join("");
+    }
+    if (pics) {
+      const t = BD.Kid.thing(), t2 = q.op === "add" ? BD.Kid.thing() : t;
+      const d = function (n, cls, icon) { let h = ""; for (let i = 0; i < n; i++) h += '<button type="button" class="count-it ' + (cls || "") + '" tabindex="-1">' + icon + '</button>'; return h; };
+      $("mathDots").innerHTML = q.op === "add"
+        ? '<span>' + d(q.a, "", t) + '</span><b>+</b><span>' + d(q.b, "b", t2) + '</span>'
+        : '<span>' + d(q.a - q.b, "", t) + d(q.b, "gone", t) + '</span>';
+      $("mathDots").setAttribute("aria-hidden", "false");
+      BD.Kid.bindCount($("mathDots"));
+    } else if (dots) {
+      $("mathDots").setAttribute("aria-hidden", "true"); $("mathDots").onclick = null;
       const d = function (n, cls) { let h = ""; for (let i = 0; i < n; i++) h += '<i class="' + (cls || "") + '"></i>'; return h; };
       $("mathDots").innerHTML = q.op === "add"
         ? '<span>' + d(q.a) + '</span><b>+</b><span>' + d(q.b, "b") + '</span>'
@@ -346,7 +367,7 @@ BD.MathGame = (function () {
       BD.Cast.say("mathSay", S.streak >= 3 && S.streak % 3 === 0 ? "streak" : "right");
       $("mathFeedback").textContent = "+" + gain + (S.streak >= 3 ? "  streak!" : "");
       BD.Sound.right();
-      setTimeout(advance, 380);
+      if (S.young) { BD.Kid.celebrate($("mathCard"), S.grade); setTimeout(advance, 1000); } else setTimeout(advance, 380);
     } else {
       S.streak = 0; st.w++;
       S.missed.push(q);
@@ -371,7 +392,7 @@ BD.MathGame = (function () {
     $("mathSteps").innerHTML = BD.Explain.math(q).map(function (t) { return "<li>" + BD.UI.esc(t) + "</li>"; }).join("");
     $("mathExplainTitle").textContent = "How to solve " + show(q);
     $("mathExplain").hidden = false;
-    $("mathKeypad").hidden = true;
+    $("mathKeypad").hidden = true; $("mathChoices").hidden = true;
     setTimeout(function () { $("mathGotIt").focus(); }, 50);
   }
 
@@ -522,6 +543,11 @@ BD.MathGame = (function () {
   });
 
   function bind() {
+    $("mathChoices").addEventListener("click", function (e) {
+      const b = e.target.closest("[data-pick]"); if (!b || !S || S.locked) return;
+      S.input = b.dataset.pick; $("mathAnswer").textContent = num(Number(S.input)); $("mathAnswer").classList.remove("empty");
+      b.classList.add("picked"); submit();
+    });
     $("mathKeypad").addEventListener("click", function (e) {
       const b = e.target.closest("[data-key]"); if (b) press(b.dataset.key);
     });

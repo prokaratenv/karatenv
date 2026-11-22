@@ -54,7 +54,7 @@ BD.Quest = (function () {
       { id: "rounds2", title: "Finish 2 rounds", goal: 2, count: function (ss) { return ss.filter(function (s) { return s.game !== "duel"; }).length; } },
       { id: "answers25", title: "Answer 25 questions", goal: 25, count: function (ss) { return ss.reduce(function (a, s) { return a + (s.total || 0); }, 0); } },
       { id: "sharp", title: "Score 90% or better in a round", goal: 1, count: function (ss) { return ss.filter(function (s) { return s.total >= 5 && s.correct / s.total >= 0.9; }).length; } },
-      { id: "boss", title: "Fight your belt boss", goal: 1, count: function (ss) { return ss.filter(function (s) { return s.game === "boss"; }).length; } }
+      { id: "boss", title: "Take on your belt boss", goal: 1, count: function (ss) { return ss.filter(function (s) { return s.game === "boss"; }).length; } }
     ];
     Object.keys(GAME_NAMES).forEach(function (g) {
       list.push({ id: "play-" + g, title: "Play a round of " + GAME_NAMES[g], goal: 1, count: function (ss) { return ss.filter(function (s) { return s.game === g && !s.school; }).length; }, game: g });

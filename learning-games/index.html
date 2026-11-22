@@ -28,7 +28,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cabin:wght@400;600;700&family=Montserrat:ital,wght@0,600;0,700;0,800;0,900;1,800;1,900&display=swap">
-<link rel="stylesheet" href="css/style.css?v=3cbb4da6a7">
+<link rel="stylesheet" href="css/style.css?v=ad26bd7713">
 </head>
 <body>
 <div class="bg-streaks" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
@@ -95,6 +95,7 @@
             <span class="start-sub" id="startNext"></span>
           </button>
           <p class="muted" id="homeToday"></p>
+          <button type="button" class="sticker-link" id="stickerLink"></button>
         </div>
       </div>
       <div class="quest-row">
@@ -238,6 +239,7 @@
         </div>
       </div>
       <button type="button" class="btn btn-quiet scratch-btn" id="mathScratch"><span aria-hidden="true">✏️</span> Scratch paper</button>
+      <div class="pic-choices" id="mathChoices" hidden></div>
       <div class="keypad" id="mathKeypad"></div>
     </section>
 
@@ -368,15 +370,16 @@
       <div class="boss-arena" id="bossArena">
         <div class="ba-side ba-me">
           <div class="ba-hearts" id="bossHearts" aria-label="Your hearts"></div>
-          <span class="mini-champ ba-champ" data-mini></span>
+          <span class="ba-mover"><span class="mini-champ ba-champ" data-mini></span><span class="ba-dizzy" aria-hidden="true">💫</span></span>
         </div>
         <div class="ba-pop-wrap"><span class="boss-pop" id="bossPop"></span></div>
         <div class="ba-side ba-boss">
           <p class="ba-name" id="bossName"></p>
           <div class="ba-hp"><i id="bossHp"></i><span id="bossHpNum"></span></div>
-          <img class="ba-boss-img" id="bossImg" src="" alt="">
+          <span class="ba-boss-wrap"><img class="ba-boss-img" id="bossImg" src="" alt=""><span class="ba-dizzy" aria-hidden="true">💫</span><span class="ba-impact" id="bossImpact" aria-hidden="true">💥</span></span>
         </div>
         <p class="ba-say" id="bossSay"></p>
+        <div class="ba-intro" id="bossIntro" hidden><span class="bi-round" id="bossRound">Round 1</span><span class="bi-begin">Begin!</span></div>
       </div>
       <div class="qq-card" id="bossQWrap">
         <button type="button" class="say-btn" id="bossRead" aria-label="Read it to me" title="Read it to me"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
@@ -579,44 +582,45 @@
   </div>
 </div>
 
-<script src="data/sentence-bank.js?v=3cbb4da6a7"></script>
-<script src="data/reading-bank.js?v=3cbb4da6a7"></script>
-<script src="data/spanish-bank.js?v=3cbb4da6a7"></script>
-<script src="data/spelling-bank.js?v=3cbb4da6a7"></script>
-<script src="js/config.js?v=3cbb4da6a7"></script>
-<script src="js/storage.js?v=3cbb4da6a7"></script>
-<script src="js/cast.js?v=3cbb4da6a7"></script>
-<script src="js/masks.js?v=3cbb4da6a7"></script>
-<script src="js/rank.js?v=3cbb4da6a7"></script>
-<script src="js/builder.js?v=3cbb4da6a7"></script>
-<script src="js/effects.js?v=3cbb4da6a7"></script>
-<script src="js/music.js?v=3cbb4da6a7"></script>
-<script src="js/explain.js?v=3cbb4da6a7"></script>
-<script src="js/coach.js?v=3cbb4da6a7"></script>
-<script src="js/sentence-gen.js?v=3cbb4da6a7"></script>
-<script src="js/reading-game.js?v=3cbb4da6a7"></script>
-<script src="js/word-quiz.js?v=3cbb4da6a7"></script>
-<script src="js/school.js?v=3cbb4da6a7"></script>
-<script src="js/sync.js?v=3cbb4da6a7"></script>
-<script src="js/sensei.js?v=3cbb4da6a7"></script>
-<script src="js/math-game.js?v=3cbb4da6a7"></script>
-<script src="js/sentence-game.js?v=3cbb4da6a7"></script>
-<script src="js/scratch.js?v=3cbb4da6a7"></script>
-<script src="js/quick.js?v=3cbb4da6a7"></script>
-<script src="js/boss.js?v=3cbb4da6a7"></script>
-<script src="js/duel.js?v=3cbb4da6a7"></script>
-<script src="js/tournament.js?v=3cbb4da6a7"></script>
-<script src="js/teams.js?v=3cbb4da6a7"></script>
-<script src="js/challenge.js?v=3cbb4da6a7"></script>
-<script src="js/badges.js?v=3cbb4da6a7"></script>
-<script src="js/mini.js?v=3cbb4da6a7"></script>
-<script src="js/backup.js?v=3cbb4da6a7"></script>
-<script src="js/certificate.js?v=3cbb4da6a7"></script>
-<script src="js/parent.js?v=3cbb4da6a7"></script>
-<script src="js/dojo.js?v=3cbb4da6a7"></script>
-<script src="js/quest.js?v=3cbb4da6a7"></script>
-<script src="js/leads.js?v=3cbb4da6a7"></script>
-<script src="js/family.js?v=3cbb4da6a7"></script>
-<script src="js/app.js?v=3cbb4da6a7"></script>
+<script src="data/sentence-bank.js?v=ad26bd7713"></script>
+<script src="data/reading-bank.js?v=ad26bd7713"></script>
+<script src="data/spanish-bank.js?v=ad26bd7713"></script>
+<script src="data/spelling-bank.js?v=ad26bd7713"></script>
+<script src="js/config.js?v=ad26bd7713"></script>
+<script src="js/storage.js?v=ad26bd7713"></script>
+<script src="js/cast.js?v=ad26bd7713"></script>
+<script src="js/masks.js?v=ad26bd7713"></script>
+<script src="js/rank.js?v=ad26bd7713"></script>
+<script src="js/builder.js?v=ad26bd7713"></script>
+<script src="js/effects.js?v=ad26bd7713"></script>
+<script src="js/kid.js?v=ad26bd7713"></script>
+<script src="js/music.js?v=ad26bd7713"></script>
+<script src="js/explain.js?v=ad26bd7713"></script>
+<script src="js/coach.js?v=ad26bd7713"></script>
+<script src="js/sentence-gen.js?v=ad26bd7713"></script>
+<script src="js/reading-game.js?v=ad26bd7713"></script>
+<script src="js/word-quiz.js?v=ad26bd7713"></script>
+<script src="js/school.js?v=ad26bd7713"></script>
+<script src="js/sync.js?v=ad26bd7713"></script>
+<script src="js/sensei.js?v=ad26bd7713"></script>
+<script src="js/math-game.js?v=ad26bd7713"></script>
+<script src="js/sentence-game.js?v=ad26bd7713"></script>
+<script src="js/scratch.js?v=ad26bd7713"></script>
+<script src="js/quick.js?v=ad26bd7713"></script>
+<script src="js/boss.js?v=ad26bd7713"></script>
+<script src="js/duel.js?v=ad26bd7713"></script>
+<script src="js/tournament.js?v=ad26bd7713"></script>
+<script src="js/teams.js?v=ad26bd7713"></script>
+<script src="js/challenge.js?v=ad26bd7713"></script>
+<script src="js/badges.js?v=ad26bd7713"></script>
+<script src="js/mini.js?v=ad26bd7713"></script>
+<script src="js/backup.js?v=ad26bd7713"></script>
+<script src="js/certificate.js?v=ad26bd7713"></script>
+<script src="js/parent.js?v=ad26bd7713"></script>
+<script src="js/dojo.js?v=ad26bd7713"></script>
+<script src="js/quest.js?v=ad26bd7713"></script>
+<script src="js/leads.js?v=ad26bd7713"></script>
+<script src="js/family.js?v=ad26bd7713"></script>
+<script src="js/app.js?v=ad26bd7713"></script>
 </body>
 </html>
