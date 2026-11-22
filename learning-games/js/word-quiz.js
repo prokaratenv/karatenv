@@ -434,7 +434,7 @@ BD.WordQuiz = (function () {
     if (stripe) stripe = BD.Rank.gate(p, game, stripe); // practice first: locked parts start as practice
     W = { game: game, g: g, grade: grade, school: school || null, flash: flash || null, noRetry: school === "test", items: flash ? flashRound(p, grade, flash) : school ? BD.School.round(p, school === "test", grade) : stripe ? (stripe.test && stripe.skill ? g.beltRound(p, grade, stripe.belt, stripe.skill, 6) : g.beltRound(p, grade, stripe.belt)) : g.round(p, grade), i: 0, xp: 0, correct: 0, firstTry: 0, answered: 0, streak: 0, best: 0, missed: [], stripe: stripe || null, test: !!(stripe && stripe.test) };
     const label = BD.Rank.subject(BD.Rank.BY_GAME[game]).label;
-    BD.UI.testMode("screen-word-play", W.test ? label + " stripe test" + (stripe.skill ? " · Part " + (stripe.part + 1) + " of 4: " + stripe.skill.label : "") : flash ? "⚡ Spelling flashcards · " + FLASH_NAMES[flash] : stripe ? label + " stripe practice · " + BD.BELTS[stripe.belt].name + " Belt" : school === "test" ? "School word test" : "", !BD.Rank.hintsAllowed(BD.Store.current(), grade));
+    BD.UI.testMode("screen-word-play", W.test ? label + " stripe test" + (stripe.skill ? " · Part " + (stripe.part + 1) + " of 4: " + stripe.skill.label : "") : flash ? "⚡ Spelling flashcards · " + FLASH_NAMES[flash] : stripe ? label + (game === "spanish" ? " bonus practice · " : " stripe practice · ") + BD.BELTS[stripe.belt].name + " Belt" : school === "test" ? "School word test" : "", W.test || W.noRetry);
     $("wordCoachFace").src = BD.Cast.face(g.coach);
     $("wordCoachName").textContent = BD.Cast.name(g.coach);
     BD.UI.syncGradeSelect("wordGradeSel", game);
@@ -469,7 +469,7 @@ BD.WordQuiz = (function () {
       $("wordInput").value = ""; $("wordInput").readOnly = false;
       $("wordInput").placeholder = q.typedSpell ? "Type the word" : "Type the Spanish word";
       $("wordCheck").hidden = false; $("wordCheck").disabled = false;
-      W.noHints = !BD.Rank.hintsAllowed(BD.Store.current(), W.grade) || W.noRetry;
+      W.noHints = W.test || W.noRetry; // practice has hints at every belt; tests don't
       showTiles(q.tilesAlways || (q.tilesFirst && !W.noHints));
       $("wordTilesBtn").hidden = !q.typedSpell || q.tilesFirst || q.tilesAlways || W.noRetry;
       setTimeout(function () { $("wordInput").focus(); }, 60);
@@ -479,6 +479,10 @@ BD.WordQuiz = (function () {
           (c.swatch ? '<span class="big-swatch sm" style="--sw:' + c.swatch + '"></span>' : "") + BD.UI.esc(c.value) + '</button>';
       }).join("");
     }
+    // Hints: up to 2 per question in practice (never in tests)
+    BD.Hints.bar($("wordCard"), "word", $("wordFeedback"));
+    const ctx = { choices: function () { return $("wordChoices").querySelectorAll(".choice"); }, isRight: function (b) { return q.choices[Number(b.dataset.i)].value === q.answer; } };
+    BD.Hints.reset("word", W.game === "spelling" && q.word ? BD.Hints.spelling(q, W.grade, ctx) : BD.Hints.spanish(q, ctx), { grade: W.grade, off: W.test || W.noRetry });
     const quietNow = W.game === "spelling" && isQuiet(BD.Store.current());
     if (BD.ReadAloud.auto(W.grade) && !quietNow) setTimeout(function () { if (item() === q) readItem(); }, 250);
     else if (q.speakNow && !quietNow) setTimeout(function () { BD.Speech.say(q.speakNow.text, q.speakNow.lang, 0.85); }, 250);
@@ -523,7 +527,7 @@ BD.WordQuiz = (function () {
       $("wordInput").select();
       return;
     }
-    W.done = true; W.answered++;
+    W.done = true; W.answered++; BD.Hints.close("word");
     const ok = verdict !== "wrong";
     if (W.school && q.word) BD.School.mark(p, q.word, ok && W.tries === 1);
     const st = ((p.wordStats[W.game] = p.wordStats[W.game] || {})[W.grade] = (p.wordStats[W.game][W.grade] || { r: 0, w: 0 }));
@@ -534,7 +538,7 @@ BD.WordQuiz = (function () {
     if (ok) {
       W.correct++; if (W.tries === 1) W.firstTry++;
       W.streak++; W.best = Math.max(W.best, W.streak);
-      const gain = (W.tries === 1 ? 10 + Math.min(W.streak - 1, 10) : 5) - (W.usedTiles ? 5 : 0);
+      const gain = Math.round(((W.tries === 1 ? 10 + Math.min(W.streak - 1, 10) : 5) - (W.usedTiles ? 5 : 0)) * BD.Hints.factor(BD.Hints.used("word")));
       W.xp += Math.max(2, gain); st.r++;
       if (bucket[missKey]) {
         const m = bucket[missKey];

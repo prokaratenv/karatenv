@@ -42,3 +42,21 @@ html.easy-font .problem, html.easy-font .bb-count { font-family: "Atkinson Hyper
 .review-note { display: block; font-size: .82rem; color: var(--gold, #E0BA77); margin: 4px 0; }
 .chip-belt { display: inline-block; width: 10px; height: 10px; border-radius: 3px; background: var(--belt); border: 1px solid rgba(0, 0, 0, .45); box-shadow: 0 0 0 1px rgba(255, 255, 255, .25); margin-right: 4px; vertical-align: -1px; }
 .grade-belt-line { margin: 6px 0 0; font-size: .85rem; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+
+/* Hints (js/hints.js): a big Hint button with up to 2 hints per question */
+.hint-bar { margin: 10px 0 4px; text-align: left; }
+.hint-bar[hidden] { display: none !important; }
+.hint-btn { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 8px 18px; border-radius: 999px; font-weight: 800; background: #F5C518; color: #1B1F2E; border: 2px solid #E0A800; box-shadow: 0 3px 0 rgba(0,0,0,.25); }
+.hint-btn:disabled { opacity: .55; box-shadow: none; }
+.hint-bar.young .hint-btn { min-height: 56px; font-size: 1.2rem; padding: 10px 24px; }
+.hint-box:empty { display: none; }
+.hint-box { margin-top: 8px; padding: 10px 12px; border-radius: 12px; background: rgba(245, 197, 24, .12); border: 1px solid rgba(245, 197, 24, .45); }
+.hint-line { margin: 0 0 6px; line-height: 1.45; }
+.hint-line:last-child { margin-bottom: 0; }
+.hint-line .hints { margin: 6px 0 0; padding-left: 0; list-style: none; }
+.hint-line .hints li { margin: 4px 0; }
+.hint-pattern { font-family: ui-monospace, Menlo, Consolas, monospace; font-weight: 800; letter-spacing: .08em; white-space: nowrap; }
+.hint-sent { display: block; margin-top: 4px; font-size: 1.05rem; }
+mark.hint-mark { background: rgba(245, 197, 24, .45); color: inherit; border-radius: 4px; padding: 0 2px; }
+.ruled-out { opacity: .3; text-decoration: line-through; }
+.no-hints .hint-bar { display: none !important; }

@@ -25,10 +25,13 @@ BD.QuickUI = (function () {
       const b = e.target.closest(".qq-choice"); if (!b || b.disabled) return;
       onPick(q.choices[Number(b.dataset.i)], b);
     };
+    // Boss battles and tournaments: each hint rules out a wrong choice (not in Dojo Duel races)
+    if (opts.hints && BD.Hints) { BD.Hints.bar(el, "quick"); BD.Hints.reset("quick", BD.Hints.quick(q, el), { grade: opts.grade }); }
     if (opts.read && BD.ReadAloud.auto(opts.grade)) readQ(el, q);
   }
   /* Show which choice was right. */
   function mark(el, q, picked) {
+    if (BD.Hints && el.querySelector(".hint-bar")) BD.Hints.close("quick");
     el.querySelectorAll(".qq-choice").forEach(function (b) {
       const v = q.choices[Number(b.dataset.i)];
       b.disabled = true;
@@ -161,7 +164,7 @@ BD.Boss = (function () {
   function next() {
     if (!S) return;
     S.q = BD.Quick.question(S.grade, S.belt); S.busy = false;
-    BD.QuickUI.render($("bossQ"), S.q, pick, { read: true, grade: S.grade });
+    BD.QuickUI.render($("bossQ"), S.q, pick, { read: true, grade: S.grade, hints: true });
   }
   function pop(text, cls) {
     const el = $("bossPop"); el.textContent = text; el.className = "boss-pop " + cls;

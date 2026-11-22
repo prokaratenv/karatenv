@@ -261,7 +261,7 @@ BD.MathGame = (function () {
     }
     buildKeypad();
     BD.UI.syncGradeSelect("mathGradeSel", "math");
-    BD.UI.testMode("screen-math-play", S.test ? "Math stripe test" + (S.stripe.skill ? " · Part " + (S.stripe.part + 1) + " of 4: " + S.stripe.skill.label : "") : S.stripe ? "Math stripe practice · " + BD.BELTS[S.stripe.belt].name + " Belt" : mode === "flash" ? "⚡ " + OPS[S.ops[0]].label + " flashcards" : "", !BD.Rank.hintsAllowed(BD.Store.current(), S.grade));
+    BD.UI.testMode("screen-math-play", S.test ? "Math stripe test" + (S.stripe.skill ? " · Part " + (S.stripe.part + 1) + " of 4: " + S.stripe.skill.label : "") : S.stripe ? "Math stripe practice · " + BD.BELTS[S.stripe.belt].name + " Belt" : mode === "flash" ? "⚡ " + OPS[S.ops[0]].label + " flashcards" : "", S.test);
     BD.UI.show("screen-math-play");
     BD.Cast.say("mathSay", "start");
     BD.Scratch.close(); BD.Scratch.clear();
@@ -327,6 +327,14 @@ BD.MathGame = (function () {
     $("mathScore").textContent = S.xp + " XP";
     $("mathKeyMinus").hidden = S.grade < 7; // negative numbers start in grade 7
     $("mathAsk").hidden = S.mode === "clock" || S.test;
+    // Hints: a strategy, then a worked first step (never in stripe tests)
+    BD.Hints.bar($("mathCard").parentNode, "math", $("mathExplain"));
+    const base = BD.Hints.math(q);
+    BD.Hints.reset("math", function (level) {
+      const h = base(level);
+      if (level === 2 && S.young) { const prev = h.act; h.act = function () { if (prev) prev(); BD.Hints.ruleOut($("mathChoices").querySelectorAll(".pic-choice"), function (b) { return Number(b.dataset.pick) === q.answer; }, 1); }; }
+      return h;
+    }, { grade: S.grade, off: S.test });
   }
 
   function buildKeypad() {
@@ -355,7 +363,7 @@ BD.MathGame = (function () {
     if (!S.input || S.input === "-") return;
     const q = current(), p = BD.Store.current();
     const right = Number(S.input) === q.answer;
-    S.answered++; S.locked = true;
+    S.answered++; S.locked = true; BD.Hints.close("math");
     const statKey = q.grade + "-" + q.op;
     const st = p.mathStats[statKey] || (p.mathStats[statKey] = { r: 0, w: 0 });
     const tk = p.tricky[q.key];
@@ -363,7 +371,7 @@ BD.MathGame = (function () {
 
     if (right) {
       S.correct++; S.streak++; S.bestStreak = Math.max(S.bestStreak, S.streak); st.r++;
-      const gain = 10 + Math.min(S.streak - 1, 10);
+      const gain = Math.max(2, Math.round((10 + Math.min(S.streak - 1, 10)) * BD.Hints.factor(BD.Hints.used("math"))));
       S.xp += gain;
       if (tk) { tk.misses--; if (tk.misses <= 0) delete p.tricky[q.key]; }
       $("mathCard").className = "flashcard is-right";

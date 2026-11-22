@@ -2,7 +2,7 @@
 window.BD = window.BD || {};
 
 BD.SentenceGame = (function () {
-  const ROUND = 8, TRIES = 3, POINTS = [30, 20, 10], HINT_COST = 5, PASS = 70;
+  const ROUND = 8, TRIES = 3, POINTS = [30, 20, 10], PASS = 70;
   const $ = function (id) { return document.getElementById(id); };
   let S = null;
 
@@ -53,7 +53,7 @@ BD.SentenceGame = (function () {
     const items = stripe ? (stripe.test && stripe.skill ? beltItems(stripe.grade, stripe.belt, 5, stripe.skill.w) : beltItems(stripe.grade, stripe.belt, 8)) : BD.SentenceGen.round(p, p.sentenceGrade, BD.Kid && BD.Kid.young(p.sentenceGrade) ? 5 : ROUND, focus);
     S = { grade: p.sentenceGrade, items: items, training: items.training || null, focus: focus, i: 0, xp: 0, solved: 0, firstTry: 0, results: [], stripe: stripe || null, test: !!(stripe && stripe.test) };
     BD.UI.show("screen-sentence-play");
-    BD.UI.testMode("screen-sentence-play", S.test ? "Reading stripe test" + (stripe.skill ? " · Part " + (stripe.part + 1) + " of 4: " + stripe.skill.label : "") : stripe ? "Reading stripe practice · " + BD.BELTS[stripe.belt].name + " Belt" : "", !BD.Rank.hintsAllowed(BD.Store.current(), S.grade));
+    BD.UI.testMode("screen-sentence-play", S.test ? "Reading stripe test" + (stripe.skill ? " · Part " + (stripe.part + 1) + " of 4: " + stripe.skill.label : "") : stripe ? "Reading stripe practice · " + BD.BELTS[stripe.belt].name + " Belt" : "", S.test);
     BD.Cast.say("sentSay", "start");
     load();
     BD.SentenceGen.topUp(p, S.grade); // ask Claude for more sentences if the bank is running low
@@ -81,7 +81,9 @@ BD.SentenceGame = (function () {
     $("sentFeedback").innerHTML = "";
     $("sentFeedback").className = "sent-feedback";
     $("sentTries").textContent = TRIES + " tries";
-    $("sentCheck").hidden = false; $("sentHint").hidden = false; $("sentReset").hidden = false;
+    $("sentCheck").hidden = false; $("sentHint").hidden = true; $("sentReset").hidden = false; // the Hint bar below replaces the old one-at-a-time button
+    BD.Hints.bar($("sentCard"), "sent", $("sentFeedback"));
+    BD.Hints.reset("sent", sentHints(item), { grade: S.grade, off: S.test });
     $("sentNext").hidden = true;
     $("sentHint").disabled = false;
     setTimeout(function () { input.focus(); }, 50);
@@ -97,6 +99,22 @@ BD.SentenceGame = (function () {
   function autoSize() {
     const el = $("sentInput");
     el.style.height = "auto"; el.style.height = el.scrollHeight + "px";
+  }
+
+  /* 2 hints: 1) where to look for each mistake, 2) highlight the words to fix and give the rule. */
+  function sentHints(item) {
+    return function (level) {
+      if (level === 1) {
+        S.hints = item.fixes.length; // every planted mistake now has its nudge
+        return { html: '<ul class="hints">' + item.fixes.map(function (f) { return '<li><span class="fix-tag fix-' + f.type + '">' + BD.FIX_TYPES[f.type].short + '</span> ' + BD.UI.esc(f.hint) + '</li>'; }).join("") + '</ul>',
+          text: item.fixes.map(function (f) { return f.hint; }).join(" ") };
+      }
+      const c = compare(item.text, answers(item)[0]);
+      const marked = c.words.map(function (w, i) { return c.ok[i] ? BD.UI.esc(w) : '<mark class="hint-mark">' + BD.UI.esc(w) + '</mark>'; }).join(" ");
+      return { html: (c.ok.some(function (x) { return !x; }) ? 'Fix the highlighted part: <span class="hint-sent">' + marked + '</span>' : 'Look between the words and at the end.') +
+        '<ul class="hints">' + item.fixes.map(function (f) { return '<li><span class="fix-tag fix-' + f.type + '">' + BD.FIX_TYPES[f.type].short + '</span> ' + BD.UI.esc(f.explain || f.hint) + '</li>'; }).join("") + '</ul>',
+        text: item.fixes.map(function (f) { return f.explain || f.hint; }).join(" ") };
+    };
   }
 
   function hint() {
@@ -143,7 +161,7 @@ BD.SentenceGame = (function () {
 
   function solved() {
     const item = S.items[S.i];
-    const gain = Math.max(5, POINTS[S.tries] - S.hints * HINT_COST);
+    const gain = Math.max(5, Math.round(POINTS[S.tries] * BD.Hints.factor(BD.Hints.used("sent"))));
     S.xp += gain; S.solved++;
     if (S.tries === 0) S.firstTry++;
     BD.Sound.right();
@@ -171,7 +189,7 @@ BD.SentenceGame = (function () {
     BD.Store.save();
 
     $("sentInput").readOnly = true;
-    $("sentCheck").hidden = true; $("sentHint").hidden = true; $("sentReset").hidden = true;
+    $("sentCheck").hidden = true; $("sentHint").hidden = true; $("sentReset").hidden = true; BD.Hints.close("sent");
     $("sentNext").hidden = false;
     $("sentNext").textContent = S.i + 1 < S.items.length ? "Next sentence" : "See results";
     $("sentScore").textContent = S.xp + " XP";

@@ -2,7 +2,8 @@
    - Every grade has its own belt path: White → Yellow → Orange → Blue → Green
      → Purple → Brown → Red → Black.
    - Each belt needs 4 stripes: Math, Reading, Spelling, Comprehension.
-     Spanish is an optional bonus stripe.
+     Spanish is bonus training only: practice earns extra XP (up to 100 per
+     belt, refilled each new belt), but there is no Spanish stripe or test.
    - A stripe is earned by passing its stripe test (85% or better), any time.
    - Practice earns XP toward a stripe, up to 100 XP each (400 per belt),
      plus 100 XP for graduating = 500 XP per belt.
@@ -68,6 +69,7 @@ BD.Rank = (function () {
   function testDone(p, subjectKey, grade, pct, part) {
     const key = subjectKey;
     if (!subject(key)) throw new Error("Unknown stripe: " + key);
+    if (subject(key).optional) { const r0 = rec(p, grade); return { subject: key, grade: grade, pct: pct, passed: false, bonusOnly: true, beltBefore: r0.belt, graduated: null, belt: BD.BELTS[r0.belt], stripes: Object.assign({}, r0.stripes) }; }
     const r = rec(p, grade);
     const out = { subject: key, grade: grade, pct: pct, passed: pct >= PASS, beltBefore: r.belt, graduated: null, already: !!r.stripes[key] };
     /* One part of a 4-part stripe test: the stripe comes when all 4 are passed. */
@@ -132,12 +134,13 @@ BD.Rank = (function () {
   function gate(p, gameOrKey, stripe) {
     if (!stripe || !stripe.test || !p) return stripe;
     const key = BY_GAME[gameOrKey] || gameOrKey, r = rec(p, stripe.grade);
+    if (subject(key) && subject(key).optional) { const o = Object.assign({}, stripe, { test: false }); delete o.part; delete o.skill; return o; } // bonus training: no test
     if (r.stripes[key]) { const o = Object.assign({}, stripe); delete o.part; delete o.skill; return o; }
     const n = nextPart(r, key);
     if (!n || !n.open) { const o = Object.assign({}, stripe, { test: false, blocked: true }); delete o.part; delete o.skill; return o; }
     return Object.assign({}, stripe, { part: n.i, skill: partSkills(key, stripe.grade)[n.i] });
   }
-  function canTest(p, key, grade) { const r = rec(p, grade); if (r.stripes[key]) return true; const n = nextPart(r, key); return !!(n && n.open); }
+  function canTest(p, key, grade) { if (subject(key) && subject(key).optional) return false; const r = rec(p, grade); if (r.stripes[key]) return true; const n = nextPart(r, key); return !!(n && n.open); }
 
   /* What each part tests, by subject and grade. */
   function partSkills(key, grade) {
@@ -210,8 +213,8 @@ BD.Rank = (function () {
     if (p.rank && typeof p.rank === "object") Object.keys(p.rank).forEach(function (g) {
       const r = p.rank[g]; if (!r || typeof r !== "object") return;
       const parts = r.parts && typeof r.parts === "object" && !Array.isArray(r.parts) ? r.parts : {}, out = {};
-      SUBJECTS.forEach(function (sj) { if (Array.isArray(parts[sj.key])) out[sj.key] = [0, 1, 2, 3].map(function (i) { return !!parts[sj.key][i]; }); });
-      r.parts = out;
+      REQUIRED.forEach(function (k) { if (Array.isArray(parts[k])) out[k] = [0, 1, 2, 3].map(function (i) { return !!parts[k][i]; }); });
+      r.parts = out; // Spanish is bonus training: no parts
     });
   }
 
@@ -229,7 +232,7 @@ BD.Rank = (function () {
     return ["warm-up level", "warm-up level", "building level", "building level", "core grade level", "core grade level", "challenge level", "challenge level", "master level"][beltIndex];
   }
 
-  /* The belt picture: two tails with two stripe slots each, plus a gold Spanish bar on the knot. */
+  /* The belt picture: two tails with two stripe slots each (Spanish is bonus training, so no bar). */
   function beltSVG(beltIndex, stripes, opts) {
     opts = opts || {};
     const b = BD.BELTS[beltIndex], col = b.color, edge = "rgba(0,0,0,.45)";
@@ -251,7 +254,6 @@ BD.Rank = (function () {
       '<g transform="rotate(-13 148 40)"><rect x="135" y="40" width="26" height="72" rx="5" fill="' + col + '" stroke="' + edge + '" stroke-width="2"/>' +
       '<g transform="translate(135 0)">' + slot(s.spelling, 82, nw === "spelling") + pips("spelling", 82) + slot(s.comprehension, 95, nw === "comprehension") + pips("comprehension", 95) + '</g></g>' +
       '<rect x="112" y="8" width="36" height="42" rx="9" fill="' + col + '" stroke="' + edge + '" stroke-width="2"/>' +
-      '<rect x="127" y="12" width="6" height="34" rx="2" fill="' + (s.spanish ? "#E0BA77" : "rgba(0,0,0,.15)") + '"' + (nw === "spanish" ? ' class="stripe-new"' : "") + '/>' +
       '</svg>';
   }
 
@@ -285,8 +287,9 @@ BD.Rank = (function () {
     return practice(p, gameKey, st.grade, amt);
   }
 
-  /* White through Purple may use hints; Brown, Red and Black do it on their own. */
-  function hintsAllowed(p, grade) { return rec(p, grade).belt <= 5; }
+  /* Practice has hints at every belt (2 per question, each costs a little XP),
+     so nobody gets stuck. Only stripe tests are hint-free. */
+  function hintsAllowed() { return true; }
 
   /* The level rises only when a round at a higher grade goes well (70%+, 5+ items),
      so tapping up just to look never lowers the points at their old grade. */

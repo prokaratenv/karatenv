@@ -126,7 +126,13 @@ BD.UI = (function () {
     const g = BD.Rank.dojoGrade(p), r = BD.Rank.rec(p, g), belt = BD.BELTS[r.belt];
     const count = BD.Rank.stripeCount(r), xp = BD.Rank.beltXP(r);
     const rows = BD.Rank.SUBJECTS.map(function (sj) {
-      const got = !!r.stripes[sj.key], x = Math.min(BD.Rank.PRACTICE_MAX, r.xp[sj.key] || 0), np = BD.Rank.nextPart(r, sj.key);
+      const x = Math.min(BD.Rank.PRACTICE_MAX, r.xp[sj.key] || 0);
+      // Spanish is bonus training: practice for extra XP, no stripe or test
+      if (sj.optional) return '<div class="stripe-row optional bonus-row"><span class="stripe-chip" aria-hidden="true"></span>' +
+        '<div class="sr-main"><strong>' + sj.label + ' <em>bonus XP</em></strong><span class="sr-sub">' + x + ' / 100 bonus XP on this belt' + (sj.note ? " · " + sj.note : "") + '</span>' +
+        '<span class="mini-track"><i style="width:' + x + '%"></i></span></div>' +
+        '<div class="sr-actions"><button type="button" class="btn btn-small" data-stripe-practice="' + sj.key + '">Practice</button></div></div>';
+      const got = !!r.stripes[sj.key], np = BD.Rank.nextPart(r, sj.key);
       const sk = np ? BD.Rank.partSkills(sj.key, g)[np.i] : null;
       return '<div class="stripe-row' + (got ? " earned" : "") + (sj.optional ? " optional" : "") + '">' +
         '<span class="stripe-chip" aria-hidden="true"></span>' +
@@ -162,7 +168,7 @@ BD.UI = (function () {
     const rows = BD.Rank.SUBJECTS.map(function (sj) {
       const got = !!r.stripes[sj.key], x = Math.min(100, r.xp[sj.key] || 0);
       return '<tr><th scope="row">' + sj.label + (sj.optional ? ' <em class="bonus">bonus</em>' : '') + '</th>' +
-        '<td>' + (got ? '<span class="got">Earned</span>' : partDots(r, sj.key) + ' <span class="muted">' + BD.Rank.partsDone(r, sj.key) + ' of 4 parts</span>') + '</td>' +
+        '<td>' + (sj.optional ? '<span class="muted">Bonus training</span>' : got ? '<span class="got">Earned</span>' : partDots(r, sj.key) + ' <span class="muted">' + BD.Rank.partsDone(r, sj.key) + ' of 4 parts</span>') + '</td>' +
         '<td><span class="mini-track"><i style="width:' + x + '%"></i></span><small>' + x + ' / 100 XP</small></td></tr>';
     }).join("");
     const ladder = '<ol class="bd-ladder">' + BD.BELTS.map(function (b, i) {
@@ -219,11 +225,12 @@ BD.UI = (function () {
   }
   function confirmTest(key) {
     const p = BD.Store.current(), g = BD.Rank.dojoGrade(p), r = BD.Rank.rec(p, g), sj = BD.Rank.subject(key);
+    if (sj.optional) return launchStripe(key, false); // Spanish is bonus training: practice only, no test
     const x = Math.min(100, r.xp[key] || 0);
     if (r.stripes[key]) {
       const what = { math: "20 problems", reading: "8 sentences to fix", spelling: "10 words to spell", comprehension: "2 stories with 6 questions", spanish: "10 Spanish words" }[key];
       sheet(sj.label + " retest",
-        '<p><strong>' + BD.gradeLabel(g) + ' · ' + BD.BELTS[r.belt].name + ' Belt.</strong> You already have this stripe. The retest mixes every skill: ' + what + '. No hints. Score <strong>' + BD.Rank.PASS + '%</strong> to keep it strong.</p>' +
+        '<p><strong>' + BD.gradeLabel(g) + ' · ' + BD.BELTS[r.belt].name + ' Belt.</strong> You already have this stripe. The retest mixes every skill: ' + what + '. Tests have no hints (practice has them whenever you need them). Score <strong>' + BD.Rank.PASS + '%</strong> to keep it strong.</p>' +
         '<div class="res-actions"><button type="button" class="btn btn-primary btn-big" id="testGo">Start the retest</button><button type="button" class="btn btn-quiet" id="testPractice">Practice more</button></div>');
     } else {
       const n = BD.Rank.nextPart(r, key), skills = BD.Rank.partSkills(key, g), sk = skills[n.i];
@@ -236,7 +243,7 @@ BD.UI = (function () {
       sheet(sj.label + " stripe test",
         '<p><strong>' + BD.gradeLabel(g) + ' · ' + BD.BELTS[r.belt].name + ' Belt.</strong> The ' + sj.label + ' stripe test has 4 parts, each a different skill. Pass all 4 (' + BD.Rank.PASS + '% or better) to earn the stripe.</p>' + list +
         (!n.open ? '<div class="xp-warn"><strong>Part ' + (n.i + 1) + ' (' + esc(sk.label) + ') opens at ' + n.need + ' practice XP.</strong><p>You have ' + x + '. Keep practicing ' + sj.label + ' to unlock it.</p></div>'
-          : '<p><strong>Part ' + (n.i + 1) + ' of 4: ' + esc(sk.label) + '.</strong> ' + what + '. No hints.</p>' +
+          : '<p><strong>Part ' + (n.i + 1) + ' of 4: ' + esc(sk.label) + '.</strong> ' + what + '. Tests have no hints. Practice has hints whenever you need them.</p>' +
             (last ? '<div class="xp-warn"><strong>🎓 This is your last part of your last stripe: passing it graduates you!</strong><p>Your graduation bonus comes from practice: right now it would be <strong>+' + BD.Rank.gradBonus(r) + ' XP</strong> of 100.' +
               (BD.Rank.beltXP(r) < 400 ? ' Practice XP you haven\'t earned on this belt (' + (400 - BD.Rank.beltXP(r)) + ' left) is gone once you move up.' : ' You did all the practice. Full bonus!') + '</p></div>' : '')) +
         '<div class="res-actions">' + (n.open ? '<button type="button" class="btn btn-primary btn-big" id="testGo">Start Part ' + (n.i + 1) + '</button><button type="button" class="btn btn-quiet" id="testPractice">Practice first</button>'
@@ -247,7 +254,7 @@ BD.UI = (function () {
   }
 
   /* Banner + hidden helpers while a stripe test or belt practice runs. */
-  /* noHints: Brown, Red and Black belts work on their own (no hints, tiles, rule books or Sensei). */
+  /* noHints: stripe tests (and the school word test) have no hints, tiles, rule books or Sensei. Practice has hints at every belt. */
   function testMode(screenId, label, noHints) {
     const scr = $(screenId);
     let b = scr.querySelector(".mode-banner");
@@ -746,8 +753,8 @@ BD.UI = (function () {
     $("flashCard").addEventListener("click", function () { BD.MathGame.openFlash(); });
     $("parentHow").addEventListener("click", function () {
       sheet("How Brain Dojo works",
-        '<h4 class="label">Belts and stripes</h4><p>Each grade has its own belt path: White, Yellow, Orange, Blue, Green, Purple, Brown, Red, Black. A belt needs 4 stripes (Math, Reading, Spelling, Comprehension). Each stripe test comes in 4 parts, each a different skill (for example Capitals, Punctuation, Spelling and Grammar). Practice comes first: Part 1 unlocks at 25 practice XP, then 50, 75 and 100, and a locked part cannot be started. Passing all 4 parts (85% each) earns the stripe, and the 4th stripe graduates them to the next belt. Spanish is a bonus stripe. Practice below their level still builds that grade\'s belt, at fewer points (60% one grade below, 40% two below, 25% three or more), so the fastest way up is training at their own level.</p>' +
-        '<h4 class="label">Practice and hints</h4><p>Points come from doing the work. Practice earns up to 100 XP per stripe; stripe tests add no XP (practice to 56, pass the test, and it stays 56). They can keep practicing a stripe after earning it, until they move up a belt. Graduating adds a bonus earned by practice: a quarter of the belt\'s practice XP (all 400 = +100; tests only = +0). The Dojo leaderboard ranks XP earned this week, so practice beats rushing tests. White through Purple belts can use hints. Brown, Red and Black belts work without them. Pre-K to 1st grade hear instructions read aloud.</p>' +
+        '<h4 class="label">Belts and stripes</h4><p>Each grade has its own belt path: White, Yellow, Orange, Blue, Green, Purple, Brown, Red, Black. A belt needs 4 stripes (Math, Reading, Spelling, Comprehension). Each stripe test comes in 4 parts, each a different skill (for example Capitals, Punctuation, Spelling and Grammar). Practice comes first: Part 1 unlocks at 25 practice XP, then 50, 75 and 100, and a locked part cannot be started. Passing all 4 parts (85% each) earns the stripe, and the 4th stripe graduates them to the next belt. Spanish is bonus training: practice earns extra XP (up to 100 per belt), with no stripe or test. Practice below their level still builds that grade\'s belt, at fewer points (60% one grade below, 40% two below, 25% three or more), so the fastest way up is training at their own level.</p>' +
+        '<h4 class="label">Practice and hints</h4><p>Points come from doing the work. Practice earns up to 100 XP per stripe; stripe tests add no XP (practice to 56, pass the test, and it stays 56). They can keep practicing a stripe after earning it, until they move up a belt. Graduating adds a bonus earned by practice: a quarter of the belt\'s practice XP (all 400 = +100; tests only = +0). The Dojo leaderboard ranks XP earned this week, so practice beats rushing tests. Every practice question at every belt has a Hint button with up to 2 hints (a meaning, a first and last letter, a strategy, or where to look). Each hint lowers that question\'s points a little, so nobody gets stuck. Stripe tests have no hints. Pre-K to 1st grade hear instructions read aloud.</p>' +
         '<h4 class="label">Badges and gear</h4><p>Gear unlocks the way it does at Engage: a mouthguard on sign-up, the Engage shirt after 3 days of training, MMA shorts after 10 days, MMA gloves with the first stripe, a sparring gear bag at the first graduation, then sparring gloves, boots, headgear and chest gear with each Yellow Belt stripe. The full Sparring Gear outfit unlocks at the Yellow to Orange Belt graduation, when sparring starts in class.</p>' +
         '<h4 class="label">Weapons, judo and tournaments</h4><p>Weapons are for show only: Nunchucks at Green Belt, Kamas at Purple, Bo Staff at Brown and a Wooden Sword at Red. They are performed in Weapons tournaments and never used against anyone or any boss. At Green Belt they earn Boxing Gloves and Judo Moves (every 5 right in a row is a judo throw). Tournaments are single-elimination brackets of 6 to 12: Kata opens at Yellow Belt with 2 stripes, Sparring at Orange and Weapons at Green. Gold +10 XP, Silver +7.5, Bronze +5, double on weekends.</p>' +
         '<h4 class="label">Saving</h4><p>Progress saves automatically, even mid-round. Opened from the shared link while signed in to Claude, it is kept in that Claude account and follows you to any device. Otherwise it stays in this browser. Use <strong>Back up progress</strong> to get a save code that moves a student to another device or restores them if the browser is cleared.</p>' +

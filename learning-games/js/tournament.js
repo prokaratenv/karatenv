@@ -197,7 +197,7 @@ BD.Tourney = (function () {
       '<div class="tn-meter"><i style="width:' + (100 * M.streak / KATA_MAX) + '%"></i>' + (M.target === null ? '' : '<b style="left:' + (100 * M.target / KATA_MAX) + '%"></b>') + '</div>' +
       '<div class="qq-card"><div id="tnQ"></div></div></div>';
     if (BD.Mini && !weapon) BD.Mini.fill($("tnBody"));
-    BD.QuickUI.render($("tnQ"), M.q, kataPick, { read: true, grade: T.grade });
+    BD.QuickUI.render($("tnQ"), M.q, kataPick, { read: true, grade: T.grade, hints: true });
   }
   function kataPick(v) {
     if (!M || M.busy) return;
@@ -225,7 +225,7 @@ BD.Tourney = (function () {
       const ok = v === M.q.answer; if (ok) T.right++;
       if (ok) BD.Sound.right(); else BD.Sound.wrong();
       later(function () { showOutcome(ok, ok ? "Sudden victory! The judges give it to you." : "So close! The judges give it to " + M.opp.name + ".", n + " vs " + n + (ok ? "+" : "−")); }, 900);
-    }, { read: true, grade: T.grade });
+    }, { read: true, grade: T.grade, hints: true });
   }
 
   /* Sparring: race your opponent to 5 points. */

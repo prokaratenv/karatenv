@@ -193,7 +193,7 @@ BD.Reading = (function () {
     const grade = p.readingGrade;
     R = { grade: grade, focus: focus, passages: stripe ? (stripe.test && stripe.skill && stripe.skill.type ? partPassages(p, grade, stripe.belt, stripe.skill.type) : beltPassages(p, grade, stripe.belt)) : choose(p, grade, focus), pi: 0, qi: 0, xp: 0, results: [], stripe: stripe || null, test: !!(stripe && stripe.test) };
     BD.UI.show("screen-read-play");
-    BD.UI.testMode("screen-read-play", R.test ? "Comprehension stripe test" + (stripe.skill ? " · Part " + (stripe.part + 1) + " of 4: " + stripe.skill.label : "") : stripe ? "Comprehension stripe practice · " + BD.BELTS[stripe.belt].name + " Belt" : "", !BD.Rank.hintsAllowed(BD.Store.current(), R.grade));
+    BD.UI.testMode("screen-read-play", R.test ? "Comprehension stripe test" + (stripe.skill ? " · Part " + (stripe.part + 1) + " of 4: " + stripe.skill.label : "") : stripe ? "Comprehension stripe practice · " + BD.BELTS[stripe.belt].name + " Belt" : "", R.test);
     BD.Cast.say("readSay", "start");
     loadPassage();
     topUp(p, grade);
@@ -234,7 +234,10 @@ BD.Reading = (function () {
     $("readFeedback").innerHTML = ""; $("readFeedback").className = "read-feedback";
     $("readCheck").hidden = false; $("readCheck").disabled = false; $("readCheck").textContent = "Check my answer";
     $("readNext").hidden = true;
-    $("readHint").hidden = false; $("readHint").disabled = false;
+    $("readHint").hidden = true; // the Hint bar replaces the old single hint
+    if (R.marked) { R.marked = false; $("readText").textContent = passage().text; }
+    BD.Hints.bar($("readFeedback").parentNode, "read", $("readFeedback"));
+    BD.Hints.reset("read", storyHints(q), { grade: R.grade, off: R.test });
     $("readTries").textContent = "";
     if (BD.ReadAlong) BD.ReadAlong.mic.sync($("readInput"));
     if (R.qi === 0) window.scrollTo(0, 0);
@@ -248,6 +251,42 @@ BD.Reading = (function () {
   function readQuestion() {
     if (!R) return;
     BD.ReadAloud.read($("readQuestion"), { id: "question", button: $("readQRead") });
+  }
+
+  /* 2 hints: 1) highlight the sentence in the story where the answer is,
+     2) a key word the answer should use. */
+  function bestSentence(q) {
+    const ps = passage(), sents = ps.text.match(/[^.!?]+[.!?]+["”']?\s*|[^.!?]+$/g) || [ps.text];
+    const keys = [].concat.apply([], q.keys || []).map(function (k) { return String(k).toLowerCase(); });
+    const qw = String(q.q).toLowerCase().match(/[a-z]{4,}/g) || [];
+    let best = 0, bi = 0;
+    sents.forEach(function (t, i) {
+      const low = t.toLowerCase();
+      const sc = keys.filter(function (k) { return k && low.indexOf(k) !== -1; }).length * 3 + qw.filter(function (w) { return low.indexOf(w) !== -1; }).length;
+      if (sc > best) { best = sc; bi = i; }
+    });
+    return { sents: sents, i: bi, found: best > 0 };
+  }
+  function storyHints(q) {
+    return function (level) {
+      R.usedHint = true;
+      if (level === 1) {
+        const b = bestSentence(q);
+        return { html: BD.UI.esc(q.hint) + (b.found ? ' <span class="muted">Look at the highlighted part of the story.</span>' : ''), text: q.hint,
+          act: function () {
+            if (!b.found) return;
+            if (BD.ReadAlong && BD.ReadAlong.stop) BD.ReadAlong.stop();
+            $("readText").innerHTML = b.sents.map(function (t, i) { return i === b.i ? '<mark class="hint-mark">' + BD.UI.esc(t) + '</mark>' : BD.UI.esc(t); }).join("");
+            R.marked = true;
+            const m = $("readText").querySelector(".hint-mark"); if (m && m.scrollIntoView) m.scrollIntoView({ block: "center", behavior: "smooth" });
+          } };
+      }
+      const typed = " " + $("readInput").value.toLowerCase() + " ";
+      const groups = (q.keys || []).filter(function (g) { return g.length && !g.some(function (k) { return typed.indexOf(String(k).toLowerCase()) !== -1; }); });
+      if (groups.length) return { html: 'Your answer should use an idea like <strong>"' + BD.UI.esc(groups[0][0]) + '"</strong>.', text: "Your answer should use an idea like " + groups[0][0] + "." };
+      const start = String(q.answer).split(/\s+/).slice(0, 3).join(" ");
+      return { html: 'Try starting your answer like this: <strong>' + BD.UI.esc(start) + '…</strong>', text: "Try starting your answer with: " + start };
+    };
   }
 
   function hint() {
@@ -286,7 +325,8 @@ BD.Reading = (function () {
     if (finished) {
       R.done = true;
       const p = BD.Store.current();
-      const gain = Math.max(0, XP[Math.min(R.tries, TRIES) - 1][res.score] - (R.usedHint ? 5 : 0));
+      const gain = Math.max(0, Math.round(XP[Math.min(R.tries, TRIES) - 1][res.score] * BD.Hints.factor(BD.Hints.used("read"))));
+      BD.Hints.close("read");
       R.xp += gain;
       R.results.push({ type: q.type, best: R.best, q: q.q, answer: q.answer });
       record(p, R.grade, q.type, R.best === 2 && R.tries === 1 && !R.usedHint);
