@@ -132,7 +132,7 @@ BD.Digest = (function () {
       const s = read(), linked = BD.Family.linked(), on = !!(s.on && linked);
       const email = s.email || typed || "";
       return '<div class="dg">' +
-        '<label class="dg-row"><span><strong>Weekly progress email</strong><span class="muted small">Every Monday: what each child practiced, their wins, what to work on, Engage Teams talking points and one thing to try at home. No need to open the app.</span></span>' +
+        '<label class="dg-row"><span><strong>Email me every Monday</strong><span class="muted small"> what each child practiced, their wins, what to work on, Engage Teams talking points and one thing to try at home. No need to open the app.</span></span>' +
         '<input type="checkbox" class="switch" data-dg-on' + (on ? " checked" : "") + (linked ? "" : " disabled") + ' aria-label="Weekly progress email"></label>' +
         (linked ? '<label class="lf dg-email"><span>Parent email (the one you signed in with)</span><input type="email" data-dg-email autocomplete="email" inputmode="email" maxlength="254" value="' + esc(email) + '" placeholder="you@example.com"></label>' +
           '<p class="muted small dg-note">We use your email only to send this weekly note; it isn\'t stored on our server. It\'s kept on this device, which sends the note when Brain Dojo is opened on or after Monday.</p>' +
