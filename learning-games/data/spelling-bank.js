@@ -4776,6 +4776,25 @@ veto|The governor may ___ the bill.
       (BD.SPELLING[src] || []).forEach(function (x) { if (BD.SPELLING[g].length < target && x[0].length <= 4 && !have.has(x[0])) { have.add(x[0]); BD.SPELLING[g].push(x); } });
     });
   }
-  fill("0", ["1"], 500);
-  fill("-1", ["0", "1"], 500);
+  // (No longer padded from the grade above: Pre-K and K keep only words chosen for their level.)
+})();
+
+/* LEVEL CHECK for the youngest grades: words that are rare, above level or
+   could confuse a young child are taken out (reviewed by hand). Pre-K keeps
+   short picture words and first sight words; K keeps CVC words, sight words,
+   digraphs and simple blends. Also out everywhere: words with a second,
+   grown-up meaning. */
+(function () {
+  const OUT = {
+    "-1": "gap lab sap dab vat wed peg rim jig bog tot sum hub tax jazz deck dock peck rack cash rich thud lung rod cot yak lit rib pug sub cob pod",
+    "0": "jot rot cod mob pun lug clog crop skid slam slim slot snip snug spun stub trim trot dent disk gasp gust lend mend raft rust silk tusk honk dunk bunk plank chunk ranch shift shrub thump sixth tenth whisk pill chill gull stiff crack padlock gumdrop pigpen cobweb hilltop wigs plop flop grip",
+    "1": "thigh clerk verb perch weed strip",
+    "2": "female hinge fringe plunge pledge budge notch hutch"
+  };
+  Object.keys(OUT).forEach(function (g) {
+    const out = new Set(OUT[g].split(" "));
+    BD.SPELLING[g] = (BD.SPELLING[g] || []).filter(function (x) { return !out.has(x[0]); });
+  });
+  const FIX = { "-1": { lip: "I smile with my top ___." } };
+  Object.keys(FIX).forEach(function (g) { (BD.SPELLING[g] || []).forEach(function (x) { if (FIX[g][x[0]]) x[1] = FIX[g][x[0]]; }); });
 })();

@@ -44,10 +44,10 @@ BD.MathGame = (function () {
       add: function () { if (chance(0.5)) { const a = r(0, 10); return [a, r(0, 10 - a)]; } const b = r(2, 9); return [r(5, 20 - b), b]; }
     },
     2: {
-      about: "Adding and subtracting within 100; first times tables (×2, ×5, ×10) and sharing",
+      about: "Adding and subtracting within 100; equal groups of 2, 5 and 10",
+      ops: ["add", "sub", "mul"], // 2nd grade: no division yet (that starts in 3rd)
       add: function () { return chance(0.35) ? [r(2, 18), r(2, 9)] : sumUnder(10, 80, 99); },
-      mul: function () { return [r(1, 10), [2, 5, 10][r(0, 2)]]; },
-      div: function () { const d = [2, 5, 10][r(0, 2)], q = r(1, 10); return [d * q, d]; }
+      mul: function () { return [r(1, 5), [2, 5, 10][r(0, 2)]]; }
     },
     3: {
       about: "Facts to 10, two-digit adding and subtracting, times tables to 10×10",
@@ -589,7 +589,7 @@ BD.MathGame = (function () {
       '<h4 class="label">Math · ' + BD.gradeLabel(p.mathGrade) + '</h4><p class="muted small">' + FLASH_CARDS + ' quick cards of one skill. Finish a set with 70% or better for a <strong>+' + FLASH_BONUS + ' bonus</strong>, once per skill each day.</p>' +
       '<div class="flash-grid" id="flashPickHome">' + Object.keys(OPS).map(function (k) {
         const ok = allowed.indexOf(k) !== -1 && !retry, got = done.indexOf(k) !== -1;
-        return '<button type="button" class="flash-btn' + (got ? " done" : "") + '" data-flash="' + k + '"' + (ok ? "" : " disabled") + '><span class="op-sym">' + OPS[k].sym + '</span><span class="flash-name">' + OPS[k].label + '</span><span class="flash-state">' + (allowed.indexOf(k) === -1 ? "Starts in 2nd grade" : got ? "✓ Bonus earned" : "+" + FLASH_BONUS + " bonus") + '</span></button>';
+        return '<button type="button" class="flash-btn' + (got ? " done" : "") + '" data-flash="' + k + '"' + (ok ? "" : " disabled") + '><span class="op-sym">' + OPS[k].sym + '</span><span class="flash-name">' + OPS[k].label + '</span><span class="flash-state">' + (allowed.indexOf(k) === -1 ? (k === "div" ? "Starts in 3rd grade" : "Starts in 2nd grade") : got ? "✓ Bonus earned" : "+" + FLASH_BONUS + " bonus") + '</span></button>';
       }).join("") + '</div>' +
       '<h4 class="label">Spelling · ' + BD.gradeLabel(p.spellingGrade) + '</h4><p class="muted small">10 words of one puzzle type. 70% or better earns <strong>+' + BD.WordQuiz.SPELL_FLASH_BONUS + '</strong>, once per type each day.</p>' + BD.WordQuiz.flashHTML(p));
     document.getElementById("infoBody").onclick = function (e) {

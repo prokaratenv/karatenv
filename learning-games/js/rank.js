@@ -224,7 +224,7 @@ BD.Rank = (function () {
     const prev = Math.max(0, 0.6 - 0.15 * beltIndex), next = Math.max(0, 0.15 * (beltIndex - 5));
     const x = Math.random();
     if (x < prev && grade > BD.MIN_GRADE) return grade - 1;
-    if (x > 1 - next && grade < BD.MAX_GRADE) return grade + 1;
+    if (x > 1 - next && grade < BD.MAX_GRADE && (grade >= 3 || grade + 1 <= 2)) return grade + 1; // Pre-K to 2nd never reach 3rd-grade work
     return grade;
   }
   /* Short description of what a belt's test covers. */

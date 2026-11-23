@@ -8,8 +8,11 @@ BD.Quick = (function () {
   const shuffle = function (a) { return a.map(function (x) { return [Math.random(), x]; }).sort(function (x, y) { return x[0] - y[0]; }).map(function (x) { return x[1]; }); };
   const esc = function (s) { return BD.UI.esc(s); };
 
-  function math(grade) {
-    const ops = BD.MathGame.opsFor(grade);
+  function math(grade, base) {
+    // A harder grade mixed in keeps the student's own kinds of problems (no × for a 1st grader).
+    const own = base === undefined ? null : BD.MathGame.opsFor(base);
+    const ops = BD.MathGame.opsFor(grade).filter(function (o) { return !own || own.indexOf(o) !== -1; });
+    if (!ops.length) ops.push(BD.MathGame.opsFor(base)[0]);
     const q = BD.MathGame.makeProblem(ops[r(ops.length)], grade);
     const ans = q.answer, neg = grade >= 7;
     const cands = shuffle([ans + 1, ans - 1, ans + 2, ans - 2, ans + 10, ans - 10, ans * 2, Math.round(ans / 2), ans + 5, ans - 3]);
@@ -85,8 +88,8 @@ BD.Quick = (function () {
     const roll = Math.random();
     const maker = roll < 0.42 ? math : roll < 0.68 ? spelling : roll < 0.86 ? grammar : spanish;
     let q = null;
-    try { q = maker(g); } catch (e) { q = null; }
-    return q || math(g);
+    try { q = maker === math ? math(g, grade) : maker(g); } catch (e) { q = null; }
+    return q || math(g, grade);
   }
 
   return { question: question, math: math, spelling: spelling, grammar: grammar, spanish: spanish };

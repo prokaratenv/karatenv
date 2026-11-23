@@ -120,9 +120,13 @@ BD.WordQuiz = (function () {
     "peace piece pace pacer price prize pride bride ride rid red read reed lead led lid laid paid pail pale peel pole pool pull poll pile pill pine pain pane pin pen pan pun").split(" "));
   /* Every word in the spelling bank, rebuilt only if the bank grows. */
   let bankSet = null, bankN = -1;
+  let nearSet = null;
+  const unsafeWord = function (c) { return !!(BD.WordSafe && BD.WordSafe.unsafe(c)); };
   function isRealWord(c) {
     c = c.toLowerCase();
     if (COMMON.has(c)) return true;
+    if (!nearSet) nearSet = new Set(String(BD.NEAR_WORDS || "").split(" "));
+    if (nearSet.has(c) || unsafeWord(c)) return true; // a real word (or a rude one) is never a wrong choice
     let n = 0; Object.keys(BD.SPELLING).forEach(function (g) { n += BD.SPELLING[g].length; });
     if (!bankSet || n !== bankN) {
       bankSet = new Set(); bankN = n;
@@ -144,8 +148,17 @@ BD.WordQuiz = (function () {
     if (w.slice(-1) === "e" && w.length > 3) add(sound, w.slice(0, -1)); else if (VOWELS.indexOf(w.slice(-1)) === -1) add(other, w + "e");
     if (VOWELS.indexOf(w[0]) > -1) VOWELS.split("").forEach(function (v) { if (v !== w[0]) add(other, v + w.slice(1)); });
     const keepCase = function (c) { return word[0] === word[0].toUpperCase() ? c[0].toUpperCase() + c.slice(1) : c; };
-    const all = shuffle(sound).concat(shuffle(other)).filter(function (c, i, arr) { return arr.indexOf(c) === i && !isRealWord(c); });
+    const all = shuffle(sound).concat(shuffle(other)).filter(function (c, i, arr) { return arr.indexOf(c) === i && !isRealWord(c) && !unsafeWord(c); });
     return all.map(keepCase);
+  }
+
+  /* Letter tiles in a mixed-up order that never spells the word itself or a rude word. */
+  function safeTiles(word) {
+    const rude = function (t) { return BD.WordSafe && BD.WordSafe.hidden(t) && !BD.WordSafe.hidden(word); };
+    const real = function (t) { const j = t.join("").toLowerCase(); return j === word.toLowerCase() || isRealWord(j); }; // never another real word (pool → polo)
+    let tiles = shuffle(word.split("")), guard = 0;
+    while ((real(tiles) || rude(tiles)) && guard++ < 80) tiles = shuffle(word.split(""));
+    return tiles;
   }
 
   /* Missing letter(s): blanks a tricky spot and offers look-alike choices. */
@@ -160,7 +173,11 @@ BD.WordQuiz = (function () {
       for (let k = 0; k < n * 2; k++) spots.push([i, 1]);
     }
     if (grade >= 3 && w.length >= 6) for (let i = 1; i < w.length - 1; i++) if (CHUNKS.indexOf(w.slice(i, i + 2)) > -1 || w[i] === w[i + 1]) for (let k = 0; k < 6; k++) spots.push([i, 2]);
-    const sp = spots[r(spots.length)], at = sp[0], len = sp[1], ans = w.slice(at, at + len);
+    // Never leave a rude chunk showing on either side of the blank ("?ass" for pass).
+    const okSpot = function (x) { return !unsafeWord(w.slice(0, x[0])) && !unsafeWord(w.slice(x[0] + x[1])); };
+    const fine = spots.filter(okSpot);
+    const pool = fine.length ? fine : spots;
+    const sp = pool[r(pool.length)], at = sp[0], len = sp[1], ans = w.slice(at, at + len);
     let alts = [];
     if (len === 2) alts = ans[0] === ans[1] ? [ans[0], ans + ans[0], ans[0] === "s" ? "c" : ans[0] + "e"] : CHUNKS.filter(function (c) { return c !== ans; });
     else if (VOWELS.indexOf(ans) > -1 || ans === "y") alts = (VOWELS + "y").split("").filter(function (c) { return c !== ans; });
@@ -168,7 +185,7 @@ BD.WordQuiz = (function () {
     const choices = [ans];
     shuffle(alts.slice(0, len === 2 ? alts.length : 8)).concat(shuffle(alts.slice(8))).forEach(function (c) {
       const made = w.slice(0, at) + c + w.slice(at + len);
-      if (choices.length < 4 && choices.indexOf(c) === -1 && made !== w && !isRealWord(made)) choices.push(c);
+      if (choices.length < 4 && choices.indexOf(c) === -1 && made !== w && !isRealWord(made) && !unsafeWord(made)) choices.push(c);
     });
     const shown = word.slice(0, at), after = word.slice(at + len);
     return { ans: ans, choices: shuffle(choices), html: BD.UI.esc(shown) + '<span class="spell-blank">?</span>' + BD.UI.esc(after), plainShow: shown + "_".repeat(len) + after };
@@ -311,7 +328,7 @@ BD.WordQuiz = (function () {
     };
     if (style === "listen") return Object.assign(base, {
       typedSpell: true, small: true, prompt: "Listen, then spell the word", sub: blankSent,
-      tiles: shuffle(word.split("")), tilesFirst: grade <= 1, speakAfter: null,
+      tiles: safeTiles(word), tilesFirst: grade <= 1, speakAfter: null,
       speakNow: { text: word + ". " + full + " " + word + ".", lang: "en-US" }
     });
     if (style === "missing") {
@@ -343,14 +360,13 @@ BD.WordQuiz = (function () {
       const shown = misspellings(word)[0];
       return Object.assign(base, {
         typedSpell: true, small: true, prompt: "This word is misspelled. Type it the right way.", subHTML: underline(shown), shown: shown,
-        tiles: shuffle(word.split("")), tilesFirst: false,
+        tiles: safeTiles(word), tilesFirst: false,
         explain: "\"" + shown + "\" should be " + word + " (" + word.split("").join("-") + ").",
         facts: base.facts + " The sentence shows it misspelled as \"" + shown + "\" and the student must type it correctly."
       });
     }
     // scramble
-    let tiles = shuffle(word.split("")), guard = 0;
-    while (tiles.join("") === word && guard++ < 20) tiles = shuffle(word.split(""));
+    const tiles = safeTiles(word);
     return Object.assign(base, {
       typedSpell: true, small: true, prompt: "Unscramble the letters to finish the sentence", sub: blankSent,
       tiles: tiles, tilesAlways: true,
