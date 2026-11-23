@@ -65,27 +65,29 @@ BD.Goals = (function () {
   }
 
   /* ---------- fuel up: a healthy snack and water tip with each reminder ----------
-     General wellness for kids, not medical advice. No calorie counting, no
-     "bad food" talk: everyday foods and sometimes foods. */
+     General wellness for kids, not medical advice. "Fuel, don't fall":
+     fruits, veggies, water and simple proteins. No calorie counting, and
+     junk food is never named or shown. */
   const TIPS = [
     "Water is the best drink for training. Take a few sips right now!",
+    "Snack idea: apple slices. Crunchy, sweet and full of power!",
+    "Snack idea: a handful of grapes. Nature's bite-size fuel.",
+    "Snack idea: strawberries. Berries are great brain food!",
+    "Snack idea: carrot and cucumber sticks with hummus.",
     "Snack idea: apple slices with peanut butter (or sunflower butter if you're allergic to peanuts).",
-    "Snack idea: veggie sticks with hummus. Crunchy, colorful and full of power.",
     "Snack idea: a cheese stick and a handful of grapes.",
-    "Snack idea: yogurt with berries. Berries are great brain food!",
-    "Snack idea: whole-grain crackers with cheese.",
-    "Snack idea: a hard-boiled egg and some orange slices.",
+    "Snack idea: yogurt with strawberries or blueberries.",
     "Snack idea: a banana. It's nature's grab-and-go snack.",
-    "Snack idea: trail mix with nuts and raisins, if you're not allergic to nuts.",
-    "Snack idea: half a turkey or cheese sandwich on whole-grain bread.",
-    "Power combo: pair a fruit or veggie with a protein (like cheese, yogurt, eggs or beans). It keeps your energy steady.",
-    "Eat the rainbow: red, orange, yellow, green and purple foods each bring different vitamins.",
+    "Snack idea: orange slices and a hard-boiled egg.",
+    "Snack idea: celery with peanut butter, if you're not allergic.",
+    "Snack idea: snap peas, cherry tomatoes or bell pepper strips.",
+    "Power combo: pair a fruit or veggie with a protein (like cheese, yogurt or eggs). It keeps your energy steady.",
+    "Eat the rainbow: red strawberries, orange carrots, green grapes, purple berries. Each color brings different vitamins.",
     "Thirsty, tired or a headache? Your body might need water. Drink up!",
     "Keep a water bottle nearby when you train, at school and at practice.",
     "Breakfast fuels your brain for the whole morning. Champions eat breakfast!",
-    "Sweets and chips are sometimes foods. Fruits, veggies, whole grains and protein are everyday foods.",
-    "Brain foods: berries, eggs, whole grains, leafy greens, beans, and nuts or seeds if you're not allergic.",
-    "Feeling hungry between meals? A small snack 2 to 3 hours after a meal keeps you sharp.",
+    "Brain foods: berries, apples, eggs, leafy greens, beans, and nuts or seeds if you're not allergic.",
+    "Feeling hungry between meals? A piece of fruit keeps you sharp.",
     "Sleep is fuel too! Kids need about 9 to 12 hours, teens about 8 to 10.",
     "Drink extra water when it's hot or after you move a lot, like karate class!"
   ];
@@ -96,14 +98,14 @@ BD.Goals = (function () {
   function fuelCard(p) {
     const n = Math.max(0, Number(p.fuelN) || 0), tip = TIPS[n % TIPS.length];
     p.fuelN = (n + 1) % 1000;
-    return { tip: tip, html: '<div class="fuel-card"><p class="fuel-h"><span aria-hidden="true">🍎💧</span> Fuel your brain and body</p>' +
+    return { tip: tip, html: '<div class="fuel-card"><p class="fuel-h"><span aria-hidden="true">🍎💧</span> Fuel your brain and body</p><p class="fuel-tag">Fuel, don\'t fall!</p>' +
       '<p class="fuel-tip">' + esc(tip) + '</p><p class="fuel-water">' + esc(waterLine(p)) + ' Ask a grown-up before you grab a snack.</p>' +
       '<button type="button" class="btn btn-small btn-quiet" id="fuelMore">Learn more about fueling up</button></div>' };
   }
   function fuelGuide() {
     const p = BD.Store.current();
     BD.UI.sheet("Fuel Up guide", '<div class="fuel-guide">' +
-      '<p>Champions fuel up with water, everyday foods and good sleep. Here\'s how.</p>' +
+      '<p class="fuel-tag fuel-tag-big">Fuel, don\'t fall.</p><p>Helping kids learn to fuel, not fall. Champions fuel up with water, fruits, veggies and good sleep. Here\'s how.</p>' +
       '<h4 class="label">💧 Water</h4><ul class="plan-text">' +
         '<li>Ages 4 to 8 (about Pre-K to 2nd grade): about 5 cups a day.</li>' +
         '<li>Ages 9 to 13 (about 3rd to 8th grade): about 7 to 8 cups a day.</li>' +
@@ -111,14 +113,14 @@ BD.Goals = (function () {
         '<li>Drink more when it\'s hot or after you move a lot.</li>' +
         '<li>Thirsty, tired or a headache can mean you need water.</li>' +
         '<li>Keep a water bottle nearby and sip while you train. Water is the best drink.</li></ul>' +
-      '<h4 class="label">🍎 Healthy snacks</h4><p>Pair a fruit or veggie with a protein or whole grain. It keeps your energy steady.</p><ul class="plan-text">' +
+      '<h4 class="label">🍎 Healthy snacks</h4><p>Fruits and veggies first. Add a protein to keep your energy steady.</p><ul class="plan-text">' +
+        '<li>Apples, grapes, strawberries, bananas, oranges and blueberries</li><li>Carrot, cucumber and celery sticks, snap peas, cherry tomatoes</li>' +
         '<li>Apple slices with peanut or sunflower butter</li><li>Veggie sticks with hummus</li><li>Cheese stick and grapes</li>' +
-        '<li>Yogurt with berries</li><li>Whole-grain crackers with cheese</li><li>Hard-boiled egg and orange slices</li>' +
-        '<li>Trail mix with nuts and raisins, if you\'re not allergic</li></ul>' +
-      '<h4 class="label">🧠 Brain foods</h4><p>Berries, eggs, whole grains (like oatmeal and whole-wheat bread), leafy greens, beans, fish, and nuts or seeds if you\'re not allergic.</p>' +
+        '<li>Yogurt with strawberries</li><li>Hard-boiled egg and orange slices</li></ul>' +
+      '<h4 class="label">🧠 Brain foods</h4><p>Strawberries and blueberries, apples, eggs, leafy greens, beans, oatmeal, fish, and nuts or seeds if you\'re not allergic.</p>' +
       '<h4 class="label">🥋 Champion habits</h4><ul class="plan-text">' +
         '<li>Eat breakfast to fuel your morning.</li><li>Have a small snack 2 to 3 hours after a meal if you\'re hungry.</li>' +
-        '<li>Eat the rainbow: lots of colors on your plate.</li><li>Sweets and chips are sometimes foods. That\'s OK sometimes!</li>' +
+        '<li>Eat the rainbow: lots of fruit and veggie colors on your plate.</li><li>Grab fruit or veggies first when you\'re hungry between meals.</li>' +
         '<li>Sleep is fuel too: about 9 to 12 hours for kids, 8 to 10 for teens.</li></ul>' +
       '<p class="muted small">Every body is different. Ask your doctor about allergies or special diets.</p>' +
       '<div class="res-actions"><button type="button" class="btn btn-primary" id="fuelDone">I fueled up!</button><button type="button" class="btn btn-quiet" id="fuelBack">Keep training</button></div></div>');

@@ -572,3 +572,13 @@ tiles, letters left showing next to a blank, and spelling hint meanings.
 spelling word (rebuild with `node tools/near-words.js <wordlist>` after the
 spelling bank changes). Pre-K and K spelling lists are hand-checked for level;
 2nd grade math has no division (it starts in 3rd).
+
+## Daily Power Phrase (js/phrases.js)
+
+Before the first training of each day, Master Young shows "Today's Power
+Phrase" with a "Say it with me!" call and response. Phrases come from the
+Power Phrase Leadership Training worksheets, picked for kids and tagged by age
+group. Power Phrase Memory (missing word, put it in order, finish the phrase)
+brings phrases back on a spaced schedule; a phrase is mastered after it's right
+on 3 different days. +5 XP once a day for 3 or more right. The week's phrase
+shows in the Parents area and the weekly email.

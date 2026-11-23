@@ -142,3 +142,41 @@ mark.hint-mark { background: rgba(245, 197, 24, .45); color: inherit; border-rad
 .fuel-card .fuel-tip { margin: 0 0 6px; font-weight: 700; }
 .fuel-card .fuel-water { margin: 0 0 8px; font-size: .9rem; color: var(--muted); }
 .fuel-guide h4 { margin-top: 14px; }
+
+/* Fuel, don't fall */
+.fuel-tag { margin: 2px 0 4px; font-family: var(--font-display); font-weight: 900; font-style: italic; text-transform: uppercase; color: #65D94A; letter-spacing: .02em; }
+.fuel-tag-big { font-size: 1.4rem; text-align: center; }
+
+/* Power Phrases */
+.pp-card { text-align: center; }
+.pp-coach { display: flex; align-items: center; gap: 10px; text-align: left; margin-bottom: 12px; }
+.pp-coach .coach-face { width: 52px; height: 52px; border-radius: 50%; flex: 0 0 auto; }
+.pp-coach .coach-say p { margin: 2px 0 0; }
+.pp-eyebrow { color: var(--gold, #E0BA77); letter-spacing: .12em; }
+.pp-big { font-family: var(--font-display); font-weight: 900; font-style: italic; font-size: clamp(1.5rem, 6.5vw, 2.3rem); line-height: 1.15; margin: 8px 4px 6px;
+  background: linear-gradient(135deg, #65D94A 0%, #5CBFC1 50%, #4F6CEE 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.pp-theme { margin: 0 0 12px; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: .1em; font-size: .8rem; }
+.pp-link { margin-top: 10px; }
+.pp-chunks { color: var(--ink); background: none; -webkit-text-fill-color: initial; }
+.pp-chunk { opacity: .35; transition: opacity .3s, color .3s; color: var(--ink); -webkit-text-fill-color: currentColor; }
+.pp-chunk.said { opacity: .75; }
+.pp-chunk.now { opacity: 1; color: #5CBFC1; }
+.pp-turn { font-family: var(--font-display); font-weight: 900; font-size: 1.1rem; color: var(--gold, #E0BA77); min-height: 1.4em; }
+.pp-note { color: var(--muted); }
+.pp-q { font-weight: 800; margin: 6px 0; }
+.pp-prompt { font-size: clamp(1.3rem, 5.5vw, 1.9rem); }
+.pp-opts { display: grid; gap: 8px; margin: 10px 0; }
+.pp-opt { min-height: 48px; font-size: 1.05rem; white-space: normal; }
+.pp-opt.right { background: rgba(101, 217, 74, .25); border-color: #65D94A; }
+.pp-opt.wrong { background: rgba(255, 92, 110, .22); border-color: #FF5C6E; }
+.pp-built { min-height: 2.6em; font-family: var(--font-display); font-weight: 800; font-size: 1.2rem; padding: 8px; border-radius: 12px; border: 2px dashed rgba(255,255,255,.2); }
+.pp-fb { min-height: 1.4em; margin-top: 8px; }
+.pp-fb .good { color: #65D94A; }
+.pp-fb .btn { margin-top: 8px; }
+.pp-list { list-style: none; padding: 0; margin: 10px 0; text-align: left; display: grid; gap: 6px; }
+.pp-list li { display: flex; gap: 10px; align-items: baseline; padding: 8px 10px; border-radius: 12px; background: rgba(255,255,255,.05); }
+.pp-list li.mastered { background: rgba(224, 186, 119, .15); }
+.pp-stars { color: #E0BA77; white-space: nowrap; letter-spacing: 1px; }
+.pp-stars i { font-style: normal; color: rgba(255,255,255,.2); }
+.pp-card .pp-sub { opacity: .8; }
+.team-card.pp-card { --cta: #5CBFC1; --tint: rgba(92, 191, 193, .2); --glow: rgba(92, 191, 193, .35); }

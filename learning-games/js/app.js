@@ -520,6 +520,8 @@ BD.UI = (function () {
   function startTraining() {
     const p = BD.Store.current(); if (!p) return;
     BD.Sound.tap();
+    // Once a day: today's Power Phrase first, then training.
+    if (BD.Phrases && BD.Phrases.beforeTraining(function () { const q = BD.Store.current(); if (q) runPlan(nextStep(q)); })) return;
     runPlan(nextStep(p));
   }
   function runPlan(it) {
@@ -804,6 +806,7 @@ BD.UI = (function () {
     BD.Tourney.bind();
     if (BD.Teams) BD.Teams.bind();
     BD.Kid.bind();
+    if (BD.Phrases) BD.Phrases.bind();
     $("infoClose").addEventListener("click", function () { BD.Breaks.stop(); });
     BD.MathGame.bind();
     BD.SentenceGame.bind();

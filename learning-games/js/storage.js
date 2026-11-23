@@ -132,6 +132,7 @@ BD.Store = (function () {
     if (BD.Placement) BD.Placement.sanitize(p);
     if (BD.Rank && BD.Rank.sanitize) BD.Rank.sanitize(p);
     if (BD.Goals && BD.Goals.sanitize) BD.Goals.sanitize(p);
+    if (BD.Phrases && BD.Phrases.sanitize) BD.Phrases.sanitize(p);
     if (BD.StoryGen && BD.StoryGen.sanitize) BD.StoryGen.sanitize(p);
     if (BD.Phonics && BD.Phonics.sanitize) BD.Phonics.sanitize(p);
     if (BD.SentenceGen && BD.SentenceGen.sanitize) BD.SentenceGen.sanitize(p);

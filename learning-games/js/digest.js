@@ -54,6 +54,7 @@ BD.Digest = (function () {
       if (st) wins.push(st + (st === 1 ? " sticker" : " stickers") + " for the Sticker Book");
     }
 
+    if (BD.Phrases && BD.Phrases.digestLine) { const pl = BD.Phrases.digestLine(p, from, to); if (pl) wins.unshift(pl); }
     const weak = [], ins = BD.Parent.insight(p);
     const addWeak = function (s) { if (s && weak.indexOf(s) === -1) weak.push(s); };
     if (ins && ins.weak) addWeak(ins.weak.label.charAt(0).toUpperCase() + ins.weak.label.slice(1) + " (" + Math.round(ins.weak.r * 100) + "% right lately)");
