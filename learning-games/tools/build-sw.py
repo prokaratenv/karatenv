@@ -31,7 +31,7 @@ for top in ["css", "js", "data", "img"]:
             # Champion Studio art (30 champions x 9 looks) is fetched only when a student picks it, then kept by the worker
             if re.match(r"img/(age|fit|mask|face)-s\d\d[-.]", p): continue
             # big character variations come down in the background after the first visit
-            (LATER if p.startswith(("img/fit-", "img/age-", "img/boss-", "img/mask-")) else CORE).append(p)
+            (LATER if p.startswith(("img/fit-", "img/age-", "img/boss-", "img/mask-", "img/ex-")) else CORE).append(p)
 for p in ["index.html", "manifest.webmanifest"]:
     with open(p, "rb") as fh: h.update(p.encode() + fh.read())
 version = h.hexdigest()[:12]

@@ -118,3 +118,27 @@ mark.hint-mark { background: rgba(245, 197, 24, .45); color: inherit; border-rad
   #screen-math-play .flashcard { padding: 10px 12px 4px; }
   #screen-math-play .card-feedback { min-height: 1.1em; font-size: .9rem; }
 }
+
+/* Power Breaks: Master Young demonstrates (two frames that swap with the count). */
+.bb-coach { position: relative; height: 230px; width: 100%; max-width: 260px; margin: 4px auto; justify-self: center; }
+.bb-coach img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; transition: opacity .12s linear; }
+.bb-coach .ex-f1 { opacity: 0; }
+.bb-coach.pose1 .ex-f0 { opacity: 0; }
+.bb-coach.pose1 .ex-f1 { opacity: 1; }
+.bb-coach.noart { display: none; }
+@media (max-height: 700px) { .bb-coach { height: 180px; } }
+@media (prefers-reduced-motion: reduce) { .bb-coach img { transition: none; } }
+/* Real ninja stars */
+.shuriken { width: 1.1em; height: 1.1em; vertical-align: -.18em; filter: drop-shadow(0 2px 2px rgba(0, 0, 0, .45)); }
+.bc-icon .shuriken { width: 1.6em; height: 1.6em; }
+.sh-sm { width: 1.1em; height: 1.1em; }
+.sh-big { width: 84px; height: 84px; animation: shSpin 2.4s linear infinite; }
+.throw-star .shuriken { width: 40px; height: 40px; display: block; }
+@keyframes shSpin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .sh-big { animation: none; } }
+/* Fuel-up tip in the goal reminder, and the Fuel Up guide */
+.fuel-card { text-align: left; margin: 12px 0 4px; padding: 12px 14px; border-radius: 16px; background: rgba(101, 217, 74, .1); border: 1px solid rgba(101, 217, 74, .45); }
+.fuel-card .fuel-h { margin: 0 0 4px; font-family: var(--font-display); font-weight: 900; color: #9BEA84; }
+.fuel-card .fuel-tip { margin: 0 0 6px; font-weight: 700; }
+.fuel-card .fuel-water { margin: 0 0 8px; font-size: .9rem; color: var(--muted); }
+.fuel-guide h4 { margin-top: 14px; }

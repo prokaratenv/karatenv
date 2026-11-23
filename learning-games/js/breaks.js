@@ -15,6 +15,16 @@ BD.Breaks = (function () {
   const $ = function (id) { return document.getElementById(id); };
   const r = function (n) { return Math.floor(Math.random() * n); };
   const shuffle = function (a) { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = r(i + 1); const t = a[i]; a[i] = a[j]; a[j] = t; } return a; };
+  /* A real ninja star (shuriken): 4 steel points with a center hole. */
+  let shN = 0;
+  function shuriken(cls) {
+    const id = "shk" + (++shN);
+    return '<svg class="shuriken ' + (cls || "") + '" viewBox="0 0 100 100" aria-hidden="true" focusable="false">' +
+      '<defs><linearGradient id="' + id + '" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F2F5F8"/><stop offset=".45" stop-color="#9AA4AE"/><stop offset="1" stop-color="#4A525B"/></linearGradient></defs>' +
+      '<path d="M50 2 L60 40 L98 50 L60 60 L50 98 L40 60 L2 50 L40 40 Z" fill="url(#' + id + ')" stroke="#2E343A" stroke-width="2.5" stroke-linejoin="round"/>' +
+      '<path d="M50 6 L57 40 L50 50 Z M94 50 L60 57 L50 50 Z M50 94 L43 60 L50 50 Z M6 50 L40 43 L50 50 Z" fill="#fff" opacity=".28"/>' +
+      '<circle cx="50" cy="50" r="9" fill="#1B2027" stroke="#C9D0D6" stroke-width="2.5"/></svg>';
+  }
   const NUM = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen"];
 
   function day(p) { const t = BD.today(); if (!p.brk || p.brk.d !== t) p.brk = { d: t, n: 0, r: 0 }; return p.brk; }
@@ -41,7 +51,7 @@ BD.Breaks = (function () {
     { id: "crane", icon: "🦩", name: "Crane Balance", kind: "crane" },
     { id: "breath", icon: "🌬️", name: "Ninja Breathing", kind: "breath" },
     { id: "pads", icon: "🥊", name: "Focus Pads", kind: "pads", brain: true },
-    { id: "stars", icon: "⭐", name: "Throwing Stars", kind: "stars", brain: true },
+    { id: "stars", icon: shuriken(), name: "Throwing Stars", kind: "stars", brain: true },
     { id: "board", icon: "🪵", name: "Board Break", kind: "board", brain: true },
     { id: "combo", icon: "🥋", name: "Sensei Says", kind: "combo", brain: true },
     { id: "count", icon: "🔢", name: "Number Punch", kind: "count", brain: true },
@@ -77,13 +87,21 @@ BD.Breaks = (function () {
   let timers = [];
   function stopTimers() { timers.forEach(function (t) { clearInterval(t); clearTimeout(t); }); timers = []; }
 
+  /* Master Young demonstrates each move: two pictures that swap with the count. */
+  const still = function () { return window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches; };
+  function coach(move) {
+    return '<div class="bb-coach' + (still() ? " pose1" : "") + '" id="bbCoach" role="img" aria-label="Master Young showing the move">' +
+      '<img class="ex-f0" src="img/ex-' + move + '-0.webp" alt="" onerror="this.parentNode.classList.add(\'noart\')"><img class="ex-f1" src="img/ex-' + move + '-1.webp" alt=""></div>';
+  }
+  function pose(up) { const c = $("bbCoach"); if (c && !still()) c.classList.toggle("pose1", !!up); }
+
   /* ---------- jumping jacks, push-ups, sit-ups: real movement, counted out loud ---------- */
   function body(p, m) {
     const n = m.reps[young(p) ? 0 : 1];
     let i = 0;
     BD.UI.sheet("⚡ " + m.name, '<div class="break-body">' +
-      '<p class="bb-task">Stand up! Do <strong>' + n + ' ' + m.say + '</strong> with your champion.</p>' +
-      '<div class="bb-champ mv-' + m.id + '">' + BD.UI.championHTML(p) + '</div>' +
+      '<p class="bb-task">Stand up! Do <strong>' + n + ' ' + m.say + '</strong> with Master Young.</p>' +
+      coach(m.id) +
       '<div class="bb-count" id="bbCount">Ready…</div>' + backBtn("I did them! Back to training") + '</div>');
     $("breakBack").onclick = back;
     speak("Stand up! Let's do " + n + " " + m.say + ". Ready? Go!");
@@ -91,7 +109,7 @@ BD.Breaks = (function () {
       const tick = setInterval(function () {
         i++;
         $("bbCount") && ($("bbCount").textContent = i + " / " + n);
-        const c = document.querySelector(".bb-champ"); if (c) { c.classList.remove("rep"); void c.offsetWidth; c.classList.add("rep"); }
+        pose(true); timers.push(setTimeout(function () { pose(false); }, m.id === "pushups" ? 750 : 560));
         speak(NUM[i] || String(i)); BD.Sound.tap();
         if (i >= n) { clearInterval(tick); setTimeout(function () { if ($("bbCount")) $("bbCount").textContent = "Osu! Great work!"; speak("Osu! Great work!"); BD.confetti(50); }, 700); }
       }, m.id === "pushups" ? 1700 : 1300);
@@ -152,12 +170,12 @@ BD.Breaks = (function () {
       $("starQ").textContent = "Throw at " + q.q + "!";
       $("starRow").innerHTML = q.o.map(function (v, i) { return '<button type="button" class="target t' + i + '" data-v="' + esc(v) + '"><span>' + esc(v) + '</span></button>'; }).join("");
     };
-    BD.UI.sheet("⭐ Throwing Stars", '<div class="break-game"><div class="bg-top"><span id="starQ"></span><span class="bg-score">⭐ <b id="starHits">0</b> · <span id="brTime">' + TAP_SECONDS + 's</span></span></div><p class="muted small">Wooden targets only. Throwing stars are for practice, never at a person.</p><div class="target-row" id="starRow"></div></div>');
+    BD.UI.sheet("Throwing Stars", '<div class="break-game"><div class="bg-top"><span id="starQ"></span><span class="bg-score">' + shuriken("sh-sm") + ' <b id="starHits">0</b> · <span id="brTime">' + TAP_SECONDS + 's</span></span></div><p class="muted small">Wooden targets only. Throwing stars are for practice, never at a person.</p><div class="target-row" id="starRow"></div></div>');
     draw();
     $("infoBody").onclick = function (e) {
       const t = e.target.closest(".target"); if (!t || t.disabled) return;
       const rc = t.getBoundingClientRect(), s = document.createElement("span");
-      s.className = "throw-star"; s.textContent = "✴️";
+      s.className = "throw-star"; s.innerHTML = shuriken();
       s.style.setProperty("--tx", (rc.left + rc.width / 2) + "px"); s.style.setProperty("--ty", (rc.top + rc.height / 2) + "px");
       document.body.appendChild(s); setTimeout(function () { s.remove(); }, 420);
       setTimeout(function () {
@@ -166,7 +184,7 @@ BD.Breaks = (function () {
         else { t.classList.add("miss"); t.disabled = true; BD.Sound.wrong(); }
       }, 380);
     };
-    countdown(TAP_SECONDS, function () { $("infoBody").onclick = null; done('<div class="chest-prize">⭐</div><h3>' + hits + (hits === 1 ? " bullseye!" : " bullseyes!") + '</h3><p>Great aim and a sharp mind.</p>'); });
+    countdown(TAP_SECONDS, function () { $("infoBody").onclick = null; done('<div class="chest-prize">' + shuriken("sh-big") + '</div><h3>' + hits + (hits === 1 ? " bullseye!" : " bullseyes!") + '</h3><p>Great aim and a sharp mind.</p>'); });
   }
 
   /* ---------- board break: stop the power meter in the green zone ---------- */
@@ -206,14 +224,14 @@ BD.Breaks = (function () {
   function crane(p) {
     const secs = young(p) ? 8 : 12; let side = 0, left = secs;
     BD.UI.sheet("🦩 Crane Balance", '<div class="break-body"><p class="bb-task" id="crTask">Stand up! Lift your <strong>left</strong> knee, arms out like a crane, and hold.</p>' +
-      '<div class="bb-champ crane-pose">' + BD.UI.championHTML(p) + '</div><div class="bb-count" id="bbCount">' + secs + '</div>' + backBtn("I did it! Back to training") + '</div>');
+      coach("crane") + '<div class="bb-count" id="bbCount">' + secs + '</div>' + backBtn("I did it! Back to training") + '</div>');
     $("breakBack").onclick = back;
     speak("Crane balance! Lift your left knee and hold.");
     const t = setInterval(function () {
       left--; if (!$("bbCount")) return clearInterval(t);
       $("bbCount").textContent = left > 0 ? left : "Switch!";
       if (left <= 0) {
-        if (side === 0) { side = 1; left = secs + 1; $("crTask").innerHTML = "Now your <strong>right</strong> knee. Steady eyes, steady body."; speak("Switch! Right knee up."); }
+        if (side === 0) { side = 1; left = secs + 1; const c = $("bbCoach"); if (c) c.classList.add("pose1"); $("crTask").innerHTML = "Now your <strong>right</strong> knee. Steady eyes, steady body."; speak("Switch! Right knee up."); }
         else { clearInterval(t); $("bbCount").textContent = "Osu! Rock solid!"; speak("Osu! Rock solid!"); BD.confetti(50); }
       }
     }, 1000);
