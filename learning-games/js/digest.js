@@ -39,7 +39,10 @@ BD.Digest = (function () {
     const g = BD.Rank.dojoGrade(p), r = BD.Rank.rec(p, g), sess = (p.sessions || []).filter(function (s) { return s.date && inRange(s.date); });
     const wins = [];
     w.belts.forEach(function (b) { wins.push("Earned the " + b.to.name + " Belt (" + BD.gradeLabel(b.grade) + ")"); });
-    w.stripes.forEach(function (x) { wins.push("Earned a " + (SUBJECTS[x.subject] || "new") + " stripe"); });
+    // One line for all stripes (Spanish is bonus training now, not a stripe).
+    const st = w.stripes.filter(function (x) { return x.subject !== "spanish"; }), byS = {};
+    st.forEach(function (x) { const k = SUBJECTS[x.subject] || "Other"; byS[k] = (byS[k] || 0) + 1; });
+    if (st.length) wins.push("Earned " + (st.length === 1 ? "a stripe" : st.length + " stripes") + ": " + Object.keys(byS).map(function (k) { return k + (byS[k] > 1 ? " ×" + byS[k] : ""); }).join(", "));
     w.badges.forEach(function (b) { wins.push("New badge: " + BD.Badges.gearName(b)); });
     const bosses = []; sess.forEach(function (s) { if (s.game === "boss" && s.won && s.boss && bosses.indexOf(s.boss) === -1) bosses.push(s.boss); });
     bosses.forEach(function (b) { wins.push("Beat the boss " + b); });
