@@ -1,8 +1,8 @@
 {
- "updated": "2026-11-18",
+ "updated": "2026-11-23",
  "window": {
   "start": "2026-10-10",
-  "end": "2026-11-18"
+  "end": "2026-11-23"
  },
  "accounts": {
   "tiktok": "CD Young (@cdyoung)",
@@ -501,6 +501,139 @@
    "score": 85,
    "title": "Black Belt Discipline: Master Your Motivation, Conquer Life",
    "durationSec": 108
+  },
+  {
+   "clipId": "oZxVnpuFOD",
+   "projectId": "P3111906BLQ1",
+   "publishedAt": "2026-11-19T06:13:34.289Z",
+   "posts": {
+    "facebook": "1850023386268041",
+    "tiktok": "7709761827537734942",
+    "youtube": "AZ11aLGqC80",
+    "instagram": "Df6aS__jrlO"
+   },
+   "linkedinPosts": 2,
+   "reposts": [
+    "linkedin:7529064324561199104",
+    "linkedin:7529064325660012546"
+   ],
+   "score": 87,
+   "title": "Keep Your Hands Up—and Help Your Training Partners Improve",
+   "durationSec": 23
+  },
+  {
+   "clipId": "5kC5zp5kma",
+   "projectId": "P2060702HtZM",
+   "publishedAt": "2026-11-19T19:36:24.944Z",
+   "posts": {
+    "facebook": "1134949885931997",
+    "youtube": "aoE_HFqBzBc",
+    "instagram": "Df72LWAHH9o",
+    "tiktok": "7709968724865879309"
+   },
+   "linkedinPosts": 2,
+   "reposts": [
+    "linkedin:7529266371302502402",
+    "linkedin:7529266372980211712"
+   ],
+   "score": 85,
+   "title": "Karate Basics: Mastering Fists, Blocks & Stances!",
+   "durationSec": 62
+  },
+  {
+   "clipId": "P87ezSASf7",
+   "projectId": "P2060702OByB",
+   "publishedAt": "2026-11-19T23:24:35.901Z",
+   "posts": {
+    "tiktok": "7710027550180871437",
+    "instagram": "Df8QZmHk_gr",
+    "youtube": "qJiBAqjXXOQ",
+    "facebook": "29398540189740590"
+   },
+   "linkedinPosts": 2,
+   "reposts": [
+    "linkedin:7529323799369158656",
+    "linkedin:7529323799842881537"
+   ],
+   "score": 88,
+   "title": "Elbow Strike Mastery: Perfect Your Technique Now!",
+   "durationSec": 46
+  },
+  {
+   "clipId": "rIHgEMoLxp",
+   "projectId": "P20613000L39",
+   "publishedAt": "2026-11-20T02:47:10.046Z",
+   "posts": {
+    "facebook": "1150126554100051",
+    "instagram": "Df8nmeGEUu3",
+    "tiktok": "7710079718522883342",
+    "youtube": "o3dVmXBOae8"
+   },
+   "linkedinPosts": 2,
+   "reposts": [
+    "linkedin:7529374807554187264",
+    "linkedin:7529374818513637376"
+   ],
+   "score": 85,
+   "title": "Straight Leg Kicks: Martial Arts Extension Technique",
+   "durationSec": 48
+  },
+  {
+   "clipId": "gLPkwMMqJO",
+   "projectId": "P2093006E7HC",
+   "publishedAt": "2026-11-21T15:26:30.404Z",
+   "posts": {
+    "tiktok": "7710646413260098830",
+    "youtube": "CIP46WEsVP4",
+    "facebook": "4523917757823261",
+    "instagram": "DgAjL5njx_6"
+   },
+   "linkedinPosts": 2,
+   "reposts": [
+    "linkedin:7529928253252288512",
+    "linkedin:7529928264023478272"
+   ],
+   "score": 99,
+   "title": "Unlock Peak Performance: Fun & Confidence in Training!",
+   "durationSec": 47
+  },
+  {
+   "clipId": "SKKbadZJeW",
+   "projectId": "P2060702K5Nb",
+   "publishedAt": "2026-11-22T10:18:45.243Z",
+   "posts": {
+    "tiktok": "7710937811553242382",
+    "facebook": "2174481803459944",
+    "instagram": "DgCk2SPFMdc",
+    "youtube": "GWG691hFQzI"
+   },
+   "linkedinPosts": 2,
+   "reposts": [
+    "linkedin:7530213249414533121",
+    "linkedin:7530213234000314369"
+   ],
+   "score": 85,
+   "title": "Mount Control to Side Control: Self-Defense Techniques",
+   "durationSec": 166
+  },
+  {
+   "clipId": "VzeaEUsds9",
+   "projectId": "P2100100VsxT",
+   "publishedAt": "2026-11-23T08:37:58.806Z",
+   "posts": {
+    "youtube": "R0RQzPxhAnI",
+    "tiktok": "7711283202421181709",
+    "facebook": "1004242128806978",
+    "instagram": "DgE-AavlTyx"
+   },
+   "linkedinPosts": 2,
+   "reposts": [
+    "linkedin:7530550238370054144",
+    "linkedin:7530550234075086848"
+   ],
+   "score": 84,
+   "title": "Building Confidence: How Words Empower and Protect You",
+   "durationSec": 69
   }
  ],
  "backlog": [
@@ -512,11 +645,39 @@
    "durationSec": 12
   },
   {
+   "clipId": "ZbSoDT331H",
+   "projectId": "P2060702HtZM",
+   "score": 99,
+   "title": "Correct Fist Punch Technique: Master Your Strike Now!",
+   "durationSec": 36
+  },
+  {
+   "clipId": "4kaEbENO97",
+   "projectId": "P2060702K5Nb",
+   "score": 99,
+   "title": "Self-Defense: Ground Control & Escape Strategy After Knockdown",
+   "durationSec": 80
+  },
+  {
    "clipId": "HkivPjHmZ6",
    "projectId": "P3110608Jwu2",
    "score": 94,
    "title": "Stop Waiting to Be Called Out—Give Your Best",
    "durationSec": 98
+  },
+  {
+   "clipId": "Rc561DJr11",
+   "projectId": "P2100100VsxT",
+   "score": 94,
+   "title": "Protect Your Feelings: Build Unshakeable Confidence",
+   "durationSec": 23
+  },
+  {
+   "clipId": "3suh3NcwIX",
+   "projectId": "P2093006E7HC",
+   "score": 85,
+   "title": "Bo Staff Safety: Instructor's Warning to Students During Training",
+   "durationSec": 17
   },
   {
    "clipId": "h3WjGC8hEP",
@@ -545,34 +706,6 @@
    "score": 84,
    "title": "Master the Invincible Jab-Cross Blocking Drill",
    "durationSec": 26
-  },
-  {
-   "clipId": "ZfouJYy80c",
-   "projectId": "P3111109IK56",
-   "score": 84,
-   "title": "Train Like Kobe: Lock In, Practice With Purpose",
-   "durationSec": 73
-  },
-  {
-   "clipId": "WZId0oivgk",
-   "projectId": "P3061907wwcd",
-   "score": 84,
-   "title": "Black Belt Truth: You MUST Find Your Own Discipline!",
-   "durationSec": 30
-  },
-  {
-   "clipId": "D5gfYdXbHK",
-   "projectId": "P3110203HB5c",
-   "score": 81,
-   "title": "Land the Right Punch: From Ribs to Head",
-   "durationSec": 116
-  },
-  {
-   "clipId": "aYAjyOnSox",
-   "projectId": "P3061907wwcd",
-   "score": 80,
-   "title": "Red Belts: How to FACE Black Belt CHALLENGES!",
-   "durationSec": 33
   }
  ]
 }
