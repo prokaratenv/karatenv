@@ -563,8 +563,35 @@ BD.Little = (function () {
     else if (a === "done") { BD.Sound.tap(); placeClose(); BD.UI.home(); }
   }
 
+  /* Parents-area controls. little.js loads before settings.js, so register once the page is ready. */
+  function addSettings() {
+    if (!BD.Settings || addSettings.done) return; addSettings.done = true;
+  /* ================= PARENTS: change the child's grade (all subjects) ================= */
+    BD.Settings.add({
+    id: "grade-level", scope: "student", title: "Grade level",
+    html: function (p) {
+      const g = Number(BD.Rank.dojoGrade(p));
+      return '<label class="set-row"><span><strong>' + esc(p.name) + '\'s grade</strong><span class="muted small">Sets every subject to this grade and picks the right home screen. Belts and stripes earned at each grade are kept.</span></span>' +
+        '<select data-gl-grade>' + BD.GRADES.map(function (x) { return '<option value="' + x + '"' + (x === g ? " selected" : "") + '>' + esc(BD.gradeLabel(x)) + '</option>'; }).join("") + '</select></label>';
+    },
+    bind: function (el, p, rerender) {
+      const sel = el.querySelector("[data-gl-grade]");
+      if (sel) sel.addEventListener("change", function () {
+        const g = Number(sel.value);
+        p.dojoGrade = g;
+        ["mathGrade", "sentenceGrade", "readingGrade", "spellingGrade", "spanishGrade"].forEach(function (f) { p[f] = g; });
+        p.retry = {}; // a parent's choice ends any redo
+        if (BD.Rank.setLevel) ["math", "reading", "spelling", "comprehension", "spanish"].forEach(function (k) { BD.Rank.setLevel(p, k, g); });
+        delete p.picHome; // home screen follows the new grade (picture home for Preschool and Pre-K)
+        BD.Store.save(p);
+        BD.Sound.tap();
+        if (rerender) rerender();
+      });
+    }
+  });
+
   /* ================= PARENTS: picture home switch ================= */
-  if (BD.Settings) BD.Settings.add({
+    BD.Settings.add({
     id: "little-home", scope: "student", title: "Simple picture home",
     html: function (p) {
       return '<label class="sound-row"><span><strong>Simple picture home for ' + esc(p.name) + '</strong><span class="muted small">Big picture buttons and a spoken greeting, made for children who aren\'t reading yet. On by default for Preschool and Pre-K. Leaderboards, teams and quests stay in the Parents area.</span></span>' +
@@ -578,6 +605,9 @@ BD.Little = (function () {
       if (b) b.addEventListener("click", function () { place(p, { from: "parent" }); });
     }
   });
+  }
+  if (BD.Settings) addSettings(); else document.addEventListener("DOMContentLoaded", addSettings);
+
   function sanitize(p) {
     if (p.picHome !== undefined && typeof p.picHome !== "boolean") delete p.picHome;
     if (p.placedHow !== undefined && p.placedHow !== "age" && p.placedHow !== "check") delete p.placedHow;
