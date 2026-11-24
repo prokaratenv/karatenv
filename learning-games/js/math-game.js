@@ -579,13 +579,13 @@ BD.MathGame = (function () {
   /* Home screen: the Daily Flashcards tile and its picker. */
   function flashTile(p) {
     const done = flashToday(p).ops.length * FLASH_BONUS + BD.WordQuiz.flashDone(p), max = opsFor(p.mathGrade).length * FLASH_BONUS + 4 * BD.WordQuiz.SPELL_FLASH_BONUS;
-    return '<span class="tile-icon" aria-hidden="true">⚡</span><span class="quest-txt"><span class="boss-k">Daily Flashcards</span><strong>' + (done >= max ? "All done today!" : "Math + spelling sets") + '</strong>' +
+    return '<span class="tile-icon" aria-hidden="true">' + BD.Icon.svg("bolt", 30) + '</span><span class="quest-txt"><span class="boss-k">Daily Flashcards</span><strong>' + (done >= max ? "All done today!" : "Math + spelling sets") + '</strong>' +
       '<span class="quest-bar"><span style="width:' + Math.round(100 * done / Math.max(1, max)) + '%"></span></span><span class="boss-sub">Bonus today: +' + done + ' of +' + max + '</span></span>';
   }
   function openFlash() {
     const p = BD.Store.current(); if (!p) return;
     const done = flashToday(p).ops, allowed = opsFor(p.mathGrade), retry = p.retry && p.retry.math;
-    BD.UI.sheet("⚡ Daily Flashcards",
+    BD.UI.sheet("Daily Flashcards",
       '<h4 class="label">Math · ' + BD.gradeLabel(p.mathGrade) + '</h4><p class="muted small">' + FLASH_CARDS + ' quick cards of one skill. Finish a set with 70% or better for a <strong>+' + FLASH_BONUS + ' bonus</strong>, once per skill each day.</p>' +
       '<div class="flash-grid" id="flashPickHome">' + Object.keys(OPS).map(function (k) {
         const ok = allowed.indexOf(k) !== -1 && !retry, got = done.indexOf(k) !== -1;

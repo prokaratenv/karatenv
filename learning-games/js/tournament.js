@@ -42,7 +42,7 @@ BD.Tourney = (function () {
   function card(p) {
     const el = $("tourneyCard"); if (!el || !p) return;
     const any = Object.keys(TYPES).some(function (t) { return open(p, t); });
-    el.innerHTML = '<span class="duel-icon" aria-hidden="true">🏆</span><span><strong>Tournaments</strong><span class="boss-sub">' +
+    el.innerHTML = '<span class="duel-icon" aria-hidden="true">' + BD.Icon.svg("trophy", 28) + '</span><span><strong>Tournaments</strong><span class="boss-sub">' +
       (any ? (count(p, "gold") + count(p, "silver") + count(p, "bronze") ? "🥇" + count(p, "gold") + " 🥈" + count(p, "silver") + " 🥉" + count(p, "bronze") : "Kata · Sparring · Weapons") : "Opens at Yellow Belt · 2 stripes") +
       (isWeekend() ? " · 2× XP today!" : "") + (BD.Challenge ? esc(BD.Challenge.homeLine(p)) : "") + '</span></span>';
     if (BD.Challenge && BD.Challenge.on() && !card.busy) { card.busy = true; BD.Challenge.refresh().then(function () { card.busy = false; const n = BD.Store.current(); if (n && n.id === p.id && el.isConnected) { const sub = el.querySelector(".boss-sub"); if (sub && sub.textContent.indexOf("⚔️") === -1 && BD.Challenge.homeLine(n)) sub.textContent += BD.Challenge.homeLine(n); } }); }
@@ -50,7 +50,7 @@ BD.Tourney = (function () {
   function hub(opts) {
     const p = BD.Store.current(); if (!p) return;
     stopMatch(); T = null;
-    $("tnTitle").textContent = "🏆 Tournaments";
+    $("tnTitle").textContent = "Tournaments";
     $("tnBody").innerHTML =
       '<div class="tn-head"><p>Single-elimination brackets of 6 to 12 competitors. Enter as many as you like!</p>' +
       '<p class="tn-prizes">🥇 Gold <strong>+' + MEDAL_XP.gold * (isWeekend() ? 2 : 1) + ' XP</strong> · 🥈 Silver <strong>+' + MEDAL_XP.silver * (isWeekend() ? 2 : 1) + '</strong> · 🥉 Bronze <strong>+' + MEDAL_XP.bronze * (isWeekend() ? 2 : 1) + '</strong>' +

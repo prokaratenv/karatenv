@@ -988,7 +988,7 @@ BD.UI = (function () {
   function syncMute() {
     document.body.classList.toggle("no-speech", !BD.Speech.available || BD.Store.muted);
     const m = BD.Music.prefs().music, fx = !BD.Store.muted;
-    $("muteBtn").textContent = m && fx ? "🔊 Sound" : m || fx ? "🔉 Sound" : "🔇 Sound";
+    $("muteBtn").innerHTML = BD.Icon.svg(m && fx ? "soundOn" : m || fx ? "soundLow" : "soundOff", 18) + " Sound";
     $("muteBtn").setAttribute("aria-label", "Sound settings: music " + (m ? "on" : "off") + ", sound effects " + (fx ? "on" : "off"));
   }
   /* Sound menu: music on/off and volume, sound effects (and read-aloud voice) on/off. */

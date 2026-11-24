@@ -131,7 +131,7 @@ BD.Quest = (function () {
     const qc = $("questCard"), mc = $("mapCard"); if (!qc || !mc || !p) return;
     const c = current(p), pct = Math.round(100 * c.n / c.q.goal);
     qc.className = "quest-card" + (c.done && !c.claimed ? " ready" : "") + (c.claimed ? " claimed" : "");
-    qc.innerHTML = '<span class="quest-icon" aria-hidden="true">' + (c.claimed ? "✅" : c.done ? "🎁" : "⭐") + '</span>' +
+    qc.innerHTML = '<span class="quest-icon" aria-hidden="true">' + BD.Icon.svg(c.claimed ? "check" : c.done ? "gift" : "star", 30) + '</span>' +
       '<span class="quest-txt"><span class="boss-k">Today\'s quest' + (p.shields ? ' · ' + p.shields + (p.shields > 1 ? " streak shields" : " streak shield") : '') + '</span><strong>' + esc(c.q.title) + '</strong>' +
       (c.claimed ? '<span class="boss-sub">Done! New quest tomorrow.' + (c.q.game || c.q.id === "school" || c.q.id === "boss" ? ' Tap to play again.' : ' Tap to see your map.') + '</span>' : c.done ? '<span class="boss-sub">Quest complete! Tap to open your chest</span>' :
         '<span class="quest-bar"><span style="width:' + pct + '%"></span></span><span class="boss-sub">' + c.n + ' / ' + c.q.goal + (c.q.goal === 25 ? " questions" : "") + '</span>') + '</span>';

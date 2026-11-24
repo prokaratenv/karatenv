@@ -582,3 +582,10 @@ group. Power Phrase Memory (missing word, put it in order, finish the phrase)
 brings phrases back on a spaced schedule; a phrase is mastered after it's right
 on 3 different days. +5 XP once a day for 3 or more right. The week's phrase
 shows in the Parents area and the weekly email.
+
+## Polish and install (phase 5)
+
+- `js/icons.js` (`BD.Icon.svg(name, size)`): one line-icon set for app chrome (Sound, quest, flashcards, Power Phrases, tournaments, partner challenge, install). Emoji stay in kid content.
+- `js/feel.js` (`BD.Feel.buzz(kind)`): short vibrations on right answers, stripe/part passes, graduations and fist bumps. Family setting "Vibration (this device)", on by default, separate from sound.
+- `js/install.js` (`BD.Install`): "Add Brain Dojo to your home screen" card (Android install prompt, iPhone/iPad Share steps). Shows on the 2nd visit or after the first round, never in the Claude version or when installed, "Not now" hides it 14 days. Me tab: "Install the app".
+- CSS tokens (radii, spacing, type, spring curve), springy presses, gliding progress fills, screen/tab/sheet transitions; all off with reduced motion.

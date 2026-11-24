@@ -8,15 +8,30 @@
   "theme_color": "#0D1830",
   "icons": [
     {
-      "src": "img/apple-touch-icon.png",
-      "sizes": "180x180",
-      "type": "image/png"
+      "src": "img/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
     },
     {
       "src": "img/app-icon.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "img/app-icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "img/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
     }
-  ]
+  ],
+  "id": "./",
+  "description": "Brain Dojo by Engage: free Pre-K to 8th grade learning games with belts and stripes.",
+  "orientation": "any"
 }

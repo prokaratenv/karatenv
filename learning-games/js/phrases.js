@@ -317,7 +317,7 @@ BD.Phrases = (function () {
     const c = $("ppCard"); if (!c || !p) return;
     const ph = todays(p), s = st(p), m = Object.keys(s.ok).filter(function (id) { return mastered(p, id); }).length;
     c.hidden = false;
-    c.innerHTML = '<span class="duel-icon" aria-hidden="true">💬</span><span><strong>Power Phrases</strong><span class="boss-sub">Today: "' + esc(ph.t) + '"</span><span class="boss-sub pp-sub">' + Object.keys(s.seen).length + ' learned · ' + m + ' mastered · tap to play the memory game</span></span>';
+    c.innerHTML = '<span class="duel-icon" aria-hidden="true">' + BD.Icon.svg("chat", 28) + '</span><span><strong>Power Phrases</strong><span class="boss-sub">Today: "' + esc(ph.t) + '"</span><span class="boss-sub pp-sub">' + Object.keys(s.seen).length + ' learned · ' + m + ' mastered · tap to play the memory game</span></span>';
   }
   function weekPhrases(p, from, to) {
     const s = st(p);

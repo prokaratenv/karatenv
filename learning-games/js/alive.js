@@ -112,7 +112,7 @@ BD.Alive = (function () {
     const kind = ["bump", "cheer", "phrase"][turn++ % 3];
     if (kind === "bump") {
       BD.Sound.tap(); bubble("Fist bump!", "bump"); burst();
-      if (navigator.vibrate) try { navigator.vibrate(25); } catch (e) { /* ignore */ }
+      if (BD.Feel) BD.Feel.buzz("bump");
     } else if (kind === "cheer") {
       BD.Sound.tap(); bubble(CHEERS[Math.floor(Math.random() * CHEERS.length)], "proud");
     } else {
