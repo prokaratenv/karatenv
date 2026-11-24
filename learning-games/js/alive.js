@@ -58,7 +58,7 @@ BD.Alive = (function () {
     const st = BD.streak(p), cells = weekCells(p, monday(now), now), b = best(p);
     el.setAttribute("aria-label", st.days + " day streak. Best " + b + ". Tap to see the last 4 weeks.");
     el.innerHTML = '<span class="wc-row">' + cells.map(cellHTML).join("") + '</span>' +
-      '<span class="wc-cap"><strong>' + st.days + '-day streak</strong> · Best: ' + b + '</span>';
+      '<span class="wc-cap"><strong>Best: ' + b + (b === 1 ? " day" : " days") + '</strong> · tap to see 4 weeks</span>';
   }
   function openCal(p) {
     if (!p) return;

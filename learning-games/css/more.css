@@ -380,12 +380,12 @@ body.has-tabs .footer { margin-top: 16px; }
 @keyframes fistPop { 0% { opacity: 0; scale: .3; } 30% { opacity: 1; scale: 1.15; } 100% { opacity: 0; scale: 1; translate: 10px -24px; } }
 .champ-say {
   position: absolute; left: 50%; top: 2px; z-index: 4; max-width: min(78vw, 260px); width: max-content;
-  translate: -50% -100%; padding: 8px 12px; border-radius: 14px; background: #FFF8E8; color: #1B1205;
+  translate: -50% calc(-100% + 12px); padding: 8px 12px; border-radius: 14px; background: #FFF8E8; color: #1B1205;
   font-weight: 800; font-size: .92rem; line-height: 1.25; text-align: center; box-shadow: 0 8px 20px rgba(0, 0, 0, .35);
   opacity: 0; pointer-events: none; transition: opacity .25s ease, translate .25s ease;
 }
 .champ-say::after { content: ""; position: absolute; left: 50%; bottom: -7px; margin-left: -7px; border: 7px solid transparent; border-bottom: 0; border-top-color: #FFF8E8; }
-.champ-say.show { opacity: 1; translate: -50% calc(-100% + 34px); }
+.champ-say.show { opacity: 1; translate: -50% calc(-100% - 4px); }
 @media (prefers-reduced-motion: reduce) {
   .fighter-art.alive > *, .fighter-art[class*="act-"] > * { animation: none !important; }
   .fist-burst { display: none; }
@@ -411,3 +411,31 @@ body.has-tabs .footer { margin-top: 16px; }
 .wc-sheet .wc-row { max-width: 340px; }
 .wc-big { display: flex; align-items: center; gap: 8px; font-size: 1.3rem; margin: 0; }
 .wc-big svg { width: 28px; height: 28px; color: #F06A2B; }
+
+/* Learning path chapters: only the current chapter is shown */
+.ch-head { display: grid; gap: 4px; margin: 10px 2px 2px; }
+.ch-k { font-size: .72rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: #E0BA77; }
+.ch-head strong { font-family: var(--font-display); font-size: 1.15rem; }
+.ch-bar { display: block; height: 8px; border-radius: 99px; background: rgba(255, 255, 255, .1); overflow: hidden; }
+.ch-bar i { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #65D94A, #5CBFC1, #4F6CEE); }
+.ch-sub { font-size: .78rem; color: var(--muted, #9fb0cc); }
+.ch-done-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.ch-done { display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border-radius: 99px; border: 1px solid #E0BA77; background: rgba(224, 186, 119, .14); color: #F5DDAE; font-weight: 800; font-size: .78rem; cursor: pointer; }
+.ch-done svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 3; }
+.pn-teaser { opacity: .45; }
+.pn-teaser .pn { filter: grayscale(.5); }
+.path-next { display: flex; align-items: center; gap: 12px; margin: 6px 0 4px; padding: 12px 14px; border-radius: 18px; border: 1px dashed rgba(224, 186, 119, .6);
+  background: linear-gradient(135deg, #1B2A47, #0F1A31); }
+.pnx-icon { flex: 0 0 46px; width: 46px; height: 46px; border-radius: 14px; display: grid; place-items: center; font-size: 1.6rem; background: linear-gradient(180deg, var(--sky, #1F5B3A), var(--ground, #2E7D4F)); overflow: hidden; }
+.pnx-icon img { width: 100%; height: 100%; object-fit: cover; }
+.pnx-txt { display: grid; gap: 2px; min-width: 0; font-size: .85rem; color: var(--muted, #9fb0cc); }
+.pnx-txt strong { color: var(--ink, #fff); font-size: 1rem; }
+.pnx-k { font-size: .7rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: #5CBFC1; }
+.path-whole { display: block; margin: 6px auto 2px; background: none; border: 0; color: #5CBFC1; font-weight: 700; text-decoration: underline; cursor: pointer; padding: 6px 10px; }
+.ch-sheet { display: grid; gap: 12px; }
+.ch-list ul { list-style: none; margin: 4px 0 0; padding: 0; display: grid; gap: 4px; }
+.ch-list li { display: flex; align-items: center; gap: 8px; color: var(--muted, #9fb0cc); }
+.ch-list li.done { color: var(--ink, #fff); }
+.ch-list svg { width: 16px; height: 16px; fill: none; stroke: #65D94A; stroke-width: 3; flex: 0 0 16px; }
+.ch-dot { width: 10px; height: 10px; border-radius: 50%; border: 2px solid rgba(255, 255, 255, .3); margin: 0 3px; flex: 0 0 10px; }
+.ch-ok svg { width: 14px; height: 14px; vertical-align: -2px; }
