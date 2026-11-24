@@ -370,6 +370,21 @@ BD.ReadAlong = (function () {
   function radio(name, val, cur, label) {
     return '<label class="ra-pill"><input type="radio" name="' + name + '" value="' + val + '"' + (cur === val ? " checked" : "") + '><span>' + label + '</span></label>';
   }
+  /* Per student: read-aloud for 3rd to 8th grade is a parent's choice, one child at a time. */
+  if (BD.Settings) BD.Settings.add({
+    id: "readaloud-student", scope: "student", title: "Read aloud",
+    html: function (p) {
+      const g = Number(p.readingGrade !== undefined ? p.readingGrade : p.dojoGrade);
+      const young = g <= 2 && Number(p.sentenceGrade) <= 2;
+      return '<label class="sound-row"><span><strong>Read stories and sentences to ' + BD.UI.esc(p.name) + '</strong><span class="muted small">' +
+        (young ? 'On automatically while ' + BD.UI.esc(p.name) + ' plays Pre-K to 2nd grade. This switch keeps it on from 3rd grade up.' : 'Off by default from 3rd grade up, so ' + BD.UI.esc(p.name) + ' reads on their own. Turn it on if they need the help.') +
+        '</span></span><input type="checkbox" class="switch" data-ra-kid' + (p.readAloud ? " checked" : "") + '></label>';
+    },
+    bind: function (el, p, rerender) {
+      const c = el.querySelector("[data-ra-kid]");
+      if (c) c.addEventListener("change", function () { p.readAloud = c.checked; BD.Store.save(p); });
+    }
+  });
   if (BD.Settings) BD.Settings.add({
     id: "readalong", scope: "family", title: "Read aloud",
     html: function () {
@@ -388,8 +403,7 @@ BD.ReadAlong = (function () {
         '<p class="ra-sample" data-ra-sample>Let\'s read together. Watch each word light up!</p>' +
         '<label class="sound-row"><span><strong>Highlight words</strong><span class="muted small">Each word lights up as it\'s read, so kids can follow along.</span></span>' +
           '<input type="checkbox" class="switch" data-ra-hl' + (s.highlight ? " checked" : "") + '></label>' +
-        '<label class="sound-row"><span><strong>Read to me in 3rd grade and up</strong><span class="muted small">Off by default, so older kids read stories and sentences on their own. Pre-K to 2nd grade always have read-aloud.</span></span>' +
-          '<input type="checkbox" class="switch" data-ra-older' + (s.older ? " checked" : "") + '></label>' +
+        '<p class="muted small">Pre-K to 2nd grade always have read-aloud. For 3rd to 8th grade, stories and sentences are read by the student; turn read-aloud on for one child in their own section below ("Read aloud for ...").</p>' +
         '<label class="sound-row"><span><strong>Voice answers</strong><span class="muted small">A microphone button on Story Scrolls answers, so kids who can\'t type yet can say their answer.</span></span>' +
           '<input type="checkbox" class="switch" data-ra-voice' + (s.voice && micOK ? " checked" : "") + (micOK ? "" : " disabled") + '></label>' +
         '<p class="muted small ra-disclose">Speech is turned into text by your device or browser\'s speech service; Brain Dojo does not record or keep audio.</p>' +
@@ -400,7 +414,6 @@ BD.ReadAlong = (function () {
       root.querySelectorAll('input[name="raMode"]').forEach(function (i) { i.addEventListener("change", function () { if (i.checked) settings({ mode: i.value }); }); });
       root.querySelectorAll('input[name="raSpeed"]').forEach(function (i) { i.addEventListener("change", function () { if (i.checked) settings({ speed: i.value }); }); });
       const hl = root.querySelector("[data-ra-hl]"); if (hl) hl.addEventListener("change", function () { settings({ highlight: hl.checked }); });
-      const ol = root.querySelector("[data-ra-older]"); if (ol) ol.addEventListener("change", function () { settings({ older: ol.checked }); });
       const vo = root.querySelector("[data-ra-voice]"); if (vo) vo.addEventListener("change", function () { settings({ voice: vo.checked }); });
       const t = root.querySelector("[data-ra-try]");
       if (t) t.addEventListener("click", function () {

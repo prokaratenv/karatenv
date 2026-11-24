@@ -145,7 +145,7 @@ BD.ReadAloud = {
   /* Reading games (Story Scrolls, Fix-It, placement stories): read-aloud is for
      Pre-K to 2nd grade, or older grades when a parent turns on "Read to me in
      3rd grade and up". This makes older kids do the reading themselves. */
-  readingOK: function (grade) { return Number(grade) <= 2 || !!(BD.ReadAlong && BD.ReadAlong.settings && BD.ReadAlong.settings().older); },
+  readingOK: function (grade) { const p = BD.Store && BD.Store.current(); return Number(grade) <= 2 || !!(p && p.readAloud); }, // 3rd to 8th: a parent turns it on per student
   /* The family's reading speed. */
   rate: function () { return BD.ReadAlong && BD.ReadAlong.rate ? BD.ReadAlong.rate() : 0.9; },
   /* parts: a string, or [{text, lang}] */
