@@ -629,3 +629,12 @@ Black Belt gear and uniform pictures use the Engage name and E mark. In the Clau
 ## Read to me in 3rd grade and up
 
 Story Scrolls, Fix-It Sentences and the Belt Assessment's stories read aloud for Pre-K to 2nd grade. From 3rd grade up the read-aloud buttons and automatic reading are off, so kids do the reading themselves, unless a parent turns on **Read to me in 3rd grade and up** (Parents, Read aloud). Hints, math and spelling audio are unchanged.
+
+## Little Ninjas (Preschool and Pre-K)
+
+Preschool (ages 3 to 4, grade -2) and Pre-K (ages 4 to 5, grade -1) play voice-led picture games (js/little.js) instead of the reading-based games. Every prompt is spoken and every answer is a picture, number or letter to tap. Four games fill the four stripe slots, so belts, stripes, test parts and Daily Training work as usual:
+- Numbers (math): tap the number, count the pictures, more and fewer (Preschool 1 to 5, Pre-K 0 to 10).
+- Letters (reading): letter names (Preschool: A B C D E M O P S T), big and little letters, letter or number.
+- Sounds (spelling): listen and find, first sounds, rhymes and letter sounds (Pre-K).
+- Shapes & Colors (comprehension): colors, shapes, big and small, which is different, patterns, sorting, what comes next.
+Misses are gentle retries; after two misses the right answer glows. Rounds are 6 items (Preschool) or 8 (Pre-K). Stripes are a quarter the size with 150 Belt XP of full power a day (about 15 minutes), and the daily goal defaults to 15 minutes. A simple picture home (big Play button, four picture tiles, stickers, a Grown-ups button) is on by default for Preschool and Pre-K and can be switched per child in the Parents area. Preschool, Pre-K, Kindergarten and "Not sure" students get a voice-led picture check that places each game at Preschool, Pre-K or Kindergarten (or pick by age 3, 4 or 5). Kindergarten keeps its games; its spelling list is trimmed to short CVC and color/number sight words.
