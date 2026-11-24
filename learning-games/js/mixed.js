@@ -187,6 +187,7 @@ BD.Mixed = (function () {
       '<div class="mix-card mc-' + it.subject + '" id="mixCard"><span class="mix-tag">' + esc(it.label) + (it.passage ? ' · question ' + (it.storyIx + 1) + ' of ' + it.storyN : '') + '</span>' +
         '<div id="mixQ"></div><div class="mix-fb" id="mixFb" aria-live="polite"></div></div>';
     const q = $("mixQ");
+    if (BD.Scratch && BD.Scratch.isOpen()) BD.Scratch.close();
     if (it.kind === "math") renderMath(q, it); else renderChoice(q, it);
     // hints: 2 per item, from the subject's own helpers
     BD.Hints.bar($("mixCard"), "mix", $("mixFb"));
@@ -228,18 +229,30 @@ BD.Mixed = (function () {
   function renderMath(el, it) {
     S.typed = "";
     el.innerHTML = '<p class="mix-problem">' + esc(it.prompt) + ' <span class="mix-ans" id="mixAns">?</span></p>' +
-      '<div class="keypad mix-keys">' + ["7", "8", "9", "4", "5", "6", "1", "2", "3", it.neg ? "−" : "", "0", "⌫"].map(function (k) {
+      '<button type="button" class="btn btn-quiet scratch-btn mix-scratch" id="mixScratch">' + '<span aria-hidden="true">✏️</span><span>Scratch paper</span></button>' +
+      '<div class="keypad mix-keys" id="mixKeys">' + ["7", "8", "9", "4", "5", "6", "1", "2", "3", it.neg ? "−" : "", "0", "⌫"].map(function (k) {
         return k ? '<button type="button" class="key' + (k === "⌫" ? " key-back" : k === "−" ? " key-minus" : "") + '" data-k="' + k + '">' + k + '</button>' : '<span></span>';
       }).join("") + '<button type="button" class="key key-go" data-k="go">Check</button></div>';
-    el.onclick = function (e) {
+    const keys = el.querySelector("#mixKeys");
+    // the handler lives on the keypad itself, so it keeps working while scratch paper borrows the keypad
+    keys.onclick = function (e) {
       const b = e.target.closest(".key"); if (!b || S.answered) return;
       const k = b.dataset.k;
-      if (k === "go") { if (S.typed === "" || S.typed === "-") return; answer(String(Number(S.typed)) === String(it.answer), b, S.typed); return; }
+      if (k === "go") {
+        if (S.typed === "" || S.typed === "-") return;
+        if (BD.Scratch && BD.Scratch.isOpen()) BD.Scratch.close();
+        answer(String(Number(S.typed)) === String(it.answer), b, S.typed); return;
+      }
       if (k === "⌫") S.typed = S.typed.slice(0, -1);
       else if (k === "−") S.typed = S.typed.charAt(0) === "-" ? S.typed.slice(1) : "-" + S.typed;
       else if (S.typed.replace("-", "").length < 6) S.typed += k;
       BD.Sound.tap();
       $("mixAns").textContent = S.typed ? S.typed.replace("-", "−") : "?";
+    };
+    el.querySelector("#mixScratch").onclick = function () {
+      if (!BD.Scratch) return;
+      BD.Scratch.clear();
+      BD.Scratch.open({ problem: function () { return it.prompt; }, answerEl: $("mixAns"), keypadEl: keys });
     };
   }
   function answer(ok, el, picked) {
@@ -317,7 +330,7 @@ BD.Mixed = (function () {
       again: function () { start(); }, againLabel: "Train again"
     });
   }
-  function stop() { clearTimeout(advT); if (S) S.phase = "stopped"; }
+  function stop() { if (BD.Scratch && BD.Scratch.isOpen()) BD.Scratch.close(); clearTimeout(advT); if (S) S.phase = "stopped"; }
   function active() { return !!(S && S.phase === "play"); }
   function bind() { if ($("mixQuit")) $("mixQuit").addEventListener("click", function () { stop(); BD.UI.back(); }); }
   return { start: start, stop: stop, active: active, bind: bind, build: build, _state: function () { return S; }, SUBJ: SUBJ };

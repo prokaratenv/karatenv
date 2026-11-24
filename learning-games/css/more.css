@@ -735,3 +735,7 @@ body.has-tabs .footer { margin-top: 16px; }
 #screen-math-play .hint-bar:has(.hint-line) .hint-btn { width: auto; flex: 0 0 auto; }
 #screen-math-play .hint-bar:has(.hint-line) .hint-box { flex: 1 1 100%; }
 #spCheck { width: 100%; }
+
+/* No double-tap zoom on buttons and keys (tapping 6 twice for 66 must not zoom the page). Pinch zoom still works. */
+html, body, button, .key, .chip, .btn, a, input, select, label, [role="button"] { touch-action: manipulation; }
+.mix-scratch { display: inline-flex; gap: 6px; align-items: center; margin: 6px auto 0; }
