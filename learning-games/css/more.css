@@ -529,3 +529,42 @@ body.has-tabs .footer { margin-top: 16px; }
 /* Game tiles: the coach art fades softly into the tile (no hard oval frame) */
 .gt-art img { border: 0 !important; border-radius: 0 !important; background: none !important; filter: none;
   -webkit-mask-image: radial-gradient(ellipse 62% 58% at 50% 42%, #000 58%, transparent 100%); mask-image: radial-gradient(ellipse 62% 58% at 50% 42%, #000 58%, transparent 100%); }
+
+/* ---------- Train tab: compact belt card + "Your next moves" (replaces the winding path) ---------- */
+.belt-card { display: grid; grid-template-columns: 96px 1fr; align-items: center; gap: 12px; width: 100%; text-align: left; padding: 12px 14px; border-radius: 20px;
+  border: 1px solid rgba(255,255,255,.14); color: var(--ink); cursor: pointer;
+  background: linear-gradient(135deg, var(--sky), var(--ground)); box-shadow: 0 10px 24px -14px rgba(0,0,0,.7); }
+.bc-belt .belt-svg { width: 96px; height: auto; display: block; filter: drop-shadow(0 3px 4px rgba(0,0,0,.35)); }
+.bc-txt { display: grid; gap: 6px; min-width: 0; }
+.bc-txt strong { font-family: var(--font-display); font-weight: 900; font-size: 1rem; line-height: 1.2; }
+.bc-sub { font-size: .78rem; opacity: .9; }
+.belt-card .ch-bar { background: rgba(0,0,0,.3); }
+.mv-head { margin: 16px 2px 8px; font-family: var(--font-display); font-size: .8rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: #E0BA77; }
+.moves { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.mv { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 60px; padding: 10px 12px; text-align: left; color: var(--ink); cursor: pointer;
+  border-radius: 16px; border: 1px solid rgba(255,255,255,.1); background: rgba(19, 34, 61, .85); }
+.mv-ic { flex: 0 0 40px; width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; overflow: hidden;
+  background: linear-gradient(180deg, var(--c1, #8DD3D4), var(--c, #5CBFC1)); }
+.mv-ic svg { width: 22px; height: 22px; fill: none; stroke: #fff; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.mv-ic img { width: 100%; height: 100%; object-fit: cover; }
+.mv-s-math { --c: #4F6CEE; --c1: #8197F4; } .mv-s-reading { --c: #8B4BE0; --c1: #AC80EA; } .mv-s-spelling { --c: #E8649C; --c1: #EF92BB; } .mv-s-comprehension { --c: #3FA6A8; --c1: #6FC9CA; } .mv-boss { --c: #B23A3A; --c1: #D85A5A; }
+.mv-txt { display: grid; gap: 2px; flex: 1; min-width: 0; }
+.mv-txt strong { font-weight: 800; font-size: .98rem; }
+.mv-txt span { font-size: .8rem; color: var(--muted); }
+.mv-chev { font-size: 1.4rem; color: var(--muted); line-height: 1; }
+.mv-tag { font-size: .68rem; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; color: #1B1205; background: var(--gold); padding: 3px 8px; border-radius: 99px; }
+.mv-first { border: 2px solid #E0BA77; background: linear-gradient(135deg, #22375C, #172848); box-shadow: 0 0 18px -6px rgba(224,186,119,.6); }
+.mv-locked { opacity: .62; }
+.mv-locked .mv-ic { background: #22314F; }
+.mv-locked .mv-ic svg { stroke: var(--muted); }
+.moves-little .mv { min-height: 72px; }
+.moves-little .mv-ic { flex-basis: 48px; width: 48px; height: 48px; }
+.moves-little .mv-txt strong { font-size: 1.08rem; }
+.learn-path .path-next { margin-top: 12px; padding: 10px 12px; }
+.ch-list li.locked { opacity: .6; }
+.ch-lock svg { width: 14px; height: 14px; stroke: var(--muted); stroke-width: 2.2; }
+@media (prefers-reduced-motion: no-preference) {
+  .mv, .belt-card { transition: transform .28s var(--spring), box-shadow .2s ease; -webkit-tap-highlight-color: transparent; }
+  .mv:active, .belt-card:active { transform: scale(.97); transition-duration: .08s; }
+}
+.bc-k { font-size: .7rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; opacity: .85; }

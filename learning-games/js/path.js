@@ -6,8 +6,8 @@
    Path order rotates subjects: Math 25, Reading 25, Spelling 25, Stories 25,
    then each Part 1, then 50 XP, Part 2 ... then the belt boss and graduation.
    Any ready node can be tapped; locked nodes explain what opens them.
-   Shown as 4 short chapters (only the current one as a path; Pre-K to 2nd
-   see just the next 4 steps), with a Coming up card for what's next. */
+   Shown as a compact belt card + "Your next moves" (2 or 3 open steps; 2 for
+   Pre-K to 2nd), with a Coming up card for what's next. */
 window.BD = window.BD || {};
 
 BD.Path = (function () {
@@ -55,12 +55,12 @@ BD.Path = (function () {
     // 1. A redo or this week's school words come first (they unlock other levels).
     if (plan[0] && /Retry$|^school/.test(plan[0].kind)) it = plan[0];
     // 2. A stripe-test part that is open now.
-    if (!it) ORDER.some(function (k) {
-      if (!BD.Rank.canTest(p, k, g) || r.stripes[k]) return false;
-      const n = BD.Rank.nextPart(r, k);
-      it = { kind: "stripeTest", subject: k, title: NAME[k] + " stripe test, Part " + (n.i + 1), node: "part-" + k + "-" + n.i };
-      return true;
-    });
+    // (lowest part first, so a chapter gets finished before the next one starts)
+    if (!it) {
+      const open = ORDER.filter(function (k) { return BD.Rank.canTest(p, k, g) && !r.stripes[k]; })
+        .map(function (k) { return { k: k, n: BD.Rank.nextPart(r, k) }; }).sort(function (a, b) { return a.n.i - b.n.i; });
+      if (open.length) { const o = open[0]; it = { kind: "stripeTest", subject: o.k, title: NAME[o.k] + " stripe test, Part " + (o.n.i + 1), node: "part-" + o.k + "-" + o.n.i }; }
+    }
     // 3. Today's quest chest is waiting.
     if (!it && BD.Quest) { const q = BD.Quest.current(p); if (q.done && !q.claimed) it = { kind: "quest", title: "Open your quest chest" }; }
     // 4. The belt boss, once the belt is well under way.
@@ -115,62 +115,81 @@ BD.Path = (function () {
     out.push({ ch: 3, id: "grad", kind: "grad", icon: "grad", label: r.belt >= BD.BELTS.length - 1 ? "Master the grade" : nextBelt.name + " Belt", state: r.mastered ? "done" : "locked", aria: "Graduation", stripes: BD.Rank.stripeCount(r), nextBelt: nextBelt });
     return out;
   }
-  const OFFS = [0, 42, 72, 42, 0, -42, -72, -42];
-  /* The belt is shown as 4 short chapters so it never feels daunting:
-     finished chapters fold into gold badges, only the current chapter is a
-     path, and a "Coming up" card always shows the next place to go. */
+  /* The belt is 4 short chapters. The Train tab shows a compact belt card
+     (belt, chapter, region) and "Your next moves": the next 2 or 3 open steps
+     in kid language, like an instructor's class plan. Done steps never show
+     as upcoming. A "Coming up" card always points to the next place to go. */
   function chapterOf(list, cur) {
     if (cur !== -1) return list[cur].ch;
     for (let c = 0; c < 4; c++) if (list.some(function (n) { return n.ch === c && !n.side && n.state !== "done"; })) return c;
     return 3;
   }
-  function nodeHTML(n, off, face, extra) {
-    const inner = n.state === "done" ? svg("check") : n.state === "locked" ? (n.img ? '<img src="' + n.img + '" alt="">' : svg(n.icon || "lock")) + '<span class="pn-lock">' + svg("lock") + '</span>'
-      : n.img ? '<img src="' + n.img + '" alt="">' : svg(n.icon);
-    const sub = n.state === "locked" ? lockShort(n) : n.state === "done" ? "Done" : n.current ? "Start" : "Ready";
-    return '<li class="pn-row' + (extra ? " " + extra : "") + '" style="--off:' + off + 'px">' +
-      '<button type="button" class="pn pn-' + n.kind + ' pn-' + n.state + (n.current ? " pn-current" : "") + (n.side ? " pn-side" : "") + (n.subject ? " pn-s-" + n.subject : "") + '" data-node="' + n.id + '" aria-label="' + esc(n.aria + ", " + (n.current ? "next up" : n.state)) + '">' +
-        '<span class="pn-disc">' + inner + (n.num && n.state !== "done" ? '<span class="pn-num">' + n.num + '</span>' : '') + '</span>' +
-        (n.current ? '<span class="pn-face">' + face + '</span>' : '') +
-        '<span class="pn-label">' + esc(n.label) + '<small>' + esc(sub) + '</small></span></button></li>';
+  const LEN = { math: "10 problems", reading: "5 sentences", spelling: "6 words", comprehension: "3 to 4 questions" };
+  function skillOf(n, g) {
+    try { const sk = BD.Rank.partSkills(n.subject, g)[n.part]; return sk && sk.label ? sk.label : ""; } catch (e) { return ""; }
+  }
+  /* Kid-friendly title and sub-line for a step. */
+  function words(n, g) {
+    if (n.kind === "practice") {
+      const left = Math.max(0, n.need - n.have);
+      return { t: NAME[n.subject] + " practice", s: left + " XP to unlock Part " + (n.ch + 1), icon: n.subject };
+    }
+    if (n.kind === "part") {
+      const sk = skillOf(n, g);
+      return { t: NAME[n.subject] + " test · Part " + (n.part + 1), s: n.state === "locked" ? lockShort(n) : (sk ? sk + " · " : "") + LEN[n.subject], icon: "test" };
+    }
+    if (n.kind === "boss") return { t: "Beat " + n.label, s: n.state === "done" ? "Beaten! Rematch any time" : "Belt boss · win a trophy", img: n.img };
+    if (n.kind === "grad") return { t: n.label === "Master the grade" ? "Master the grade" : "Graduate to " + n.label, s: "Earn all 4 stripes (" + n.stripes + " of 4)", icon: "grad" };
+    return { t: n.label, s: "", icon: n.icon || "lock" };
+  }
+  function moveHTML(n, g, first) {
+    const w = words(n, g), locked = n.state === "locked";
+    const ic = w.img ? '<img src="' + w.img + '" alt="">' : svg(locked ? "lock" : w.icon);
+    return '<li><button type="button" class="mv' + (first ? " mv-first" : "") + (locked ? " mv-locked" : "") + (n.subject ? " mv-s-" + n.subject : n.kind === "boss" ? " mv-boss" : "") + '" data-node="' + n.id + '" aria-label="' + esc(w.t + ". " + w.s + (locked ? ". Locked" : first ? ". Next up" : "")) + '">' +
+      '<span class="mv-ic">' + ic + '</span><span class="mv-txt"><strong>' + esc(w.t) + '</strong><span>' + esc(w.s) + '</span></span>' +
+      (first ? '<span class="mv-tag">Next</span>' : '') + '<span class="mv-chev" aria-hidden="true">›</span></button></li>';
+  }
+  /* The next open steps (current chapter first, then the next), done steps skipped. */
+  function moves(p, list, nx, howMany) {
+    const order = list.filter(function (n) { return !n.side; });
+    const open = order.filter(function (n) { return n.state === "ready"; });
+    const cur = open.findIndex(function (n) { return n.id === nx.node; });
+    if (cur > 0) open.unshift(open.splice(cur, 1)[0]);
+    // The boss is always "ready" in data; offer it only when Continue does or nothing else is open.
+    const openNoBoss = open.filter(function (n, i) { return n.kind !== "boss" || i === 0; });
+    let pick = openNoBoss.slice(0, howMany);
+    if (pick.length < howMany && open.some(function (n) { return n.kind === "boss"; }) && pick.every(function (n) { return n.kind !== "boss"; }) && openNoBoss.length === 0) pick.push(open.find(function (n) { return n.kind === "boss"; }));
+    if (pick.length < howMany) {
+      const locked = order.find(function (n) { return n.state === "locked" && n.kind === "part"; }) || order.find(function (n) { return n.state === "locked"; });
+      if (locked) pick.push(locked);
+    }
+    return pick.slice(0, howMany);
   }
   function render(p) {
     const box = $("learnPath"); if (!box || !p) return;
     const g = BD.Rank.dojoGrade(p), r = BD.Rank.rec(p, g), belt = BD.BELTS[r.belt];
     const REG = BD.Quest.REGIONS, reg = REG[Math.min(r.belt, REG.length - 1)], nreg = REG[Math.min(r.belt + 1, REG.length - 1)];
-    const list = nodes(p), nx = next(p);
+    const list = nodes(p), nx = next(p), little = Number(g) <= 2;
     let cur = list.findIndex(function (n) { return n.id === nx.node && n.state !== "done"; });
-    if (cur === -1) cur = list.findIndex(function (n) { return n.state === "ready" && !n.side; });
-    if (cur !== -1) list[cur].current = true;
-    const ch = chapterOf(list, cur), little = Number(g) <= 2;
-    let shown = list.filter(function (n) { return n.ch === ch; });
-    if (little) { // little kids: just the next 4 steps
-      let at = shown.findIndex(function (n) { return n.current; });
-      if (at === -1) at = Math.max(0, shown.findIndex(function (n) { return n.state !== "done" && !n.side; }));
-      shown = shown.slice(at, at + 4);
-    }
-    const face = BD.UI.avatar ? BD.UI.avatar(p, "sm") : "";
-    let k = 0;
-    const rows = shown.map(function (n) { return nodeHTML(n, n.side ? 96 : OFFS[k++ % OFFS.length], face); }).join("");
+    if (cur === -1) cur = list.findIndex(function (n) { return n.state === "ready" && !n.side && n.kind !== "boss"; });
+    const ch = chapterOf(list, -1); // the earliest chapter with steps left
     const inCh = list.filter(function (n) { return n.ch === ch && !n.side; }), chDone = inCh.filter(function (n) { return n.state === "done"; }).length;
-    const teaser = ch < 3 ? list.filter(function (n) { return n.ch === ch + 1 && !n.side; }).slice(0, little ? 1 : 2).map(function (n) { return nodeHTML(n, OFFS[k++ % OFFS.length], face, "pn-teaser"); }).join("") : "";
+    const mv = moves(p, list, nx, little ? 2 : 3);
     const b = bossInfo(p), last = r.belt >= BD.BELTS.length - 1, nextBelt = BD.BELTS[Math.min(BD.BELTS.length - 1, r.belt + 1)];
     const thenLine = last ? "Then: master " + BD.gradeLabel(g) + "!" : "Then: " + nextBelt.name + " Belt in " + nreg.name;
     const coming = '<div class="path-next" style="--sky:' + nreg.sky + ';--ground:' + nreg.ground + '">' +
       '<span class="pnx-icon" aria-hidden="true">' + (ch < 3 ? nreg.icon : (b.boss.img ? '<img src="' + b.boss.img + '" alt="">' : nreg.icon)) + '</span><span class="pnx-txt"><span class="pnx-k">Coming up</span>' +
-      (ch < 3 ? '<strong>Chapter ' + (ch + 2) + ': ' + esc(CH[ch + 1]) + '</strong><span>' + esc(CH_SUB[ch + 1]) + '</span>' : '') +
-      '<span>' + (b.beat ? "" : 'Next stop: the belt boss ' + esc(b.boss.name) + '. ') + esc(thenLine) + '</span></span></div>';
-    const badges = ch > 0 ? '<div class="ch-done-row">' + CH.slice(0, ch).map(function (nm, i) {
-      return '<button type="button" class="ch-done" data-chpeek="' + i + '"><span aria-hidden="true">' + svg("check") + '</span>Chapter ' + (i + 1) + ' complete</button>'; }).join("") + '</div>' : '';
-    const doneN = list.filter(function (n) { return n.state === "done" && !n.side; }).length, totalN = list.filter(function (n) { return !n.side; }).length;
-    box.innerHTML = '<button type="button" class="path-banner" id="pathBanner" style="--sky:' + reg.sky + ';--ground:' + reg.ground + '" aria-label="' + esc(belt.name + " Belt, " + reg.name + ". Open the Adventure Map") + '">' +
-      '<span class="pb-icon" aria-hidden="true">' + reg.icon + '</span><span class="pb-txt"><span class="pb-k">' + esc(BD.gradeLabel(g)) + ' · ' + esc(belt.name) + ' Belt</span><strong>' + esc(reg.name) + '</strong>' +
-      '<span class="pb-bar"><i style="width:' + Math.round(100 * doneN / totalN) + '%"></i></span><span class="pb-sub">' + doneN + ' of ' + totalN + ' steps · tap for the map</span></span></button>' +
-      badges +
-      '<div class="ch-head"><span class="ch-k">Chapter ' + (ch + 1) + ' of 4</span><strong>' + esc(CH[ch]) + '</strong>' +
-      '<span class="ch-bar" role="progressbar" aria-valuemin="0" aria-valuemax="' + inCh.length + '" aria-valuenow="' + chDone + '"><i style="width:' + Math.round(100 * chDone / inCh.length) + '%"></i></span>' +
-      '<span class="ch-sub">' + chDone + ' of ' + inCh.length + ' steps in this chapter</span></div>' +
-      '<ol class="path" style="--sky:' + reg.sky + '">' + rows + teaser + '</ol>' + coming +
+      (ch < 3 ? '<strong>Chapter ' + (ch + 2) + ': ' + esc(CH[ch + 1]) + '</strong>' : '<strong>' + (b.beat ? esc(thenLine.replace(/^Then: /, "")) : 'The belt boss ' + esc(b.boss.name)) + '</strong>') +
+      '<span>' + (ch < 3 ? esc(thenLine) : b.beat ? "Earn all 4 stripes to graduate" : esc(thenLine)) + '</span></span></div>';
+    box.innerHTML =
+      '<button type="button" class="belt-card" id="pathBanner" style="--sky:' + reg.sky + ';--ground:' + reg.ground + '" aria-label="' + esc(belt.name + " Belt, chapter " + (ch + 1) + " of 4, " + reg.name + ". Open the Adventure Map") + '">' +
+        '<span class="bc-belt">' + BD.Rank.beltSVG(r.belt, r.stripes, { parts: r.parts }) + '</span>' +
+        '<span class="bc-txt"><span class="bc-k">Chapter ' + (ch + 1) + ' of 4</span><strong>' + esc(belt.name) + ' Belt · ' + esc(CH[ch]) + '</strong>' +
+        '<span class="ch-bar" role="progressbar" aria-valuemin="0" aria-valuemax="' + inCh.length + '" aria-valuenow="' + chDone + '"><i style="width:' + Math.round(100 * chDone / inCh.length) + '%"></i></span>' +
+        '<span class="bc-sub"><span aria-hidden="true">' + reg.icon + '</span> ' + esc(reg.name) + ' · ' + chDone + ' of ' + inCh.length + ' steps · map ›</span></span></button>' +
+      '<h3 class="mv-head">Your next moves</h3>' +
+      '<ol class="moves' + (little ? " moves-little" : "") + '">' + mv.map(function (n, i) { return moveHTML(n, g, i === 0 && n.state !== "locked"); }).join("") + '</ol>' +
+      coming +
       '<button type="button" class="path-whole" id="pathWhole">See the whole belt</button>';
   }
   function chapterSheet(p, only) {
@@ -180,7 +199,7 @@ BD.Path = (function () {
       const items = list.filter(function (n) { return n.ch === c; });
       const d = items.filter(function (n) { return n.state === "done" && !n.side; }).length, t = items.filter(function (n) { return !n.side; }).length;
       return '<div class="ch-list"><h4 class="label">Chapter ' + (c + 1) + ': ' + esc(nm) + ' · ' + d + '/' + t + (d === t ? ' ' + '<span class="ch-ok">' + svg("check") + '</span>' : '') + '</h4><ul>' +
-        items.map(function (n) { return '<li class="' + (n.state === "done" ? "done" : "") + '">' + (n.state === "done" ? svg("check") : '<span class="ch-dot"></span>') + esc(n.label) + (n.side ? ' <em>bonus</em>' : '') + '</li>'; }).join("") + '</ul></div>';
+        items.map(function (n) { const w = words(n, BD.Rank.dojoGrade(p)); return '<li class="' + n.state + '">' + (n.state === "done" ? svg("check") : n.state === "locked" ? '<span class="ch-lock">' + svg("lock") + '</span>' : '<span class="ch-dot"></span>') + esc(n.side ? "Spanish bonus practice" : w.t + (n.kind === "practice" ? " to " + n.need + " XP" : "")) + (n.side ? ' <em>bonus</em>' : '') + '</li>'; }).join("") + '</ul></div>';
     }).join("");
     BD.UI.sheet(only !== undefined ? "Chapter " + (only + 1) + " complete" : "The whole belt", '<div class="ch-sheet">' + html + '</div>');
   }
