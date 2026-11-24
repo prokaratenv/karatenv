@@ -32,7 +32,7 @@ for top in ["css", "js", "data", "img"]:
             if re.match(r"img/(age|fit|mask|face)-s\d\d[-.]", p): continue
             # big character variations come down in the background after the first visit
             (LATER if p.startswith(("img/fit-", "img/age-", "img/boss-", "img/mask-", "img/ex-")) else CORE).append(p)
-for p in ["index.html", "manifest.webmanifest"]:
+for p in ["index.html", "manifest.webmanifest", "tools/sw-template.js"]:
     with open(p, "rb") as fh: h.update(p.encode() + fh.read())
 version = h.hexdigest()[:12]
 tpl = open("tools/sw-template.js").read()

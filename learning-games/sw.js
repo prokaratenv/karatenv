@@ -6,7 +6,7 @@
      device when offline. Everything else loads from the device first.
    - Saving progress, family sync and sign-ups are never cached: they wait on
      the device and send when the connection is back. */
-const VERSION = "736688749c94";
+const VERSION = "82bf72aa0009";
 const CACHE = "brain-dojo-" + VERSION;
 const STAMP = "ad6e9cdbc6"; // the ?v= the current pages ask for
 const FONTS = "brain-dojo-fonts";
@@ -721,7 +721,7 @@ const LATER = [
 ];
 
 self.addEventListener("install", function (e) {
-  e.waitUntil(caches.open(CACHE).then(function (c) { return c.addAll(CORE); }).then(function () { return self.skipWaiting(); }));
+  e.waitUntil(caches.open(CACHE).then(function (c) { return c.addAll(CORE.map(function (u) { return new Request(u, { cache: "reload" }); })); }).then(function () { return self.skipWaiting(); }));
 });
 self.addEventListener("activate", function (e) {
   e.waitUntil(caches.keys().then(function (keys) {
@@ -735,7 +735,7 @@ self.addEventListener("message", function (e) {
     const todo = [];
     for (const u of LATER) if (!(await c.match(u))) todo.push(u);
     for (let i = 0; i < todo.length; i += 4) {
-      await Promise.all(todo.slice(i, i + 4).map(function (u) { return fetch(u).then(function (r) { if (r.ok) return c.put(u, r); }).catch(function () {}); }));
+      await Promise.all(todo.slice(i, i + 4).map(function (u) { return fetch(u, { cache: "reload" }).then(function (r) { if (r.ok) return c.put(u, r); }).catch(function () {}); }));
     }
   }));
 });
