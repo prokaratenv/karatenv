@@ -9,7 +9,7 @@ BD.UI = (function () {
 
   let currentScreen = null, goingBack = false;
   const trail = [];   // screens visited, for the Back button
-  const PLAY = ["screen-math-play", "screen-sentence-play", "screen-read-play", "screen-word-play", "screen-mixed-play"];
+  const PLAY = ["screen-math-play", "screen-sentence-play", "screen-read-play", "screen-word-play", "screen-mixed-play", "screen-spanish-play"];
   function show(id) {
     if (!goingBack && currentScreen && currentScreen !== id) {
       trail.push(currentScreen);
@@ -41,7 +41,7 @@ BD.UI = (function () {
   /* The grade a play screen is training at (null elsewhere). */
   function playGrade(id) {
     const p = BD.Store.current(); if (!p) return null;
-    const f = { "screen-math-play": "mathGrade", "screen-sentence-play": "sentenceGrade", "screen-read-play": "readingGrade" }[id] ||
+    const f = { "screen-spanish-play": "spanishGrade", "screen-math-play": "mathGrade", "screen-sentence-play": "sentenceGrade", "screen-read-play": "readingGrade" }[id] ||
       (id === "screen-word-play" ? (BD.WordQuiz && BD.WordQuiz.game && BD.WordQuiz.game() === "spanish" ? "spanishGrade" : "spellingGrade") : null);
     if (!f) return null;
     const g = Number(p[f]); return isFinite(g) ? g : null;
@@ -991,6 +991,7 @@ BD.UI = (function () {
     BD.Builder.bind();
     BD.Studio.bind();
     BD.Quest.bind();
+    if (BD.Spanish) BD.Spanish.bind();
     if (BD.Mixed) BD.Mixed.bind();
     if ($("dailyTile")) $("dailyTile").addEventListener("click", function () { BD.Sound.tap(); if (BD.Phrases && BD.Phrases.beforeTraining(function () { BD.Mixed.start(); })) return; BD.Mixed.start(); });
     BD.Leads.bind();

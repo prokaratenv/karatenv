@@ -71,6 +71,7 @@ BD.Mixed = (function () {
     return null;
   }
   function spanishItem(p) {
+    if (BD.Spanish && BD.Spanish.mixedItem) { const it = BD.Spanish.mixedItem(p); if (it) return it; } // only words the student has learned
     const base = gradeOf(p, "spanish"), q = BD.Quick.spanish(Math.max(-1, itemGrade(p, "spanish")));
     if (!q) return null;
     return { subject: "spanish", g: base, kind: "choice", label: "Spanish", prompt: q.prompt, html: q.html, choices: q.choices, answer: q.answer, say: q.say, topic: "" };
@@ -278,6 +279,7 @@ BD.Mixed = (function () {
   /* Keep each subject's own skill records up to date. */
   function note(p, it, ok) {
     const bump = function (o) { if (ok) o.r++; else o.w++; };
+    if (it.onResult) try { it.onResult(ok); } catch (e) { /* ok */ }
     try {
       if (it.subject === "math" && it.mq) { const key = it.g + "-" + it.mq.op; bump(p.mathStats[key] || (p.mathStats[key] = { r: 0, w: 0 })); }
       else if (it.subject === "reading") bump(p.sentenceStats[it.g] || (p.sentenceStats[it.g] = { r: 0, w: 0, firstTry: 0 }));
