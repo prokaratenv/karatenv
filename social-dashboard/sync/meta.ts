@@ -62,7 +62,7 @@ let version = DEFAULT_CONFIG.apiVersion;
  * `pageToken`: Facebook Page endpoints need a Page access token. It's fetched at run time from
  * me/accounts using the system-user token and only ever kept in memory.
  */
-async function graph<T>(path: string, params: Record<string, string> = {}, pageToken?: string): Promise<T> {
+export async function graph<T>(path: string, params: Record<string, string> = {}, pageToken?: string): Promise<T> {
   const url = new URL(path.startsWith('https://') ? path : `https://graph.facebook.com/${version}/${path}`);
   for (const [k, v] of Object.entries(params)) url.searchParams.set(k, v);
   if (pageToken && !url.searchParams.has('access_token')) url.searchParams.set('access_token', pageToken);
@@ -230,7 +230,7 @@ interface PageRow {
   instagram_business_account?: { id: string; username?: string; followers_count?: number };
 }
 
-async function discover(withTokens = false): Promise<PageRow[]> {
+export async function discover(withTokens = false): Promise<PageRow[]> {
   return all<PageRow>(
     'me/accounts',
     {

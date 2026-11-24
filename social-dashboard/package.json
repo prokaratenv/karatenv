@@ -13,7 +13,8 @@
     "sync:youtube": "NODE_USE_ENV_PROXY=1 NODE_NO_WARNINGS=1 tsx sync/youtube.ts",
     "sync:meta": "NODE_USE_ENV_PROXY=1 NODE_NO_WARNINGS=1 tsx sync/meta.ts",
     "report:weekly": "TZ=America/Los_Angeles tsx sync/weekly-report.ts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "sync:audience": "NODE_USE_ENV_PROXY=1 NODE_NO_WARNINGS=1 tsx sync/audience.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.6.0",

@@ -5,6 +5,8 @@ import { AtAGlance } from './Overview';
 import { BigPictureView } from './BigPicture';
 import { LocalSection } from './Local';
 import type { LocalData } from '../import/local';
+import { HendersonSection } from './Henderson';
+import type { AudienceSnapshot } from '../import/audience';
 
 /** Numbers first (for the chosen period), then what they mean (last 12 months). */
 export function Home({
@@ -15,6 +17,7 @@ export function Home({
   topics,
   rangeDays,
   local,
+  audience,
   onSeeAll,
 }: {
   a: Analysis;
@@ -24,6 +27,7 @@ export function Home({
   topics: Topic[];
   rangeDays: number;
   local?: LocalData;
+  audience?: AudienceSnapshot[];
   onSeeAll: () => void;
 }) {
   return (
@@ -33,6 +37,7 @@ export function Home({
         <span className="home-sub">{rangeDays ? `Last ${rangeDays} days, compared with the ${rangeDays} days before` : 'All time'} · change it with the buttons above</span>
       </div>
       <AtAGlance a={a} recs={recs} followers={followers} onSeeAll={onSeeAll} />
+      <HendersonSection data={audience} />
       <LocalSection data={local} />
 
       <div className="home-band" style={{ marginTop: 32 }}>

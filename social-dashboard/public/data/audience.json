@@ -1,0 +1,186 @@
+[
+ {
+  "date": "2026-11-24",
+  "ig": {
+   "followers": {
+    "cities": {
+     "henderson": 331,
+     "valley": 669,
+     "known": 828,
+     "top": [
+      {
+       "city": "Henderson, Nevada",
+       "count": 331
+      },
+      {
+       "city": "Enterprise, Nevada",
+       "count": 100
+      },
+      {
+       "city": "Las Vegas, Nevada",
+       "count": 89
+      },
+      {
+       "city": "Spring Valley, Nevada",
+       "count": 47
+      },
+      {
+       "city": "Whitney, Nevada",
+       "count": 45
+      },
+      {
+       "city": "Sunrise Manor, Nevada",
+       "count": 31
+      },
+      {
+       "city": "Sialkot, Punjab",
+       "count": 24
+      },
+      {
+       "city": "North Las Vegas, Nevada",
+       "count": 17
+      },
+      {
+       "city": "Los Angeles, California",
+       "count": 14
+      },
+      {
+       "city": "Reno, Nevada",
+       "count": 10
+      }
+     ]
+    },
+    "age": {
+     "13-17": 10,
+     "18-24": 81,
+     "25-34": 289,
+     "35-44": 488,
+     "45-54": 241,
+     "55-64": 87,
+     "65+": 59
+    },
+    "gender": {
+     "F": 611,
+     "M": 492,
+     "U": 152
+    }
+   },
+   "reach": {
+    "cities": {
+     "henderson": 4092,
+     "valley": 5805,
+     "known": 8610,
+     "top": [
+      {
+       "city": "Henderson, Nevada",
+       "count": 4092
+      },
+      {
+       "city": "Whitney, Nevada",
+       "count": 390
+      },
+      {
+       "city": "Las Vegas, Nevada",
+       "count": 373
+      },
+      {
+       "city": "Sunrise Manor, Nevada",
+       "count": 312
+      },
+      {
+       "city": "Enterprise, Nevada",
+       "count": 295
+      },
+      {
+       "city": "Sydney, New South Wales",
+       "count": 250
+      },
+      {
+       "city": "Melbourne, Victoria",
+       "count": 242
+      },
+      {
+       "city": "North Las Vegas, Nevada",
+       "count": 176
+      },
+      {
+       "city": "New York, New York",
+       "count": 169
+      },
+      {
+       "city": "Spring Valley, Nevada",
+       "count": 167
+      }
+     ]
+    },
+    "age": {
+     "13-17": 821,
+     "18-24": 9175,
+     "25-34": 10946,
+     "35-44": 3904,
+     "45-54": 1336,
+     "55-64": 493,
+     "65+": 449,
+     "U": 1
+    },
+    "gender": {
+     "F": 4613,
+     "M": 16575,
+     "U": 5937
+    },
+    "total": 27125
+   }
+  },
+  "fb": {
+   "followers": {
+    "cities": {
+     "henderson": 501,
+     "valley": 1085,
+     "known": 1279,
+     "top": [
+      {
+       "city": "Henderson, NV",
+       "count": 501
+      },
+      {
+       "city": "Las Vegas, NV",
+       "count": 384
+      },
+      {
+       "city": "Enterprise, NV",
+       "count": 72
+      },
+      {
+       "city": "Spring Valley, NV",
+       "count": 42
+      },
+      {
+       "city": "Whitney, NV",
+       "count": 32
+      },
+      {
+       "city": "North Las Vegas, NV",
+       "count": 26
+      },
+      {
+       "city": "Boulder City, NV",
+       "count": 14
+      },
+      {
+       "city": "Sunrise Manor, NV",
+       "count": 14
+      },
+      {
+       "city": "Phoenix, AZ",
+       "count": 13
+      },
+      {
+       "city": "San Antonio, TX",
+       "count": 11
+      }
+     ]
+    }
+   }
+  }
+ }
+]

@@ -166,3 +166,29 @@ describe('Windsor imports', () => {
     expect(p).toMatchObject({ id: 'li-engage:7520197981891973120', views: 13, impressions: 13, shares: 1, format: 'carousel', hashtags: ['HendersonNV'], url: 'https://www.linkedin.com/feed/update/urn:li:ugcPost:7520197981891973120' });
   });
 });
+
+import { summarizeCities, mergeSnapshot, hendersonGoals } from '../src/import/audience';
+
+describe('Henderson audience', () => {
+  it('counts Henderson and the valley only in Nevada', () => {
+    const s = summarizeCities({ 'Henderson, Nevada': 30, 'Henderson, KY': 5, 'Las Vegas, NV': 20, 'Enterprise, Nevada': 10, 'Los Angeles, California': 15 });
+    expect(s).toMatchObject({ henderson: 30, valley: 60, known: 80 });
+    expect(s.top[0]).toEqual({ city: 'Henderson, Nevada', count: 30 });
+  });
+  it('keeps one snapshot per date, oldest first', () => {
+    const m = mergeSnapshot([{ date: '2026-11-30' }, { date: '2026-11-24' }], { date: '2026-11-24', fb: {} });
+    expect(m.map((x) => x.date)).toEqual(['2026-11-24', '2026-11-30']);
+    expect(m[0].fb).toEqual({});
+  });
+  it('builds goals from the latest snapshot', () => {
+    const city = (h: number) => ({ henderson: h, valley: h, known: h * 2, top: [] });
+    const g = hendersonGoals([
+      { date: '2026-11-24', ig: { followers: { cities: city(300) }, reach: { cities: city(100), total: 1000, gender: { F: 150 } } } },
+      { date: '2026-12-01', ig: { followers: { cities: city(331) }, reach: { cities: city(200), total: 1000, gender: { F: 200 } } } },
+    ]);
+    expect(g.find((x) => x.id === 'ig')).toMatchObject({ now: 331, start: 300, target: 450 });
+    expect(g.find((x) => x.id === 'reach')?.now).toBeCloseTo(0.2);
+    expect(g.find((x) => x.id === 'women')?.now).toBeCloseTo(0.2);
+    expect(g.find((x) => x.id === 'fb')?.now).toBeUndefined();
+  });
+});

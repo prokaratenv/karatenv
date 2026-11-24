@@ -7,6 +7,7 @@ import { mergePosts } from './import/parse';
 import { generateSample } from './data/sample';
 import { applyOpus, type OpusData } from './import/opus';
 import type { LocalData } from './import/local';
+import type { AudienceSnapshot } from './import/audience';
 
 const KEY = 'engage-social-dashboard-v1';
 
@@ -30,6 +31,7 @@ export function useStore() {
   const [persistError, setPersistError] = useState<string>();
   const [followers, setFollowers] = useState<FollowerInfo[]>([]);
   const [local, setLocal] = useState<LocalData>();
+  const [audience, setAudience] = useState<AudienceSnapshot[]>();
   const [opusBacklog, setOpusBacklog] = useState<NonNullable<OpusData['backlog']>>([]);
   const first = useRef(true);
   const ref = useRef(state);
@@ -74,6 +76,7 @@ export function useStore() {
         .then((r) => (r.ok ? r.json() : undefined))
         .catch(() => undefined);
     getJson('data/local.json').then((d) => d && setLocal(d as LocalData));
+    getJson('data/audience.json').then((d) => Array.isArray(d) && setAudience(d as AudienceSnapshot[]));
     Promise.all([...files.map(getJson), getJson('data/opus.json')]).then((results: unknown[]) => {
       const opus = results.pop() as OpusData | undefined;
       const synced = results.flatMap((l) => (Array.isArray(l) ? (l as Post[]) : []));
@@ -131,7 +134,7 @@ export function useStore() {
   const setSettings = useCallback((settings: Settings) => setState((s) => ({ ...s, settings })), []);
   const replaceAll = useCallback((next: Stored) => setState({ ...initial(), ...next }), []);
 
-  return { ...state, followers, opusBacklog, local, loaded, persistError, addPosts, removeSource, loadDemo, setAccounts, setSettings, replaceAll };
+  return { ...state, followers, opusBacklog, local, audience, loaded, persistError, addPosts, removeSource, loadDemo, setAccounts, setSettings, replaceAll };
 }
 
 export type Store = ReturnType<typeof useStore>;

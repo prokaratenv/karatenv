@@ -371,3 +371,13 @@ th { color: var(--heading); }
 /* Refresh stats now (hosted dashboard) */
 .refresh { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; max-width: 520px; }
 .refresh-note { font-size: 13px; color: var(--text-secondary); }
+
+/* Henderson goals */
+.goals { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 16px; }
+@media (max-width: 900px) { .goals { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 520px) { .goals { grid-template-columns: 1fr; } }
+.goal { display: grid; gap: 6px; align-content: start; }
+.goal-target { font-size: 14px; font-weight: 500; color: var(--text-secondary); }
+.goal-bar { height: 8px; border-radius: 4px; background: var(--border); overflow: hidden; }
+.goal-bar span { display: block; height: 100%; background: var(--series-1); border-radius: 4px; }
+.goal-how { font-size: 13px; color: var(--text-secondary); }
