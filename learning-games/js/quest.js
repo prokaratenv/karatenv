@@ -136,9 +136,13 @@ BD.Quest = (function () {
       (c.claimed ? '<span class="boss-sub">Done! New quest tomorrow.' + (c.q.game || c.q.id === "school" || c.q.id === "boss" ? ' Tap to play again.' : ' Tap to see your map.') + '</span>' : c.done ? '<span class="boss-sub">Quest complete! Tap to open your chest</span>' :
         '<span class="quest-bar"><span style="width:' + pct + '%"></span></span><span class="boss-sub">' + c.n + ' / ' + c.q.goal + (c.q.goal === 25 ? " questions" : "") + '</span>') + '</span>';
     const g = BD.Rank.dojoGrade(p), r = BD.Rank.rec(p, g), reg = REGIONS[r.belt];
-    mc.innerHTML = '<span class="map-mini" style="--sky:' + reg.sky + ';--ground:' + reg.ground + '" aria-hidden="true">' + reg.icon + '</span>' +
-      '<span class="quest-txt"><span class="boss-k">Adventure Map</span><strong>' + esc(r.mastered ? "Grade mastered!" : reg.name) + '</strong><span class="boss-sub">' +
-      (r.mastered ? "Every region cleared" : BD.Rank.stripeCount(r) + ' of 4 stripes to the next region') + '</span></span>';
+    const here = r.mastered ? REGIONS.length : r.belt;
+    mc.innerHTML = '<span class="quest-txt"><span class="boss-k">World map · ' + esc(BD.gradeLabel(g)) + '</span><strong>' + esc(r.mastered ? "Grade mastered!" : reg.name) + '</strong><span class="boss-sub">' +
+      (r.mastered ? "Every region cleared" : BD.Rank.stripeCount(r) + ' of 4 stripes to the next region') + '</span></span>' +
+      '<span class="world-strip" aria-hidden="true">' + REGIONS.map(function (x, i) {
+        return '<span class="ws-reg' + (i < here ? " cleared" : i === here ? " here" : "") + '" style="--sky:' + x.sky + ';--ground:' + x.ground + ';--belt:' + BD.BELTS[i].color + '">' + x.icon + '</span>';
+      }).join("") + '</span>';
+    mc.classList.add("world-card");
   }
   function questTap() {
     const p = BD.Store.current(); if (!p) return;

@@ -565,6 +565,7 @@ BD.UI = (function () {
     $("homeRedo").hidden = true; // redo items are shown in Sensei's plan instead
     renderPlan(p);
     BD.Quest.render(p);
+    if (BD.Path) BD.Path.render(p);
     renderTiles(p);
     renderMe(p);
     applyTab();
@@ -586,7 +587,7 @@ BD.UI = (function () {
   function renderPlan(p) {
     planItems = BD.Coach.plan(p);
     const first = nextStep(p);
-    $("startNext").textContent = first ? "Next: " + first.title : "";
+    $("startNext").textContent = first ? (first.label || "Next: " + first.title) : "";
     $("homePlan").hidden = !planItems.length;
     $("homePlanList").innerHTML = planItems.map(function (it, i) {
       return '<button type="button" class="plan-item plan-' + it.kind + '" data-plan="' + i + '"><strong>' + esc(it.title) + '</strong><span>' + esc(it.sub) + '</span></button>';
@@ -595,6 +596,7 @@ BD.UI = (function () {
   /* The one-tap "Start training" pick: Sensei's top suggestion, or practice
      for the stripe with the least XP at their dojo grade. */
   function nextStep(p) {
+    if (BD.Path) return BD.Path.next(p);
     if (planItems[0]) return planItems[0];
     const g = BD.Rank.dojoGrade(p), r = BD.Rank.rec(p, g);
     const open = BD.Rank.SUBJECTS.filter(function (s) { return !s.optional && !r.stripes[s.key]; });
@@ -625,6 +627,8 @@ BD.UI = (function () {
     else if (it.kind === "stripePractice") launchStripe(it.subject, false);
     else if (it.kind === "school") BD.WordQuiz.start("spelling", null, "practice");
     else if (it.kind === "schoolTest") BD.WordQuiz.start("spelling", null, "test");
+    else if (it.kind === "boss") BD.Boss.open();
+    else if (it.kind === "quest") $("questCard").click();
   }
 
   /* Re-draw when progress arrives from another device. */
@@ -853,6 +857,12 @@ BD.UI = (function () {
     });
     $("gradContinue").addEventListener("click", home);
     $("startTraining").addEventListener("click", startTraining);
+    if (BD.Path) BD.Path.bind();
+    if ($("dojoSignIn")) $("dojoSignIn").addEventListener("click", function () {
+      BD.Sound.tap();
+      if (BD.Family && BD.Family.enabled && BD.Family.enabled()) BD.Family.openSignIn(function () { home(); });
+      else sheet("Dojo leaderboard", '<p>The Dojo leaderboard works on <strong>brain.engagelma.com</strong>, where a parent signs in with the family email.</p>');
+    });
     $("gearBtn").addEventListener("click", function () { BD.Badges.openLocker(); });
     $("dojoCard").addEventListener("click", function () { BD.Dojo.openBoard(); });
     $("flashCard").addEventListener("click", function () { BD.MathGame.openFlash(); });
@@ -1009,7 +1019,7 @@ BD.UI = (function () {
     offline();
   }
 
-  return { tab: setTab, currentTab: function () { return tab; }, openGameSheet: openGameSheet, champArt: champArt, championHTML: function (p, outfit) { return fighterArt(p, "full", outfit); }, refreshStage: refreshStage, openBuilder: function () { const p = BD.Store.current(); if (p) openBuilder(p); }, openStudio: openStudio, fighterKey: function (p) { return fighterOf(p); }, beltDetails: beltDetails, testMode: testMode, stripeResult: stripeResult, back: back, setGrade: setGrade, syncGradeSelect: syncGradeSelect, refresh: refresh, sheet: sheet, sheetOpen: sheetOpen, show: show, esc: esc, home: home, players: players, results: results, gradePicker: gradePicker, init: init };
+  return { launchStripe: launchStripe, confirmTest: confirmTest, avatar: avatar, tab: setTab, currentTab: function () { return tab; }, openGameSheet: openGameSheet, champArt: champArt, championHTML: function (p, outfit) { return fighterArt(p, "full", outfit); }, refreshStage: refreshStage, openBuilder: function () { const p = BD.Store.current(); if (p) openBuilder(p); }, openStudio: openStudio, fighterKey: function (p) { return fighterOf(p); }, beltDetails: beltDetails, testMode: testMode, stripeResult: stripeResult, back: back, setGrade: setGrade, syncGradeSelect: syncGradeSelect, refresh: refresh, sheet: sheet, sheetOpen: sheetOpen, show: show, esc: esc, home: home, players: players, results: results, gradePicker: gradePicker, init: init };
 })();
 
 document.addEventListener("DOMContentLoaded", BD.UI.init);
