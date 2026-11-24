@@ -63,11 +63,15 @@ BD.Kid = (function () {
   const byId = {}; STICKERS.forEach(function (s) { byId[s[0]] = s; });
   function book(p) { if (!p.stickers || typeof p.stickers !== "object") p.stickers = {}; return p.stickers; }
   function count(p) { return Object.keys(book(p)).length; }
-  /* A finished round earns a sticker: a new one while any are missing, else a shiny repeat. */
+  /* One sticker per training day (a round of 5+ questions, a boss match, a
+     tournament or a team lesson): a new one while any are missing, else a shiny
+     repeat. 48 stickers take about 2 to 3 months of training days. */
   function earn(p, s) {
     if (!p || !s) return null;
-    const big = s.game === "boss" || s.game === "team" || s.game === "tournament" || (Number(s.total) || 0) >= 3;
+    const big = s.game === "boss" || s.game === "team" || s.game === "tournament" || (Number(s.total) || 0) >= 5;
     if (!big || String(s.game).indexOf("test-") === 0) return null;
+    const today = BD.today(); if (p.stickerDay === today) return null;
+    p.stickerDay = today;
     const b = book(p), missing = STICKERS.filter(function (x) { return !b[x[0]]; });
     const pick = (missing.length ? missing : STICKERS)[Math.floor(Math.random() * (missing.length || STICKERS.length))];
     b[pick[0]] = (b[pick[0]] || 0) + 1;
@@ -89,7 +93,7 @@ BD.Kid = (function () {
   function open() {
     const p = BD.Store.current(); if (!p) return;
     const b = book(p), fresh = p.stickerNew;
-    BD.UI.sheet("📒 Sticker Book", '<p class="muted small">Finish a round, a boss match, a tournament or a team lesson to earn a sticker. <strong>' + count(p) + ' of ' + STICKERS.length + '</strong> collected' + (count(p) >= STICKERS.length ? ': the whole book! Extras turn shiny ✨' : '') + '.</p>' +
+    BD.UI.sheet("📒 Sticker Book", '<p class="muted small">Train each day to earn a sticker: one a day for a round of 5 or more questions, a boss match, a tournament or a team lesson. <strong>' + count(p) + ' of ' + STICKERS.length + '</strong> collected' + (count(p) >= STICKERS.length ? ': the whole book! Extras turn shiny ✨' : '') + '.</p>' +
       PAGES.map(function (pg) {
         const list = STICKERS.slice(pg[1], pg[2]), got = list.filter(function (s) { return b[s[0]]; }).length;
         return '<h4 class="label">' + esc(pg[0]) + ' · ' + got + '/' + list.length + '</h4><div class="sticker-page">' + list.map(function (s) {
@@ -102,6 +106,7 @@ BD.Kid = (function () {
   function sanitize(p) {
     if (p.stickers && typeof p.stickers === "object") { const o = {}; Object.keys(p.stickers).forEach(function (k) { if (byId[k]) o[k] = Math.max(1, Math.min(999, Math.round(Number(p.stickers[k]) || 1))); }); p.stickers = o; } else delete p.stickers;
     if (p.stickerNew !== undefined && !byId[p.stickerNew]) delete p.stickerNew;
+    if (p.stickerDay !== undefined && !/^\d{4}-\d\d-\d\d$/.test(String(p.stickerDay))) delete p.stickerDay;
   }
   function bind() { const l = document.getElementById("stickerLink"); if (l) l.addEventListener("click", function () { BD.Sound.tap(); open(); }); }
   return { young: young, celebrate: celebrate, thing: thing, bindCount: bindCount, STICKERS: STICKERS, earn: earn, count: count, open: open, homeLink: homeLink, sanitize: sanitize, bind: bind };

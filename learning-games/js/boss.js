@@ -71,30 +71,32 @@ BD.Boss = (function () {
   function bossFor(p) {
     const g = BD.Rank.dojoGrade(p), belt = BD.Rank.rec(p, g).belt;
     const idx = belt === 8 && wins(p, g).indexOf(8) !== -1 ? 9 : belt;
-    return { grade: g, belt: belt, idx: idx, boss: BOSSES[idx] };
+    // Iron Master Young is the face of the Black Belt boss; his secret form only appears when he transforms.
+    return { grade: g, belt: belt, idx: idx, boss: BOSSES[idx], shown: BOSSES[Math.min(idx, 8)] };
   }
-  const label = function (b) { return b.boss.secret ? "Final Boss" : b.boss.final ? "Black Belt Boss" : BD.BELTS[b.belt].name + " Belt Boss"; };
+  const label = function (b) { return b.idx >= 8 ? "Black Belt Boss" : BD.BELTS[b.belt].name + " Belt Boss"; };
 
   /* Home card. */
   function card(p) {
     const el = $("bossCard"); if (!el || !p) return;
-    const b = bossFor(p), beat = wins(p, b.grade).indexOf(b.idx) !== -1;
-    el.innerHTML = '<img class="boss-thumb" src="' + b.boss.img + '" alt="">' +
+    const b = bossFor(p), beat = wins(p, b.grade).indexOf(b.idx) !== -1, sh = b.shown;
+    el.innerHTML = '<img class="boss-thumb" src="' + sh.img + '" alt="">' +
       '<span class="boss-txt"><span class="boss-k">' + label(b) + '</span>' +
-      '<strong>' + esc(b.boss.name) + '</strong><span class="boss-sub">' + (beat ? "Defeated ✓ · tap for a rematch" : "Beat " + (b.boss.instructor ? "them" : "this boss") + " for a trophy and +" + prize(b.boss) + " XP") + '</span></span>';
+      '<strong>' + esc(sh.name) + '</strong><span class="boss-sub">' + (beat ? "Defeated ✓ · tap for a rematch" : b.idx === 9 ? "Rematch: something feels different..." : "Beat " + (sh.instructor ? "them" : "this boss") + " for a trophy and +" + prize(sh) + " XP") + '</span></span>';
   }
 
   /* The ladder + fight button. */
   function open() {
     const p = BD.Store.current(); if (!p) return;
     const b = bossFor(p), w = wins(p, b.grade);
+    const sh = b.shown;
     BD.UI.sheet("Boss ladder · " + BD.gradeLabel(b.grade),
-      '<div class="boss-intro"><img src="' + b.boss.img + '" alt=""><div><p class="boss-k">' + label(b) + '</p><h3>' + esc(b.boss.name) + '</h3><p class="muted">' + esc(b.boss.title) + '</p><p class="boss-quote">“' + esc(b.boss.hi) + '”</p></div></div>' +
+      '<div class="boss-intro"><img src="' + sh.img + '" alt=""><div><p class="boss-k">' + label(b) + '</p><h3>' + esc(sh.name) + '</h3><p class="muted">' + esc(sh.title) + '</p><p class="boss-quote">“' + esc(sh.hi) + '”</p></div></div>' +
       '<p class="muted small">' + b.boss.hits + ' hits to win. You have ' + hearts(p) + ' hearts' + (hearts(p) > 3 ? ' (your gear adds extra!)' : '') + (gloves(p) ? '. Your gloves power up every 3rd hit in a row' : '') + (BD.Badges.hasSkill(p, "judo") ? '. 🥋 Every 5th hit in a row is a judo throw (−3)' : '') + '. Weapons are for show, never for fighting.</p>' +
-      '<div class="res-actions"><button type="button" class="btn btn-primary btn-big" id="bossFight">Begin vs ' + esc(b.boss.name) + '</button></div>' +
-      '<h4 class="label">The ladder</h4><ol class="boss-ladder">' + BOSSES.map(function (x, i) {
-        if (x.secret && b.idx !== 9 && w.indexOf(9) === -1) return '<li class="locked secret"><span class="belt-swatch" style="--belt:#17171C"></span><img src="' + x.img + '" alt=""><span>??? Secret boss</span><em>🔒</em></li>';
-        const st = w.indexOf(i) !== -1 ? "beat" : i === b.idx ? "now" : i > b.idx ? "locked" : "";
+      '<div class="res-actions"><button type="button" class="btn btn-primary btn-big" id="bossFight">Begin vs ' + esc(sh.name) + '</button></div>' +
+      '<h4 class="label">The ladder</h4><ol class="boss-ladder">' + BOSSES.filter(function (x) { return !x.secret; }).map(function (x, i) {
+        // the secret boss never shows on the ladder: Iron Master Young transforms into him
+        const st = (i === 8 ? w.indexOf(8) !== -1 && w.indexOf(9) !== -1 : w.indexOf(i) !== -1) ? "beat" : i === Math.min(b.idx, 8) ? "now" : i > b.idx ? "locked" : "";
         return '<li class="' + st + (x.secret ? " secret" : "") + '"><span class="belt-swatch" style="--belt:' + BD.BELTS[Math.min(8, i)].color + '"></span><img src="' + x.img + '" alt=""><span>' + (st === "locked" ? "???" : esc(x.name)) + '</span><em>' + (st === "beat" ? "✓" : st === "now" ? "Now" : st === "locked" ? "🔒" : "") + '</em></li>';
       }).join("") + '</ol>');
     $("bossFight").onclick = function () { $("infoClose").click(); start(); };
@@ -110,11 +112,13 @@ BD.Boss = (function () {
     const p = BD.Store.current(); if (!p) return;
     const b = bossFor(p);
     S = { grade: b.grade, belt: b.belt, idx: b.idx, boss: b.boss, hp: b.boss.hits, max: b.boss.hits, hearts: hearts(p), maxHearts: hearts(p), streak: 0, gloves: gloves(p), judo: BD.Badges.hasSkill(p, "judo"), right: 0, asked: 0, busy: false };
-    $("bossName").textContent = b.boss.name;
-    $("bossImg").src = b.boss.img; $("bossImg").alt = b.boss.name;
-    $("bossTitle").textContent = (b.boss.secret ? "Final Boss · " : "") + BD.gradeLabel(b.grade) + " · " + BD.BELTS[b.belt].name + " Belt";
-    $("bossArena").classList.toggle("ultimate", !!b.boss.secret);
-    $("bossSay").textContent = b.boss.hi;
+    // The secret form starts as Iron Master Young and transforms on the mat.
+    const firstForm = b.boss.secret && wins(p, b.grade).indexOf(9) === -1 ? BOSSES[8] : b.boss;
+    $("bossName").textContent = firstForm.name;
+    $("bossImg").src = firstForm.img; $("bossImg").alt = firstForm.name;
+    $("bossTitle").textContent = (firstForm.secret ? "Final Boss · " : "") + BD.gradeLabel(b.grade) + " · " + BD.BELTS[b.belt].name + " Belt";
+    $("bossArena").classList.toggle("ultimate", !!firstForm.secret);
+    $("bossSay").textContent = firstForm === b.boss ? b.boss.hi : "Back for more? Let's see your best...";
     $("bossOver").hidden = true;
     BD.UI.show("screen-boss");
     if (BD.Music) BD.Music.scene(b.boss.final || b.boss.secret ? "final" : "boss");
@@ -153,6 +157,8 @@ BD.Boss = (function () {
     $("bossQ").innerHTML = "";
     m.hidden = false; m.classList.remove("go"); void m.offsetWidth; m.classList.add("go");
     BD.Sound.belt();
+    // halfway through the flash, Iron Master Young becomes his true form
+    setTimeout(function () { if (!S) return; $("bossName").textContent = S.boss.name; $("bossImg").src = S.boss.img; $("bossImg").alt = S.boss.name; $("bossTitle").textContent = "Final Boss · " + BD.gradeLabel(S.grade) + " · " + BD.BELTS[S.belt].name + " Belt"; $("bossArena").classList.add("ultimate"); $("bossSay").textContent = S.boss.hi; }, 1500);
     setTimeout(function () { m.hidden = true; if (S) then(); }, 3200);
   }
   function prize(boss) { return boss.secret ? 100 : XP; }
@@ -176,7 +182,7 @@ BD.Boss = (function () {
     BD.QuickUI.mark($("bossQ"), S.q, v);
     const arena = $("bossArena");
     if (v === S.q.answer) {
-      S.right++; S.streak++;
+      S.right++; S.streak++; if (BD.Correct) BD.Correct.hit(BD.Store.current());
       const judo = S.judo && S.streak % 5 === 0;
       const power = !judo && S.gloves && S.streak % 3 === 0;
       const dmg = judo ? 3 : power ? 2 : 1;

@@ -11,7 +11,24 @@ Free math, writing, reading, spelling and Spanish practice from Pre-K through 8t
   - Reading (Fix-It): Capitals, Punctuation, Spelling, Grammar.
   - Comprehension (Story Scrolls): Main idea, Details, Reading between the lines, Word meaning.
   - Spelling: Short words, Medium words, Long words, Mixed review.
-- **Pacing (so the journey lasts):** there's no daily cap, but easier work earns fewer points. Each subject has a **level**: the highest grade the Belt Assessment placed them at, automatic leveling moved them to, or a round of 70%+ (5+ items) at a higher grade. Clicking a lower grade never lowers it. Practice below the level still builds **that grade's belt** and gives XP, at **60%** points one grade below, **40%** two below and **25%** three or more below; the results screen says "Review practice: 60% points. Try Grade 4 for full points!"
+- **The long journey (about 100 hours, White to Black at a grade):** practice fills each stripe meter in **Belt XP**, about 10 Belt XP per minute of focused practice in any game (each game's XP is converted so a fast game and a slow game grow the belt equally). A stripe meter grows with the belt:
+
+  | Belt | Belt XP per stripe | Practice per stripe | 4 stripes |
+  |---|---|---|---|
+  | White | 450 | 45 min | 3 h |
+  | Yellow | 900 | 1.5 h | 6 h |
+  | Orange | 1,200 | 2 h | 8 h |
+  | Blue | 1,650 | 2.75 h | 11 h |
+  | Green | 2,100 | 3.5 h | 14 h |
+  | Purple | 2,550 | 4.25 h | 17 h |
+  | Brown | 2,850 | 4.75 h | 19 h |
+  | Red | 3,300 | 5.5 h | 22 h |
+  | **Total** | **60,000** | | **100 h** |
+
+- **Belt power (no waiting, nothing locked):** each day the first **600 Belt XP** (about an hour of practice) count in full; after that the belt still grows at **8%** for the rest of the day, and every point still counts on the leaderboard. Resets at midnight. So 30 to 40 minutes a day reaches Black Belt in about **5 to 6 months**; even 4 hours every day takes about **80 days**. The belt card, rank panel and results show "Today's belt XP: 52 of 600 at full power", then "Bonus practice".
+- **Black Belt degrees:** after Black Belt, practice in any subject fills the degree meter. **1st, 2nd and 3rd Degree:** 4 degree stripes of 250 Belt XP, then a **Degree Test** (15 mixed questions, 85%, +250 XP). **4th and 5th Degree:** 4 x 500 Belt XP and a +500 XP test. **5th Degree is Master Rank.** Degree belt power is 50 Belt XP a day (70 for 4th and 5th), then 3%, so a degree takes about 2 to 3 weeks of regular practice. Gold bars on the belt show the degree; each promotion has a certificate.
+- **Right answers:** every right answer in practice and games (not tests or duels) earns **+2 XP**, up to 600 right answers a day, so XP keeps flowing after the day's belt power is used. Right answers this week count toward the Dojo's **3,000 right answers a week** team goal, show on the leaderboard ("You: 412") and appear in the weekly parent email.
+- **Easier work earns fewer points:** Each subject has a **level**: the highest grade the Belt Assessment placed them at, automatic leveling moved them to, or a round of 70%+ (5+ items) at a higher grade. Clicking a lower grade never lowers it. Practice below the level still builds **that grade's belt** and gives XP, at **60%** points one grade below, **40%** two below and **25%** three or more below; the results screen says "Review practice: 60% points. Try Grade 4 for full points!"
 - **Hints on every practice question, at every belt:** a big **Hint** button gives up to 2 hints, one per tap. Hint 1 lowers that question's points to 75%, hint 2 to 50%; they never block an answer, and they are read aloud when read-aloud is automatic. Stripe tests have no hints.
   - Spelling Bee: hint 1 is the word's meaning (from `data/spelling-hints.js`, 2nd grade up, about 65% of words) or, for younger kids and words without a meaning, a rhyme or sound clue plus the number of letters and syllables. Hint 2 is the first and last letter with blanks (`b _ _ _ _ e`, 6 letters); on pick-a-choice puzzles it rules out wrong choices instead. Unscramble always shows the first letter, so its hint 2 adds the last letter.
   - Fix-It Sentences: hint 1 says where to look for each mistake; hint 2 highlights the word(s) to fix and gives the rule.
@@ -20,7 +37,7 @@ Free math, writing, reading, spelling and Spanish practice from Pre-K through 8t
   - Spanish Dojo: hint 1 rules out a wrong choice (or shows the first letter when typing); hint 2 rules out another (or first and last letters).
   - Boss battles and tournaments: each hint rules out a wrong choice. The Belt Assessment has no hints, so it measures the right starting level.
 - **A belt at every grade:** each grade has its own belt. The grade chips on the home cards and game setup show each grade's belt color (white if not trained yet), with a line like "Grade 4 · Blue Belt · 2 of 4 stripes" for the selected grade, and in-game grade menus list the belt too. While a game is played at a grade, the champion wears that grade's belt.
-- **Practice:** each stripe has a **Practice** button set to the same level as its test. **Points come from doing the work:** practice earns up to **100 XP per stripe**, and stripe tests add **no XP** (practice to 56, pass the test, and it stays 56). They can keep practicing a stripe after earning it, until they move up a belt. Before a test, a note reminds them that practice, not the test, earns points.
+- **Practice:** each stripe has a **Practice** button set to the same level as its test. **Points come from doing the work:** practice fills the stripe meter (Belt XP, above), and stripe tests add **no XP**. Each test part opens at 25%, 50%, 75% and 100% of the meter. They can keep practicing a stripe after earning it, until they move up a belt. Before a test, a note reminds them that practice, not the test, earns points.
 - **Graduation:** the 4th required stripe graduates them to the next belt automatically, with a celebration and a **graduation bonus earned by practice**: a quarter of that belt's practice XP (all 400 practiced = **+100**, tests only = +0). That makes up to 500 XP per belt. Before the 4th test, a note shows the bonus they'd get now and the practice XP they'd leave behind. Earning all 4 stripes on the Black Belt masters the grade. A student who only takes tests can still earn belts, but won't climb the leaderboard.
 - **Harder each belt:** White and Yellow tests mix in work from the grade below. Purple through Black lean harder, and Red and Black mix in the grade above. In Math, multiplication unlocks at Orange and division at Green.
 - **Hints at every belt:** practice and free play always have hints, letter tiles, the rule book and Ask Sensei, at every belt. Only stripe tests (and the school word test) hide them.
@@ -172,7 +189,7 @@ On the website, a student who is on the Dojo leaderboard can tap **⚔️ Challe
 
 ## Boss Battles, Partner Challenge and the champion in every game
 
-- **Boss Battles:** every belt in every grade has a boss to beat. Right answers are kicks that knock down the boss's health; a wrong answer lets the boss strike back and costs a heart. Questions mix math, spelling, reading (pick the correctly written sentence) and Spanish at the student's grade and belt. The ladder: Rascal the Raccoon Ninja (White), Professor Hoot (Yellow), Blaze the Fire Fox (Orange), Glacier the Polar Bear (Blue), Bamboo the Panda Master (Green), Shadow the Ninja Cat (Purple), then the Engage instructors: **Agent Bridgette** (Brown), **Star Force Mrs. Young** (Red) and the final boss, **Iron Master Young** (Black). Beat him and he transforms into **Final Boss Master Young** for one last fight (+100 XP and the Final Boss trophy). Beating a boss the first time earns a trophy and +50 XP. Gear helps (based on the outfit worn): headgear and chest gear add a heart each, and gloves turn every 3rd hit in a row into a 2-damage power punch.
+- **Boss Battles:** every belt in every grade has a boss to beat. Right answers are kicks that knock down the boss's health; a wrong answer lets the boss strike back and costs a heart. Questions mix math, spelling, reading (pick the correctly written sentence) and Spanish at the student's grade and belt. The ladder: Rascal the Raccoon Ninja (White), Professor Hoot (Yellow), Blaze the Fire Fox (Orange), Glacier the Polar Bear (Blue), Bamboo the Panda Master (Green), Shadow the Ninja Cat (Purple), then the Engage instructors: **Agent Bridgette** (Brown), **Star Force Mrs. Young** (Red) and the final boss, **Iron Master Young** (Black). Beat him and, on the rematch, he transforms into **Final Boss Master Young** for one last fight (+100 XP and the Final Boss trophy). The secret form never shows on the ladder or the map: it's a surprise. Beating a boss the first time earns a trophy and +50 XP. Gear helps (based on the outfit worn): headgear and chest gear add a heart each, and gloves turn every 3rd hit in a row into a 2-damage power punch.
 - **Partner Challenge:** two players on one phone or tablet. The screen splits (the top half flips to face the player across the table), each player gets questions at their own grade, and the first to the goal wins. A wrong answer freezes that player for 1.5 seconds. Students who win get +20 XP. Guests can play too.
 - **Champion in every game:** a small version of the student's champion, in their belt and gear, sits beside every game. It kicks on a right answer, shakes it off on a miss and bows at the end of a round.
 
@@ -589,3 +606,26 @@ shows in the Parents area and the weekly email.
 - `js/feel.js` (`BD.Feel.buzz(kind)`): short vibrations on right answers, stripe/part passes, graduations and fist bumps. Family setting "Vibration (this device)", on by default, separate from sound.
 - `js/install.js` (`BD.Install`): "Add Brain Dojo to your home screen" card (Android install prompt, iPhone/iPad Share steps). Shows on the 2nd visit or after the first round, never in the Claude version or when installed, "Not now" hides it 14 days. Me tab: "Install the app".
 - CSS tokens (radii, spacing, type, spring curve), springy presses, gliding progress fills, screen/tab/sheet transitions; all off with reduced motion.
+
+
+## Rewards over the long journey
+
+| Reward | When |
+|---|---|
+| Mouthguard | Sign up |
+| Engage Black Training Shirt | 7 training days |
+| MMA Shorts (Training outfit) | 20 training days |
+| Gear bag | First graduation |
+| Sparring gloves, boots, headgear, chest gear | Yellow Belt stripes 1 to 4 |
+| Full Sparring outfit | Orange Belt |
+| MMA Gloves | Blue Belt and 30 training days |
+| Boxing Gloves, High Rank Uniform, Judo Moves | Green Belt |
+| Weapons | Green, Purple, Brown, Red Belt |
+| Stickers | One per training day (48 take about 2 to 3 months) |
+| **Black Belt Gear** | Pro Training Shirt at Black Belt; Training Shorts at 2 degree stripes; **Black Belt Uniform** and MMA Gloves at 1st Degree; Boxing Gloves at 1st Degree + 2 stripes; Headgear and Shin Guards at 2nd Degree; Fight Shorts at 2nd Degree + 2 stripes; Gear Backpack at 3rd Degree |
+
+Black Belt gear and uniform pictures use the Engage name and E mark. In the Claude version the Black Belt Uniform shows the gi (that version can't hold every picture).
+
+## Read to me in 3rd grade and up
+
+Story Scrolls, Fix-It Sentences and the Belt Assessment's stories read aloud for Pre-K to 2nd grade. From 3rd grade up the read-aloud buttons and automatic reading are off, so kids do the reading themselves, unless a parent turns on **Read to me in 3rd grade and up** (Parents, Read aloud). Hints, math and spelling audio are unchanged.

@@ -102,9 +102,9 @@ BD.Studio = (function () {
   function warm(key) {
     if (!BD.Cast.isStudio(key) || warmed[key] || !("serviceWorker" in navigator) || BD.MASKS) return;
     warmed[key] = true;
-    const fits = ["training", "sparring", "boxing", "mma", "highrank", "leadership", "athlete", "bbc"];
+    const fits = ["training", "sparring", "boxing", "mma", "highrank", "leadership", "athlete", "bbc", "bbu"];
     const urls = ["img/age-" + key + ".webp", "img/face-" + key + ".webp", "img/mask-" + key + ".png", "img/mask-" + key + "-logo.png", "img/mask-" + key + "-hrcollar.png"];
-    fits.forEach(function (f) { urls.push("img/fit-" + key + "-" + f + ".webp", "img/mask-" + key + "-" + f + ".png"); if (f !== "sparring") urls.push("img/mask-" + key + "-" + f + "-logo.png"); });
+    fits.forEach(function (f) { urls.push("img/fit-" + key + "-" + f + ".webp", "img/mask-" + key + "-" + f + ".png"); if (f !== "sparring" && f !== "bbu") urls.push("img/mask-" + key + "-" + f + "-logo.png"); });
     setTimeout(function () { urls.forEach(function (u) { fetch(u).catch(function () {}); }); }, 3000);
   }
   BD.on("home", function (p) { if (p) warm(p.avatar); });

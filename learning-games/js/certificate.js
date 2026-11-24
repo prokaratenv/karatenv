@@ -95,7 +95,7 @@ BD.Certificate = (function () {
 
     const [logo, zumi, champ, beltImg] = await Promise.all([
       load("img/engage-logo.webp"), load("img/zumi.webp"), champion(p, belt.color),
-      load(svgSrc(BD.Rank.beltSVG(beltIdx, g.mastered ? { math: true, reading: true, spelling: true, comprehension: true } : {})))
+      load(svgSrc(BD.Rank.beltSVG(beltIdx, g.mastered && !g.degree ? { math: true, reading: true, spelling: true, comprehension: true } : {}, g.degree ? { degree: g.degree } : {})))
     ]);
 
     x.textAlign = "center"; x.textBaseline = "alphabetic";
@@ -110,14 +110,14 @@ BD.Certificate = (function () {
 
     x.fillStyle = "#A3B4CE"; x.font = "600 36px " + BODY;
     x.fillText(g.mastered ? "earned every stripe on the Black Belt and mastered" : "has earned the rank of", W / 2, 652);
-    const rank = g.mastered ? BD.gradeLabel(g.grade).toUpperCase() : belt.name.toUpperCase() + " BELT";
+    const rank = g.degree ? BD.Rank.DEG_NAMES[g.degree].toUpperCase() : g.mastered ? BD.gradeLabel(g.grade).toUpperCase() : belt.name.toUpperCase() + " BELT";
     fitText(x, rank, "italic 900 {s}px " + DISPLAY, 760, 96);
     x.lineWidth = 8; x.strokeStyle = beltIdx === 0 || beltIdx === 8 ? (beltIdx === 0 ? "#1A2C45" : GOLD) : "rgba(0,0,0,.35)";
     x.strokeText(rank, W / 2, 745);
     x.fillStyle = beltIdx === 8 ? "#17171C" : belt.color; x.fillText(rank, W / 2, 745);
     if (beltImg) fitDraw(x, beltImg, W / 2, 885, 360, 110);
     x.fillStyle = INK; x.font = "700 34px " + BODY;
-    x.fillText(g.mastered ? "Brain Dojo by Engage" : BD.gradeLabel(g.grade) + " · Brain Dojo by Engage", W / 2, 930);
+    x.fillText(g.degree >= 5 ? "Master Rank · " + BD.gradeLabel(g.grade) + " · Brain Dojo by Engage" : g.mastered ? "Brain Dojo by Engage" : BD.gradeLabel(g.grade) + " · Brain Dojo by Engage", W / 2, 930);
 
     // Champion left, Zumi right
     if (champ) fitDraw(x, champ, 250, 975, 300, 620);
@@ -179,9 +179,9 @@ BD.Certificate = (function () {
     let blob;
     try { blob = await toBlob(await draw(p, g)); }
     catch (e) { BD.UI.sheet("Your certificate", '<p>Sorry, the certificate couldn\'t be made on this device.</p>'); return; }
-    const name = "brain-dojo-" + p.name.replace(/[^a-z0-9]+/gi, "-").toLowerCase() + "-" + (g.mastered ? "mastered-" + BD.gradeShort(g.grade).toLowerCase() : g.to.name.toLowerCase() + "-belt") + ".jpg";
+    const name = "brain-dojo-" + p.name.replace(/[^a-z0-9]+/gi, "-").toLowerCase() + "-" + (g.degree ? "degree-" + g.degree : g.mastered ? "mastered-" + BD.gradeShort(g.grade).toLowerCase() : g.to.name.toLowerCase() + "-belt") + ".jpg";
     offer(blob, name, "Your certificate", p.name + " earned a new belt!",
-      p.name + " just earned the " + (g.mastered ? BD.gradeLabel(g.grade) + " mastery" : g.to.name + " Belt") + " in Brain Dojo by Engage!",
+      p.name + " just earned the " + (g.degree ? BD.Rank.DEG_NAMES[g.degree] : g.mastered ? BD.gradeLabel(g.grade) + " mastery" : g.to.name + " Belt") + " in Brain Dojo by Engage!",
       "Save it to print, text it to family, or post it. Tag Engage!");
   }
 

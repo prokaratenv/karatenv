@@ -57,13 +57,15 @@ BD.Cast = (function () {
   function art(key, grade, outfit) {
     if (isStudio(key)) { // one age for every grade
       // The Claude version can hold only some files: Studio boxing and MMA show the gi there (the website has every outfit).
-      if ((outfit === "boxing" || outfit === "mma") && window.claude && typeof window.claude.use === "function") outfit = "gi";
-      if (outfit && outfit !== "gi") return { src: "img/fit-" + key + "-" + outfit + ".webp", mask: key + "-" + outfit, collar: outfit === "highrank" ? key + "-hrcollar" : null, logo: outfit === "sparring" ? null : key + "-" + outfit + "-logo", band: 2 };
+      if ((outfit === "boxing" || outfit === "mma" || outfit === "bbu") && window.claude && typeof window.claude.use === "function") outfit = "gi";
+      if (outfit && outfit !== "gi") return { src: "img/fit-" + key + "-" + outfit + ".webp", mask: key + "-" + outfit, collar: outfit === "highrank" ? key + "-hrcollar" : null, logo: outfit === "sparring" || outfit === "bbu" ? null : key + "-" + outfit + "-logo", band: 2 };
       return { src: "img/age-" + key + ".webp", mask: key, logo: key + "-logo", band: 2 };
     }
     if (KIDS.indexOf(key) === -1) return { src: "img/wb-" + key + ".webp", mask: key, band: null };
     const b = ageBand(grade === undefined ? 3 : grade);
-    if (outfit && outfit !== "gi") return { src: "img/fit-" + key + "-" + b + "-" + outfit + ".webp", mask: key + "-" + b + "-" + outfit, collar: outfit === "highrank" ? key + "-" + b + "-hrcollar" : null, logo: outfit === "sparring" ? null : key + "-" + b + "-" + outfit + "-logo", band: b };
+    // The Claude version holds only some pictures: the Black Belt Uniform shows the gi there.
+    if (outfit === "bbu" && window.claude && typeof window.claude.use === "function") outfit = "gi";
+    if (outfit && outfit !== "gi") return { src: "img/fit-" + key + "-" + b + "-" + outfit + ".webp", mask: key + "-" + b + "-" + outfit, collar: outfit === "highrank" ? key + "-" + b + "-hrcollar" : null, logo: outfit === "sparring" || outfit === "bbu" ? null : key + "-" + b + "-" + outfit + "-logo", band: b };
     return { src: "img/age-" + key + "-" + b + ".webp", mask: key + "-" + b, logo: key + "-" + b + "-logo", band: b };
   }
 

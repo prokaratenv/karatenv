@@ -585,3 +585,24 @@ body.has-tabs .footer { margin-top: 16px; }
   #panelTrain #goalLine { flex-wrap: nowrap; font-size: .85rem; line-height: 1.25; }
   #panelTrain #goalLine > span:last-child { min-width: 0; }
 }
+
+/* Belt power (daily full-power Belt XP), right-answer XP, Black Belt degrees */
+.power-line { display: flex; align-items: center; gap: 10px; margin: 8px 0 4px; font-size: .85rem; color: var(--muted); }
+.power-line strong { color: var(--ink); }
+.power-line .pw-bar { flex: 0 0 64px; height: 8px; border-radius: 99px; background: rgba(255, 255, 255, .12); overflow: hidden; }
+.power-line .pw-bar i { display: block; height: 100%; background: linear-gradient(90deg, #E0BA77, #F6DDA8); border-radius: 99px; }
+.power-line.bonus .pw-bar i { background: linear-gradient(90deg, #5CBFC1, #65D94A); }
+.power-note { display: block; margin-top: 4px; font-size: .82rem; color: var(--muted); }
+.power-note.bonus { color: #9EE6A0; }
+.ca-line { margin: 0 0 8px; font-weight: 800; color: #E0BA77; font-size: .92rem; text-align: center; }
+.ca-plus { position: fixed; z-index: 60; transform: translate(-50%, 0); font-family: var(--font-display); font-weight: 900; font-size: 1rem; color: #E0BA77; pointer-events: none; animation: caUp 1s ease-out forwards; text-shadow: 0 2px 6px rgba(0, 0, 0, .5); }
+@keyframes caUp { from { opacity: 0; translate: 0 6px; } 20% { opacity: 1; } to { opacity: 0; translate: 0 -34px; } }
+@media (prefers-reduced-motion: reduce) { .ca-plus { animation: none; opacity: 0; } }
+.deg-ladder small { margin-left: auto; color: var(--muted); font-size: .75rem; }
+.degree-card .rank-name, .belt-card.degree strong { color: #F6DDA8; }
+.dg-test .dg-bar { height: 8px; border-radius: 99px; background: rgba(255, 255, 255, .12); overflow: hidden; margin: 6px 0 14px; }
+.dg-test .dg-bar i { display: block; height: 100%; background: linear-gradient(90deg, #E0BA77, #F6DDA8); }
+.dg-win .bd-belt { max-width: 280px; margin: 0 auto 8px; }
+.bb-locker .locker-item img { background: radial-gradient(circle at 50% 40%, rgba(166, 226, 46, .18), transparent 70%); }
+.bc-power { display: block; margin-top: 3px; font-size: .78rem; color: rgba(255, 255, 255, .78); }
+.bc-power.bonus { color: #B8F5A0; }

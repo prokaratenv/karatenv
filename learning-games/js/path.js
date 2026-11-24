@@ -29,20 +29,21 @@ BD.Path = (function () {
   };
   const svg = function (k) { return '<svg viewBox="0 0 24 24" aria-hidden="true">' + ICON[k] + '</svg>'; };
   const CH = ["Warm Up", "Build Up", "Power Up", "Belt Battle"];
-  const CH_SUB = ["25 XP in each subject, then Part 1 tests", "50 XP in each subject, then Part 2 tests", "75 XP in each subject, then Part 3 tests", "100 XP, Part 4 tests, the belt boss and graduation"];
+  const CH_SUB = ["A quarter of each stripe meter, then Part 1 tests", "Half of each meter, then Part 2 tests", "Three quarters, then Part 3 tests", "Full meters, Part 4 tests, the belt boss and graduation"];
 
   /* ---------- what's next ---------- */
   function bossInfo(p) {
     const g = BD.Rank.dojoGrade(p), belt = BD.Rank.rec(p, g).belt;
-    const w = BD.Boss.wins(p, g), idx = belt === 8 && w.indexOf(8) !== -1 ? 9 : belt;
-    return { boss: BD.Boss.BOSSES[idx], beat: w.indexOf(idx) !== -1 };
+    const w = BD.Boss.wins(p, g), idx = Math.min(belt, 8);
+    // At Black Belt the boss is always shown as Iron Master Young (his secret form is a surprise).
+    return { boss: BD.Boss.BOSSES[idx], beat: w.indexOf(idx) !== -1 && (idx !== 8 || w.indexOf(9) !== -1) };
   }
   function lowestPractice(p, r) {
     let best = null;
     ORDER.forEach(function (k) {
       if (r.stripes[k]) return;
-      const x = Math.min(BD.Rank.PRACTICE_MAX, r.xp[k] || 0);
-      if (x >= BD.Rank.PRACTICE_MAX) return;
+      const M = BD.Rank.maxFor(r), x = Math.floor(Math.min(M, r.xp[k] || 0));
+      if (x >= M && r.belt < 8) return;
       if (!best || x < best.x) best = { key: k, x: x };
     });
     return best;
@@ -52,6 +53,7 @@ BD.Path = (function () {
     const plan = BD.Coach ? BD.Coach.plan(p) : [];
     const g = BD.Rank.dojoGrade(p), r = BD.Rank.rec(p, g);
     let it = null;
+    if (r.belt >= 8) return degreeNext(p, g, r, plan);
     // 1. A redo or this week's school words come first (they unlock other levels).
     if (plan[0] && /Retry$|^school/.test(plan[0].kind)) it = plan[0];
     // 2. A stripe-test part that is open now.
@@ -66,12 +68,12 @@ BD.Path = (function () {
     // 4. The belt boss, once the belt is well under way.
     if (!it) {
       const b = bossInfo(p);
-      if (!b.beat && (BD.Rank.stripeCount(r) >= 2 || BD.Rank.beltXP(r) >= 200)) it = { kind: "boss", title: "Beat the boss " + b.boss.name, node: "boss" };
+      if (!b.beat && (BD.Rank.stripeCount(r) >= 2 || BD.Rank.beltXP(r) >= BD.Rank.beltMax(r) / 2)) it = { kind: "boss", title: "Beat the boss " + b.boss.name, node: "boss" };
     }
     // 5. Practice the subject with the least XP.
     if (!it) {
       const low = lowestPractice(p, r);
-      if (low) it = { kind: "stripePractice", subject: low.key, title: NAME[low.key] + " practice (" + low.x + " of " + BD.Rank.PRACTICE_MAX + " XP)", node: "prac-" + low.key + "-" + nextNeedIndex(low.x) };
+      if (low) it = { kind: "stripePractice", subject: low.key, title: NAME[low.key] + " practice (" + low.x + " of " + BD.Rank.maxFor(r) + " Belt XP)", node: "prac-" + low.key + "-" + nextNeedIndex(low.x, r) };
     }
     // 6. Everything practiced: today's quest, the boss, or a warm-up.
     if (!it && BD.Quest) { const q = BD.Quest.current(p); if (!q.done) it = { kind: "quest", title: "Today's quest: " + q.q.title }; }
@@ -81,20 +83,56 @@ BD.Path = (function () {
     it.label = (goal && goal.met ? "Keep training: " : "Next: ") + it.title;
     return it;
   }
-  function nextNeedIndex(x) { let i = 0; while (i < BD.Rank.PARTS - 1 && x >= BD.Rank.partNeed(i)) i++; return i; }
+  function nextNeedIndex(x, r) { let i = 0; while (i < BD.Rank.PARTS - 1 && x >= BD.Rank.partNeed(i, r)) i++; return i; }
+  /* Black Belt: the Degree Test when ready, the belt boss, else degree training. */
+  function degreeNext(p, g, r, plan) {
+    const d = BD.Rank.degInfo(r); let it = null;
+    if (plan[0] && /Retry$|^school/.test(plan[0].kind)) it = plan[0];
+    if (!it && d.ready) it = { kind: "degreeTest", title: d.nextName + " test" };
+    if (!it && BD.Quest) { const q = BD.Quest.current(p); if (q.done && !q.claimed) it = { kind: "quest", title: "Open your quest chest" }; }
+    if (!it) { const b = bossInfo(p); if (!b.beat) it = { kind: "boss", title: "Beat the boss " + b.boss.name, node: "boss" }; }
+    if (!it && !d.master) { const low = lowestPractice(p, r) || { key: ORDER[0] }; it = { kind: "stripePractice", subject: low.key, title: "Train for your " + d.nextName + " (" + d.xp + " of " + d.max + " Belt XP)" }; }
+    if (!it) it = { kind: "mathStart", title: "Keep your skills sharp with Math Dojo" };
+    const goal = BD.Goals && BD.Goals.progress ? BD.Goals.progress(p) : null;
+    it.label = (goal && goal.met ? "Keep training: " : "Next: ") + it.title;
+    return it;
+  }
+  /* Today's belt power on the belt card. */
+  function powerSpan(p, g) {
+    const pw = BD.Rank.power(p, g);
+    return '<span class="bc-power' + (pw.bonus ? " bonus" : "") + '">' + (pw.bonus ? "Bonus practice today: your belt still grows a little" : "Today's belt XP: " + pw.used + " of " + pw.full + " at full power") + '</span>';
+  }
+  function degreeRender(p, box, g, r) {
+    const d = BD.Rank.degInfo(r), REG = BD.Quest.REGIONS, reg = REG[REG.length - 1], b = bossInfo(p), nx = next(p);
+    const rows = [];
+    if (d.ready) rows.push({ id: "deg-test", t: d.nextName + " test", s: "Mixed questions from every subject · 85% to promote", icon: "test", first: true });
+    if (!b.beat) rows.push({ id: "boss", t: "Beat " + b.boss.name, s: "Black Belt boss · win a trophy", img: b.boss.img, first: !rows.length && nx.kind === "boss" });
+    if (!d.master && !d.ready) ORDER.forEach(function (k) { if (rows.length < 3) rows.push({ id: "deg-" + k, t: NAME[k] + " practice", s: "Fills your degree meter: " + d.xp + " of " + d.max + " Belt XP", icon: k, subject: k, first: !rows.length }); });
+    box.innerHTML =
+      '<button type="button" class="belt-card degree" id="pathBanner" style="--sky:' + reg.sky + ';--ground:' + reg.ground + '" aria-label="' + esc(BD.Rank.title(r) + ". Open the Adventure Map") + '">' +
+        '<span class="bc-belt">' + BD.Rank.beltSVG(8, {}, { degree: d.deg }) + '</span>' +
+        '<span class="bc-txt"><span class="bc-k">' + (d.master ? "Master Rank" : "Next: " + esc(d.nextName)) + '</span><strong>' + esc(BD.Rank.title(r)) + '</strong>' +
+        '<span class="ch-bar" role="progressbar" aria-valuemin="0" aria-valuemax="' + d.max + '" aria-valuenow="' + d.xp + '"><i style="width:' + Math.round(100 * d.xp / d.max) + '%"></i></span>' +
+        '<span class="bc-sub">' + (d.master ? "Every degree earned in " + esc(BD.gradeLabel(g)) : d.stripes + ' of 4 degree stripes · ' + d.xp + ' / ' + d.max + ' Belt XP') + '</span>' + (d.master ? '' : powerSpan(p, g)) + '</span></button>' +
+      (rows.length ? '<h3 class="mv-head">Your next moves</h3><ol class="moves">' + rows.map(function (w) {
+        const ic = w.img ? '<img src="' + w.img + '" alt="">' : svg(w.icon);
+        return '<li><button type="button" class="mv' + (w.first ? " mv-first" : "") + (w.subject ? " mv-s-" + w.subject : "") + '" data-node="' + w.id + '" aria-label="' + esc(w.t + ". " + w.s) + '"><span class="mv-ic">' + ic + '</span><span class="mv-txt"><strong>' + esc(w.t) + '</strong><span>' + esc(w.s) + '</span></span>' + (w.first ? '<span class="mv-tag">Next</span>' : '') + '<span class="mv-chev" aria-hidden="true">›</span></button></li>';
+      }).join("") + '</ol>' : '') +
+      (d.master ? '' : '<div class="path-next" style="--sky:#1A1A20;--ground:#7A5A1E"><span class="pnx-icon" aria-hidden="true">🥋</span><span class="pnx-txt"><span class="pnx-k">Coming up</span><strong>' + esc(d.nextName) + '</strong><span>' + (d.next >= 5 ? "Then: Master Rank!" : "Then: " + esc(BD.Rank.DEG_NAMES[Math.min(5, d.next + 1)])) + '</span></span></div>');
+  }
 
   /* ---------- the path ---------- */
   function nodes(p) {
-    const g = BD.Rank.dojoGrade(p), r = BD.Rank.rec(p, g), out = [];
+    const g = BD.Rank.dojoGrade(p), r = BD.Rank.rec(p, g), out = [], M = BD.Rank.maxFor(r);
     const PARTS = BD.Rank.PARTS;
     for (let m = 0; m < PARTS; m++) {
-      const need = BD.Rank.partNeed(m);
+      const need = BD.Rank.partNeed(m, r);
       ORDER.forEach(function (k) {
         const x = r.xp[k] || 0, done = !!r.stripes[k] || x >= need;
-        const firstOpen = !r.stripes[k] && nextNeedIndex(Math.min(x, BD.Rank.PRACTICE_MAX)) === m && x < need;
+        const firstOpen = !r.stripes[k] && nextNeedIndex(Math.min(x, M), r) === m && x < need;
         out.push({ ch: m, id: "prac-" + k + "-" + m, kind: "practice", subject: k, need: need, icon: k, label: NAME[k] + " " + need,
           state: done ? "done" : firstOpen ? "ready" : "locked",
-          aria: NAME[k] + " practice to " + need + " XP", have: Math.min(x, BD.Rank.PRACTICE_MAX) });
+          aria: NAME[k] + " practice to " + need + " Belt XP", have: Math.floor(Math.min(x, M)) });
       });
       ORDER.forEach(function (k) {
         const parts = Array.isArray(r.parts && r.parts[k]) ? r.parts[k] : [];
@@ -102,17 +140,17 @@ BD.Path = (function () {
         const ready = !done && n && n.i === m && n.open;
         out.push({ ch: m, id: "part-" + k + "-" + m, kind: "part", subject: k, part: m, need: need, icon: "test", num: m + 1, label: NAME[k] + " Part " + (m + 1),
           state: done ? "done" : ready ? "ready" : "locked", aria: NAME[k] + " stripe test part " + (m + 1),
-          have: Math.min(r.xp[k] || 0, BD.Rank.PRACTICE_MAX), prevOpen: !n || n.i >= m });
+          have: Math.floor(Math.min(r.xp[k] || 0, M)), prevOpen: !n || n.i >= m });
       });
       if (m === 1) {
-        const sx = Math.min(BD.Rank.PRACTICE_MAX, r.xp.spanish || 0);
-        out.push({ ch: 1, id: "spanish", kind: "spanish", subject: "spanish", icon: "spanish", label: "Spanish bonus", side: true, state: sx >= BD.Rank.PRACTICE_MAX ? "done" : "ready", aria: "Spanish bonus practice", have: sx });
+        const sx = Math.floor(Math.min(M, r.xp.spanish || 0));
+        out.push({ ch: 1, id: "spanish", kind: "spanish", subject: "spanish", icon: "spanish", label: "Spanish bonus", side: true, state: sx >= M ? "done" : "ready", aria: "Spanish bonus practice", have: sx });
       }
     }
     const b = bossInfo(p);
     out.push({ ch: 3, id: "boss", kind: "boss", label: b.boss.name, img: b.boss.img, state: b.beat ? "done" : "ready", aria: "Belt boss " + b.boss.name });
     const nextBelt = BD.BELTS[Math.min(BD.BELTS.length - 1, r.belt + 1)];
-    out.push({ ch: 3, id: "grad", kind: "grad", icon: "grad", label: r.belt >= BD.BELTS.length - 1 ? "Master the grade" : nextBelt.name + " Belt", state: r.mastered ? "done" : "locked", aria: "Graduation", stripes: BD.Rank.stripeCount(r), nextBelt: nextBelt });
+    out.push({ ch: 3, id: "grad", kind: "grad", icon: "grad", label: nextBelt.name + " Belt", state: r.belt >= 8 ? "done" : "locked", aria: "Graduation", stripes: BD.Rank.stripeCount(r), nextBelt: nextBelt });
     return out;
   }
   /* The belt is 4 short chapters. The Train tab shows a compact belt card
@@ -132,7 +170,7 @@ BD.Path = (function () {
   function words(n, g) {
     if (n.kind === "practice") {
       const left = Math.max(0, n.need - n.have);
-      return { t: NAME[n.subject] + " practice", s: left + " XP to unlock Part " + (n.ch + 1), icon: n.subject };
+      return { t: NAME[n.subject] + " practice", s: left + " Belt XP to unlock Part " + (n.ch + 1), icon: n.subject };
     }
     if (n.kind === "part") {
       const sk = skillOf(n, g);
@@ -168,6 +206,7 @@ BD.Path = (function () {
   function render(p) {
     const box = $("learnPath"); if (!box || !p) return;
     const g = BD.Rank.dojoGrade(p), r = BD.Rank.rec(p, g), belt = BD.BELTS[r.belt];
+    if (r.belt >= 8) return degreeRender(p, box, g, r);
     const REG = BD.Quest.REGIONS, reg = REG[Math.min(r.belt, REG.length - 1)], nreg = REG[Math.min(r.belt + 1, REG.length - 1)];
     const list = nodes(p), nx = next(p), little = Number(g) <= 2;
     let cur = list.findIndex(function (n) { return n.id === nx.node && n.state !== "done"; });
@@ -176,7 +215,7 @@ BD.Path = (function () {
     const inCh = list.filter(function (n) { return n.ch === ch && !n.side; }), chDone = inCh.filter(function (n) { return n.state === "done"; }).length;
     const mv = moves(p, list, nx, little ? 2 : 3);
     const b = bossInfo(p), last = r.belt >= BD.BELTS.length - 1, nextBelt = BD.BELTS[Math.min(BD.BELTS.length - 1, r.belt + 1)];
-    const thenLine = last ? "Then: master " + BD.gradeLabel(g) + "!" : "Then: " + nextBelt.name + " Belt in " + nreg.name;
+    const thenLine = r.belt === 7 ? "Then: Black Belt, and the Black Belt degrees" : "Then: " + nextBelt.name + " Belt in " + nreg.name;
     const coming = '<div class="path-next" style="--sky:' + nreg.sky + ';--ground:' + nreg.ground + '">' +
       '<span class="pnx-icon" aria-hidden="true">' + (ch < 3 ? nreg.icon : (b.boss.img ? '<img src="' + b.boss.img + '" alt="">' : nreg.icon)) + '</span><span class="pnx-txt"><span class="pnx-k">Coming up</span>' +
       (ch < 3 ? '<strong>Chapter ' + (ch + 2) + ': ' + esc(CH[ch + 1]) + '</strong>' : '<strong>' + (b.beat ? esc(thenLine.replace(/^Then: /, "")) : 'The belt boss ' + esc(b.boss.name)) + '</strong>') +
@@ -186,7 +225,7 @@ BD.Path = (function () {
         '<span class="bc-belt">' + BD.Rank.beltSVG(r.belt, r.stripes, { parts: r.parts }) + '</span>' +
         '<span class="bc-txt"><span class="bc-k">Chapter ' + (ch + 1) + ' of 4</span><strong>' + esc(belt.name) + ' Belt · ' + esc(CH[ch]) + '</strong>' +
         '<span class="ch-bar" role="progressbar" aria-valuemin="0" aria-valuemax="' + inCh.length + '" aria-valuenow="' + chDone + '"><i style="width:' + Math.round(100 * chDone / inCh.length) + '%"></i></span>' +
-        '<span class="bc-sub"><span aria-hidden="true">' + reg.icon + '</span> ' + esc(reg.name) + ' · ' + chDone + ' of ' + inCh.length + ' steps · map ›</span></span></button>' +
+        '<span class="bc-sub"><span aria-hidden="true">' + reg.icon + '</span> ' + esc(reg.name) + ' · ' + chDone + ' of ' + inCh.length + ' steps · map ›</span>' + powerSpan(p, g) + '</span></button>' +
       '<h3 class="mv-head">Your next moves</h3>' +
       '<ol class="moves' + (little ? " moves-little" : "") + '">' + mv.map(function (n, i) { return moveHTML(n, g, i === 0 && n.state !== "locked"); }).join("") + '</ol>' +
       coming +
@@ -199,13 +238,13 @@ BD.Path = (function () {
       const items = list.filter(function (n) { return n.ch === c; });
       const d = items.filter(function (n) { return n.state === "done" && !n.side; }).length, t = items.filter(function (n) { return !n.side; }).length;
       return '<div class="ch-list"><h4 class="label">Chapter ' + (c + 1) + ': ' + esc(nm) + ' · ' + d + '/' + t + (d === t ? ' ' + '<span class="ch-ok">' + svg("check") + '</span>' : '') + '</h4><ul>' +
-        items.map(function (n) { const w = words(n, BD.Rank.dojoGrade(p)); return '<li class="' + n.state + '">' + (n.state === "done" ? svg("check") : n.state === "locked" ? '<span class="ch-lock">' + svg("lock") + '</span>' : '<span class="ch-dot"></span>') + esc(n.side ? "Spanish bonus practice" : w.t + (n.kind === "practice" ? " to " + n.need + " XP" : "")) + (n.side ? ' <em>bonus</em>' : '') + '</li>'; }).join("") + '</ul></div>';
+        items.map(function (n) { const w = words(n, BD.Rank.dojoGrade(p)); return '<li class="' + n.state + '">' + (n.state === "done" ? svg("check") : n.state === "locked" ? '<span class="ch-lock">' + svg("lock") + '</span>' : '<span class="ch-dot"></span>') + esc(n.side ? "Spanish bonus practice" : w.t + (n.kind === "practice" ? " to " + n.need + " Belt XP" : "")) + (n.side ? ' <em>bonus</em>' : '') + '</li>'; }).join("") + '</ul></div>';
     }).join("");
     BD.UI.sheet(only !== undefined ? "Chapter " + (only + 1) + " complete" : "The whole belt", '<div class="ch-sheet">' + html + '</div>');
   }
   function lockShort(n) {
-    if (n.kind === "practice") return n.have + " / " + n.need + " XP";
-    if (n.kind === "part") return n.prevOpen ? "Opens at " + n.need + " XP" : "Pass Part " + n.part + " first";
+    if (n.kind === "practice") return n.have + " / " + n.need + " Belt XP";
+    if (n.kind === "part") return n.prevOpen ? "Opens at " + n.need + " Belt XP" : "Pass Part " + n.part + " first";
     if (n.kind === "grad") return n.stripes + " of 4 stripes";
     return "Locked";
   }
@@ -213,10 +252,13 @@ BD.Path = (function () {
   /* ---------- tapping a node ---------- */
   function tap(id) {
     const p = BD.Store.current(); if (!p) return;
+    if (id === "deg-test") { BD.Sound.tap(); if (BD.Degrees) BD.Degrees.start(); return; }
+    if (/^deg-/.test(id)) { BD.Sound.tap(); BD.UI.launchStripe(id.slice(4), false); return; }
+    if (id === "boss" && BD.Rank.rec(p, BD.Rank.dojoGrade(p)).belt >= 8) { BD.Sound.tap(); BD.Boss.open(); return; }
     const n = nodes(p).find(function (x) { return x.id === id; }); if (!n) return;
     BD.Sound.tap();
     if (n.state === "done") {
-      const what = n.kind === "practice" ? "You reached " + n.need + " practice XP in " + GAME[n.subject] + "."
+      const what = n.kind === "practice" ? "You reached " + n.need + " Belt XP in " + GAME[n.subject] + "."
         : n.kind === "part" ? "You passed " + NAME[n.subject] + " Part " + (n.part + 1) + "."
         : n.kind === "boss" ? "You beat " + n.label + "! Rematch any time."
         : n.kind === "spanish" ? "You earned all your Spanish bonus XP on this belt." : "You graduated!";
@@ -229,8 +271,8 @@ BD.Path = (function () {
     }
     if (n.state === "locked") {
       let why;
-      if (n.kind === "practice") why = "Keep practicing " + GAME[n.subject] + ". You have " + n.have + " of " + n.need + " XP.";
-      else if (n.kind === "part") why = n.prevOpen ? NAME[n.subject] + " Part " + (n.part + 1) + " opens at " + n.need + " practice XP. You have " + n.have + "." : "Pass " + NAME[n.subject] + " Part " + n.part + " first. Each part opens after more practice.";
+      if (n.kind === "practice") why = "Keep practicing " + GAME[n.subject] + ". You have " + n.have + " of " + n.need + " Belt XP.";
+      else if (n.kind === "part") why = n.prevOpen ? NAME[n.subject] + " Part " + (n.part + 1) + " opens at " + n.need + " Belt XP. You have " + n.have + "." : "Pass " + NAME[n.subject] + " Part " + n.part + " first. Each part opens after more practice.";
       else why = "Earn all 4 stripes (" + n.stripes + " of 4 so far) to graduate to " + n.nextBelt.name + " Belt.";
       BD.UI.sheet("Not yet!", '<div class="unlock"><div class="chest-prize" aria-hidden="true">' + svg("lock") + '</div><p>' + esc(why) + '</p><p class="muted small">Practice is how you open every step. Every round counts!</p>' +
         '<div class="res-actions">' + (n.subject ? '<button type="button" class="btn btn-primary" id="pnGo">Practice ' + esc(NAME[n.subject]) + '</button>' : '') + '<button type="button" class="btn btn-quiet" id="pnOk">OK</button></div></div>');

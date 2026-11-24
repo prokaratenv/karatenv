@@ -87,11 +87,12 @@ BD.SentenceGame = (function () {
     $("sentNext").hidden = true;
     $("sentHint").disabled = false;
     setTimeout(function () { input.focus(); }, 50);
+    if ($("sentRead")) $("sentRead").hidden = !BD.ReadAloud.readingOK(S.grade);
     readItem(true);
   }
   /* Read the sentence out loud (automatic for Pre-K to 1st grade). */
   function readItem(auto) {
-    if (!S || (auto && !BD.ReadAloud.auto(S.grade))) return;
+    if (!S || !BD.ReadAloud.readingOK(S.grade) || (auto && !BD.ReadAloud.auto(S.grade))) return;
     // read-along hook: the sentence is highlighted word by word
     BD.ReadAloud.read([{ text: "Fix the mistakes in this sentence." }, $("sentOriginal").textContent.trim() ? { el: $("sentOriginal") } : { text: S.items[S.i].text }]);
   }
@@ -163,6 +164,7 @@ BD.SentenceGame = (function () {
     const item = S.items[S.i];
     const gain = Math.max(5, Math.round(POINTS[S.tries] * BD.Hints.factor(BD.Hints.used("sent"))));
     S.xp += gain; S.solved++;
+    if (!S.test && BD.Correct) BD.Correct.hit(BD.Store.current());
     if (S.tries === 0) S.firstTry++;
     BD.Sound.right();
     BD.Cast.say("sentSay", "right");

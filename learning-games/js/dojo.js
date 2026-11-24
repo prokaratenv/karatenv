@@ -53,8 +53,8 @@ BD.Dojo = (function () {
   function cleanPlayer(pl) {
     BD.BELTS.forEach(function (b) { BELT_BY_NAME[b.name] = b; });
     const b = BELT_BY_NAME[pl && pl.belt] || BD.BELTS[0];
-    const reps = Math.max(0, Math.min(1500, Math.round(Number(pl && pl.reps) || 0))); // no one answers 1,500+ in a week
-    const xp = Math.max(0, Math.min(10000, Math.round((Number(pl && pl.xp) || 0) * 2) / 2));
+    const reps = Math.max(0, Math.min(4200, Math.round(Number(pl && pl.reps) || 0))); // right answers count up to 600 a day
+    const xp = Math.max(0, Math.min(50000, Math.round((Number(pl && pl.xp) || 0) * 2) / 2));
     const life = Math.max(0, Math.min(1000000, Math.round((Number(pl && pl.life) || 0) * 2) / 2));
     const st = Math.max(0, Math.min(3650, Math.round(Number(pl && pl.st) || 0)));
     const nm = pl && pl.name;
@@ -130,7 +130,7 @@ BD.Dojo = (function () {
     const ws = BD.Parent.weekStart(), now = Date.now() + 864e5;
     return BD.Store.players().filter(function (p) { return p.dojoOptIn; }).map(function (p) {
       const w = BD.Parent.weekStats(p, ws, now), belt = BD.beltOf(p);
-      return { sid: sid(p.id), name: display(p), belt: belt.name, reps: Math.min(1500, w.correct), xp: Math.min(10000, BD.xpSince(p, ws)), life: Math.min(1000000, p.xp || 0), st: Math.min(3650, BD.streak(p).days) };
+      return { sid: sid(p.id), name: display(p), belt: belt.name, reps: Math.min(4200, Math.max(w.correct, BD.Correct ? BD.Correct.thisWeek(p) : 0)), xp: Math.min(50000, BD.xpSince(p, ws)), life: Math.min(1000000, p.xp || 0), st: Math.min(3650, BD.streak(p).days) };
     });
   }
   let lastWeb = "", given = [];
@@ -270,7 +270,7 @@ BD.Dojo = (function () {
     el.innerHTML = '<span class="lb-trophy" aria-hidden="true">🏆</span><span class="lb-mid"><strong>Dojo Leaderboard</strong>' +
       '<span class="lb-line">' + (me ? 'You\'re <b>#' + rank + '</b> this week · <span class="belt-swatch" style="--belt:' + me.color + '"></span> ' + me.belt + ' Belt · ' + me.life.toLocaleString() + ' XP' + (me.cheers && total(me.cheers.week) ? ' · ' + cheerIcons(me.cheers.week) : '') :
         (p && !p.dojoOptIn ? "See who's on top this week. Ask a parent to join you in!" : "This week, all-time and streaks")) + '</span>' +
-      '<span class="lb-goal"><span class="dojo-bar"><i style="width:' + pct + '%"></i></span><span>Team goal ' + b.total.toLocaleString() + ' / ' + b.goal.toLocaleString() + '</span></span></span>' +
+      '<span class="lb-goal"><span class="dojo-bar"><i style="width:' + pct + '%"></i></span><span>Team goal ' + b.total.toLocaleString() + ' / ' + b.goal.toLocaleString() + ' right answers' + (p && BD.Correct ? ' · You: ' + BD.Correct.thisWeek(p).toLocaleString() : '') + '</span></span></span>' +
       '<span class="lb-cta">View ›</span>';
   }
   let tab = "week";
@@ -307,7 +307,7 @@ BD.Dojo = (function () {
       (canCheer ? '<p class="support-line" id="supportLine">' + supportLine(p) + '</p>' : b.v2 && p && !p.dojoOptIn ? '<p class="muted small">Join the leaderboard (ask a parent in the Parent corner) to cheer on friends.</p>' : '') +
       '<p class="muted small">Cheer as often as you like: 🤜 fist bump, 🙌 high-five, 👏 applause, 👍 thumbs up. Supporting others is a black belt skill.</p>' +
       (BD.Challenge ? BD.Challenge.boardNote(p, canCh) : '') +
-      '<p><strong>' + b.total.toLocaleString() + '</strong> of <strong>' + b.goal.toLocaleString() + '</strong> right answers this week (team goal). This week\'s board resets every Monday.</p>' +
+      '<p><strong>' + b.total.toLocaleString() + '</strong> of <strong>' + b.goal.toLocaleString() + '</strong> right answers this week (team goal). Every right answer also earns +2 XP. This week\'s board resets every Monday.</p>' + (BD.Store.current() && BD.Correct ? '<p class="muted small">You: <strong>' + BD.Correct.thisWeek(BD.Store.current()).toLocaleString() + '</strong> right answers this week.</p>' : '') +
       '<p class="muted small">XP comes from doing the work: practice (up to 100 per stripe), graduation bonuses earned by that practice (up to +100), Daily Flashcards, bosses, challenges, team lessons and daily chests. Stripe tests alone give no points. No names are ever shown: only nicknames (or first initials) and belts. Parents can join or leave in the Parent corner.</p>');
     if ($("nickPick")) $("nickPick").onclick = function () { pickNick(p, function () { openBoard(); }); };
     $("infoBody").onclick = function (e) {

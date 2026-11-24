@@ -30,6 +30,7 @@ for top in ["css", "js", "data", "img"]:
             with open(p, "rb") as fh: h.update(p.encode() + fh.read())
             # Champion Studio art (30 champions x 9 looks) is fetched only when a student picks it, then kept by the worker
             if re.match(r"img/(age|fit|mask|face)-s\d\d[-.]", p): continue
+            if "-bbu." in p: continue  # Black Belt Uniform pictures: fetched when a Black Belt wears it, then kept
             # big character variations come down in the background after the first visit
             (LATER if p.startswith(("img/fit-", "img/age-", "img/boss-", "img/mask-", "img/ex-")) else CORE).append(p)
 for p in ["index.html", "manifest.webmanifest", "tools/sw-template.js"]:

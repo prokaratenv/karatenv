@@ -246,7 +246,7 @@ function boardPost(req) {
     (Array.isArray(req.players) ? req.players : []).slice(0, 6).forEach(function (p) {
       var sid = String(p && p.sid || ""), name = String(p && p.name || "");
       if (!/^[a-f0-9]{16}$/.test(sid) || !(nickOk(name) || initialOk(name)) || BELTS.indexOf(p.belt) === -1) return;
-      d.rows[fid + ":" + sid] = { name: name, belt: p.belt, xp: Math.max(0, Math.min(10000, Math.round(Number(p.xp) * 2 || 0) / 2)), reps: Math.max(0, Math.min(1500, Math.round(Number(p.reps) || 0))),
+      d.rows[fid + ":" + sid] = { name: name, belt: p.belt, xp: Math.max(0, Math.min(50000, Math.round(Number(p.xp) * 2 || 0) / 2)), reps: Math.max(0, Math.min(4200, Math.round(Number(p.reps) || 0))),
         life: Math.max(0, Math.min(1000000, Math.round(Number(p.life) * 2 || 0) / 2)), st: Math.max(0, Math.min(3650, Math.round(Number(p.st) || 0))), at: Date.now() };
     });
     file.setContent(JSON.stringify(d));

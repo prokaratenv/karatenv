@@ -38,9 +38,11 @@ BD.Digest = (function () {
     const w = BD.Parent.weekStats(p, from, to), inRange = function (iso) { const t = new Date(iso).getTime(); return t >= from && t < to; };
     const g = BD.Rank.dojoGrade(p), r = BD.Rank.rec(p, g), sess = (p.sessions || []).filter(function (s) { return s.date && inRange(s.date); });
     const wins = [];
+    if (w.correct) wins.push(w.correct.toLocaleString() + " right answers this week (each one +2 XP for the Dojo goal)");
     w.belts.forEach(function (b) { wins.push("Earned the " + b.to.name + " Belt (" + BD.gradeLabel(b.grade) + ")"); });
     // One line for all stripes (Spanish is bonus training now, not a stripe).
-    const st = w.stripes.filter(function (x) { return x.subject !== "spanish"; }), byS = {};
+    const st = w.stripes.filter(function (x) { return x.subject !== "spanish" && x.subject !== "degree"; }), byS = {};
+    w.stripes.forEach(function (x) { if (x.subject === "degree" && x.deg) wins.push("Earned the " + BD.Rank.DEG_NAMES[Math.min(5, x.deg)] + (x.deg >= 5 ? " (Master Rank)" : "")); });
     st.forEach(function (x) { const k = SUBJECTS[x.subject] || "Other"; byS[k] = (byS[k] || 0) + 1; });
     if (st.length) wins.push("Earned " + (st.length === 1 ? "a stripe" : st.length + " stripes") + ": " + Object.keys(byS).map(function (k) { return k + (byS[k] > 1 ? " ×" + byS[k] : ""); }).join(", "));
     w.badges.forEach(function (b) { wins.push("New badge: " + BD.Badges.gearName(b)); });

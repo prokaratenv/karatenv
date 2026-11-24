@@ -553,6 +553,7 @@ BD.WordQuiz = (function () {
     if (spellSR && BD.Phonics) BD.Phonics.note(q.word, ok && W.tries === 1, p);
     if (ok) {
       W.correct++; if (W.tries === 1) W.firstTry++;
+      if (!W.test && BD.Correct) BD.Correct.hit(p);
       W.streak++; W.best = Math.max(W.best, W.streak);
       const gain = Math.round(((W.tries === 1 ? 10 + Math.min(W.streak - 1, 10) : 5) - (W.usedTiles ? 5 : 0)) * BD.Hints.factor(BD.Hints.used("word")));
       W.xp += Math.max(2, gain); st.r++;

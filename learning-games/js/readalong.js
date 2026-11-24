@@ -21,7 +21,7 @@ window.BD = window.BD || {};
 
 BD.ReadAlong = (function () {
   const KEY = "brainDojo.readalong";
-  const DEF = { mode: "auto", speed: "normal", highlight: true, voice: false };
+  const DEF = { mode: "auto", speed: "normal", highlight: true, voice: false, older: false };
   const RATES = { slow: 0.7, normal: 0.9 };
   const synth = typeof window !== "undefined" && "speechSynthesis" in window && typeof window.SpeechSynthesisUtterance === "function" ? window.speechSynthesis : null;
 
@@ -32,7 +32,8 @@ BD.ReadAlong = (function () {
       mode: ["auto", "always", "tap"].indexOf(o.mode) !== -1 ? o.mode : DEF.mode,
       speed: RATES[o.speed] ? o.speed : DEF.speed,
       highlight: o.highlight !== false,
-      voice: o.voice === true
+      voice: o.voice === true,
+      older: o.older === true // read stories and sentences aloud for 3rd grade and up (off: they read on their own)
     };
   }
   let prefs = (function () { try { return clean(JSON.parse(localStorage.getItem(KEY) || "{}")); } catch (e) { return clean({}); } })();
@@ -387,6 +388,8 @@ BD.ReadAlong = (function () {
         '<p class="ra-sample" data-ra-sample>Let\'s read together. Watch each word light up!</p>' +
         '<label class="sound-row"><span><strong>Highlight words</strong><span class="muted small">Each word lights up as it\'s read, so kids can follow along.</span></span>' +
           '<input type="checkbox" class="switch" data-ra-hl' + (s.highlight ? " checked" : "") + '></label>' +
+        '<label class="sound-row"><span><strong>Read to me in 3rd grade and up</strong><span class="muted small">Off by default, so older kids read stories and sentences on their own. Pre-K to 2nd grade always have read-aloud.</span></span>' +
+          '<input type="checkbox" class="switch" data-ra-older' + (s.older ? " checked" : "") + '></label>' +
         '<label class="sound-row"><span><strong>Voice answers</strong><span class="muted small">A microphone button on Story Scrolls answers, so kids who can\'t type yet can say their answer.</span></span>' +
           '<input type="checkbox" class="switch" data-ra-voice' + (s.voice && micOK ? " checked" : "") + (micOK ? "" : " disabled") + '></label>' +
         '<p class="muted small ra-disclose">Speech is turned into text by your device or browser\'s speech service; Brain Dojo does not record or keep audio.</p>' +
@@ -397,6 +400,7 @@ BD.ReadAlong = (function () {
       root.querySelectorAll('input[name="raMode"]').forEach(function (i) { i.addEventListener("change", function () { if (i.checked) settings({ mode: i.value }); }); });
       root.querySelectorAll('input[name="raSpeed"]').forEach(function (i) { i.addEventListener("change", function () { if (i.checked) settings({ speed: i.value }); }); });
       const hl = root.querySelector("[data-ra-hl]"); if (hl) hl.addEventListener("change", function () { settings({ highlight: hl.checked }); });
+      const ol = root.querySelector("[data-ra-older]"); if (ol) ol.addEventListener("change", function () { settings({ older: ol.checked }); });
       const vo = root.querySelector("[data-ra-voice]"); if (vo) vo.addEventListener("change", function () { settings({ voice: vo.checked }); });
       const t = root.querySelector("[data-ra-try]");
       if (t) t.addEventListener("click", function () {

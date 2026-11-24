@@ -207,7 +207,9 @@ BD.Reading = (function () {
     $("readTitle").textContent = ps.title;
     $("readText").textContent = ps.text;
     BD.Speech.stop();
-    $("readListen").hidden = !BD.Speech.available;
+    const ok = BD.ReadAloud.readingOK(R.grade);
+    $("readListen").hidden = !BD.Speech.available || !ok;
+    $("readQRead").hidden = !ok;
     $("readListen").textContent = "Read the story";
     $("readQRead").setAttribute("aria-label", "Read the question"); $("readQRead").title = "Read the question";
     R.autoStory = true; // read-along: the first question of a story also reads the story (when reading is automatic)
@@ -226,7 +228,7 @@ BD.Reading = (function () {
     $("readQType").textContent = BD.READ_TYPES[q.type].label;
     $("readQType").className = "q-type q-" + q.type;
     $("readQuestion").textContent = q.q;
-    if (BD.ReadAloud.auto(R.grade)) {
+    if (BD.ReadAloud.auto(R.grade) && BD.ReadAloud.readingOK(R.grade)) {
       const withStory = R.autoStory; R.autoStory = false;
       setTimeout(function () { if (R && question() === q) { if (withStory) readStory(); else readQuestion(); } }, 300);
     }
@@ -245,10 +247,12 @@ BD.Reading = (function () {
 
   /* Read-along (js/readalong.js): the story, then the question, word by word. */
   function readStory() {
+    if (!R || !BD.ReadAloud.readingOK(R.grade)) return;
     if (!R) return;
     BD.ReadAloud.read([$("readTitle"), $("readText"), $("readQuestion")], { id: "story", button: $("readListen"), stopLabel: "■ Stop" });
   }
   function readQuestion() {
+    if (!R || !BD.ReadAloud.readingOK(R.grade)) return;
     if (!R) return;
     BD.ReadAloud.read($("readQuestion"), { id: "question", button: $("readQRead") });
   }
@@ -328,6 +332,7 @@ BD.Reading = (function () {
       const gain = Math.max(0, Math.round(XP[Math.min(R.tries, TRIES) - 1][res.score] * BD.Hints.factor(BD.Hints.used("read"))));
       BD.Hints.close("read");
       R.xp += gain;
+      if (!R.test && res.score > 0 && BD.Correct) BD.Correct.hit(p);
       R.results.push({ type: q.type, best: R.best, q: q.q, answer: q.answer });
       record(p, R.grade, q.type, R.best === 2 && R.tries === 1 && !R.usedHint);
       if (BD.StoryGen && BD.StoryGen.note) BD.StoryGen.note(q.type, R.best === 2 && R.tries === 1 && !R.usedHint, R.grade);

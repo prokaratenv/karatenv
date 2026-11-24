@@ -21,7 +21,16 @@ BD.Badges = (function () {
     nunchucks: { name: "Nunchucks", img: "img/weapon-nunchucks.webp", weapon: true },
     kamas: { name: "Kamas", img: "img/weapon-kamas.webp", weapon: true },
     bo: { name: "Bo Staff", img: "img/weapon-bo.webp", weapon: true },
-    sword: { name: "Wooden Sword", img: "img/weapon-sword.webp", weapon: true }
+    sword: { name: "Wooden Sword", img: "img/weapon-sword.webp", weapon: true },
+    // Black Belt Gear: new things to earn through the Black Belt degrees
+    bbshirt: { name: "Engage Pro Training Shirt", img: "img/gear-bb-proshirt.webp", bb: true },
+    bbshorts: { name: "Black Belt Training Shorts", img: "img/gear-bb-bbshorts.webp", bb: true },
+    bbmma: { name: "Black Belt MMA Gloves", img: "img/gear-bb-mmagloves.webp", bb: true },
+    bbboxing: { name: "Black Belt Boxing Gloves", img: "img/gear-bb-boxgloves.webp", bb: true },
+    bbhead: { name: "Black Belt Headgear", img: "img/gear-bb-headgear.webp", bb: true },
+    bbshin: { name: "Black Belt Shin Guards", img: "img/gear-bb-shinguards.webp", bb: true },
+    bbfight: { name: "Engage Fight Shorts", img: "img/gear-bb-fightshorts.webp", bb: true },
+    bbpack: { name: "Black Belt Gear Backpack", img: "img/gear-bb-backpack.webp", bb: true }
   };
 
   const weekAgo = function () { return Date.now() - 7 * 864e5; };
@@ -38,15 +47,22 @@ BD.Badges = (function () {
     }, 0);
   };
   /* Reached a belt (0 White … 8 Black) in any grade. */
-  const reached = function (p, belt) { return Object.keys(p.rank || {}).some(function (g) { return p.rank[g] && (p.rank[g].belt >= belt || p.rank[g].mastered); }); };
+  const reached = function (p, belt) { return Object.keys(p.rank || {}).some(function (g) { return p.rank[g] && p.rank[g].belt >= belt; }); };
   const reachedOrange = function (p) { return reached(p, 2); };
+  /* Black Belt degree progress in any grade, as "degrees + quarter stripes" (e.g. 1.5 = 1st Degree + 2 stripes). */
+  const degProgress = function (p) {
+    return Object.keys(p.rank || {}).reduce(function (best, g) {
+      const r = p.rank[g]; if (!r || r.belt < 8) return best;
+      const d = BD.Rank.degInfo(r); return Math.max(best, d.deg + (d.master ? 0 : d.stripes / 4));
+    }, -1);
+  };
 
   /* The gear path, in the order kids earn it (sparring starts at Orange Belt, like class). */
   const BADGES = [
     { id: "signup", name: "Welcome to the Dojo", how: "Sign up for Brain Dojo.", gear: "mouthguard", test: function () { return true; } },
-    { id: "days-3", name: "3 Days In", how: "Train on 3 different days.", gear: "shirt", test: function (p) { return daysTrained(p) >= 3; } },
-    { id: "days-10", name: "10 Days Strong", how: "Train on 10 different days.", gear: "shorts", test: function (p) { return daysTrained(p) >= 10; } },
-    { id: "stripe-1", name: "First Stripe", how: "Earn your first stripe.", gear: "mma", test: function (p) { return stripes(p) >= 1; } },
+    { id: "days-3", name: "7 Days In", how: "Train on 7 different days.", gear: "shirt", test: function (p) { return daysTrained(p) >= 7; } },
+    { id: "days-10", name: "20 Days Strong", how: "Train on 20 different days.", gear: "shorts", test: function (p) { return daysTrained(p) >= 20; } },
+    { id: "stripe-1", name: "Blue Belt", how: "Reach Blue Belt and train on 30 different days.", gear: "mma", test: function (p) { return reached(p, 3) && daysTrained(p) >= 30; } },
     { id: "grad-1", name: "First Graduation", how: "Graduate to your next belt.", gear: "bag", test: function (p) { return belts(p) >= 1; } },
     { id: "yellow-1", name: "Yellow Belt · 1 Stripe", how: "Earn 1 stripe on your Yellow Belt.", gear: "sparring", test: function (p) { return yellowStripes(p) >= 1; } },
     { id: "yellow-2", name: "Yellow Belt · 2 Stripes", how: "Earn 2 stripes on your Yellow Belt.", gear: "boots", test: function (p) { return yellowStripes(p) >= 2; } },
@@ -59,9 +75,20 @@ BD.Badges = (function () {
     { id: "green-judo", name: "Judo Moves", how: "Reach Green Belt. Every 5 right in a row becomes a judo throw in battles and sparring!", gear: null, skill: "judo", test: function (p) { return reached(p, 4); } },
     { id: "purple-kamas", name: "Purple Belt", how: "Reach Purple Belt.", gear: "kamas", test: function (p) { return reached(p, 5); } },
     { id: "brown-bo", name: "Brown Belt", how: "Reach Brown Belt.", gear: "bo", test: function (p) { return reached(p, 6); } },
-    { id: "red-sword", name: "Red Belt", how: "Reach Red Belt.", gear: "sword", test: function (p) { return reached(p, 7); } }
+    { id: "red-sword", name: "Red Belt", how: "Reach Red Belt.", gear: "sword", test: function (p) { return reached(p, 7); } },
+    // Black Belt Gear and Uniform (after Black Belt, through the degrees)
+    { id: "bb-shirt", name: "Black Belt", how: "Reach Black Belt.", gear: "bbshirt", test: function (p) { return reached(p, 8); } },
+    { id: "bb-shorts", name: "Degree Training", how: "Earn 2 degree stripes on your Black Belt.", gear: "bbshorts", test: function (p) { return degProgress(p) >= 0.5; } },
+    { id: "deg-1-bbu", name: "1st Degree Black Belt", how: "Earn your 1st Degree: the Black Belt Uniform, a black gi with lime-green Engage trim.", gear: null, unlocks: "bbu", test: function (p) { return degProgress(p) >= 1; } },
+    { id: "bb-mma", name: "1st Degree Black Belt", how: "Earn your 1st Degree.", gear: "bbmma", test: function (p) { return degProgress(p) >= 1; } },
+    { id: "bb-boxing", name: "1st Degree · 2 Stripes", how: "Earn 2 stripes toward your 2nd Degree.", gear: "bbboxing", test: function (p) { return degProgress(p) >= 1.5; } },
+    { id: "bb-head", name: "2nd Degree Black Belt", how: "Earn your 2nd Degree.", gear: "bbhead", test: function (p) { return degProgress(p) >= 2; } },
+    { id: "bb-shin", name: "2nd Degree Black Belt", how: "Earn your 2nd Degree.", gear: "bbshin", test: function (p) { return degProgress(p) >= 2; } },
+    { id: "bb-fight", name: "2nd Degree · 2 Stripes", how: "Earn 2 stripes toward your 3rd Degree.", gear: "bbfight", test: function (p) { return degProgress(p) >= 2.5; } },
+    { id: "bb-pack", name: "3rd Degree Black Belt", how: "Earn your 3rd Degree.", gear: "bbpack", test: function (p) { return degProgress(p) >= 3; } }
   ];
-  const GEAR_BADGES = BADGES.filter(function (b) { return b.gear && !GEAR[b.gear].weapon; });
+  const GEAR_BADGES = BADGES.filter(function (b) { return b.gear && !GEAR[b.gear].weapon && !GEAR[b.gear].bb; });
+  const BB_BADGES = BADGES.filter(function (b) { return b.gear && GEAR[b.gear].bb; });
   const WEAPON_BADGES = BADGES.filter(function (b) { return b.gear && GEAR[b.gear].weapon; });
   function hasSkill(p, skill) { return BADGES.some(function (b) { return b.skill === skill && p.badges && p.badges[b.id]; }); }
   function weapons(p) { return WEAPON_BADGES.filter(function (b) { return (p.gear || []).indexOf(b.gear) !== -1; }).map(function (b) { return b.gear; }); }
@@ -79,7 +106,8 @@ BD.Badges = (function () {
     // team shirt and shorts: join the team (Engage Teams, from Orange, Green and Brown Belt)
     { id: "leadership", name: "Leadership Team", gear: [], team: "leadership", lockText: "Join the Leadership Team (Orange Belt)" },
     { id: "athlete", name: "Athlete Team", gear: [], team: "athlete", lockText: "Join the Athlete Team (Green Belt)" },
-    { id: "bbc", name: "Black Belt Club", gear: [], team: "bbc", lockText: "Join the Black Belt Club (Brown Belt)" }
+    { id: "bbc", name: "Black Belt Club", gear: [], team: "bbc", lockText: "Join the Black Belt Club (Brown Belt)" },
+    { id: "bbu", name: "Black Belt Uniform", gear: [], badge: "deg-1-bbu", lockText: "Unlocks at 1st Degree Black Belt" }
   ];
   OUTFITS[2].lockText = "Unlocks at Orange Belt";
   OUTFITS.forEach(function (o) { o.needs = o.gear; });
@@ -134,7 +162,7 @@ BD.Badges = (function () {
       '<div class="outfits">' + OUTFITS.map(function (o) {
         const open = outfitUnlocked(p, o), on = now === o.id;
         const missing = o.needs.filter(function (g) { return !hasGear(p, g); }).map(function (g) { return GEAR[g].name; })
-          .concat(o.badge && !(p.badges && p.badges[o.badge]) ? [o.id === "highrank" ? "Green Belt" : "Orange Belt graduation"] : []).concat(o.team && !(BD.Teams && BD.Teams.joined(p, o.team)) ? [BD.Teams.byId(o.team).name] : []);
+          .concat(o.badge && !(p.badges && p.badges[o.badge]) ? [o.id === "highrank" ? "Green Belt" : o.id === "bbu" ? "1st Degree Black Belt" : "Orange Belt graduation"] : []).concat(o.team && !(BD.Teams && BD.Teams.joined(p, o.team)) ? [BD.Teams.byId(o.team).name] : []);
         return '<button type="button" class="outfit' + (on ? " on" : "") + (open && kid ? "" : " locked") + '"' + (open && kid ? ' data-outfit="' + o.id + '" aria-pressed="' + on + '"' : ' disabled') + '>' +
           '<span class="outfit-art">' + BD.UI.championHTML(p, o.id) + '</span>' +
           '<strong>' + esc(o.name) + '</strong>' +
@@ -148,6 +176,11 @@ BD.Badges = (function () {
           '<img src="' + g.img + '" alt="">' +
           '<strong>' + g.name + '</strong>' +
           '<span class="locker-badge">' + (got ? "🏅 " + esc(b.name) : "🔒 " + esc(b.how)) + '</span></div>';
+      }).join("") + '</div>' +
+      '<h4 class="label">Black Belt Gear · ' + BB_BADGES.filter(function (b) { return hasGear(p, b.gear); }).length + ' of ' + BB_BADGES.length + '</h4><p class="muted small">New gear to earn after Black Belt, through the Black Belt degrees.</p>' +
+      '<div class="locker bb-locker">' + BB_BADGES.map(function (b) {
+        const got = hasGear(p, b.gear), g = GEAR[b.gear];
+        return '<div class="locker-item' + (got ? " got" : " locked") + '"><img src="' + g.img + '" alt=""><strong>' + g.name + '</strong><span class="locker-badge">' + (got ? "🏅 " + esc(b.name) : "🔒 " + esc(b.how)) + '</span></div>';
       }).join("") + '</div>' +
       '<h4 class="label">Weapons · for show</h4><p class="muted small">Weapons are for show only. Perform with them in Weapons tournaments; they\'re never used against anyone or any boss.</p>' +
       '<div class="locker">' + WEAPON_BADGES.map(function (b) {
@@ -191,12 +224,12 @@ BD.Badges = (function () {
       BD.Sound.belt(); BD.confetti(120); nextBtns(); return;
     }
     if (!g) { // an outfit milestone: the full sparring outfit (Orange) or the High Rank Uniform (Green)
-      const p = BD.Store.current(), o = b.outfit || outfitById(b.unlocks), hr = b.unlocks === "highrank";
-      BD.UI.sheet(hr ? "High Rank Uniform!" : "Ready to spar!",
+      const p = BD.Store.current(), o = b.outfit || outfitById(b.unlocks), hr = b.unlocks === "highrank", bbu = b.unlocks === "bbu";
+      BD.UI.sheet(bbu ? "Black Belt Uniform!" : hr ? "High Rank Uniform!" : "Ready to spar!",
         '<div class="unlock">' + (canWearOutfits(p) ? '<div class="unlock-outfit">' + BD.UI.championHTML(p, o.id) + '</div>' : '') +
-        '<h3>' + (hr ? "High Rank Uniform unlocked!" : "Full Sparring Gear outfit unlocked!") + '</h3><p>🏅 <strong>' + esc(b.name) + '</strong>: ' + esc(b.how) + '</p>' +
+        '<h3>' + (bbu ? "Black Belt Uniform unlocked!" : hr ? "High Rank Uniform unlocked!" : "Full Sparring Gear outfit unlocked!") + '</h3><p>🏅 <strong>' + esc(b.name) + '</strong>: ' + esc(b.how) + '</p>' +
         (canWearOutfits(p) && b.outfit ? '<p class="muted">Your champion is wearing it now.</p>' : '<p class="muted">Find it in your Gear locker.</p>') +
-        '<div class="res-actions"><button type="button" class="btn btn-primary" id="unlockNext">' + (list.length > 1 ? "Next unlock" : hr ? "Osu!" : "Let\'s spar!") + '</button>' +
+        '<div class="res-actions"><button type="button" class="btn btn-primary" id="unlockNext">' + (list.length > 1 ? "Next unlock" : hr || bbu ? "Osu!" : "Let\'s spar!") + '</button>' +
         '<button type="button" class="btn btn-quiet" id="unlockLocker">Open my locker</button></div></div>');
       BD.Sound.belt(); BD.confetti(160);
       document.getElementById("unlockNext").onclick = function () { celebrate(list.slice(1), done); if (list.length === 1) document.getElementById("infoClose").click(); };
@@ -222,5 +255,5 @@ BD.Badges = (function () {
   }
 
   function gearName(b) { return b.gear ? GEAR[b.gear].name : b.name; }
-  return { canWear: canWearOutfits, hasSkill: hasSkill, weapons: weapons, reached: reached, yellowStripes: yellowStripes, WEAPON_BADGES: WEAPON_BADGES, gearName: gearName, GEAR_BADGES: GEAR_BADGES, GEAR: GEAR, BADGES: BADGES, OUTFITS: OUTFITS, outfit: outfit, outfitUnlocked: outfitUnlocked, check: check, award: award, earned: earned, equipped: equipped, rack: rack, openLocker: openLocker };
+  return { BB_BADGES: BB_BADGES, degProgress: degProgress, canWear: canWearOutfits, hasSkill: hasSkill, weapons: weapons, reached: reached, yellowStripes: yellowStripes, WEAPON_BADGES: WEAPON_BADGES, gearName: gearName, GEAR_BADGES: GEAR_BADGES, GEAR: GEAR, BADGES: BADGES, OUTFITS: OUTFITS, outfit: outfit, outfitUnlocked: outfitUnlocked, check: check, award: award, earned: earned, equipped: equipped, rack: rack, openLocker: openLocker };
 })();

@@ -204,7 +204,7 @@ BD.Tourney = (function () {
     M.busy = true; T.asked++;
     BD.QuickUI.mark($("tnQ"), M.q, v);
     if (v === M.q.answer) {
-      M.streak++; T.right++; BD.Sound.right(); if (BD.Mini) BD.Mini.react("kick");
+      M.streak++; T.right++; if (BD.Correct) BD.Correct.hit(BD.Store.current()); BD.Sound.right(); if (BD.Mini) BD.Mini.react("kick");
       if (M.streak >= KATA_MAX) return later(function () { kataEnd(); }, 600);
       later(kataQ, 550);
     } else { BD.Sound.wrong(); later(kataEnd, 1300); }
@@ -222,7 +222,7 @@ BD.Tourney = (function () {
     BD.QuickUI.render($("tnQ"), M.q, function (v) {
       if (!M || M.busy) return; M.busy = true; T.asked++;
       BD.QuickUI.mark($("tnQ"), M.q, v);
-      const ok = v === M.q.answer; if (ok) T.right++;
+      const ok = v === M.q.answer; if (ok) { T.right++; if (BD.Correct) BD.Correct.hit(BD.Store.current()); }
       if (ok) BD.Sound.right(); else BD.Sound.wrong();
       later(function () { showOutcome(ok, ok ? "Sudden victory! The judges give it to you." : "So close! The judges give it to " + M.opp.name + ".", n + " vs " + n + (ok ? "+" : "−")); }, 900);
     }, { read: true, grade: T.grade, hints: true });
@@ -261,7 +261,7 @@ BD.Tourney = (function () {
     if (!M || M.busy || M.frozen) return;
     T.asked++;
     if (v === M.q.answer) {
-      M.busy = true; T.right++; M.streak++;
+      M.busy = true; T.right++; M.streak++; if (BD.Correct) BD.Correct.hit(BD.Store.current());
       const judo = M.judo && M.streak % 5 === 0;
       M.you += judo ? 2 : 1;
       BD.QuickUI.mark($("tnQ"), M.q, v); BD.Sound.right(); if (BD.Mini) BD.Mini.react("kick");
@@ -331,7 +331,7 @@ BD.Tourney = (function () {
     if (!M || M.busy || M.frozen) return;
     T.asked++;
     if (v === M.q.answer) {
-      M.busy = true; T.right++; M.streak++;
+      M.busy = true; T.right++; M.streak++; if (BD.Correct) BD.Correct.hit(BD.Store.current());
       const judo = M.judo && M.streak % 5 === 0;
       M.you += judo ? 2 : 1;
       BD.QuickUI.mark($("tnQ"), M.q, v); BD.Sound.right(); if (BD.Mini) BD.Mini.react("kick");

@@ -130,6 +130,7 @@ BD.Store = (function () {
     if (BD.Quest) BD.Quest.sanitize(p);
     if (BD.Breaks) BD.Breaks.sanitize(p);
     if (BD.Placement) BD.Placement.sanitize(p);
+    if (BD.Correct) BD.Correct.sanitize(p);
     if (BD.Rank && BD.Rank.sanitize) BD.Rank.sanitize(p);
     if (BD.Goals && BD.Goals.sanitize) BD.Goals.sanitize(p);
     if (BD.Phrases && BD.Phrases.sanitize) BD.Phrases.sanitize(p);

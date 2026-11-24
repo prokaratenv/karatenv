@@ -81,7 +81,7 @@ BD.Parent = (function () {
     if (!w.rounds && !w.tests) return "No training yet.";
     const bits = [w.days + (w.days === 1 ? " day" : " days"), w.rounds + (w.rounds === 1 ? " round" : " rounds")];
     if (w.answers) bits.push(w.answers + " questions (" + Math.round(100 * w.correct / Math.max(1, w.answers)) + "% right)");
-    const wins = w.stripes.map(function (x) { return SUBJECT_NAMES[x.subject] + " stripe"; }).concat(w.belts.map(function (b) { return b.to.name + " Belt"; }));
+    const wins = w.stripes.map(function (x) { return x.subject === "degree" ? BD.Rank.DEG_NAMES[Math.min(5, x.deg || 1)] : SUBJECT_NAMES[x.subject] + " stripe"; }).concat(w.belts.map(function (b) { return b.to.name + " Belt"; }));
     return bits.join(" · ") + (wins.length ? ". Earned: " + list(wins) + "." : ".");
   }
   function card(p) {
@@ -95,8 +95,9 @@ BD.Parent = (function () {
     return '<div class="pd">' +
       (monday ? recap : "") +
       '<div class="pd-row"><span class="pd-k">This week</span><span>' + esc(weekLine(tw)) + (st.days ? ' <strong class="pd-streak">🔥 ' + st.days + '-day streak</strong>' : "") + '</span></div>' +
-      '<div class="pd-row"><span class="pd-k">Belt</span><span><span class="belt-swatch" style="--belt:' + belt.color + '"></span> ' + BD.gradeLabel(g) + ' · <strong>' + belt.name + ' Belt</strong> · ' + sc + ' of 4 stripes · ' +
-        (r.mastered ? "grade mastered!" : next ? left + " more to " + next.name : "Black Belt: " + left + " more to master the grade") + '</span></div>' +
+      '<div class="pd-row"><span class="pd-k">Belt</span><span><span class="belt-swatch" style="--belt:' + belt.color + '"></span> ' + BD.gradeLabel(g) + ' · <strong>' + esc(BD.Rank.title(r)) + '</strong> · ' +
+        (r.belt >= 8 ? (function () { const d = BD.Rank.degInfo(r); return d.master ? "Master Rank!" : d.stripes + " of 4 degree stripes toward the " + d.nextName; })() : sc + ' of 4 stripes · ' + left + " more to " + next.name) +
+        ' · <span class="muted">today: ' + BD.Rank.power(p, g).used + ' of ' + BD.Rank.power(p, g).full + ' full-power Belt XP</span></span></div>' +
       (ins ? '<div class="pd-row"><span class="pd-k">How it\'s going</span><span>' +
         (ins.strong ? 'Strong at <strong>' + esc(ins.strong.label) + '</strong> (' + Math.round(ins.strong.r * 100) + '%). ' : '') +
         (ins.weak ? 'Work on <strong>' + esc(ins.weak.label) + '</strong> (' + Math.round(ins.weak.r * 100) + '%).' : 'No weak spots right now.') + '</span></div>' : '') +
@@ -147,7 +148,7 @@ BD.Parent = (function () {
     if (st.days) { y += 82; stat("day streak 🔥", st.days, y); }
     x.textAlign = "center";
     y = 990;
-    const wins = tw.stripes.map(function (s) { return SUBJECT_NAMES[s.subject] + " stripe"; }).concat(tw.belts.map(function (b) { return b.to.name + " Belt"; })).concat(tw.badges.map(function (b) { return BD.Badges.gearName(b); }));
+    const wins = tw.stripes.map(function (s) { return s.subject === "degree" ? BD.Rank.DEG_NAMES[Math.min(5, s.deg || 1)] : SUBJECT_NAMES[s.subject] + " stripe"; }).concat(tw.belts.map(function (b) { return b.to.name + " Belt"; })).concat(tw.badges.map(function (b) { return BD.Badges.gearName(b); }));
     const wrap = function (text, yy, font, color, max) {
       x.font = font; x.fillStyle = color;
       const words = text.split(" "); let line = "";

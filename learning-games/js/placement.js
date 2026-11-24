@@ -255,7 +255,7 @@ BD.Placement = (function () {
     body().innerHTML = track() +
       '<div class="place-card' + (young ? " young" : "") + '" data-grade="' + st.grade + '">' +
       '<div class="place-qhead"><span class="place-dots" aria-label="Question ' + (st.n + 1) + '">' + dots.join("") + '</span>' +
-      '<button type="button" class="btn btn-quiet btn-small place-say" data-pl="say" aria-label="Read it to me">🔊</button></div>' +
+      (it.passage && !BD.ReadAloud.readingOK(st.grade) ? '' : '<button type="button" class="btn btn-quiet btn-small place-say" data-pl="say" aria-label="Read it to me">🔊</button>') + '</div>' +
       (it.passage ? '<div class="place-passage"><strong>' + esc(it.title || "") + '</strong><p>' + esc(it.passage) + '</p></div>' : "") +
       (it.html || "") +
       '<p class="place-prompt">' + esc(it.prompt) + '</p>' +
@@ -267,6 +267,8 @@ BD.Placement = (function () {
   }
   function speak() {
     const it = S && S.item; if (!it) return;
+    const stNow = S.stairs[SUBJECTS[S.idx].key];
+    if (it.passage && !BD.ReadAloud.readingOK(stNow.grade)) return; // older kids read stories on their own
     let parts = typeof it.say === "string" ? [{ text: it.say }] : (it.say || [{ text: it.prompt }]).slice();
     if (it.passage) parts = parts.concat(it.choices.map(function (c, i) { return { text: (i + 1) + ". " + c }; }));
     BD.ReadAloud.say(parts);

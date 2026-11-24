@@ -371,6 +371,7 @@ BD.MathGame = (function () {
 
     if (right) {
       S.correct++; S.streak++; S.bestStreak = Math.max(S.bestStreak, S.streak); st.r++;
+      if (!S.test && BD.Correct) BD.Correct.hit(p, document.getElementById("mathAnswer"));
       const gain = Math.max(2, Math.round((10 + Math.min(S.streak - 1, 10)) * BD.Hints.factor(BD.Hints.used("math"))));
       S.xp += gain;
       if (tk) { tk.misses--; if (tk.misses <= 0) delete p.tricky[q.key]; }

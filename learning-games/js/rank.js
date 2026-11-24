@@ -16,7 +16,8 @@
    - Black Belt degrees: 1st to 3rd Degree need 4 stripes of 250 Belt XP plus a
      Degree Test (worth 250 XP); 4th and 5th need 4 x 500 plus a 500 XP test.
      5th Degree is Master Rank. Practice in any subject fills the degree meter
-     (daily full power 50 Belt XP for 1st to 3rd, 70 for 4th and 5th).
+     (daily full power 50 Belt XP for 1st to 3rd, 70 for 4th and 5th, then 3%:
+     about 2 to 3 weeks a degree at 30 to 40 minutes a day).
    - The 4th stripe graduates them to the next belt automatically.
    - Tests and belt practice get harder with each belt inside a grade.
    - PACING (so the journey lasts):
@@ -35,7 +36,7 @@ BD.Rank = (function () {
   const STRIPE_XP = [450, 900, 1200, 1650, 2100, 2550, 2850, 3300];
   /* Belt XP per game XP: evens out how fast each game pays (about 10 Belt XP a minute). */
   const NORM = { math: 0.14, reading: 0.2, spelling: 0.18, comprehension: 0.4, spanish: 0.18 };
-  const DAY_FULL = 600, DAY_AFTER = 0.08;            // belts: full-power Belt XP a day, then 8%
+  const DAY_FULL = 600, DAY_AFTER = 0.08, DEG_AFTER = 0.03; // belts: full-power Belt XP a day, then 8% (degrees 3%)
   const DEG_NAMES = ["Black Belt", "1st Degree Black Belt", "2nd Degree Black Belt", "3rd Degree Black Belt", "4th Degree Black Belt", "5th Degree Black Belt"];
   function degStripe(d) { return d < 3 ? 250 : 500; }   // d = degrees already earned (0..4): working toward d+1
   function degDay(d) { return d < 3 ? 50 : 70; }
@@ -84,10 +85,10 @@ BD.Rank = (function () {
     return { full: full, used: used, left: full - used, bonus: u >= 1 };
   }
   /* Credit Belt XP through today's power: full until the day's amount is used, then DAY_AFTER. */
-  function powered(p, amt, full) {
+  function powered(p, amt, full, after) {
     const d = powerDay(p), leftFrac = Math.max(0, 1 - d.u), fullPart = Math.min(amt, leftFrac * full);
     d.u = Math.min(1, d.u + fullPart / full);
-    return fullPart + (amt - fullPart) * DAY_AFTER;
+    return fullPart + (amt - fullPart) * (after === undefined ? DAY_AFTER : after);
   }
   const r1 = function (x) { return Math.round(x * 10) / 10; };
 
@@ -108,7 +109,7 @@ BD.Rank = (function () {
     } else if (r.belt >= 8) {
       max = 4 * degStripe(r.deg || 0);
       if ((r.deg || 0) >= 5) { now = max; }
-      else { const b = r.dxp || 0, c = powered(p, bx, degDay(r.deg || 0)); now = Math.min(max, r1(b + c)); gained = now - b; r.dxp = now; }
+      else { const b = r.dxp || 0, c = powered(p, bx, degDay(r.deg || 0), DEG_AFTER); now = Math.min(max, r1(b + c)); gained = now - b; r.dxp = now; }
     } else {
       max = stripeMax(r.belt); const b = r.xp[key] || 0, c = powered(p, bx, DAY_FULL); now = Math.min(max, r1(b + c)); gained = now - b; r.xp[key] = now;
     }

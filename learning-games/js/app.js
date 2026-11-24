@@ -127,36 +127,59 @@ BD.UI = (function () {
     return '<span class="belt-swatch" style="--belt:' + belt.color + '" title="' + belt.name + ' belt"></span>';
   }
   /* ---------- belt rank panel ---------- */
+  /* Today's belt power line: full power until the day's amount is used, then a little. */
+  function powerLine(p, g) {
+    const pw = BD.Rank.power(p, g);
+    return '<p class="power-line' + (pw.bonus ? " bonus" : "") + '"><span class="pw-bar"><i style="width:' + Math.round(100 * pw.used / pw.full) + '%"></i></span>' +
+      (pw.bonus ? '<span><strong>Bonus practice.</strong> Your belt still grows a little, and every point counts on the leaderboard.</span>'
+        : '<span>Today\'s belt XP: <strong>' + pw.used + ' of ' + pw.full + '</strong> at full power</span>') + '</p>';
+  }
+  /* Black Belt: the degree card (practice any subject, then the Degree Test). */
+  function degreePanel(p, g, r) {
+    const d = BD.Rank.degInfo(r), pct = Math.round(100 * d.xp / d.max);
+    return '<div class="rank-card degree-card">' +
+      '<div class="rank-top"><label class="grade-select"><span class="eyebrow">Dojo grade</span><select id="dojoGradeSel">' +
+      BD.GRADES.map(function (x) { return '<option value="' + x + '"' + (x === g ? " selected" : "") + '>' + BD.gradeLabel(x) + '</option>'; }).join("") +
+      '</select></label><span class="rank-xp">Degree XP <strong>' + d.xp + '</strong> / ' + d.max + '</span></div>' +
+      '<button type="button" class="rank-belt" id="rankBeltBtn" aria-label="See belt details">' + BD.Rank.beltSVG(8, {}, { degree: d.deg }) + '<span class="rank-tap">Tap your belt for details</span></button>' +
+      '<h2 class="rank-name">' + BD.gradeLabel(g) + ' · ' + esc(BD.Rank.title(r)) + '</h2>' +
+      (d.master ? '<p class="rank-note mastered">Master Rank! You earned every degree in ' + BD.gradeLabel(g) + '.' + (g < BD.MAX_GRADE ? ' <button type="button" class="btn btn-small btn-primary" id="rankNextGrade">Start ' + BD.gradeLabel(g + 1) + '</button>' : '') + '</p>'
+        : '<p class="rank-note">Next: <strong>' + esc(d.nextName) + '</strong> · ' + d.stripes + ' of 4 degree stripes (' + d.size + ' Belt XP each) · practice any subject, then pass the Degree Test (+' + d.testXP + ' XP).' +
+          (g < BD.MAX_GRADE ? ' You can also start ' + BD.gradeLabel(g + 1) + ' any time. <button type="button" class="btn btn-small btn-quiet" id="rankNextGrade">Start ' + BD.gradeLabel(g + 1) + '</button>' : '') + '</p>') +
+      '<div class="xp-track"><div class="xp-fill" style="width:' + pct + '%"></div></div>' + (d.master ? '' : powerLine(p, g)) +
+      (d.master ? '' : '<div class="res-actions">' + (d.ready ? '<button type="button" class="btn btn-primary btn-big" id="degreeTest">Take the ' + esc(d.nextName) + ' test</button>' : '<button type="button" class="btn btn-primary" data-stripe-practice="' + BD.Rank.REQUIRED[0] + '">Train for your next degree</button>') + '</div>') +
+      '</div>';
+  }
   function rankPanel(p) {
     const g = BD.Rank.dojoGrade(p), r = BD.Rank.rec(p, g), belt = BD.BELTS[r.belt];
-    const count = BD.Rank.stripeCount(r), xp = BD.Rank.beltXP(r);
+    if (r.belt >= 8) return degreePanel(p, g, r);
+    const count = BD.Rank.stripeCount(r), xp = BD.Rank.beltXP(r), M = BD.Rank.maxFor(r), BM = BD.Rank.beltMax(r);
     const rows = BD.Rank.SUBJECTS.map(function (sj) {
-      const x = Math.min(BD.Rank.PRACTICE_MAX, r.xp[sj.key] || 0);
+      const x = Math.floor(Math.min(M, r.xp[sj.key] || 0)), pc = Math.round(100 * x / M);
       // Spanish is bonus training: practice for extra XP, no stripe or test
       if (sj.optional) return '<div class="stripe-row optional bonus-row"><span class="stripe-chip" aria-hidden="true"></span>' +
-        '<div class="sr-main"><strong>' + sj.label + ' <em>bonus XP</em></strong><span class="sr-sub">' + x + ' / 100 bonus XP on this belt' + (sj.note ? " · " + sj.note : "") + '</span>' +
-        '<span class="mini-track"><i style="width:' + x + '%"></i></span></div>' +
+        '<div class="sr-main"><strong>' + sj.label + ' <em>bonus XP</em></strong><span class="sr-sub">' + x + ' / ' + M + ' bonus Belt XP on this belt' + (sj.note ? " · " + sj.note : "") + '</span>' +
+        '<span class="mini-track"><i style="width:' + pc + '%"></i></span></div>' +
         '<div class="sr-actions"><button type="button" class="btn btn-small" data-stripe-practice="' + sj.key + '">Practice</button></div></div>';
       const got = !!r.stripes[sj.key], np = BD.Rank.nextPart(r, sj.key);
       const sk = np ? BD.Rank.partSkills(sj.key, g)[np.i] : null;
-      return '<div class="stripe-row' + (got ? " earned" : "") + (sj.optional ? " optional" : "") + '">' +
+      return '<div class="stripe-row' + (got ? " earned" : "") + '">' +
         '<span class="stripe-chip" aria-hidden="true"></span>' +
-        '<div class="sr-main"><strong>' + sj.label + (sj.optional ? ' <em>bonus</em>' : '') + '</strong>' +
-        '<span class="sr-sub">' + (got ? "Stripe earned" : x + " / 100 practice XP") + (sj.note ? " · " + sj.note : "") + '</span>' +
-        (np ? '<span class="sr-part">' + partDots(r, sj.key) + ' Part ' + (np.i + 1) + ' of 4: ' + esc(sk.label) + (np.open ? ' · ready!' : ' · unlocks at ' + np.need + ' XP') + '</span>' : '') +
-        '<span class="mini-track">' + partTicks() + '<i style="width:' + x + '%"></i></span></div>' +
+        '<div class="sr-main"><strong>' + sj.label + '</strong>' +
+        '<span class="sr-sub">' + (got ? "Stripe earned" : x + " / " + M + " Belt XP") + (sj.note ? " · " + sj.note : "") + '</span>' +
+        (np ? '<span class="sr-part">' + partDots(r, sj.key) + ' Part ' + (np.i + 1) + ' of 4: ' + esc(sk.label) + (np.open ? ' · ready!' : ' · unlocks at ' + np.need + ' Belt XP') + '</span>' : '') +
+        '<span class="mini-track">' + partTicks() + '<i style="width:' + pc + '%"></i></span></div>' +
         '<div class="sr-actions"><button type="button" class="btn btn-small" data-stripe-practice="' + sj.key + '">Practice</button>' +
-        '<button type="button" class="btn btn-small' + (got || np.open ? " btn-primary" : " btn-quiet") + '" data-stripe-test="' + sj.key + '">' + (got ? "Retest" : np.open ? "Part " + (np.i + 1) + " test" : "Part " + (np.i + 1) + " unlocks at " + np.need + " XP") + '</button></div></div>';
+        '<button type="button" class="btn btn-small' + (got || np.open ? " btn-primary" : " btn-quiet") + '" data-stripe-test="' + sj.key + '">' + (got ? "Retest" : np.open ? "Part " + (np.i + 1) + " test" : "Part " + (np.i + 1) + " unlocks at " + np.need) + '</button></div></div>';
     }).join("");
     return '<div class="rank-card">' +
       '<div class="rank-top"><label class="grade-select"><span class="eyebrow">Dojo grade</span><select id="dojoGradeSel">' +
       BD.GRADES.map(function (x) { return '<option value="' + x + '"' + (x === g ? " selected" : "") + '>' + BD.gradeLabel(x) + '</option>'; }).join("") +
-      '</select></label><span class="rank-xp">Belt XP <strong>' + xp + '</strong> / 500</span></div>' +
+      '</select></label><span class="rank-xp">Belt XP <strong>' + xp + '</strong> / ' + BM + '</span></div>' +
       '<button type="button" class="rank-belt" id="rankBeltBtn" aria-label="See belt details">' + BD.Rank.beltSVG(r.belt, r.stripes, { parts: r.parts }) + '<span class="rank-tap">Tap your belt for details</span></button>' +
       '<h2 class="rank-name">' + BD.gradeLabel(g) + ' · ' + belt.name + ' Belt</h2>' +
-      (r.mastered ? '<p class="rank-note mastered">Grade mastered! You earned every belt in ' + BD.gradeLabel(g) + '.' + (g < BD.MAX_GRADE ? ' <button type="button" class="btn btn-small btn-primary" id="rankNextGrade">Start ' + BD.gradeLabel(g + 1) + '</button>' : '') + '</p>'
-        : '<p class="rank-note">' + count + ' of 4 stripes · each stripe test has 4 parts (score ' + BD.Rank.PASS + '% on each) · ' + BD.Rank.levelNote(r.belt) + '</p>') +
-      '<div class="xp-track"><div class="xp-fill" style="width:' + Math.round(100 * xp / 500) + '%"></div></div>' +
+      '<p class="rank-note">' + count + ' of 4 stripes · each stripe test has 4 parts (score ' + BD.Rank.PASS + '% on each) · ' + BD.Rank.levelNote(r.belt) + '</p>' +
+      '<div class="xp-track"><div class="xp-fill" style="width:' + Math.round(100 * xp / BM) + '%"></div></div>' + powerLine(p, g) +
       '<div class="stripe-list">' + rows + '</div></div>';
   }
 
@@ -170,34 +193,43 @@ BD.UI = (function () {
       return '<button type="button" class="bd-grade' + (x === g ? " on" : "") + '" data-bd-grade="' + x + '" role="tab" aria-selected="' + (x === g) + '">' +
         '<span class="belt-swatch" style="--belt:' + bx.color + '"></span>' + BD.gradeShort(x) + '</button>';
     }).join("") + '</div>';
-    const rows = BD.Rank.SUBJECTS.map(function (sj) {
-      const got = !!r.stripes[sj.key], x = Math.min(100, r.xp[sj.key] || 0);
+    const M = BD.Rank.maxFor(r), dg = r.belt >= 8 ? BD.Rank.degInfo(r) : null;
+    const rows = dg ? '' : BD.Rank.SUBJECTS.map(function (sj) {
+      const got = !!r.stripes[sj.key], x = Math.floor(Math.min(M, r.xp[sj.key] || 0));
       return '<tr><th scope="row">' + sj.label + (sj.optional ? ' <em class="bonus">bonus</em>' : '') + '</th>' +
         '<td>' + (sj.optional ? '<span class="muted">Bonus training</span>' : got ? '<span class="got">Earned</span>' : partDots(r, sj.key) + ' <span class="muted">' + BD.Rank.partsDone(r, sj.key) + ' of 4 parts</span>') + '</td>' +
-        '<td><span class="mini-track"><i style="width:' + x + '%"></i></span><small>' + x + ' / 100 XP</small></td></tr>';
+        '<td><span class="mini-track"><i style="width:' + Math.round(100 * x / M) + '%"></i></span><small>' + x + ' / ' + M + '</small></td></tr>';
     }).join("");
     const ladder = '<ol class="bd-ladder">' + BD.BELTS.map(function (b, i) {
-      const st = i < r.belt || (i === r.belt && r.mastered) ? "done" : i === r.belt ? "now" : "";
+      const st = i < r.belt ? "done" : i === r.belt ? "now" : "";
       return '<li class="' + st + '"><span class="belt-swatch" style="--belt:' + b.color + '"></span>' + b.name + '</li>';
-    }).join("") + '</ol>';
+    }).join("") + '</ol>' + (r.belt >= 8 ? '<h4 class="label">Black Belt degrees</h4><ol class="bd-ladder deg-ladder">' + [1, 2, 3, 4, 5].map(function (n) {
+      const st = n <= (r.deg || 0) ? "done" : n === (r.deg || 0) + 1 ? "now" : "";
+      return '<li class="' + st + '"><span class="belt-swatch" style="--belt:#17171C"></span>' + BD.Rank.DEG_NAMES[n].replace(" Black Belt", "") + (n === 5 ? " · Master Rank" : "") + '<small> ' + (n <= 3 ? "4 x 250 + test 250" : "4 x 500 + test 500") + '</small></li>';
+    }).join("") + '</ol>' : '');
     const grads = r.grads.length ? '<ul class="plan-text bd-grads">' + r.grads.map(function (x, i) {
       return '<li><span>Graduated from ' + BD.BELTS[x.belt].name + ' · ' + new Date(x.date).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" }) + '</span>' +
         '<button type="button" class="btn btn-small btn-quiet" data-cert="' + i + '">Certificate</button></li>';
+    }).join("") + (r.dgrads || []).map(function (x) {
+      return '<li><span>Promoted to ' + BD.Rank.DEG_NAMES[x.deg] + ' · ' + new Date(x.date).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" }) + '</span>' +
+        '<button type="button" class="btn btn-small btn-quiet" data-dcert="' + x.deg + '" data-date="' + esc(x.date) + '">Certificate</button></li>';
     }).join("") + '</ul>' : '<p class="muted">No graduations yet at this grade.</p>';
-    const nextLine = r.mastered ? "Grade mastered! Every belt earned." : next ? "Next belt: <strong>" + next.name + "</strong>. Earn the " + (4 - BD.Rank.stripeCount(r)) + " remaining stripe" + (4 - BD.Rank.stripeCount(r) === 1 ? "" : "s") + " to graduate." : "Black Belt is the top belt. Earn all 4 stripes to master " + BD.gradeLabel(g) + ".";
+    const nextLine = dg ? (dg.master ? "Master Rank! Every degree earned." : "Next: <strong>" + dg.nextName + "</strong>. " + dg.stripes + " of 4 degree stripes, then the Degree Test.") : next ? "Next belt: <strong>" + next.name + "</strong>. Earn the " + (4 - BD.Rank.stripeCount(r)) + " remaining stripe" + (4 - BD.Rank.stripeCount(r) === 1 ? "" : "s") + " to graduate." : "";
     sheet("My belt",
       tabs +
-      '<div class="bd-belt">' + BD.Rank.beltSVG(r.belt, r.stripes, { parts: r.parts }) + '</div>' +
-      '<h3 class="bd-name">' + BD.gradeLabel(g) + ' · ' + belt.name + ' Belt</h3>' +
-      '<p class="bd-next">' + BD.Rank.stripeCount(r) + ' of 4 stripes · ' + nextLine + '</p>' +
-      '<p class="bd-xp">Belt XP <strong>' + BD.Rank.beltXP(r) + '</strong> / 500 <span class="muted">(up to 100 per stripe from practice + a graduation bonus of up to 100, earned by that practice)</span></p>' +
-      '<div class="table-wrap"><table class="grid bd-table"><thead><tr><th>Stripe</th><th>Status</th><th>Practice XP</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
+      '<div class="bd-belt">' + BD.Rank.beltSVG(r.belt, dg ? {} : r.stripes, dg ? { degree: dg.deg } : { parts: r.parts }) + '</div>' +
+      '<h3 class="bd-name">' + BD.gradeLabel(g) + ' · ' + esc(BD.Rank.title(r)) + '</h3>' +
+      '<p class="bd-next">' + (dg ? '' : BD.Rank.stripeCount(r) + ' of 4 stripes · ') + nextLine + '</p>' +
+      '<p class="bd-xp">' + (dg ? 'Degree XP <strong>' + dg.xp + '</strong> / ' + dg.max : 'Belt XP <strong>' + BD.Rank.beltXP(r) + '</strong> / ' + BD.Rank.beltMax(r)) + ' <span class="muted">(practice fills it: full power for the first ' + BD.Rank.power(p, g).full + ' Belt XP each day, then a little more)</span></p>' +
+      (dg ? '' : '<div class="table-wrap"><table class="grid bd-table"><thead><tr><th>Stripe</th><th>Status</th><th>Belt XP</th></tr></thead><tbody>' + rows + '</tbody></table></div>') +
       '<h4 class="label">Belt path</h4>' + ladder +
       '<h4 class="label">Graduations</h4>' + grads +
       (g !== BD.Rank.dojoGrade(p) ? '<div class="res-actions"><button type="button" class="btn btn-primary" id="bdTrain">Train at ' + BD.gradeLabel(g) + '</button></div>' : '<p class="muted small">This is the grade you are training at now.</p>'));
     $("infoBody").onclick = function (e) {
       const t = e.target.closest("[data-bd-grade]");
       if (t) { beltDetails(Number(t.dataset.bdGrade)); return; }
+      const dc = e.target.closest("[data-dcert]");
+      if (dc) { BD.Certificate.open(p, { to: BD.BELTS[8], grade: g, degree: Number(dc.dataset.dcert), date: dc.dataset.date }); return; }
       const c = e.target.closest("[data-cert]");
       if (c) {
         const x = r.grads[Number(c.dataset.cert)], last = BD.BELTS.length - 1;
@@ -230,8 +262,9 @@ BD.UI = (function () {
   }
   function confirmTest(key) {
     const p = BD.Store.current(), g = BD.Rank.dojoGrade(p), r = BD.Rank.rec(p, g), sj = BD.Rank.subject(key);
+    if (r.belt >= 8) { if (BD.Degrees) BD.Degrees.start(); return; } // Black Belt: degree test
     if (sj.optional) return launchStripe(key, false); // Spanish is bonus training: practice only, no test
-    const x = Math.min(100, r.xp[key] || 0);
+    const x = Math.min(BD.Rank.maxFor(r), r.xp[key] || 0);
     if (r.stripes[key]) {
       const what = { math: "20 problems", reading: "8 sentences to fix", spelling: "10 words to spell", comprehension: "2 stories with 6 questions", spanish: "10 Spanish words" }[key];
       sheet(sj.label + " retest",
@@ -243,14 +276,13 @@ BD.UI = (function () {
       const last = n.i === BD.Rank.PARTS - 1 && BD.Rank.stripeCount(r) === 3 && !sj.optional;
       const list = '<ol class="part-list">' + skills.map(function (k, i) {
         const done = BD.Rank.partsDone(r, key) > i && (r.parts[key] || [])[i];
-        return '<li class="' + (done ? "done" : i === n.i ? "now" : "") + '"><strong>Part ' + (i + 1) + ': ' + esc(k.label) + '</strong> <span class="muted small">' + (done ? "passed ✓" : "opens at " + BD.Rank.partNeed(i) + " XP") + '</span></li>';
+        return '<li class="' + (done ? "done" : i === n.i ? "now" : "") + '"><strong>Part ' + (i + 1) + ': ' + esc(k.label) + '</strong> <span class="muted small">' + (done ? "passed ✓" : "opens at " + BD.Rank.partNeed(i, r) + " Belt XP") + '</span></li>';
       }).join("") + '</ol>';
       sheet(sj.label + " stripe test",
         '<p><strong>' + BD.gradeLabel(g) + ' · ' + BD.BELTS[r.belt].name + ' Belt.</strong> The ' + sj.label + ' stripe test has 4 parts, each a different skill. Pass all 4 (' + BD.Rank.PASS + '% or better) to earn the stripe.</p>' + list +
-        (!n.open ? '<div class="xp-warn"><strong>Part ' + (n.i + 1) + ' (' + esc(sk.label) + ') opens at ' + n.need + ' practice XP.</strong><p>You have ' + x + '. Keep practicing ' + sj.label + ' to unlock it.</p></div>'
+        (!n.open ? '<div class="xp-warn"><strong>Part ' + (n.i + 1) + ' (' + esc(sk.label) + ') opens at ' + n.need + ' Belt XP.</strong><p>You have ' + Math.floor(x) + '. Keep practicing ' + sj.label + ' to unlock it.</p></div>'
           : '<p><strong>Part ' + (n.i + 1) + ' of 4: ' + esc(sk.label) + '.</strong> ' + what + '. Tests have no hints. Practice has hints whenever you need them.</p>' +
-            (last ? '<div class="xp-warn"><strong>🎓 This is your last part of your last stripe: passing it graduates you!</strong><p>Your graduation bonus comes from practice: right now it would be <strong>+' + BD.Rank.gradBonus(r) + ' XP</strong> of 100.' +
-              (BD.Rank.beltXP(r) < 400 ? ' Practice XP you haven\'t earned on this belt (' + (400 - BD.Rank.beltXP(r)) + ' left) is gone once you move up.' : ' You did all the practice. Full bonus!') + '</p></div>' : '')) +
+            (last ? '<div class="xp-warn"><strong>🎓 This is your last part of your last stripe: passing it graduates you!</strong><p>Graduation bonus: <strong>+' + BD.Rank.gradBonus(r) + ' XP</strong>.</p></div>' : '')) +
         '<div class="res-actions">' + (n.open ? '<button type="button" class="btn btn-primary btn-big" id="testGo">Start Part ' + (n.i + 1) + '</button><button type="button" class="btn btn-quiet" id="testPractice">Practice first</button>'
           : '<button type="button" class="btn btn-primary btn-big" id="testPractice">Practice ' + esc(sj.label) + '</button>') + '</div>');
     }
@@ -306,14 +338,14 @@ BD.UI = (function () {
   function graduation(res) {
     const p = BD.Store.current(), gr = res.graduated;
     $("gradChamp").innerHTML = fighterArt(p, "full");
-    $("gradLine").innerHTML = gr.mastered
-      ? esc(p.name) + " earned all 4 stripes on the <strong>Black Belt</strong>. " + BD.gradeLabel(gr.grade) + " mastered!"
+    $("gradLine").innerHTML = gr.to === BD.BELTS[8]
+      ? esc(p.name) + " graduated from <strong>" + gr.from.name + "</strong> to <strong>Black Belt</strong> in " + BD.gradeLabel(gr.grade) + "! Next: Black Belt degrees."
       : esc(p.name) + " graduated from <strong>" + gr.from.name + "</strong> to <strong>" + gr.to.name + " Belt</strong> in " + BD.gradeLabel(gr.grade) + "!";
     $("gradBelt").innerHTML = BD.Rank.beltSVG(BD.BELTS.indexOf(gr.to), gr.mastered ? BD.Rank.REQUIRED.reduce(function (a, k) { a[k] = true; return a; }, {}) : {});
     $("gradBelt").style.setProperty("--belt", gr.to.color);
     $("gradSay").textContent = "Zumi: " + BD.Cast.line("win") + " Bow in to your new belt!";
-    $("gradXP").textContent = gr.bonus ? "+" + gr.bonus + " XP graduation bonus" + (gr.bonus < BD.Rank.GRAD_XP ? " (practice every stripe to 100 for the full +100)" : " · full bonus for doing all the practice!") : "No graduation bonus this time: it comes from practice. Practice each stripe to 100 on your next belt for +100!";
-    $("gradNextGrade").hidden = !(gr.mastered && gr.grade < BD.MAX_GRADE);
+    $("gradXP").textContent = "+" + gr.bonus + " XP graduation bonus";
+    $("gradNextGrade").hidden = !(gr.to === BD.BELTS[8] && gr.grade < BD.MAX_GRADE);
     $("gradNextGrade").onclick = function () { p.dojoGrade = gr.grade + 1; BD.Store.save(p); home(); };
     $("gradCert").onclick = function () { BD.Certificate.open(p, { to: gr.to, grade: gr.grade, mastered: gr.mastered, date: new Date().toISOString() }); };
     show("screen-grad");
@@ -476,14 +508,16 @@ BD.UI = (function () {
   ];
   function tileState(p, t) {
     const g = Number(p[t.field]), r = BD.Rank.rec(p, g), belt = BD.BELTS[r.belt], retry = (p.retry || {})[t.game];
-    const xp = Math.min(BD.Rank.PRACTICE_MAX, r.xp[t.subj] || 0);
+    const M = BD.Rank.maxFor(r), dg = r.belt >= 8 && t.subj !== "spanish" ? BD.Rank.degInfo(r) : null;
+    const xp = dg ? dg.xp : Math.floor(Math.min(M, r.xp[t.subj] || 0)), MX = dg ? dg.max : M;
     let badge = "";
     if (retry) badge = "Redo " + BD.gradeShort(retry.grade);
     else if (t.subj === "spanish") badge = "Bonus XP";
+    else if (dg) badge = dg.master ? "Master Rank" : dg.ready ? "Degree test ready" : "Degree training";
     else if (r.stripes[t.subj]) badge = "Stripe earned";
     else { const n = BD.Rank.nextPart(r, t.subj); if (n && n.open) badge = "Part " + (n.i + 1) + " ready"; }
     if (!badge && t.key === "spelling" && BD.School.has(p)) badge = "School words";
-    return { g: g, belt: belt, xp: xp, pct: Math.round(100 * xp / BD.Rank.PRACTICE_MAX), badge: badge };
+    return { g: g, belt: belt, xp: xp, max: MX, pct: Math.round(100 * xp / MX), badge: badge };
   }
   function renderTiles(p) {
     $("gameTiles").innerHTML = TILES.map(function (t) {
@@ -491,7 +525,7 @@ BD.UI = (function () {
       return '<button type="button" class="game-tile tile-' + t.key + '" data-tile="' + t.key + '" aria-label="' + esc(t.name + ", " + BD.gradeLabel(st.g) + ", " + st.belt.name + " Belt") + '">' +
         '<span class="gt-art"><img src="img/' + t.coach + '.webp" alt="" loading="lazy"></span>' +
         (st.badge ? '<span class="gt-badge">' + esc(st.badge) + '</span>' : '') +
-        '<span class="gt-ring" style="--pct:' + st.pct + '" title="' + st.xp + ' / 100 practice XP"><span>' + st.xp + '</span></span>' +
+        '<span class="gt-ring" style="--pct:' + st.pct + '" title="' + st.xp + ' / ' + st.max + ' Belt XP"><span>' + st.pct + '%</span></span>' +
         '<span class="gt-name">' + esc(t.name) + '</span>' +
         '<span class="gt-grade"><span class="belt-swatch" style="--belt:' + st.belt.color + '"></span>' + esc(BD.gradeShort(st.g)) + ' · ' + esc(st.belt.name) + '</span>' +
         '</button>';
@@ -625,6 +659,7 @@ BD.UI = (function () {
     else if (it.kind === "spanishRetry" || it.kind === "spellingRetry") BD.WordQuiz.start(it.game);
     else if (it.kind === "stripeTest") confirmTest(it.subject);
     else if (it.kind === "stripePractice") launchStripe(it.subject, false);
+    else if (it.kind === "degreeTest" || it.kind === "degree") { if (BD.Degrees) BD.Degrees.start(); }
     else if (it.kind === "school") BD.WordQuiz.start("spelling", null, "practice");
     else if (it.kind === "schoolTest") BD.WordQuiz.start("spelling", null, "test");
     else if (it.kind === "boss") BD.Boss.open();
@@ -651,18 +686,21 @@ BD.UI = (function () {
     const p = BD.Store.current();
     const rk = o.belt || {};
     const sjr = BD.Rank.subject(rk.subject) || { label: "" };
+    const rkPct = rk.max ? Math.round(100 * rk.now / rk.max) : 0;
+    const rkPw = rk.power ? '<span class="power-note' + (rk.bonusPower ? " bonus" : "") + '">' + (rk.optional ? "Bonus training: Spanish fills its own meter." : rk.bonusPower ? "Bonus practice: your belt still grows a little, and every point counts on the leaderboard." : "Today's belt XP: " + rk.power.used + " of " + rk.power.full + " at full power.") + '</span>' : '';
     $("resBelt").innerHTML = rk.subject ? '<div class="belt-row stripe-xp">' +
-      '<div class="belt-text"><strong>' + sjr.label + ' stripe practice</strong>' +
-      '<span>' + (rk.gained ? "+" + rk.gained + " XP · " : "") + rk.now + " / 100 XP on your " + BD.gradeLabel(rk.grade) + " " + rk.belt.name + " Belt" +
-      (rk.locked ? "" : rk.earned > rk.gained ? " (this stripe's practice is maxed at 100, so extra XP doesn't add up)" : "") + '</span>' +
-      '<div class="xp-track"><div class="xp-fill" style="width:' + rk.now + '%"></div></div>' +
+      '<div class="belt-text"><strong>' + (rk.degree && !rk.optional ? esc(rk.title) + ' training' : sjr.label + ' stripe practice') + '</strong>' +
+      '<span>' + (rk.earned ? "+" + rk.earned + " XP · " : "") + "+" + (rk.gained || 0) + " Belt XP · " + rk.now + " / " + rk.max + (rk.degree && !rk.optional ? " toward your next degree" : " on your " + BD.gradeLabel(rk.grade) + " " + rk.belt.name + " Belt") + '</span>' +
+      '<div class="xp-track"><div class="xp-fill" style="width:' + rkPct + '%"></div></div>' + rkPw +
       (rk.factor < 1 ? '<span class="review-note">Review practice: ' + Math.round(rk.factor * 100) + '% points. Try ' + BD.gradeLabel(rk.level) + ' for full points!</span>' : '') +
-      (rk.hasStripe ? '<span class="muted">You already have this stripe. Practice still earns XP for it (up to 100) until you move up a belt.</span>' : (function () {
+      (rk.degree ? (function () { const d = BD.Rank.degInfo(BD.Rank.rec(p, rk.grade)); return d.ready ? '<button type="button" class="btn btn-small btn-primary" id="resDegreeTest">The ' + esc(d.nextName) + ' test is ready!</button>' : ''; })()
+        : rk.hasStripe ? '<span class="muted">You already have this stripe. Practice still fills its meter until you move up a belt.</span>' : (function () {
         const rr = BD.Rank.rec(p, rk.grade), n = BD.Rank.nextPart(rr, rk.subject); if (!n) return "";
         return n.open ? '<button type="button" class="btn btn-small btn-primary" id="resStripeTest">Part ' + (n.i + 1) + ' of the ' + sjr.label + ' stripe test is ready!</button>'
-          : '<span class="muted small">Part ' + (n.i + 1) + ' of the ' + sjr.label + ' stripe test opens at ' + n.need + ' practice XP (' + (n.need - rk.now) + ' to go).</span>';
+          : '<span class="muted small">Part ' + (n.i + 1) + ' of the ' + sjr.label + ' stripe test opens at ' + n.need + ' Belt XP (' + Math.max(0, n.need - rk.now) + ' to go).</span>';
       })()) +
       '</div></div>' : "";
+    if ($("resDegreeTest")) $("resDegreeTest").onclick = function () { p.dojoGrade = rk.grade; BD.Store.save(p); if (BD.Degrees) BD.Degrees.start(); };
     if ($("resStripeTest")) $("resStripeTest").onclick = function () { p.dojoGrade = rk.grade; BD.Store.save(p); confirmTest(rk.subject); };
     $("resFailed").hidden = !o.failed;
     $("resFailedText").textContent = o.failed || "";
@@ -850,6 +888,7 @@ BD.UI = (function () {
       else if (te) confirmTest(te.dataset.stripeTest);
       else if (e.target.closest("#rankBeltBtn")) beltDetails();
       else if (e.target.id === "rankNextGrade") { const p = BD.Store.current(); p.dojoGrade = BD.Rank.dojoGrade(p) + 1; BD.Store.save(p); home(); }
+      else if (e.target.id === "degreeTest" && BD.Degrees) BD.Degrees.start();
     });
     $("homeBelt").addEventListener("change", function (e) {
       if (e.target.id !== "dojoGradeSel") return;
@@ -869,7 +908,7 @@ BD.UI = (function () {
     $("parentHow").addEventListener("click", function () {
       sheet("How Brain Dojo works",
         '<h4 class="label">Belts and stripes</h4><p>Each grade has its own belt path: White, Yellow, Orange, Blue, Green, Purple, Brown, Red, Black. A belt needs 4 stripes (Math, Reading, Spelling, Comprehension). Each stripe test comes in 4 parts, each a different skill (for example Capitals, Punctuation, Spelling and Grammar). Practice comes first: Part 1 unlocks at 25 practice XP, then 50, 75 and 100, and a locked part cannot be started. Passing all 4 parts (85% each) earns the stripe, and the 4th stripe graduates them to the next belt. Spanish is bonus training: practice earns extra XP (up to 100 per belt), with no stripe or test. Practice below their level still builds that grade\'s belt, at fewer points (60% one grade below, 40% two below, 25% three or more), so the fastest way up is training at their own level.</p>' +
-        '<h4 class="label">Practice and hints</h4><p>Points come from doing the work. Practice earns up to 100 XP per stripe; stripe tests add no XP (practice to 56, pass the test, and it stays 56). They can keep practicing a stripe after earning it, until they move up a belt. Graduating adds a bonus earned by practice: a quarter of the belt\'s practice XP (all 400 = +100; tests only = +0). The Dojo leaderboard ranks XP earned this week, so practice beats rushing tests. Every practice question at every belt has a Hint button with up to 2 hints (a meaning, a first and last letter, a strategy, or where to look). Each hint lowers that question\'s points a little, so nobody gets stuck. Stripe tests have no hints. Pre-K to 1st grade hear instructions read aloud.</p>' +
+        '<h4 class="label">Practice and hints</h4><p>Points come from doing the work. Every game pays XP for the leaderboard (plus 2 XP for every right answer). Practice also fills the stripe meters in Belt XP (about 10 Belt XP a minute in any game). A stripe needs 450 Belt XP at White Belt, growing to 3,300 at Red Belt, about 100 hours of practice from White to Black Belt at a grade. Belt power: the first 600 Belt XP each day count in full; after that the belt still grows a little (8%), so a child who trains 30 to 40 minutes a day reaches Black Belt in about 5 to 6 months, and even 4 hours a day takes about 80 days. Nothing is ever locked. Stripe tests add no XP; graduating adds a bonus. After Black Belt come 5 Black Belt degrees: 4 degree stripes (250 Belt XP each for 1st to 3rd, 500 for 4th and 5th) plus a Degree Test; 5th Degree is Master Rank. Every practice question at every belt has a Hint button with up to 2 hints (a meaning, a first and last letter, a strategy, or where to look). Each hint lowers that question\'s points a little, so nobody gets stuck. Stripe tests have no hints. Pre-K to 1st grade hear instructions read aloud.</p>' +
         '<h4 class="label">Badges and gear</h4><p>Gear unlocks the way it does at Engage: a mouthguard on sign-up, the Engage shirt after 3 days of training, MMA shorts after 10 days, MMA gloves with the first stripe, a sparring gear bag at the first graduation, then sparring gloves, boots, headgear and chest gear with each Yellow Belt stripe. The full Sparring Gear outfit unlocks at the Yellow to Orange Belt graduation, when sparring starts in class.</p>' +
         '<h4 class="label">Weapons, judo and tournaments</h4><p>Weapons are for show only: Nunchucks at Green Belt, Kamas at Purple, Bo Staff at Brown and a Wooden Sword at Red. They are performed in Weapons tournaments and never used against anyone or any boss. At Green Belt they earn Boxing Gloves and Judo Moves (every 5 right in a row is a judo throw). Tournaments are single-elimination brackets of 6 to 12: Kata opens at Yellow Belt with 2 stripes, Sparring at Orange and Weapons at Green. Gold +10 XP, Silver +7.5, Bronze +5, double on weekends.</p>' +
         '<h4 class="label">Saving</h4><p>Progress saves automatically, even mid-round. Opened from the shared link while signed in to Claude, it is kept in that Claude account and follows you to any device. Otherwise it stays in this browser. Use <strong>Back up progress</strong> to get a save code that moves a student to another device or restores them if the browser is cleared.</p>' +
