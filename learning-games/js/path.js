@@ -70,7 +70,9 @@ BD.Path = (function () {
       const b = bossInfo(p);
       if (!b.beat && (BD.Rank.stripeCount(r) >= 2 || BD.Rank.beltXP(r) >= BD.Rank.beltMax(r) / 2)) it = { kind: "boss", title: "Beat the boss " + b.boss.name, node: "boss" };
     }
-    // 5. Practice the subject with the least XP.
+    // 5. Daily Training: every subject mixed in one round (fills each subject's stripe).
+    if (!it && BD.Mixed && lowestPractice(p, r)) it = { kind: "mixed", title: "Daily Training (all 4 subjects)", node: "mixed" };
+    // (fallback when Daily Training isn't loaded) practice the subject with the least XP.
     if (!it) {
       const low = lowestPractice(p, r);
       if (low) it = { kind: "stripePractice", subject: low.key, title: NAME[low.key] + " practice (" + low.x + " of " + BD.Rank.maxFor(r) + " Belt XP)", node: "prac-" + low.key + "-" + nextNeedIndex(low.x, r) };
@@ -91,6 +93,7 @@ BD.Path = (function () {
     if (!it && d.ready) it = { kind: "degreeTest", title: d.nextName + " test" };
     if (!it && BD.Quest) { const q = BD.Quest.current(p); if (q.done && !q.claimed) it = { kind: "quest", title: "Open your quest chest" }; }
     if (!it) { const b = bossInfo(p); if (!b.beat) it = { kind: "boss", title: "Beat the boss " + b.boss.name, node: "boss" }; }
+    if (!it && !d.master && BD.Mixed) it = { kind: "mixed", title: "Daily Training for your " + d.nextName + " (" + d.xp + " of " + d.max + " Belt XP)", node: "mixed" };
     if (!it && !d.master) { const low = lowestPractice(p, r) || { key: ORDER[0] }; it = { kind: "stripePractice", subject: low.key, title: "Train for your " + d.nextName + " (" + d.xp + " of " + d.max + " Belt XP)" }; }
     if (!it) it = { kind: "mathStart", title: "Keep your skills sharp with Math Dojo" };
     const goal = BD.Goals && BD.Goals.progress ? BD.Goals.progress(p) : null;
@@ -107,6 +110,7 @@ BD.Path = (function () {
     const rows = [];
     if (d.ready) rows.push({ id: "deg-test", t: d.nextName + " test", s: "Mixed questions from every subject · 85% to promote", icon: "test", first: true });
     if (!b.beat) rows.push({ id: "boss", t: "Beat " + b.boss.name, s: "Black Belt boss · win a trophy", img: b.boss.img, first: !rows.length && nx.kind === "boss" });
+    if (!d.master && !d.ready && BD.Mixed) rows.push({ id: "mixed", t: "Daily Training", s: "All 4 subjects mixed · fills your degree meter", icon: "grad", first: nx.kind === "mixed" || !rows.length });
     if (!d.master && !d.ready) ORDER.forEach(function (k) { if (rows.length < 3) rows.push({ id: "deg-" + k, t: NAME[k] + " practice", s: "Fills your degree meter: " + d.xp + " of " + d.max + " Belt XP", icon: k, subject: k, first: !rows.length }); });
     box.innerHTML =
       '<button type="button" class="belt-card degree" id="pathBanner" style="--sky:' + reg.sky + ';--ground:' + reg.ground + '" aria-label="' + esc(BD.Rank.title(r) + ". Open the Adventure Map") + '">' +
@@ -180,6 +184,12 @@ BD.Path = (function () {
     if (n.kind === "grad") return { t: n.label === "Master the grade" ? "Master the grade" : "Graduate to " + n.label, s: "Earn all 4 stripes (" + n.stripes + " of 4)", icon: "grad" };
     return { t: n.label, s: "", icon: n.icon || "lock" };
   }
+  /* Daily Training: every subject mixed in one round. */
+  function mixedHTML() {
+    return '<li><button type="button" class="mv mv-first mv-mixed" data-node="mixed" aria-label="Daily Training. All 4 subjects mixed, about 8 minutes. Next up">' +
+      '<span class="mv-ic">' + svg("grad") + '</span><span class="mv-txt"><strong>Daily Training</strong><span>All 4 subjects mixed · about 8 minutes</span></span>' +
+      '<span class="mv-tag">Next</span><span class="mv-chev" aria-hidden="true">›</span></button></li>';
+  }
   function moveHTML(n, g, first) {
     const w = words(n, g), locked = n.state === "locked";
     const ic = w.img ? '<img src="' + w.img + '" alt="">' : svg(locked ? "lock" : w.icon);
@@ -227,7 +237,8 @@ BD.Path = (function () {
         '<span class="ch-bar" role="progressbar" aria-valuemin="0" aria-valuemax="' + inCh.length + '" aria-valuenow="' + chDone + '"><i style="width:' + Math.round(100 * chDone / inCh.length) + '%"></i></span>' +
         '<span class="bc-sub"><span aria-hidden="true">' + reg.icon + '</span> ' + esc(reg.name) + ' · ' + chDone + ' of ' + inCh.length + ' steps · map ›</span>' + powerSpan(p, g) + '</span></button>' +
       '<h3 class="mv-head">Your next moves</h3>' +
-      '<ol class="moves' + (little ? " moves-little" : "") + '">' + mv.map(function (n, i) { return moveHTML(n, g, i === 0 && n.state !== "locked"); }).join("") + '</ol>' +
+      '<ol class="moves' + (little ? " moves-little" : "") + '">' + (nx.kind === "mixed" ? mixedHTML() + mv.slice(0, (little ? 2 : 3) - 1).map(function (n) { return moveHTML(n, g, false); }).join("")
+        : mv.map(function (n, i) { return moveHTML(n, g, i === 0 && n.state !== "locked"); }).join("")) + '</ol>' +
       coming +
       '<button type="button" class="path-whole" id="pathWhole">See the whole belt</button>';
   }
@@ -252,6 +263,7 @@ BD.Path = (function () {
   /* ---------- tapping a node ---------- */
   function tap(id) {
     const p = BD.Store.current(); if (!p) return;
+    if (id === "mixed") { BD.Sound.tap(); if (BD.Mixed) BD.Mixed.start(); return; }
     if (id === "deg-test") { BD.Sound.tap(); if (BD.Degrees) BD.Degrees.start(); return; }
     if (/^deg-/.test(id)) { BD.Sound.tap(); BD.UI.launchStripe(id.slice(4), false); return; }
     if (id === "boss" && BD.Rank.rec(p, BD.Rank.dojoGrade(p)).belt >= 8) { BD.Sound.tap(); BD.Boss.open(); return; }

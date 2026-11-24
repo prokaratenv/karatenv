@@ -9,7 +9,7 @@ BD.UI = (function () {
 
   let currentScreen = null, goingBack = false;
   const trail = [];   // screens visited, for the Back button
-  const PLAY = ["screen-math-play", "screen-sentence-play", "screen-read-play", "screen-word-play"];
+  const PLAY = ["screen-math-play", "screen-sentence-play", "screen-read-play", "screen-word-play", "screen-mixed-play"];
   function show(id) {
     if (!goingBack && currentScreen && currentScreen !== id) {
       trail.push(currentScreen);
@@ -369,6 +369,7 @@ BD.UI = (function () {
     if (BD.SentenceGame.stop) BD.SentenceGame.stop();
     if (BD.Reading.stop) BD.Reading.stop();
     if (BD.WordQuiz.stop) BD.WordQuiz.stop();
+    if (BD.Mixed) BD.Mixed.stop();
     if (BD.Boss) BD.Boss.stop();
     if (BD.Duel) BD.Duel.stop();
   }
@@ -524,10 +525,10 @@ BD.UI = (function () {
       const st = tileState(p, t);
       return '<button type="button" class="game-tile tile-' + t.key + '" data-tile="' + t.key + '" aria-label="' + esc(t.name + ", " + BD.gradeLabel(st.g) + ", " + st.belt.name + " Belt") + '">' +
         '<span class="gt-art"><img src="img/' + t.coach + '.webp" alt="" loading="lazy"></span>' +
-        (st.badge ? '<span class="gt-badge">' + esc(st.badge) + '</span>' : '') +
         '<span class="gt-ring" style="--pct:' + st.pct + '" title="' + st.xp + ' / ' + st.max + ' Belt XP"><span>' + st.pct + '%</span></span>' +
         '<span class="gt-name">' + esc(t.name) + '</span>' +
         '<span class="gt-grade"><span class="belt-swatch" style="--belt:' + st.belt.color + '"></span>' + esc(BD.gradeShort(st.g)) + ' · ' + esc(st.belt.name) + '</span>' +
+        (st.badge ? '<span class="gt-badge">' + esc(st.badge) + '</span>' : '') +
         '</button>';
     }).join("");
   }
@@ -664,6 +665,7 @@ BD.UI = (function () {
     else if (it.kind === "schoolTest") BD.WordQuiz.start("spelling", null, "test");
     else if (it.kind === "boss") BD.Boss.open();
     else if (it.kind === "quest") $("questCard").click();
+    else if (it.kind === "mixed") BD.Mixed.start();
   }
 
   /* Re-draw when progress arrives from another device. */
@@ -773,7 +775,7 @@ BD.UI = (function () {
       const tricky = Object.values(p.tricky).sort(function (a, b) { return b.misses - a.misses; }).slice(0, 16);
       const recent = p.sessions.slice(0, 8).map(function (s) {
         const d = new Date(s.date);
-        const what = s.game === "team" ? "Team lesson · " + ((BD.Teams.byId(s.mode) || {}).name || "") : s.game === "tournament" ? "Tournament · " + (s.mode || "") + (s.medal ? " (" + s.medal + ")" : "") : s.game === "boss" ? "Boss Battle · " + (s.boss || "") + (s.won ? " (won)" : "") : s.game === "duel" ? "Partner Challenge vs " + (s.vs || "") + (s.won ? " (won)" : "") : String(s.game).indexOf("test-") === 0 ? "Stripe test" : s.game === "spelling" ? "Spelling Bee" : s.game === "spanish" ? "Spanish Dojo" : s.game === "reading" ? "Story Scrolls" : s.game === "math" ? "Math · " + (s.mode === "clock" ? "Speed" : "Practice") + " · " + s.ops.map(function (o) { return BD.MathGame.OPS[o].sym; }).join("") : "Sentences";
+        const what = s.game === "team" ? "Team lesson · " + ((BD.Teams.byId(s.mode) || {}).name || "") : s.game === "tournament" ? "Tournament · " + (s.mode || "") + (s.medal ? " (" + s.medal + ")" : "") : s.game === "boss" ? "Boss Battle · " + (s.boss || "") + (s.won ? " (won)" : "") : s.game === "duel" ? "Partner Challenge vs " + (s.vs || "") + (s.won ? " (won)" : "") : s.game === "mixed" ? "Daily Training · all subjects" : String(s.game).indexOf("test-") === 0 ? "Stripe test" : s.game === "spelling" ? "Spelling Bee" : s.game === "spanish" ? "Spanish Dojo" : s.game === "reading" ? "Story Scrolls" : s.game === "math" ? "Math · " + (s.mode === "clock" ? "Speed" : "Practice") + " · " + s.ops.map(function (o) { return BD.MathGame.OPS[o].sym; }).join("") : "Sentences";
         return '<tr><td>' + d.toLocaleDateString(undefined, { month: "short", day: "numeric" }) + '</td><td>' + what + '</td><td>' + BD.gradeShort(s.grade) + '</td><td>' + s.correct + "/" + s.total + '</td><td>+' + s.xp + '</td></tr>';
       }).join("");
       const readRow = '<tr><th scope="row">Story Scrolls</th>' + cols.map(function (g) {
@@ -989,6 +991,8 @@ BD.UI = (function () {
     BD.Builder.bind();
     BD.Studio.bind();
     BD.Quest.bind();
+    if (BD.Mixed) BD.Mixed.bind();
+    if ($("dailyTile")) $("dailyTile").addEventListener("click", function () { BD.Sound.tap(); if (BD.Phrases && BD.Phrases.beforeTraining(function () { BD.Mixed.start(); })) return; BD.Mixed.start(); });
     BD.Leads.bind();
   }
   /* OFFLINE: keep the app on the device (own website only; not inside Claude). */

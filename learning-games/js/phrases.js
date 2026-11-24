@@ -7,7 +7,7 @@
      and tagged by age group: n = Engage Ninjas (Pre-K to K), c = Core Kids
      (1st to 5th), t = Pre-Teen/Teens (6th to 8th).
    - Memory: each phrase seen is tracked. The Power Phrase Memory game
-     (5 quick items: missing word, put it in order, finish the phrase) brings
+     (3 quick items: missing word, put it in order, finish the phrase; memory grows by spacing across days, not by many reps at once) brings
      back phrases that are due, spaced out over days. A phrase is mastered
      (gold star) after it's answered right on 3 different days.
    Saved on the student: p.pp = { d: day, id: today's phrase, shown: day,
@@ -216,7 +216,7 @@ BD.Phrases = (function () {
     const recent = seen.slice().sort(function (a, b) { return String((s.seen[b] || [])[1]).localeCompare(String((s.seen[a] || [])[1])); });
     const order = due.concat(recent.filter(function (id) { return due.indexOf(id) === -1; }));
     const out = [];
-    for (let i = 0; out.length < 5; i++) out.push(order[i % order.length]);
+    for (let i = 0; out.length < 3; i++) out.push(order[i % order.length]);
     return out.map(function (id) { return BY[id]; });
   }
   function makeItem(ph, kind) {
@@ -237,7 +237,7 @@ BD.Phrases = (function () {
   let G = null;
   function game(p) {
     p = p || BD.Store.current(); if (!p) return;
-    const kinds = shuffle(["missing", "order", "finish", "missing", "order"], Math.floor(Math.random() * 1e9));
+    const kinds = shuffle(["missing", "order", "finish"], Math.floor(Math.random() * 1e9));
     G = { p: p, items: practiceList(p).map(function (ph, i) { return makeItem(ph, kinds[i]); }), i: 0, right: 0 };
     showItem();
   }
@@ -287,14 +287,14 @@ BD.Phrases = (function () {
   function finish() {
     const p = G.p, s = st(p), t = today();
     let xp = 0;
-    if (s.xpDay !== t && G.right >= 3) { xp = 5; s.xpDay = t; BD.addXP(p, xp); }
+    if (s.xpDay !== t && G.right >= 2) { xp = 5; s.xpDay = t; BD.addXP(p, xp); }
     BD.Store.save(p);
     const m = Object.keys(s.ok).filter(function (id) { return mastered(p, id); }).length;
     BD.UI.sheet("Power Phrase Memory", '<div class="pp-card"><div class="chest-prize">🧠</div><h3>' + G.right + ' of ' + G.items.length + ' right!</h3>' +
-      (xp ? '<p class="chest-xp">+' + xp + ' XP</p>' : '<p class="muted small">' + (G.right >= 3 ? "You earned today's memory XP already. Great extra practice!" : "Get 3 right to earn +5 XP (once a day).") + '</p>') +
+      (xp ? '<p class="chest-xp">+' + xp + ' XP</p>' : '<p class="muted small">' + (G.right >= 2 ? "You earned today's memory XP already. Great extra practice!" : "Get 2 right to earn +5 XP (once a day).") + '</p>') +
       '<p>' + m + ' Power Phrase' + (m === 1 ? "" : "s") + ' mastered. Say them out loud to lock them in!</p>' +
       '<div class="res-actions"><button type="button" class="btn btn-primary" id="ppAgain">Play again</button><button type="button" class="btn btn-quiet" id="ppMine">My Power Phrases</button></div></div>');
-    if (G.right >= 3) BD.confetti(60);
+    if (G.right >= 2) BD.confetti(60);
     $("ppAgain").onclick = function () { game(p); };
     $("ppMine").onclick = function () { collection(p); };
   }

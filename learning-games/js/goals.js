@@ -13,7 +13,7 @@ window.BD = window.BD || {};
 BD.Goals = (function () {
   const $ = function (id) { return document.getElementById(id); };
   const esc = function (s) { return BD.UI.esc(s); };
-  const PLAY = /^screen-(math-play|sentence-play|read-play|word-play|boss|tourney|duel)$/;
+  const PLAY = /^screen-(math-play|sentence-play|read-play|word-play|mixed-play|boss|tourney|duel)$/;
   const GOALS = [["m30", "30 minutes"], ["m20", "20 minutes"], ["m15", "15 minutes"], ["m45", "45 minutes"], ["r3", "3 rounds"], ["r5", "5 rounds"], ["off", "No daily goal"]];
   const EVERY = [["30", "Every 30 minutes"], ["20", "Every 20 minutes"], ["45", "Every 45 minutes"], ["60", "Every hour"], ["off", "Only once a day"]];
 

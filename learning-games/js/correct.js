@@ -45,7 +45,7 @@ BD.Correct = (function () {
   BD.on("screen", function (id) { if (/-play$|^screen-(boss|tourney)$/.test(id) && id !== "screen-duel") round = 0; });
   BD.on("results", function (e) {
     if (!round) return; const box = document.getElementById("resBelt"); if (!box) return;
-    const n = round / XP; round = 0;
+    const n = round; round = 0; // round counts right answers that earned the +2
     box.insertAdjacentHTML("afterbegin", '<p class="ca-line">+' + (n * XP) + ' XP for ' + n + ' right answer' + (n === 1 ? '' : 's') + ' · ' + thisWeek(e.p) + ' right this week</p>');
   });
   return { hit: hit, thisWeek: thisWeek, sanitize: sanitize, XP: XP, DAY_CAP: DAY_CAP };

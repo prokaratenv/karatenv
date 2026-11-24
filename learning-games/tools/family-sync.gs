@@ -372,7 +372,7 @@ function chScore(req) {
    just whether this email is the family's. */
 var DIGEST_SAMPLES_PER_DAY = 3, DIGEST_CHECKS_PER_HOUR = 10, DIGEST_KIDS = 6;
 var DIGEST_GAMES = { math: "Math Dojo", sentence: "Fix-It Sentences", reading: "Story Scrolls", spelling: "Spelling Bee", spanish: "Spanish Dojo", boss: "Boss battles",
-  duel: "Duels", tournament: "Tournaments", team: "Engage Teams lesson", quick: "Quick rounds", mini: "Mini games", phonics: "Phonics", readalong: "Read-along", flash: "Flash facts", school: "School words" };
+  duel: "Duels", tournament: "Tournaments", team: "Engage Teams lesson", quick: "Quick rounds", mini: "Mini games", phonics: "Phonics", readalong: "Read-along", flash: "Flash facts", school: "School words", mixed: "Daily Training" };
 var BELT_COLORS = { White: "#FFFFFF", Yellow: "#F5C518", Orange: "#F08A24", Blue: "#2D6CDF", Green: "#2FA866", Purple: "#7B4BC4", Brown: "#8A5A3B", Red: "#D63A2F", Black: "#17171C" };
 function digestFile() { var f = folder(), it = f.getFilesByName("digests.json"); return it.hasNext() ? it.next() : f.createFile("digests.json", "{}", "application/json"); }
 function digestData(file) {

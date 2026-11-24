@@ -6,9 +6,9 @@
      device when offline. Everything else loads from the device first.
    - Saving progress, family sync and sign-ups are never cached: they wait on
      the device and send when the connection is back. */
-const VERSION = "5c547c2fae7c";
+const VERSION = "147e61eba0f6";
 const CACHE = "brain-dojo-" + VERSION;
-const STAMP = "176a6c01a9"; // the ?v= the current pages ask for
+const STAMP = "14aa933df7"; // the ?v= the current pages ask for
 const FONTS = "brain-dojo-fonts";
 const CORE = [
 "./",
@@ -23,6 +23,16 @@ const CORE = [
 "img/app-icon.png",
 "img/apple-touch-icon.png",
 "img/billy.webp",
+"img/boss-0.webp",
+"img/boss-1.webp",
+"img/boss-2.webp",
+"img/boss-3.webp",
+"img/boss-4.webp",
+"img/boss-5.webp",
+"img/boss-6.webp",
+"img/boss-7.webp",
+"img/boss-8.webp",
+"img/boss-9.webp",
 "img/bridgette.webp",
 "img/cd.webp",
 "img/engage-logo.png",
@@ -124,6 +134,7 @@ const CORE = [
 "js/logo-box.js",
 "js/math-game.js",
 "js/mini.js",
+"js/mixed.js",
 "js/music.js",
 "js/parent.js",
 "js/path.js",
@@ -173,16 +184,6 @@ const LATER = [
 "img/age-tommy-1.webp",
 "img/age-tommy-2.webp",
 "img/age-tommy-3.webp",
-"img/boss-0.webp",
-"img/boss-1.webp",
-"img/boss-2.webp",
-"img/boss-3.webp",
-"img/boss-4.webp",
-"img/boss-5.webp",
-"img/boss-6.webp",
-"img/boss-7.webp",
-"img/boss-8.webp",
-"img/boss-9.webp",
 "img/ex-crane-0.webp",
 "img/ex-crane-1.webp",
 "img/ex-jacks-0.webp",

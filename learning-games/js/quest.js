@@ -59,7 +59,7 @@ BD.Quest = (function () {
       { id: "boss", title: "Take on your belt boss", goal: 1, count: function (ss) { return ss.filter(function (s) { return s.game === "boss"; }).length; } }
     ];
     Object.keys(GAME_NAMES).forEach(function (g) {
-      list.push({ id: "play-" + g, title: "Play a round of " + GAME_NAMES[g], goal: 1, count: function (ss) { return ss.filter(function (s) { return s.game === g && !s.school; }).length; }, game: g });
+      list.push({ id: "play-" + g, title: "Play a round of " + GAME_NAMES[g], goal: 1, count: function (ss) { return ss.filter(function (s) { return (s.game === g && !s.school) || (s.game === "mixed" && s.parts && s.parts[{ math: "math", sentence: "reading", reading: "comprehension", spelling: "spelling", spanish: "spanish" }[g]]); }).length; }, game: g });
     });
     if (BD.School && BD.School.has(p)) {
       const school = { id: "school", title: "Practice your school words", goal: 1, count: function (ss) { return ss.filter(function (s) { return s.school; }).length; } };
@@ -172,7 +172,7 @@ BD.Quest = (function () {
         return '<li class="region ' + st + '" style="--sky:' + reg.sky + ';--ground:' + reg.ground + ';--belt:' + BD.BELTS[i].color + '"' + (st === "here" ? ' id="mapHere"' : '') + '>' +
           '<div class="region-scene" aria-hidden="true"><span class="region-icon">' + reg.icon + '</span>' +
           (st === "here" ? '<span class="region-champ">' + BD.UI.championHTML(p) + '</span>' : '') +
-          '<img class="region-boss" src="' + b.img + '" alt="">' + (beat.indexOf(i) !== -1 ? '<span class="region-trophy" title="Boss beaten">🏆</span>' : '') + '</div>' +
+          '<img class="region-boss" src="' + b.img + '" alt="" onerror="if(!this.dataset.r){this.dataset.r=1;this.src=this.src.split(\'?\')[0]+\'?r=\'+Date.now();}">' + (beat.indexOf(i) !== -1 ? '<span class="region-trophy" title="Boss beaten">🏆</span>' : '') + '</div>' +
           '<div class="region-info"><span class="belt-swatch" style="--belt:' + BD.BELTS[i].color + '"></span> <strong>' + esc(st === "locked" ? "???" : reg.name) + '</strong>' +
           '<span class="region-sub">' + BD.BELTS[i].name + ' Belt · ' + (st === "cleared" ? "Cleared ✓" : st === "here" ? "You are here" : "Locked 🔒") + '</span>' +
           '<span class="map-dots" aria-label="' + (st === "here" ? sc : st === "cleared" ? 4 : 0) + ' of 4 stripes">' + dots + '</span>' +
