@@ -475,6 +475,7 @@ BD.WordQuiz = (function () {
   /* school = "practice" or "test" for this week's school spelling words. */
   function start(game, stripe, school, flash) {
     const g = GAMES[game], p = BD.Store.current();
+    if (game === "spelling" && !school && BD.Little && BD.Little.take("spelling", stripe)) return; // Preschool and Pre-K: picture Sounds game
     if (school && !(BD.School && BD.School.has(p))) school = null;
     if (school) stripe = null;
     if (stripe) p[g.field] = stripe.grade;

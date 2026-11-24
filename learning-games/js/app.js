@@ -9,7 +9,7 @@ BD.UI = (function () {
 
   let currentScreen = null, goingBack = false;
   const trail = [];   // screens visited, for the Back button
-  const PLAY = ["screen-math-play", "screen-sentence-play", "screen-read-play", "screen-word-play", "screen-mixed-play", "screen-spanish-play"];
+  const PLAY = ["screen-math-play", "screen-sentence-play", "screen-read-play", "screen-word-play", "screen-mixed-play", "screen-spanish-play", "screen-little-play"];
   function show(id) {
     if (!goingBack && currentScreen && currentScreen !== id) {
       trail.push(currentScreen);
@@ -24,7 +24,7 @@ BD.UI = (function () {
     if (id !== "screen-results") BD.confetti.stop();
     document.querySelectorAll(".screen").forEach(function (s) { s.hidden = s.id !== id; });
     // Bottom tabs: on the home tabs and the Parents corner only (never during play).
-    const tabsOn = !!BD.Store.current() && (id === "screen-home" || id === "screen-parent");
+    const tabsOn = !!BD.Store.current() && (id === "screen-home" || id === "screen-parent") && !(id === "screen-home" && BD.Little && BD.Little.homeOn(BD.Store.current()));
     $("tabbar").hidden = !tabsOn;
     document.body.classList.toggle("has-tabs", tabsOn);
     markTab(id === "screen-parent" ? "parents" : tab);
@@ -41,6 +41,7 @@ BD.UI = (function () {
   /* The grade a play screen is training at (null elsewhere). */
   function playGrade(id) {
     const p = BD.Store.current(); if (!p) return null;
+    if (id === "screen-little-play" && BD.Little && BD.Little._state()) { const ls = BD.Little._state(), it = ls.items && ls.items[0]; return it && isFinite(Number(it.g)) ? Number(it.g) : null; }
     const f = { "screen-spanish-play": "spanishGrade", "screen-math-play": "mathGrade", "screen-sentence-play": "sentenceGrade", "screen-read-play": "readingGrade" }[id] ||
       (id === "screen-word-play" ? (BD.WordQuiz && BD.WordQuiz.game && BD.WordQuiz.game() === "spanish" ? "spanishGrade" : "spellingGrade") : null);
     if (!f) return null;
@@ -466,7 +467,8 @@ BD.UI = (function () {
         '<span class="pc-name">' + esc(p.name) + '</span>' +
         '<span class="pc-belt">' + beltSwatch(belt) + BD.gradeShort(BD.Rank.dojoGrade(p)) + ' · ' + belt.name + ' Belt</span></button>';
     }).join("");
-    $("newGrade").innerHTML = BD.GRADES.map(function (g) { return '<option value="' + g + '">' + BD.gradeLabel(g) + '</option>'; }).join("");
+    const AGE = { "-2": " (age 3 to 4)", "-1": " (age 4 to 5)", "0": " (age 5 to 6)" };
+    $("newGrade").innerHTML = BD.GRADES.map(function (g) { return '<option value="' + g + '">' + BD.gradeLabel(g) + (AGE[String(g)] || "") + '</option>'; }).join("") + '<option value="ns">Not sure (age 3 to 5): a picture check will place them</option>';
     $("newGrade").value = "3";
     fighterPicker("newFighter", newFighter, false);
     BD.Leads.welcomeLink();
@@ -521,8 +523,10 @@ BD.UI = (function () {
     return { g: g, belt: belt, xp: xp, max: MX, pct: Math.round(100 * xp / MX), badge: badge };
   }
   function renderTiles(p) {
-    $("gameTiles").innerHTML = TILES.map(function (t) {
-      const st = tileState(p, t);
+    const ps = Number(BD.Rank.dojoGrade(p)) <= -2;
+    $("gameTiles").innerHTML = TILES.filter(function (t) { return !(ps && t.key === "spanish"); }).map(function (t) {
+      const st = tileState(p, t), lit = BD.Little && st.g <= -1 && t.key !== "spanish" ? BD.Little.DOM[t.subj] : null;
+      if (lit) t = Object.assign({}, t, { name: lit.name });
       return '<button type="button" class="game-tile tile-' + t.key + '" data-tile="' + t.key + '" aria-label="' + esc(t.name + ", " + BD.gradeLabel(st.g) + ", " + st.belt.name + " Belt") + '">' +
         '<span class="gt-art"><img src="img/' + t.coach + '.webp" alt="" loading="lazy"></span>' +
         '<span class="gt-ring" style="--pct:' + st.pct + '" title="' + st.xp + ' / ' + st.max + ' Belt XP"><span>' + st.pct + '%</span></span>' +
@@ -604,6 +608,7 @@ BD.UI = (function () {
     renderTiles(p);
     renderMe(p);
     applyTab();
+    if (BD.Little) BD.Little.renderHome(p); // Preschool and Pre-K: the simple picture home
     show("screen-home");
     BD.emit("home", p);
   }
@@ -834,6 +839,7 @@ BD.UI = (function () {
 
   /* ---------- wiring ---------- */
   function bind() {
+    if (BD.Little) BD.Little.bind();
     $("welcomeCta").addEventListener("click", function (e) {
       if (e.target.closest("#welcomeResume")) { const p = lastPlayer(); if (p) { BD.Store.setCurrent(p.id); BD.Sound.tap(); home(); } }
       else if (e.target.closest("#welcomeStart, #welcomeNew")) { BD.Sound.tap(); showAddForm(); }
@@ -846,7 +852,9 @@ BD.UI = (function () {
       e.preventDefault();
       const name = $("newName").value.trim().slice(0, 20);
       if (!name) { $("newName").focus(); return; }
-      const np = BD.Store.addPlayer(name, Number($("newGrade").value), newFighter === "custom" || newFighter === "studio" ? null : newFighter);
+      const gv = $("newGrade").value, notSure = gv === "ns";
+      const np = BD.Store.addPlayer(name, notSure ? -1 : Number(gv), newFighter === "custom" || newFighter === "studio" ? null : newFighter);
+      if (notSure && BD.Little) setTimeout(function () { if (BD.Store.current() === np && !BD.Little._place()) BD.Little.place(np, { isNew: true, from: "new" }); }, 600); // not sure: the picture check places them
       BD.emit("playerAdded", np);
       if (newFighter === "custom") { home(); openBuilder(np); return; }
       if (newFighter === "studio") { $("newName").value = ""; home(); openStudio(np); return; }

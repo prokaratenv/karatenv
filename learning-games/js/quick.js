@@ -9,6 +9,7 @@ BD.Quick = (function () {
   const esc = function (s) { return BD.UI.esc(s); };
 
   function math(grade, base) {
+    if (Number(base !== undefined ? base : grade) <= -1 && BD.Little) return BD.Little.quick(grade, "math");
     // A harder grade mixed in keeps the student's own kinds of problems (no × for a 1st grader).
     const own = base === undefined ? null : BD.MathGame.opsFor(base);
     const ops = BD.MathGame.opsFor(grade).filter(function (o) { return !own || own.indexOf(o) !== -1; });
@@ -24,6 +25,7 @@ BD.Quick = (function () {
   }
 
   function spelling(grade) {
+    if (Number(grade) <= -1 && BD.Little) return BD.Little.quick(grade, "spelling");
     const list = BD.SPELLING[String(grade)] || BD.SPELLING["3"];
     const x = list[r(list.length)];
     const style = ["pick", "missing", "check"][r(3)];
@@ -37,6 +39,7 @@ BD.Quick = (function () {
   }
 
   function grammar(grade) {
+    if (Number(grade) <= -1 && BD.Little) return BD.Little.quick(grade, "grammar");
     // endless sentences from the generator first (never the same one twice for this student)
     if (BD.SentenceGen && BD.SentenceGen.choice) {
       try {
@@ -84,6 +87,7 @@ BD.Quick = (function () {
 
   /* One question at the grade and belt (higher belts lean harder). */
   function question(grade, belt) {
+    if (Number(grade) <= -1 && BD.Little) return BD.Little.quick(grade); // picture questions for Preschool and Pre-K
     const g = BD.Rank && belt !== undefined ? BD.Rank.itemGrade(grade, belt) : grade;
     const roll = Math.random();
     const maker = roll < 0.42 ? math : roll < 0.68 ? spelling : roll < 0.86 ? grammar : spanish;

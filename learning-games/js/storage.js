@@ -21,12 +21,13 @@ BD.collarColor = function (beltColor) { return String(beltColor).toUpperCase() =
 /* High Rank trim paint for the champion art: shiny gold sheen at Black Belt and every degree, the belt color otherwise. */
 BD.GOLD_TRIM = "linear-gradient(120deg, #F3C64A 0%, #B07D12 18%, #FFE38A 34%, #C8961F 50%, #8C6410 66%, #F6D46A 82%, #A9780F 100%)";
 BD.collarPaint = function (beltColor) { return String(beltColor).toUpperCase() === BD.BELTS[8].color.toUpperCase() ? BD.GOLD_TRIM : beltColor; };
-BD.GRADES = [-1, 0, 1, 2, 3, 4, 5, 6, 7, 8]; // -1 = Pre-K, 0 = Kindergarten
-BD.MIN_GRADE = -1;
+BD.GRADES = [-2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8]; // -2 = Preschool (ages 3 to 4), -1 = Pre-K, 0 = Kindergarten
+BD.MIN_GRADE = -2;
 BD.MAX_GRADE = 8;
-BD.gradeLabel = function (g) { g = Number(g); return g === -1 ? "Pre-K" : g === 0 ? "Kindergarten" : "Grade " + g; };
+BD.gradeLabel = function (g) { g = Number(g); return g === -2 ? "Preschool" : g === -1 ? "Pre-K" : g === 0 ? "Kindergarten" : "Grade " + g; };
 BD.gradeShort = function (g) {
   g = Number(g);
+  if (g === -2) return "PS";
   if (g === -1) return "Pre-K";
   if (g === 0) return "K";
   return g + (g === 1 ? "st" : g === 2 ? "nd" : g === 3 ? "rd" : "th");
@@ -109,7 +110,7 @@ BD.Store = (function () {
   function sanitize(p) {
     const FIGHTER_KEYS = ["kimmy", "billy", "tommy", "mackenzie", "rylan", "zumi", "cd", "michele", "bridgette", "kyra", "lauryn", "custom"];
     const GEAR_KEYS = ["mouthguard", "shorts", "shirt", "sparring", "boots", "headgear", "chest", "boxing", "mma", "bag", "nunchucks", "kamas", "bo", "sword"];
-    const gradeOk = function (g, dflt) { g = Number(g); return isFinite(g) ? Math.max(-1, Math.min(8, Math.round(g))) : dflt; };
+    const gradeOk = function (g, dflt) { g = Number(g); return isFinite(g) ? Math.max(BD.MIN_GRADE, Math.min(8, Math.round(g))) : dflt; };
     if (typeof p.id !== "string" || !/^[a-z0-9]{4,40}$/i.test(p.id)) p.id = "p" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
     p.name = String(p.name == null ? "" : p.name).replace(/[\u0000-\u001f\u007f<>]/g, "").trim().slice(0, 20) || "Champion";
     if (typeof p.color !== "string" || !/^#[0-9a-f]{6}$/i.test(p.color)) p.color = BD.AVATAR_COLORS[0];
@@ -133,6 +134,7 @@ BD.Store = (function () {
     if (BD.Quest) BD.Quest.sanitize(p);
     if (BD.Breaks) BD.Breaks.sanitize(p);
     if (BD.Placement) BD.Placement.sanitize(p);
+    if (BD.Little && BD.Little.sanitize) BD.Little.sanitize(p);
     if (BD.Spanish) BD.Spanish.sanitize(p);
     if (p.readAloud !== undefined) { if (p.readAloud === true) p.readAloud = true; else delete p.readAloud; }
     if (BD.Correct) BD.Correct.sanitize(p);

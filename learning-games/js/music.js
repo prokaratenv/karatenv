@@ -209,7 +209,7 @@ BD.Music = (function () {
   }
 
   /* Pick the piece for what's on screen. */
-  const SCREEN = { "screen-math-play": "focus", "screen-sentence-play": "focus", "screen-read-play": "focus", "screen-word-play": "focus", "screen-spanish-play": "focus", "screen-boss": "boss", "screen-duel": "boss" };
+  const SCREEN = { "screen-math-play": "focus", "screen-sentence-play": "focus", "screen-read-play": "focus", "screen-word-play": "focus", "screen-spanish-play": "focus", "screen-little-play": "focus", "screen-boss": "boss", "screen-duel": "boss" };
   let screenTrack = "dojo";
   function scene(name) {
     wanted = name;

@@ -13,16 +13,16 @@ window.BD = window.BD || {};
 BD.Goals = (function () {
   const $ = function (id) { return document.getElementById(id); };
   const esc = function (s) { return BD.UI.esc(s); };
-  const PLAY = /^screen-(math-play|sentence-play|read-play|word-play|mixed-play|spanish-play|boss|tourney|duel)$/;
-  const GOALS = [["m30", "30 minutes"], ["m20", "20 minutes"], ["m15", "15 minutes"], ["m45", "45 minutes"], ["r3", "3 rounds"], ["r5", "5 rounds"], ["off", "No daily goal"]];
-  const EVERY = [["30", "Every 30 minutes"], ["20", "Every 20 minutes"], ["45", "Every 45 minutes"], ["60", "Every hour"], ["off", "Only once a day"]];
+  const PLAY = /^screen-(math-play|sentence-play|read-play|word-play|mixed-play|spanish-play|little-play|boss|tourney|duel)$/;
+  const GOALS = [["m30", "30 minutes"], ["m20", "20 minutes"], ["m15", "15 minutes"], ["m10", "10 minutes"], ["m45", "45 minutes"], ["r3", "3 rounds"], ["r5", "5 rounds"], ["off", "No daily goal"]];
+  const EVERY = [["30", "Every 30 minutes"], ["20", "Every 20 minutes"], ["15", "Every 15 minutes"], ["45", "Every 45 minutes"], ["60", "Every hour"], ["off", "Only once a day"]];
 
   function day(p) {
     const t = BD.today();
     if (!p.today || p.today.d !== t) p.today = { d: t, s: 0, r: 0, done: false, nb: 0 };
     return p.today;
   }
-  function settings(p) { return { goal: p.goal || "m30", every: p.every || "30" }; }
+  function settings(p) { const lil = BD.Rank && Number(BD.Rank.dojoGrade(p)) <= -1; return { goal: p.goal || (lil ? "m15" : "m30"), every: p.every || (lil ? "15" : "30") }; } // Preschool and Pre-K: 15-minute sessions
   function goalParts(p) {
     const g = settings(p).goal; if (g === "off") return null;
     return { kind: g.charAt(0) === "m" ? "min" : "rounds", n: Number(g.slice(1)) };
@@ -169,7 +169,8 @@ BD.Goals = (function () {
     html: function (p) {
       const s = settings(p), d = day(p), pr = progress(p);
       const opt = function (list, v) { return list.map(function (o) { return '<option value="' + o[0] + '"' + (o[0] === v ? " selected" : "") + '>' + o[1] + '</option>'; }).join(""); };
-      return '<p class="muted small">Works on its own: after about 30 minutes ' + esc(p.name) + ' sees "You reached your goal for today. See you training tomorrow!" If they tap Keep training, it reminds them again every 30 minutes. Each reminder includes a quick tip about water and healthy snacks. Nothing is ever locked. Change it here if you like.</p>' +
+      const gm = (settings(p).goal.match(/^m(\d+)/) || [0, 30])[1], ev = settings(p).every === "off" ? 30 : settings(p).every;
+      return '<p class="muted small">Works on its own: after about ' + gm + ' minutes ' + esc(p.name) + ' sees "You reached your goal for today. See you training tomorrow!" If they tap Keep training, it reminds them again every ' + ev + ' minutes. Each reminder includes a quick tip about water and healthy snacks. Nothing is ever locked. Change it here if you like.</p>' +
         '<div class="set-row"><label>Daily goal <select data-goal>' + opt(GOALS, s.goal) + '</select></label>' +
         '<label>Remind again <select data-every>' + opt(EVERY, s.every) + '</select></label></div>' +
         '<p class="small">Today: ' + Math.floor(d.s / 60) + ' min, ' + d.r + (d.r === 1 ? ' round' : ' rounds') + (pr ? (pr.met ? ' · goal done ✓' : ' · goal ' + pr.have + ' of ' + pr.need) : '') + '</p>';

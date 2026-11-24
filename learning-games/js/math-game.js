@@ -181,6 +181,7 @@ BD.MathGame = (function () {
 
   function openSetup() {
     const p = BD.Store.current();
+    if (BD.Little && BD.Little.take("math", null)) return; // Preschool and Pre-K: the Little Ninjas picture games
     const retry = p.retry && p.retry.math;
     if (retry) { p.mathGrade = retry.grade; p.mathOps = retry.ops.slice(); }
     const grade = p.mathGrade;
@@ -250,6 +251,7 @@ BD.MathGame = (function () {
   /* stripe = { grade, belt, test } when started from the belt panel. */
   function start(mode, focusOps, stripe) {
     const p = BD.Store.current();
+    if (BD.Little && BD.Little.take("math", stripe)) return; // Preschool and Pre-K: the Little Ninjas picture games
     if (stripe) stripe = BD.Rank.gate(p, "math", stripe); // practice first: locked parts start as practice
     if (stripe) { p.mathGrade = stripe.grade; focusOps = stripe.test && stripe.skill && stripe.skill.ops ? stripe.skill.ops.slice() : beltOps(stripe.grade, stripe.belt); }
     else if (p.retry && p.retry.math) { p.mathGrade = p.retry.math.grade; focusOps = p.retry.math.ops; }
@@ -607,6 +609,7 @@ BD.MathGame = (function () {
   }
   function openFlash() {
     const p = BD.Store.current(); if (!p) return;
+    if (BD.Little && BD.Little.take("math", null)) return; // Preschool and Pre-K: the Little Ninjas picture games
     const done = flashToday(p).ops, allowed = opsFor(p.mathGrade), retry = p.retry && p.retry.math;
     BD.UI.sheet("Daily Flashcards",
       '<h4 class="label">Math · ' + BD.gradeLabel(p.mathGrade) + '</h4><p class="muted small">' + FLASH_CARDS + ' quick cards of one skill. Finish a set with 70% or better for a <strong>+' + FLASH_BONUS + ' bonus</strong>, once per skill each day.</p>' +

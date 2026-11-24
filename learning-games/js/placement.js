@@ -37,8 +37,9 @@ BD.Placement = (function () {
   const esc = function (s) { return BD.UI.esc(s); };
   const r = function (n) { return Math.floor(Math.random() * n); };
   const shuffle = function (a) { return a.map(function (x) { return [Math.random(), x]; }).sort(function (x, y) { return x[0] - y[0]; }).map(function (x) { return x[1]; }); };
+  const FLOOR = -1; // the word-and-number Belt Assessment bottoms out at Pre-K (Preschool is placed by the picture check)
   const clampG = function (g) { return Math.max(BD.MIN_GRADE, Math.min(BD.MAX_GRADE, Math.round(Number(g)))); };
-  const gradeWords = function (g) { g = Number(g); return g === -1 ? "Pre-K" : g === 0 ? "Kindergarten" : BD.gradeShort(g) + " grade"; };
+  const gradeWords = function (g) { g = Number(g); return g === -2 ? "Preschool" : g === -1 ? "Pre-K" : g === 0 ? "Kindergarten" : BD.gradeShort(g) + " grade"; };
 
   /* ================= QUESTIONS ================= */
   /* Each item: { prompt, html (already safe), sub, passage, choices: [text], answer, say, long } */
@@ -160,7 +161,7 @@ BD.Placement = (function () {
       if (st.streak >= 2) { st.streak = 0; if (st.grade < BD.MAX_GRADE) move = 1; else st.ceil++; }
     } else {
       st.streak = 0;
-      if (st.grade > BD.MIN_GRADE) move = -1; else st.floor++;
+      if (st.grade > FLOOR) move = -1; else st.floor++;
     }
     if (move) {
       if (st.lastMove && st.lastMove !== move) st.reversals++;
@@ -170,7 +171,7 @@ BD.Placement = (function () {
     const cap = st.grade <= 0 ? Math.min(st.max, Math.max(4, st.n)) : st.max;
     if (st.reversals >= 2) { st.done = true; st.result = Math.min(st.grade, st.prev); }
     else if (st.ceil >= 1) { st.done = true; st.result = BD.MAX_GRADE; }
-    else if (st.floor >= 2) { st.done = true; st.result = BD.MIN_GRADE; }
+    else if (st.floor >= 2) { st.done = true; st.result = FLOOR; }
     else if (st.n >= cap) { st.done = true; st.result = st.grade; }
     return move;
   }
@@ -200,10 +201,12 @@ BD.Placement = (function () {
   function start(p, opts) {
     opts = opts || {};
     p = p || BD.Store.current(); if (!p) return false;
+    // Preschool, Pre-K and Kindergarten get the voice-led picture check (js/little.js)
+    if (!opts.standard && BD.Little && BD.Little.placesYoung(p)) { delete pending[p.id]; return BD.Little.place(p, opts); }
     if (BD.Store.current() !== p) BD.Store.setCurrent(p.id);
     delete pending[p.id];
     S = { p: p, isNew: !!opts.isNew, from: opts.from || "", idx: -1, stairs: {}, used: { spelling: {}, comprehension: {} }, item: null, locked: false, results: {} };
-    SUBJECTS.forEach(function (s) { const g = clampG(p[s.field] === undefined ? 3 : p[s.field]); S.stairs[s.key] = stair(s.key, g); });
+    SUBJECTS.forEach(function (s) { const g = Math.max(FLOOR, clampG(p[s.field] === undefined ? 3 : p[s.field])); S.stairs[s.key] = stair(s.key, g); });
     root().hidden = false;
     root().querySelector("#placeSkip").textContent = "Skip for now";
     document.body.classList.add("sheet-lock");

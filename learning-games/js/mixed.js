@@ -138,6 +138,7 @@ BD.Mixed = (function () {
   /* ---------- screen ---------- */
   function start() {
     const p = BD.Store.current(); if (!p) return;
+    if (BD.Little && BD.Little.young(p)) { BD.Little.start("mixed"); return; } // Little Ninjas Daily Training
     stop();
     S = { p: p, phase: "intro" };
     BD.UI.show("screen-mixed-play");

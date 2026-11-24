@@ -46,6 +46,7 @@ BD.SentenceGame = (function () {
   /* stripe = { grade, belt, test } when started from the belt panel. */
   function start(focus, stripe) {
     const p = BD.Store.current();
+    if (BD.Little && BD.Little.take("sentence", stripe)) return; // Preschool and Pre-K: the Little Ninjas picture games
     if (stripe) stripe = BD.Rank.gate(p, "sentence", stripe); // practice first: locked parts start as practice
     if (typeof focus !== "string") focus = null;
     if (stripe) p.sentenceGrade = stripe.grade;

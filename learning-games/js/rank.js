@@ -40,8 +40,13 @@ BD.Rank = (function () {
   const DEG_NAMES = ["Black Belt", "1st Degree Black Belt", "2nd Degree Black Belt", "3rd Degree Black Belt", "4th Degree Black Belt", "5th Degree Black Belt"];
   function degStripe(d) { return d < 3 ? 250 : 500; }   // d = degrees already earned (0..4): working toward d+1
   function degDay(d) { return d < 3 ? 50 : 70; }
-  function stripeMax(beltIndex) { return STRIPE_XP[Math.min(beltIndex, STRIPE_XP.length - 1)]; }
-  function maxFor(r) { return r && r.belt >= 8 ? degStripe(r.deg || 0) : stripeMax(r ? r.belt : 0); }
+  /* Little Ninjas (Preschool and Pre-K): short daily sessions, so a stripe is a quarter the size and
+     the day's full belt power is 150 Belt XP (about 15 minutes). White to Black is still about 3+ months. */
+  const LITTLE = 0.25, LITTLE_DAY = 150;
+  const little = function (g) { return Number(g) <= -1; };
+  function stripeMax(beltIndex, g) { const m = STRIPE_XP[Math.min(beltIndex, STRIPE_XP.length - 1)]; return little(g) ? Math.round(m * LITTLE) : m; }
+  function dayFull(g) { return little(g) ? LITTLE_DAY : DAY_FULL; }
+  function maxFor(r) { return r && r.belt >= 8 ? degStripe(r.deg || 0) : stripeMax(r ? r.belt : 0, r ? r.g : undefined); }
   const GRAD_XP = 100;
   const SUBJECTS = [
     { key: "math", label: "Math", game: "math", coach: "cd" },
@@ -59,6 +64,7 @@ BD.Rank = (function () {
     const g = String(grade);
     if (!p.rank[g]) p.rank[g] = { belt: 0, stripes: {}, xp: {}, parts: {}, grads: [], mastered: false, deg: 0, dxp: 0, dgrads: [] };
     const r = p.rank[g];
+    r.g = Number(g);
     r.stripes = r.stripes || {}; r.xp = r.xp || {}; r.parts = r.parts || {}; r.grads = r.grads || [];
     r.deg = r.deg || 0; r.dxp = r.dxp || 0; r.dgrads = r.dgrads || [];
     return r;
@@ -80,7 +86,7 @@ BD.Rank = (function () {
   function powerDay(p) { const t = BD.today(); if (!p.bp || p.bp.d !== t) p.bp = { d: t, u: 0 }; return p.bp; }
   /* Today's belt power for a record: { full, used, left, bonus } in that belt's Belt XP. */
   function power(p, grade) {
-    const r = rec(p, grade === undefined ? dojoGrade(p) : grade), full = r.belt >= 8 ? degDay(r.deg || 0) : DAY_FULL, u = powerDay(p).u;
+    const r = rec(p, grade === undefined ? dojoGrade(p) : grade), full = r.belt >= 8 ? degDay(r.deg || 0) : dayFull(r.g), u = powerDay(p).u;
     const used = Math.min(full, Math.round(u * full));
     return { full: full, used: used, left: full - used, bonus: u >= 1 };
   }
@@ -105,13 +111,13 @@ BD.Rank = (function () {
     const sj = subject(key), bx = raw * (NORM[key] || 0.2);
     let gained = 0, now, max, beforeFull = powerDay(p).u < 1;
     if (sj && sj.optional) { // Spanish: bonus meter, no belt power used
-      max = stripeMax(Math.min(r.belt, 7)); const b = r.xp[key] || 0; now = Math.min(max, r1(b + bx)); gained = now - b; r.xp[key] = now;
+      max = stripeMax(Math.min(r.belt, 7), grade); const b = r.xp[key] || 0; now = Math.min(max, r1(b + bx)); gained = now - b; r.xp[key] = now;
     } else if (r.belt >= 8) {
       max = 4 * degStripe(r.deg || 0);
       if ((r.deg || 0) >= 5) { now = max; }
       else { const b = r.dxp || 0, c = powered(p, bx, degDay(r.deg || 0), DEG_AFTER); now = Math.min(max, r1(b + c)); gained = now - b; r.dxp = now; }
     } else {
-      max = stripeMax(r.belt); const b = r.xp[key] || 0, c = powered(p, bx, DAY_FULL); now = Math.min(max, r1(b + c)); gained = now - b; r.xp[key] = now;
+      max = stripeMax(r.belt, grade); const b = r.xp[key] || 0, c = powered(p, bx, dayFull(grade)); now = Math.min(max, r1(b + c)); gained = now - b; r.xp[key] = now;
     }
     BD.Store.save(p);
     const pw = power(p, grade);
@@ -200,6 +206,7 @@ BD.Rank = (function () {
   /* What each part tests, by subject and grade. */
   function partSkills(key, grade) {
     grade = Number(grade);
+    if (grade <= -1 && key !== "spanish" && BD.Little) { const ls = BD.Little.partSkills(key, grade); if (ls) return ls; } // Little Ninjas picture games
     if (key === "math") {
       const ops = BD.MathGame ? BD.MathGame.opsFor(grade) : ["add", "sub"];
       const L = { add: "Addition", sub: "Subtraction", mul: "Multiplication", div: "Division" };
@@ -289,6 +296,7 @@ BD.Rank = (function () {
     const migrate = (p.rankV || 1) < 2;
     if (p.rank && typeof p.rank === "object") Object.keys(p.rank).forEach(function (g) {
       const r = p.rank[g]; if (!r || typeof r !== "object") return;
+      r.g = Number(g);
       r.belt = Math.max(0, Math.min(8, Math.round(Number(r.belt) || 0)));
       if (migrate) {
         // Old meters were 0-100 per stripe: keep the same share of the new, longer meters.
@@ -299,7 +307,7 @@ BD.Rank = (function () {
       r.dxp = Math.max(0, Math.min(2000, Number(r.dxp) || 0));
       r.dgrads = Array.isArray(r.dgrads) ? r.dgrads.filter(function (x) { return x && typeof x.date === "string"; }).slice(-10) : [];
       r.mastered = r.deg >= 5;
-      if (r.xp && typeof r.xp === "object") Object.keys(r.xp).forEach(function (k) { r.xp[k] = Math.max(0, Math.min(stripeMax(Math.min(r.belt, 7)), Number(r.xp[k]) || 0)); });
+      if (r.xp && typeof r.xp === "object") Object.keys(r.xp).forEach(function (k) { r.xp[k] = Math.max(0, Math.min(stripeMax(Math.min(r.belt, 7), r.g), Number(r.xp[k]) || 0)); });
       const parts = r.parts && typeof r.parts === "object" && !Array.isArray(r.parts) ? r.parts : {}, out = {};
       REQUIRED.forEach(function (k) { if (Array.isArray(parts[k])) out[k] = [0, 1, 2, 3].map(function (i) { return !!parts[k][i]; }); });
       r.parts = out; // Spanish is bonus training: no parts
@@ -398,7 +406,7 @@ BD.Rank = (function () {
   function BD_GAME_OK(s) { return !!BY_GAME[s.game] && !s.school; }
 
   return {
-    bank: bank, hintsAllowed: hintsAllowed, PASS: PASS, GRAD_XP: GRAD_XP, STRIPE_XP: STRIPE_XP, NORM: NORM, DAY_FULL: DAY_FULL, DAY_AFTER: DAY_AFTER, DEG_NAMES: DEG_NAMES, stripeMax: stripeMax, maxFor: maxFor, beltMax: beltMax, title: title, power: power, degInfo: degInfo, degreeDone: degreeDone, degStripe: degStripe, SUBJECTS: SUBJECTS, REQUIRED: REQUIRED, BY_GAME: BY_GAME,
+    bank: bank, hintsAllowed: hintsAllowed, PASS: PASS, GRAD_XP: GRAD_XP, STRIPE_XP: STRIPE_XP, NORM: NORM, DAY_FULL: DAY_FULL, DAY_AFTER: DAY_AFTER, DEG_NAMES: DEG_NAMES, stripeMax: stripeMax, dayFull: dayFull, LITTLE: LITTLE, maxFor: maxFor, beltMax: beltMax, title: title, power: power, degInfo: degInfo, degreeDone: degreeDone, degStripe: degStripe, SUBJECTS: SUBJECTS, REQUIRED: REQUIRED, BY_GAME: BY_GAME,
     subject: subject, gradBonus: gradBonus, rec: rec, dojoGrade: dojoGrade, belt: belt, stripeCount: stripeCount, beltXP: beltXP,
     practice: practice, testDone: testDone, PARTS: PARTS, partNeed: partNeed, nextPart: nextPart, gate: gate, canTest: canTest, partsDone: partsDone, partSkills: partSkills, level: level, raise: raise, setLevel: setLevel, factor: factor, factorFor: factorFor, peek: peek, sanitize: sanitize, at: null, itemGrade: itemGrade, levelNote: levelNote, beltSVG: beltSVG, planItems: planItems
   };
