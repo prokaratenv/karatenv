@@ -13,8 +13,8 @@ BD.Alive = (function () {
   const esc = function (s) { return BD.UI.esc(s); };
   const reduce = function () { return !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches); };
   const key = function (d) { return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); };
-  const FLAME = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c1 3.2-.6 5-2 6.6C8.6 10.2 7 12 7 14.6A5 5 0 0 0 12 20a5 5 0 0 0 5-5.4c0-2.2-1.2-3.6-2.2-4.6.2 1.6-.4 2.8-1.4 3.2.4-3.6-.2-7.2-1.4-11.2z" fill="currentColor"/></svg>';
-  const SHIELD = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l8 3v6c0 5-3.4 9.2-8 11-4.6-1.8-8-6-8-11V5z" fill="currentColor"/></svg>';
+  const FLAME = '<svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c1 3.2-.6 5-2 6.6C8.6 10.2 7 12 7 14.6A5 5 0 0 0 12 20a5 5 0 0 0 5-5.4c0-2.2-1.2-3.6-2.2-4.6.2 1.6-.4 2.8-1.4 3.2.4-3.6-.2-7.2-1.4-11.2z" fill="currentColor"/></svg>';
+  const SHIELD = '<svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l8 3v6c0 5-3.4 9.2-8 11-4.6-1.8-8-6-8-11V5z" fill="currentColor"/></svg>';
   const FIST = '<svg viewBox="0 0 64 64" aria-hidden="true"><rect x="10" y="20" width="40" height="28" rx="10" fill="#F2C28B" stroke="#7A4A22" stroke-width="3"/><path d="M18 20v12M27 20v12M36 20v12" stroke="#7A4A22" stroke-width="3" stroke-linecap="round"/><rect x="44" y="26" width="12" height="16" rx="6" fill="#F2C28B" stroke="#7A4A22" stroke-width="3"/></svg>';
   const CHEERS = ["Osu!", "Let's go!", "You've got this!", "Hi-yah!", "Champions train!"];
 

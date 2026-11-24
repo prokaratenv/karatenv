@@ -393,9 +393,9 @@ body.has-tabs .footer { margin-top: 16px; }
 }
 
 /* Weekly streak calendar */
-.week-cal { display: grid; gap: 4px; justify-items: start; padding: 6px 8px; margin: 2px 0 4px; border-radius: 14px; border: 1px solid var(--line, #2A3B5E); background: rgba(9, 2, 3, .3); color: var(--ink, #fff); cursor: pointer; width: 100%; max-width: 320px; }
+.week-cal { display: block; text-align: left; padding: 6px 8px; margin: 2px 0 4px; border-radius: 14px; border: 1px solid var(--line, #2A3B5E); background: rgba(9, 2, 3, .3); color: var(--ink, #fff); cursor: pointer; width: 100%; max-width: 320px; }
 .week-cal:focus-visible { outline: 3px solid #E0BA77; outline-offset: 2px; }
-.wc-row { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; width: 100%; }
+.wc-row { display: grid; margin-bottom: 4px; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; width: 100%; }
 .wc-day { display: grid; justify-items: center; gap: 2px; }
 .wc-dot { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; background: rgba(255, 255, 255, .08); border: 2px solid transparent; }
 .wc-dot svg { width: 16px; height: 16px; }
@@ -405,7 +405,7 @@ body.has-tabs .footer { margin-top: 16px; }
 .wc-day.today .wc-dot { border-color: #E0BA77; }
 .wc-day.today .wc-l { color: #E0BA77; }
 .wc-day.future { opacity: .4; }
-.wc-cap { font-size: .78rem; color: var(--muted, #9fb0cc); }
+.wc-cap { display: block; font-size: .78rem; color: var(--muted, #9fb0cc); }
 .wc-cap strong { color: var(--ink, #fff); }
 .wc-sheet { display: grid; gap: 8px; }
 .wc-sheet .wc-row { max-width: 340px; }
