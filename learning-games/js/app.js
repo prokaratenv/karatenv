@@ -840,7 +840,7 @@ BD.UI = (function () {
       if (e.target.closest(".game-body > .btn, [data-school]")) closeGameSheet();
     }, true);
     document.addEventListener("keydown", function (e) { if (e.key === "Escape" && !$("gameSheet").hidden) closeGameSheet(); });
-    $("meChampion").addEventListener("click", function () { $("changeFighter").click(); });
+    $("meChampion").addEventListener("click", function () { $("changeFighter").querySelector(".fighter-change").click(); });
     $("mePhrases").addEventListener("click", function () { const p = BD.Store.current(); if (p && BD.Phrases) BD.Phrases.collection(p); });
     $("ppGameCard").addEventListener("click", function () { const p = BD.Store.current(); if (p && BD.Phrases) BD.Phrases.game(p); });
     $("playSent").addEventListener("click", function () { BD.SentenceGame.start(); });

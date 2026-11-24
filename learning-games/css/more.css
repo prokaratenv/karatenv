@@ -363,3 +363,51 @@ body.has-tabs .footer { margin-top: 16px; }
 #dojoCard[hidden] + .signin-card { display: flex; }
 .signin-card strong { display: block; font-family: var(--font-display); font-weight: 900; }
 .sc-ico { color: var(--teal); }
+
+/* ---------- Phase 4: the champion comes alive ---------- */
+.stage-col { position: relative; }
+.fighter-art.alive > img, .fighter-art.alive > svg, .fighter-art.alive > .champ { animation: breathe 3.6s ease-in-out infinite, stance 11s ease-in-out infinite; transform-origin: 50% 100%; }
+@keyframes breathe { 0%, 100% { scale: 1 1; translate: 0 0; } 50% { scale: 1.015 1.03; translate: 0 -4px; } }
+@keyframes stance { 0%, 86%, 100% { rotate: 0deg; } 90% { rotate: -2.5deg; } 94% { rotate: 1.5deg; } }
+.fighter-art.act-wave > * { animation: wave .9s ease-in-out 1 !important; transform-origin: 50% 100%; }
+.fighter-art.act-proud > * { animation: proud .8s ease-out 1 !important; transform-origin: 50% 100%; }
+.fighter-art.act-bump > * { animation: bump .6s ease-out 1 !important; transform-origin: 50% 100%; }
+@keyframes wave { 0%, 100% { rotate: 0deg; } 25% { rotate: -6deg; } 50% { rotate: 5deg; } 75% { rotate: -3deg; } }
+@keyframes proud { 0% { scale: 1; } 40% { scale: 1.06 1.08; translate: 0 -10px; } 100% { scale: 1; translate: 0 0; } }
+@keyframes bump { 0% { translate: 0 0; } 35% { translate: 14px 0; rotate: 4deg; } 100% { translate: 0 0; rotate: 0deg; } }
+.fist-burst { position: absolute; right: -6px; top: 30%; width: 54px; height: 54px; pointer-events: none; animation: fistPop .9s ease-out forwards; z-index: 3; }
+.fist-burst svg { width: 100%; height: 100%; }
+@keyframes fistPop { 0% { opacity: 0; scale: .3; } 30% { opacity: 1; scale: 1.15; } 100% { opacity: 0; scale: 1; translate: 10px -24px; } }
+.champ-say {
+  position: absolute; left: 50%; top: 2px; z-index: 4; max-width: min(78vw, 260px); width: max-content;
+  translate: -50% -100%; padding: 8px 12px; border-radius: 14px; background: #FFF8E8; color: #1B1205;
+  font-weight: 800; font-size: .92rem; line-height: 1.25; text-align: center; box-shadow: 0 8px 20px rgba(0, 0, 0, .35);
+  opacity: 0; pointer-events: none; transition: opacity .25s ease, translate .25s ease;
+}
+.champ-say::after { content: ""; position: absolute; left: 50%; bottom: -7px; margin-left: -7px; border: 7px solid transparent; border-bottom: 0; border-top-color: #FFF8E8; }
+.champ-say.show { opacity: 1; translate: -50% calc(-100% + 34px); }
+@media (prefers-reduced-motion: reduce) {
+  .fighter-art.alive > *, .fighter-art[class*="act-"] > * { animation: none !important; }
+  .fist-burst { display: none; }
+  .champ-say { transition: none; }
+}
+
+/* Weekly streak calendar */
+.week-cal { display: grid; gap: 4px; justify-items: start; padding: 6px 8px; margin: 2px 0 4px; border-radius: 14px; border: 1px solid var(--line, #2A3B5E); background: rgba(9, 2, 3, .3); color: var(--ink, #fff); cursor: pointer; width: 100%; max-width: 320px; }
+.week-cal:focus-visible { outline: 3px solid #E0BA77; outline-offset: 2px; }
+.wc-row { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; width: 100%; }
+.wc-day { display: grid; justify-items: center; gap: 2px; }
+.wc-dot { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; background: rgba(255, 255, 255, .08); border: 2px solid transparent; }
+.wc-dot svg { width: 16px; height: 16px; }
+.wc-l { font-size: .62rem; font-weight: 800; color: var(--muted, #9fb0cc); }
+.wc-day.on .wc-dot { background: linear-gradient(180deg, #FFB347, #F06A2B); color: #FFF3D6; }
+.wc-day.shield .wc-dot { background: #24406A; color: #5CBFC1; }
+.wc-day.today .wc-dot { border-color: #E0BA77; }
+.wc-day.today .wc-l { color: #E0BA77; }
+.wc-day.future { opacity: .4; }
+.wc-cap { font-size: .78rem; color: var(--muted, #9fb0cc); }
+.wc-cap strong { color: var(--ink, #fff); }
+.wc-sheet { display: grid; gap: 8px; }
+.wc-sheet .wc-row { max-width: 340px; }
+.wc-big { display: flex; align-items: center; gap: 8px; font-size: 1.3rem; margin: 0; }
+.wc-big svg { width: 28px; height: 28px; color: #F06A2B; }
