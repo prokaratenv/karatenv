@@ -568,3 +568,20 @@ body.has-tabs .footer { margin-top: 16px; }
   .mv:active, .belt-card:active { transform: scale(.97); transition-duration: .08s; }
 }
 .bc-k { font-size: .7rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; opacity: .85; }
+
+/* Train hero on phones: greeting across the top, champion beside the streak and Continue (no empty gap above the head). */
+@media (max-width: 600px) {
+  #panelTrain .home-hero { grid-template-columns: minmax(0, 40%) minmax(0, 1fr); column-gap: 12px; row-gap: 8px; align-items: start; }
+  #panelTrain .home-hud { display: contents; }
+  #panelTrain .home-hud > * { grid-column: 2; margin-top: 0; margin-bottom: 0; }
+  #panelTrain #homeHello { grid-column: 1 / -1; grid-row: 1; margin: 0; }
+  #panelTrain .stage-col { grid-column: 1; grid-row: 2 / span 8; align-self: start; max-width: none; }
+}
+@media (max-width: 600px) {
+  /* room for the champion's speech bubble inside its own column, so it never covers the greeting */
+  #panelTrain .stage-col { padding-top: 58px; }
+  #panelTrain .champ-say { top: 0; translate: 0 0; max-width: 100%; font-size: .85rem; }
+  #panelTrain .champ-say.show { translate: 0 0; }
+  #panelTrain #goalLine { flex-wrap: nowrap; font-size: .85rem; line-height: 1.25; }
+  #panelTrain #goalLine > span:last-child { min-width: 0; }
+}

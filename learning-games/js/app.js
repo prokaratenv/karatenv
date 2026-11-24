@@ -960,7 +960,18 @@ BD.UI = (function () {
         if (!reg) return;
         // once settled, fetch the rest of the pictures in the background
         setTimeout(function () { const w = reg.active || reg.waiting || reg.installing; if (w) w.postMessage({ type: "warm" }); }, 8000);
+        // look for a newer version whenever the app comes back to the screen
+        document.addEventListener("visibilitychange", function () { if (document.visibilityState === "visible") reg.update().catch(function () {}); });
       }).catch(function () { /* plays online only */ });
+      // A newer version took over: reload into it, but never in the middle of a game.
+      const hadController = !!navigator.serviceWorker.controller;
+      let pendingReload = false;
+      const safeToReload = function () { const s = document.querySelector(".screen:not([hidden])"); return !s || /^screen-(home|players)$/.test(s.id); };
+      navigator.serviceWorker.addEventListener("controllerchange", function () {
+        if (!hadController) return; // first install, nothing old to replace
+        if (safeToReload() && !(BD.UI.sheetOpen && BD.UI.sheetOpen())) location.reload(); else pendingReload = true;
+      });
+      BD.on("screen", function (id) { if (pendingReload && (id === "screen-home" || id === "screen-players")) { pendingReload = false; setTimeout(function () { location.reload(); }, 300); } });
     }
     const note = function () {
       document.body.classList.toggle("is-offline", !navigator.onLine);

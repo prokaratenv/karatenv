@@ -6,8 +6,9 @@
      device when offline. Everything else loads from the device first.
    - Saving progress, family sync and sign-ups are never cached: they wait on
      the device and send when the connection is back. */
-const VERSION = "733b9fe8d80d";
+const VERSION = "736688749c94";
 const CACHE = "brain-dojo-" + VERSION;
+const STAMP = "ad6e9cdbc6"; // the ?v= the current pages ask for
 const FONTS = "brain-dojo-fonts";
 const CORE = [
 "./",
@@ -749,6 +750,12 @@ self.addEventListener("fetch", function (e) {
         fetch(req).then(function (r) { if (r.ok) caches.open(CACHE).then(function (c) { c.put("index.html", r.clone()); }); return r; }),
         new Promise(function (_, rej) { setTimeout(rej, 4000); })
       ]).catch(function () { return caches.match("index.html", { ignoreSearch: true }); }));
+      return;
+    }
+    // A page from a newer version asks for ?v=<other stamp>: get those files fresh, never mix versions.
+    const v = url.searchParams.get("v");
+    if (v && v !== STAMP) {
+      e.respondWith(fetch(req).catch(function () { return caches.match(req, { ignoreSearch: true }); }));
       return;
     }
     e.respondWith(caches.match(req, { ignoreSearch: true }).then(function (hit) {

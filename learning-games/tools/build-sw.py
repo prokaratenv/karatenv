@@ -36,6 +36,6 @@ for p in ["index.html", "manifest.webmanifest"]:
     with open(p, "rb") as fh: h.update(p.encode() + fh.read())
 version = h.hexdigest()[:12]
 tpl = open("tools/sw-template.js").read()
-out = tpl.replace("__VERSION__", version).replace("__CORE__", json.dumps(sorted(set(CORE)), indent=0)).replace("__LATER__", json.dumps(sorted(LATER), indent=0))
+out = tpl.replace("__STAMP__", STAMP).replace("__VERSION__", version).replace("__CORE__", json.dumps(sorted(set(CORE)), indent=0)).replace("__LATER__", json.dumps(sorted(LATER), indent=0))
 open("sw.js", "w").write(out)
 print("scripts/styles stamp", STAMP, "· sw.js version", version, "·", len(CORE), "core files,", len(LATER), "background files")
