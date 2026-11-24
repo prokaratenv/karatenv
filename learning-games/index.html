@@ -28,8 +28,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cabin:wght@400;600;700&family=Montserrat:ital,wght@0,600;0,700;0,800;0,900;1,800;1,900&display=swap">
-<link rel="stylesheet" href="css/style.css?v=aaf760deee">
-<link rel="stylesheet" href="css/more.css?v=aaf760deee">
+<link rel="stylesheet" href="css/style.css?v=326fc95e83">
+<link rel="stylesheet" href="css/more.css?v=326fc95e83">
 </head>
 <body>
 <div class="bg-streaks" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
@@ -81,13 +81,14 @@
 
     <!-- Dojo home -->
     <section class="screen" id="screen-home" hidden>
+      <!-- TRAIN tab -->
+      <div class="tab-panel" id="panelTrain" data-panel="train" role="tabpanel" aria-labelledby="tabTrain">
       <div class="home-hero">
         <div class="stage-col">
         <button type="button" class="fighter-stage" id="changeFighter" title="Change your champion">
           <span class="fighter-art" id="homeFighter"></span>
           <span class="fighter-change">Change champion</span>
         </button>
-        <button type="button" class="gear-btn" id="gearBtn"><span id="homeGear"></span><span class="gear-label" id="gearLabel">Gear locker</span></button>
         </div>
         <div class="home-hud">
           <h1 id="homeHello">Ready to train?</h1>
@@ -97,26 +98,52 @@
             <span class="start-sub" id="startNext"></span>
           </button>
           <p class="muted" id="homeToday"></p>
-          <button type="button" class="sticker-link" id="stickerLink"></button>
         </div>
       </div>
-      <button type="button" class="dojo-card lb-strip" id="dojoCard" hidden></button>
-      <h2 class="home-sec">Today's training</h2>
-      <div class="quest-row">
+      <div class="quest-row train-row">
         <button type="button" class="quest-card" id="questCard" data-cta="Go"></button>
         <button type="button" class="tile-card flash-card" id="flashCard" data-cta="Start"></button>
-        <button type="button" class="map-card" id="mapCard" data-cta="Open map"></button>
-      </div>
-      <h2 class="home-sec">Dojo adventures</h2>
-      <div class="fun-row">
         <button type="button" class="boss-card" id="bossCard" data-cta="Begin"></button>
-        <button type="button" class="duel-card" id="duelCard" data-cta="Play"><span class="duel-icon" aria-hidden="true">⚔️</span><span><strong>Partner Challenge</strong><span class="boss-sub">2 players · one screen</span></span></button>
-        <button type="button" class="duel-card tourney-card" id="tourneyCard" data-cta="Enter"></button>
       </div>
-      <button type="button" class="team-card" id="teamCard" data-cta="Open" hidden></button>
       <button type="button" class="team-card pp-card" id="ppCard" data-cta="Play" hidden></button>
-      <div class="belt-panel" id="homeBelt"></div>
-      <div class="redo-note" id="homeRedo" hidden></div>
+      </div>
+
+      <!-- GAMES tab -->
+      <div class="tab-panel" id="panelGames" data-panel="games" role="tabpanel" aria-labelledby="tabGames" hidden>
+        <h2 class="home-sec">Learning games</h2>
+        <div class="tile-grid" id="gameTiles"></div>
+        <h2 class="home-sec">Dojo adventures</h2>
+        <div class="fun-row">
+          <button type="button" class="duel-card tourney-card" id="tourneyCard" data-cta="Enter"></button>
+          <button type="button" class="duel-card" id="duelCard" data-cta="Play"><span class="duel-icon" aria-hidden="true">⚔️</span><span><strong>Partner Challenge</strong><span class="boss-sub">2 players · one screen</span></span></button>
+          <button type="button" class="duel-card pp-game-card" id="ppGameCard" data-cta="Play"><span class="duel-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0-6 6c0 2.2 1.2 3.6 2.4 4.6.7.6 1.1 1.3 1.1 2.1V17h5v-1.3c0-.8.4-1.5 1.1-2.1C16.8 12.6 18 11.2 18 9a6 6 0 0 0-6-6z"/><path d="M10 21h4"/></svg></span><span><strong>Power Phrase Memory</strong><span class="boss-sub">Remember your phrases</span></span></button>
+        </div>
+      </div>
+
+      <!-- DOJO tab -->
+      <div class="tab-panel" id="panelDojo" data-panel="dojo" role="tabpanel" aria-labelledby="tabDojo" hidden>
+        <h2 class="home-sec">Dojo leaderboard</h2>
+        <button type="button" class="dojo-card lb-strip" id="dojoCard" hidden></button>
+        <p class="tab-empty dojo-empty">The Dojo leaderboard, cheers and friend challenges show up here once your family is signed in. Ask a grown-up to open <strong>Parents</strong> and sign in with the family email.</p>
+        <h2 class="home-sec">Teams and adventures</h2>
+        <button type="button" class="team-card" id="teamCard" data-cta="Open" hidden></button>
+        <p class="tab-empty team-empty">Engage Teams open at <strong>Orange Belt</strong>: the Leadership Team, then the Athlete Team at Green Belt and the Black Belt Club at Brown Belt.</p>
+        <div class="quest-row dojo-row">
+        <button type="button" class="map-card" id="mapCard" data-cta="Open map"></button>
+        </div>
+      </div>
+
+      <!-- ME tab -->
+      <div class="tab-panel" id="panelMe" data-panel="me" role="tabpanel" aria-labelledby="tabMe" hidden>
+        <div class="me-head" id="meHead"></div>
+        <div class="me-actions">
+          <button type="button" class="me-btn" id="meChampion"><span class="me-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7" r="4"/><path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"/></svg></span><span>Change champion</span></button>
+          <button type="button" class="gear-btn" id="gearBtn"><span id="homeGear"></span><span class="gear-label" id="gearLabel">Gear locker</span></button>
+          <button type="button" class="sticker-link" id="stickerLink"></button>
+          <button type="button" class="me-btn" id="mePhrases"><span class="me-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span><span>My Power Phrases</span></button>
+        </div>
+        <div class="belt-panel" id="homeBelt"></div>
+        <div class="redo-note" id="homeRedo" hidden></div>
       <section class="plan" id="homePlan" hidden>
         <div class="coach-row">
           <img class="coach-face" src="img/face-michele.webp" alt="">
@@ -124,7 +151,13 @@
         </div>
         <div class="plan-list" id="homePlanList"></div>
       </section>
-      <div class="game-grid">
+      </div>
+
+      <!-- game detail sheet: each game's grade picker and Play button -->
+      <div class="sheet-backdrop" id="gameSheet" hidden>
+        <div class="sheet game-sheet" role="dialog" aria-modal="true" aria-labelledby="gameSheetTitle">
+          <div class="sheet-head"><h2 id="gameSheetTitle">Game</h2><button type="button" class="btn btn-quiet btn-small" id="gameSheetClose">Close</button></div>
+      <div class="game-grid in-sheet">
         <article class="game-card game-math">
           <div class="game-art" aria-hidden="true">
             <img class="game-coach" src="img/cd.webp" alt="">
@@ -137,6 +170,7 @@
             <p class="eyebrow">Math grade level</p>
             <div id="homeMathGrade"></div>
             <button type="button" class="btn btn-primary btn-big" id="playMath">Play Math Dojo</button>
+            <button type="button" class="btn btn-quiet" id="playFlash">Flashcards</button>
           </div>
         </article>
         <article class="game-card game-sent">
@@ -196,6 +230,8 @@
             <button type="button" class="btn btn-primary btn-big" id="playSpanish">Play Spanish Dojo</button>
           </div>
         </article>
+      </div>
+        </div>
       </div>
     </section>
 
@@ -517,6 +553,14 @@
       <div id="parentBody"></div>
     </section>
   </main>
+
+  <nav class="tabbar" id="tabbar" role="tablist" aria-label="Brain Dojo sections" hidden>
+    <button type="button" class="tab" id="tabTrain" role="tab" data-tab="train" aria-controls="panelTrain" aria-selected="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg><span>Train</span></button>
+    <button type="button" class="tab" id="tabGames" role="tab" data-tab="games" aria-controls="panelGames" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7.5" height="7.5" rx="2"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="2"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="2"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="2"/></svg><span>Games</span></button>
+    <button type="button" class="tab" id="tabDojo" role="tab" data-tab="dojo" aria-controls="panelDojo" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 21h8"/><path d="M12 17v4"/><path d="M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M17 5h3v2a3 3 0 0 1-3 3"/><path d="M7 5H4v2a3 3 0 0 0 3 3"/></svg><span>Dojo</span></button>
+    <button type="button" class="tab" id="tabMe" role="tab" data-tab="me" aria-controls="panelMe" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"/></svg><span>Me</span></button>
+    <button type="button" class="tab" id="tabParents" role="tab" data-tab="parents" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><span>Parents</span></button>
+  </nav>
   <footer class="footer">
     <img src="img/engage-logo.webp" alt="Engage Lifestyle Martial Arts" class="footer-logo" width="130" height="123">
     <span class="sync-status" id="syncStatus" data-state="local">Saved on this device</span>
@@ -602,61 +646,61 @@
   </div>
 </div>
 
-<script src="data/sentence-bank.js?v=aaf760deee"></script>
-<script src="data/reading-bank.js?v=aaf760deee"></script>
-<script src="data/spanish-bank.js?v=aaf760deee"></script>
-<script src="data/spelling-bank.js?v=aaf760deee"></script>
-<script src="data/spelling-hints.js?v=aaf760deee"></script>
-<script src="data/near-words.js?v=aaf760deee"></script>
-<script src="js/wordsafe.js?v=aaf760deee"></script>
-<script src="js/config.js?v=aaf760deee"></script>
-<script src="js/storage.js?v=aaf760deee"></script>
-<script src="js/cast.js?v=aaf760deee"></script>
-<script src="js/logo-box.js?v=aaf760deee"></script>
-<script src="js/rank.js?v=aaf760deee"></script>
-<script src="js/builder.js?v=aaf760deee"></script>
-<script src="js/studio.js?v=aaf760deee"></script>
-<script src="js/effects.js?v=aaf760deee"></script>
-<script src="js/kid.js?v=aaf760deee"></script>
-<script src="js/breaks.js?v=aaf760deee"></script>
-<script src="js/music.js?v=aaf760deee"></script>
-<script src="js/explain.js?v=aaf760deee"></script>
-<script src="js/hints.js?v=aaf760deee"></script>
-<script src="js/coach.js?v=aaf760deee"></script>
-<script src="js/sentence-gen.js?v=aaf760deee"></script>
-<script src="js/story-gen.js?v=aaf760deee"></script>
-<script src="js/phonics.js?v=aaf760deee"></script>
-<script src="js/reading-game.js?v=aaf760deee"></script>
-<script src="js/word-quiz.js?v=aaf760deee"></script>
-<script src="js/school.js?v=aaf760deee"></script>
-<script src="js/sync.js?v=aaf760deee"></script>
-<script src="js/sensei.js?v=aaf760deee"></script>
-<script src="js/math-game.js?v=aaf760deee"></script>
-<script src="js/sentence-game.js?v=aaf760deee"></script>
-<script src="js/scratch.js?v=aaf760deee"></script>
-<script src="js/quick.js?v=aaf760deee"></script>
-<script src="js/boss.js?v=aaf760deee"></script>
-<script src="js/duel.js?v=aaf760deee"></script>
-<script src="js/tournament.js?v=aaf760deee"></script>
-<script src="js/teams.js?v=aaf760deee"></script>
-<script src="js/challenge.js?v=aaf760deee"></script>
-<script src="js/badges.js?v=aaf760deee"></script>
-<script src="js/mini.js?v=aaf760deee"></script>
-<script src="js/backup.js?v=aaf760deee"></script>
-<script src="js/certificate.js?v=aaf760deee"></script>
-<script src="js/parent.js?v=aaf760deee"></script>
-<script src="js/dojo.js?v=aaf760deee"></script>
-<script src="js/quest.js?v=aaf760deee"></script>
-<script src="js/leads.js?v=aaf760deee"></script>
-<script src="js/family.js?v=aaf760deee"></script>
-<script src="js/settings.js?v=aaf760deee"></script>
-<script src="js/placement.js?v=aaf760deee"></script>
-<script src="js/readalong.js?v=aaf760deee"></script>
-<script src="js/digest.js?v=aaf760deee"></script>
-<script src="js/bugs.js?v=aaf760deee"></script>
-<script src="js/goals.js?v=aaf760deee"></script>
-<script src="js/phrases.js?v=aaf760deee"></script>
-<script src="js/prefs.js?v=aaf760deee"></script>
-<script src="js/app.js?v=aaf760deee"></script>
+<script src="data/sentence-bank.js?v=326fc95e83"></script>
+<script src="data/reading-bank.js?v=326fc95e83"></script>
+<script src="data/spanish-bank.js?v=326fc95e83"></script>
+<script src="data/spelling-bank.js?v=326fc95e83"></script>
+<script src="data/spelling-hints.js?v=326fc95e83"></script>
+<script src="data/near-words.js?v=326fc95e83"></script>
+<script src="js/wordsafe.js?v=326fc95e83"></script>
+<script src="js/config.js?v=326fc95e83"></script>
+<script src="js/storage.js?v=326fc95e83"></script>
+<script src="js/cast.js?v=326fc95e83"></script>
+<script src="js/logo-box.js?v=326fc95e83"></script>
+<script src="js/rank.js?v=326fc95e83"></script>
+<script src="js/builder.js?v=326fc95e83"></script>
+<script src="js/studio.js?v=326fc95e83"></script>
+<script src="js/effects.js?v=326fc95e83"></script>
+<script src="js/kid.js?v=326fc95e83"></script>
+<script src="js/breaks.js?v=326fc95e83"></script>
+<script src="js/music.js?v=326fc95e83"></script>
+<script src="js/explain.js?v=326fc95e83"></script>
+<script src="js/hints.js?v=326fc95e83"></script>
+<script src="js/coach.js?v=326fc95e83"></script>
+<script src="js/sentence-gen.js?v=326fc95e83"></script>
+<script src="js/story-gen.js?v=326fc95e83"></script>
+<script src="js/phonics.js?v=326fc95e83"></script>
+<script src="js/reading-game.js?v=326fc95e83"></script>
+<script src="js/word-quiz.js?v=326fc95e83"></script>
+<script src="js/school.js?v=326fc95e83"></script>
+<script src="js/sync.js?v=326fc95e83"></script>
+<script src="js/sensei.js?v=326fc95e83"></script>
+<script src="js/math-game.js?v=326fc95e83"></script>
+<script src="js/sentence-game.js?v=326fc95e83"></script>
+<script src="js/scratch.js?v=326fc95e83"></script>
+<script src="js/quick.js?v=326fc95e83"></script>
+<script src="js/boss.js?v=326fc95e83"></script>
+<script src="js/duel.js?v=326fc95e83"></script>
+<script src="js/tournament.js?v=326fc95e83"></script>
+<script src="js/teams.js?v=326fc95e83"></script>
+<script src="js/challenge.js?v=326fc95e83"></script>
+<script src="js/badges.js?v=326fc95e83"></script>
+<script src="js/mini.js?v=326fc95e83"></script>
+<script src="js/backup.js?v=326fc95e83"></script>
+<script src="js/certificate.js?v=326fc95e83"></script>
+<script src="js/parent.js?v=326fc95e83"></script>
+<script src="js/dojo.js?v=326fc95e83"></script>
+<script src="js/quest.js?v=326fc95e83"></script>
+<script src="js/leads.js?v=326fc95e83"></script>
+<script src="js/family.js?v=326fc95e83"></script>
+<script src="js/settings.js?v=326fc95e83"></script>
+<script src="js/placement.js?v=326fc95e83"></script>
+<script src="js/readalong.js?v=326fc95e83"></script>
+<script src="js/digest.js?v=326fc95e83"></script>
+<script src="js/bugs.js?v=326fc95e83"></script>
+<script src="js/goals.js?v=326fc95e83"></script>
+<script src="js/phrases.js?v=326fc95e83"></script>
+<script src="js/prefs.js?v=326fc95e83"></script>
+<script src="js/app.js?v=326fc95e83"></script>
 </body>
 </html>

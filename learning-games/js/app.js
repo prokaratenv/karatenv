@@ -23,6 +23,11 @@ BD.UI = (function () {
     document.body.classList.toggle("on-players", id === "screen-players");
     if (id !== "screen-results") BD.confetti.stop();
     document.querySelectorAll(".screen").forEach(function (s) { s.hidden = s.id !== id; });
+    // Bottom tabs: on the home tabs and the Parents corner only (never during play).
+    const tabsOn = !!BD.Store.current() && (id === "screen-home" || id === "screen-parent");
+    $("tabbar").hidden = !tabsOn;
+    document.body.classList.toggle("has-tabs", tabsOn);
+    markTab(id === "screen-parent" ? "parents" : tab);
     if (BD.Mini && $(id).querySelector("[data-mini]")) BD.Mini.fill($(id));
     const p = BD.Store.current();
     $("playerChip").hidden = !p || id === "screen-players";
@@ -437,6 +442,83 @@ BD.UI = (function () {
   }
 
   /* ---------- dojo home ---------- */
+  /* ---------- bottom tabs: Train, Games, Dojo, Me, Parents ---------- */
+  const TABS = ["train", "games", "dojo", "me"];
+  let tab = (function () { try { const t = localStorage.getItem("brainDojo.tab"); return TABS.indexOf(t) !== -1 ? t : "train"; } catch (e) { return "train"; } })();
+  function markTab(t) {
+    document.querySelectorAll("#tabbar .tab").forEach(function (b) { const on = b.dataset.tab === t; b.classList.toggle("on", on); b.setAttribute("aria-selected", on ? "true" : "false"); b.tabIndex = on ? 0 : -1; });
+  }
+  function applyTab() {
+    document.querySelectorAll("#screen-home .tab-panel").forEach(function (el) { el.hidden = el.dataset.panel !== tab; });
+    TABS.forEach(function (t) { document.body.classList.toggle("tab-" + t, t === tab); });
+    if (currentScreen === "screen-home" || currentScreen === "screen-parent") markTab(currentScreen === "screen-parent" ? "parents" : tab);
+  }
+  /* Switch tabs. "parents" opens the Parents corner (behind the PIN). */
+  function setTab(t) {
+    if (t === "parents") { BD.Parent.gate(parent); return; }
+    if (TABS.indexOf(t) === -1) t = "train";
+    const changed = t !== tab || currentScreen !== "screen-home";
+    tab = t;
+    try { localStorage.setItem("brainDojo.tab", t); } catch (e) { /* private mode */ }
+    if (currentScreen !== "screen-home") { home(); return; }
+    applyTab();
+    if (changed) window.scrollTo(0, 0);
+    BD.emit("tab", t);
+  }
+
+  /* ---------- Games tab: one tile per learning game ---------- */
+  const TILES = [
+    { key: "math", name: "Math Dojo", coach: "cd", card: "game-math", field: "mathGrade", subj: "math", game: "math" },
+    { key: "sentence", name: "Fix-It Sentences", coach: "michele", card: "game-sent", field: "sentenceGrade", subj: "reading", game: "sentence" },
+    { key: "reading", name: "Story Scrolls", coach: "kyra", card: "game-read", field: "readingGrade", subj: "comprehension", game: "reading" },
+    { key: "spelling", name: "Spelling Bee", coach: "lauryn", card: "game-spell", field: "spellingGrade", subj: "spelling", game: "spelling" },
+    { key: "spanish", name: "Spanish Dojo", coach: "bridgette", card: "game-spanish", field: "spanishGrade", subj: "spanish", game: "spanish" }
+  ];
+  function tileState(p, t) {
+    const g = Number(p[t.field]), r = BD.Rank.rec(p, g), belt = BD.BELTS[r.belt], retry = (p.retry || {})[t.game];
+    const xp = Math.min(BD.Rank.PRACTICE_MAX, r.xp[t.subj] || 0);
+    let badge = "";
+    if (retry) badge = "Redo " + BD.gradeShort(retry.grade);
+    else if (t.subj === "spanish") badge = "Bonus XP";
+    else if (r.stripes[t.subj]) badge = "Stripe earned";
+    else { const n = BD.Rank.nextPart(r, t.subj); if (n && n.open) badge = "Part " + (n.i + 1) + " ready"; }
+    if (!badge && t.key === "spelling" && BD.School.has(p)) badge = "School words";
+    return { g: g, belt: belt, xp: xp, pct: Math.round(100 * xp / BD.Rank.PRACTICE_MAX), badge: badge };
+  }
+  function renderTiles(p) {
+    $("gameTiles").innerHTML = TILES.map(function (t) {
+      const st = tileState(p, t);
+      return '<button type="button" class="game-tile tile-' + t.key + '" data-tile="' + t.key + '" aria-label="' + esc(t.name + ", " + BD.gradeLabel(st.g) + ", " + st.belt.name + " Belt") + '">' +
+        '<span class="gt-art"><img src="img/' + t.coach + '.webp" alt="" loading="lazy"></span>' +
+        (st.badge ? '<span class="gt-badge">' + esc(st.badge) + '</span>' : '') +
+        '<span class="gt-ring" style="--pct:' + st.pct + '" title="' + st.xp + ' / 100 practice XP"><span>' + st.xp + '</span></span>' +
+        '<span class="gt-name">' + esc(t.name) + '</span>' +
+        '<span class="gt-grade"><span class="belt-swatch" style="--belt:' + st.belt.color + '"></span>' + esc(BD.gradeShort(st.g)) + ' · ' + esc(st.belt.name) + '</span>' +
+        '</button>';
+    }).join("");
+  }
+  let openTile = null;
+  function openGameSheet(key) {
+    const t = TILES.find(function (x) { return x.key === key; }); if (!t) return;
+    openTile = key;
+    $("gameSheetTitle").textContent = t.name;
+    $("gameSheet").querySelectorAll(".game-card").forEach(function (c) { c.hidden = !c.classList.contains(t.card); });
+    $("gameSheet").hidden = false; document.body.classList.add("sheet-lock");
+    const play = $("gameSheet").querySelector("." + t.card + " .btn-primary"); if (play) setTimeout(function () { play.focus(); }, 60);
+  }
+  function closeGameSheet() {
+    openTile = null; $("gameSheet").hidden = true;
+    if ($("infoSheet").hidden && $("senseiSheet").hidden) document.body.classList.remove("sheet-lock");
+  }
+
+  /* ---------- Me tab header ---------- */
+  function renderMe(p) {
+    const g = BD.Rank.dojoGrade(p), belt = BD.Rank.belt(p, g);
+    $("meHead").innerHTML = '<span class="me-face">' + avatar(p, "lg") + '</span><span class="me-txt"><strong>' + esc(p.name) + '</strong>' +
+      '<span class="me-belt"><span class="belt-swatch" style="--belt:' + belt.color + '"></span>' + esc(BD.gradeLabel(g)) + ' · ' + esc(belt.name) + ' Belt</span>' +
+      '<span class="muted small">' + Math.round(p.xp || 0) + ' XP</span></span>';
+  }
+
   function home() {
     const p = BD.Store.current();
     if (!p) return players();
@@ -483,6 +565,9 @@ BD.UI = (function () {
     $("homeRedo").hidden = true; // redo items are shown in Sensei's plan instead
     renderPlan(p);
     BD.Quest.render(p);
+    renderTiles(p);
+    renderMe(p);
+    applyTab();
     show("screen-home");
     BD.emit("home", p);
   }
@@ -736,6 +821,24 @@ BD.UI = (function () {
       });
     });
     $("playMath").addEventListener("click", function () { BD.MathGame.openSetup(); });
+    $("playFlash").addEventListener("click", function () { BD.MathGame.openFlash(); });
+    $("tabbar").addEventListener("click", function (e) { const b = e.target.closest("[data-tab]"); if (!b) return; BD.Sound.tap(); setTab(b.dataset.tab); });
+    $("tabbar").addEventListener("keydown", function (e) {
+      if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
+      const list = [].slice.call(document.querySelectorAll("#tabbar .tab")), i = list.indexOf(document.activeElement); if (i === -1) return;
+      const nx = list[(i + (e.key === "ArrowRight" ? 1 : list.length - 1)) % list.length]; nx.focus(); e.preventDefault();
+    });
+    $("gameTiles").addEventListener("click", function (e) { const b = e.target.closest("[data-tile]"); if (b) { BD.Sound.tap(); openGameSheet(b.dataset.tile); } });
+    $("gameSheetClose").addEventListener("click", closeGameSheet);
+    $("gameSheet").addEventListener("click", function (e) {
+      if (e.target === $("gameSheet")) { closeGameSheet(); return; }
+      // starting a game (Play, Flashcards, school words) closes the sheet; grade chips keep it open
+      if (e.target.closest(".game-body > .btn, [data-school]")) closeGameSheet();
+    }, true);
+    document.addEventListener("keydown", function (e) { if (e.key === "Escape" && !$("gameSheet").hidden) closeGameSheet(); });
+    $("meChampion").addEventListener("click", function () { $("changeFighter").click(); });
+    $("mePhrases").addEventListener("click", function () { const p = BD.Store.current(); if (p && BD.Phrases) BD.Phrases.collection(p); });
+    $("ppGameCard").addEventListener("click", function () { const p = BD.Store.current(); if (p && BD.Phrases) BD.Phrases.game(p); });
     $("playSent").addEventListener("click", function () { BD.SentenceGame.start(); });
     $("homeBelt").addEventListener("click", function (e) {
       const pr = e.target.closest("[data-stripe-practice]"), te = e.target.closest("[data-stripe-test]");
@@ -906,7 +1009,7 @@ BD.UI = (function () {
     offline();
   }
 
-  return { champArt: champArt, championHTML: function (p, outfit) { return fighterArt(p, "full", outfit); }, refreshStage: refreshStage, openBuilder: function () { const p = BD.Store.current(); if (p) openBuilder(p); }, openStudio: openStudio, fighterKey: function (p) { return fighterOf(p); }, beltDetails: beltDetails, testMode: testMode, stripeResult: stripeResult, back: back, setGrade: setGrade, syncGradeSelect: syncGradeSelect, refresh: refresh, sheet: sheet, sheetOpen: sheetOpen, show: show, esc: esc, home: home, players: players, results: results, gradePicker: gradePicker, init: init };
+  return { tab: setTab, currentTab: function () { return tab; }, openGameSheet: openGameSheet, champArt: champArt, championHTML: function (p, outfit) { return fighterArt(p, "full", outfit); }, refreshStage: refreshStage, openBuilder: function () { const p = BD.Store.current(); if (p) openBuilder(p); }, openStudio: openStudio, fighterKey: function (p) { return fighterOf(p); }, beltDetails: beltDetails, testMode: testMode, stripeResult: stripeResult, back: back, setGrade: setGrade, syncGradeSelect: syncGradeSelect, refresh: refresh, sheet: sheet, sheetOpen: sheetOpen, show: show, esc: esc, home: home, players: players, results: results, gradePicker: gradePicker, init: init };
 })();
 
 document.addEventListener("DOMContentLoaded", BD.UI.init);
