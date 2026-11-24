@@ -2098,6 +2098,32 @@ BD.StoryGen = (function () {
     return used;
   }
 
+  /* 6th to 8th grade: author's purpose (a main-idea skill) and text
+     structure (a reading-between-the-lines skill), on top of each genre's own
+     questions. */
+  function middleQs(genre, out) {
+    const fiction = genre === "story" || genre === "dojo";
+    const subj = String(out.subject || "this topic").replace(/^(a|an|the) /i, "");
+    const PURPOSE = {
+      fiction: ["To entertain readers and teach a lesson.", [["entertain", "fun", "enjoy", "lesson", "teach", "moral"]]],
+      animal: ["To inform readers with facts about " + subj + ".", [["inform", "teach", "fact", "learn", "explain", "tell"]]],
+      howto: ["To explain how to do something, step by step.", [["explain", "teach", "how to", "show", "step", "instruct"]]],
+      hist: ["To inform readers how something changed from long ago to today.", [["inform", "teach", "explain", "change", "compar", "learn", "fact"]]],
+      comm: ["To inform readers about a job and how it helps people.", [["inform", "teach", "explain", "job", "help", "learn"]]]
+    };
+    const STRUCT = {
+      fiction: ["How is this story organized?", "In time order: a problem, and then how it gets solved.", [["order", "sequence", "time", "first", "problem", "solv", "solution", "beginning", "chronolog"]]],
+      howto: ["How is this text organized?", "In sequence: steps in the order you do them.", [["sequence", "order", "step", "first", "chronolog"]]],
+      hist: ["How is this passage organized?", "It compares long ago and today: a problem, then the change that solved it.", [["compar", "contrast", "then and now", "long ago", "before", "problem", "solution", "cause", "effect", "change"]]],
+      animal: ["How is this passage organized?", "It describes the topic with facts and details.", [["describ", "fact", "detail", "descript", "inform"]]],
+      comm: ["How is this passage organized?", "It describes a job: where, what tools, and how it helps.", [["describ", "fact", "detail", "descript", "inform", "explain"]]]
+    };
+    const k = fiction ? "fiction" : genre, pu = PURPOSE[k], st = STRUCT[k], qs = [];
+    if (pu) qs.push({ type: "main", q: fiction ? "Why do you think the author wrote this story?" : "What is the author's purpose in this passage?", answer: pu[0], hint: fiction ? "Is it mostly to give facts, or to tell a story with a message?" : "Is it mostly to give facts, to persuade, or to entertain?", keys: pu[1] });
+    if (st) qs.push({ type: "infer", q: st[0], answer: st[1], hint: "Look at how it moves: in order, comparing, or describing?", keys: st[2] });
+    return qs;
+  }
+
   /* seed = ((base * 5) + focus) * 8 + genre slot */
   function makeSeed(base, focus, slotIx) { return (base * 5 + Math.max(0, FOCI.indexOf(focus || null))) * 8 + slotIx; }
   const cache = {};
@@ -2117,7 +2143,7 @@ BD.StoryGen = (function () {
         const out = GEN[genre](c);
         const text = out.sents.join(" ").replace(/\s+/g, " ").trim();
         const n = countSent(text);
-        const cands = out.qs.concat(vocabQs(c, text)).filter(function (q) { return q.keys.length && kwScore(q.keys, q.answer) === 2; });
+        const cands = out.qs.concat(vocabQs(c, text), band === 3 ? middleQs(genre, out) : []).filter(function (q) { return q.keys.length && kwScore(q.keys, q.answer) === 2; });
         const qs = chooseQs(cands, band, focus);
         const lenOk = n >= len[0] && n <= len[1];
         const focusOk = !focus || qs.filter(function (q) { return q.type === focus; }).length >= 2;

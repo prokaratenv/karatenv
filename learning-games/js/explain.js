@@ -173,6 +173,7 @@ BD.Explain = (function () {
   }
 
   function math(p) {
+    if (p.steps && p.steps.length) return p.steps.slice(); // middle school strands carry their own steps
     if (p.a < 0 || p.b < 0 || p.answer < 0) return integers(p);
     if (p.op === "add") return add(p.a, p.b);
     if (p.op === "sub") return sub(p.a, p.b);
@@ -201,6 +202,34 @@ BD.Explain = (function () {
       "Division is multiplication backwards. For 56 ÷ 7, ask: 7 × what = 56?",
       "Long division: Divide, Multiply, Subtract, Bring down, and repeat.",
       "Check: answer × the number you divided by = the starting number."
+    ] },
+    ratio: { title: "Ratios, rates and percents", points: [
+      "A unit rate is the amount for 1: divide. $12 for 4 → $3 each.",
+      "Percent means out of 100. Find 10% by dividing by 10, then build: 20% is double, 5% is half.",
+      "Discount: find the percent, then subtract. Tax or tip: find the percent, then add.",
+      "Proportional: y = kx, so k = y ÷ x. Slope = rise ÷ run = change in y ÷ change in x."
+    ] },
+    expr: { title: "Expressions and equations", points: [
+      "Keep the equation balanced: whatever you do to one side, do to the other.",
+      "Undo in reverse order: first undo + or −, then undo × or ÷. 3x + 5 = 20 → 3x = 15 → x = 5.",
+      "Like terms combine: 4x + 7x − 2x = 9x. Distribute first: 2(x + 3) = 2x + 6.",
+      "Check it: put your answer back in and see if both sides match."
+    ] },
+    numsys: { title: "Number system", points: [
+      "Dividing by a fraction: keep, change, flip. 3/4 ÷ 1/8 = 3/4 × 8/1 = 6.",
+      "Same signs multiply or divide to a positive; different signs give a negative.",
+      "Exponents: 2⁵ = 2 × 2 × 2 × 2 × 2 = 32. A square root undoes squaring: √81 = 9.",
+      "× 10³ moves the decimal point 3 places right: 4.2 × 10³ = 4,200."
+    ] },
+    geo: { title: "Geometry and data", points: [
+      "Triangle area = ½ × base × height. Parallelogram = base × height.",
+      "Circle: area = πr², circumference = 2πr. Angles in a triangle add to 180°.",
+      "Pythagorean theorem: a² + b² = c² (3, 4, 5 is the classic right triangle).",
+      "Mean = total ÷ how many. Median = the middle number in order."
+    ] },
+    fact: { title: "Fact fluency", points: [
+      "Break big numbers apart: 23 × 14 = 23 × 10 + 23 × 4.",
+      "Division is multiplication backwards: 96 ÷ 12 → 12 × what = 96?"
     ] },
     int: { title: "Negative numbers", points: [
       "Same signs when adding: add the sizes, keep the sign. −4 + −3 = −7.",

@@ -203,7 +203,7 @@ BD.Rank = (function () {
     if (key === "math") {
       const ops = BD.MathGame ? BD.MathGame.opsFor(grade) : ["add", "sub"];
       const L = { add: "Addition", sub: "Subtraction", mul: "Multiplication", div: "Division" };
-      const one = ops.map(function (o) { return { label: L[o], ops: [o] }; });
+      const one = ops.map(function (o) { return { label: L[o] || (BD.MathGame && BD.MathGame.opLabel ? BD.MathGame.opLabel(o, grade) : o), ops: [o] }; }); // 6th to 8th: the four strands
       if (one.length >= 4) return one.slice(0, 4);
       if (one.length === 3) return one.concat([{ label: "Mixed review", ops: ops.slice() }]);
       return one.concat([{ label: "Mixed review", ops: ops.slice() }, { label: "Challenge mix", ops: ops.slice(), up: true }]).slice(0, 4);

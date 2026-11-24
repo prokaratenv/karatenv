@@ -179,6 +179,7 @@ BD.Hints = (function () {
   }
   function math(q) {
     const a = q.a, b = q.b, op = q.op;
+    if (q.hints && q.hints.length) return function (level) { return { text: q.hints[Math.min(level, q.hints.length) - 1] }; }; // middle school strands
     return function (level) {
       if (a < 0 || b < 0 || q.answer < 0) {
         if (level === 1) return { text: op === "add" || op === "sub" ? "Signs first: subtracting a negative is adding. Same signs add up, different signs subtract the sizes." : "Same signs make a positive answer, different signs make a negative answer." };

@@ -41,7 +41,7 @@ BD.Mixed = (function () {
     if (!ops.length) ops.push(own[0]);
     const q = BD.MathGame.makeProblem(ops[r(ops.length)], g);
     return { subject: "math", g: base, kind: "math", label: "Math", prompt: BD.MathGame.show(q) + " =", answer: String(q.answer), mq: q, neg: q.answer < 0,
-      say: "What is " + BD.ReadAloud.words(BD.MathGame.show(q)) + "?" };
+      say: q.say || "What is " + BD.ReadAloud.words(BD.MathGame.show(q)) + "?" };
   }
   function readingItem(p) {
     const base = gradeOf(p, "reading"), q = BD.Quick.grammar(Math.max(-1, itemGrade(p, "reading")));

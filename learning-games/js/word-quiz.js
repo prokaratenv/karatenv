@@ -135,21 +135,55 @@ BD.WordQuiz = (function () {
     return bankSet.has(c);
   }
   function misspellings(word) {
-    const w = word.toLowerCase(), sound = [], other = [];
+    // Ordered by how often students really make each kind of mistake:
+    // sound-alike spellings, doubled or undoubled letters, a dropped letter,
+    // a swapped vowel, then two letters swapped (longer words only).
+    const w = word.toLowerCase(), sound = [], dbl = [], drop = [], vow = [], swap = [];
     const add = function (arr, c) { if (c && c !== w && c.length >= 2 && arr.indexOf(c) === -1) arr.push(c); };
-    SUBS.forEach(function (s) { const i = w.indexOf(s[0], 1); if (i > 0) add(sound, w.slice(0, i) + s[1] + w.slice(i + s[0].length)); });
+    SUBS.forEach(function (s) {
+      const i = w.indexOf(s[0], 1); if (i <= 0) return;
+      const after = w[i + s[0].length] || "";
+      if ((s[0] === "y" || s[0] === "ed" || s[0] === "ly") && after) return; // endings only at the end (happy → happie, jumped → jumpt)
+      if (s[0] === "c" && s[1] === "k" && after && "aou".indexOf(after) === -1) return; // a hard c only (cave → kave), never "insuranke"
+      if (s[0] === "k" && s[1] === "c" && after && "aou".indexOf(after) === -1) return;
+      if (s[0] === "s" && s[1] === "z" && "aeiouy".indexOf(w[i - 1]) === -1) return;   // s → z only between vowel sounds
+      add(sound, w.slice(0, i) + s[1] + w.slice(i + s[0].length));
+    });
+    if (w[0] === "c" && /[aou]/.test(w[1] || "")) add(sound, "k" + w.slice(1)); // cat → kat
     for (let i = 1; i < w.length; i++) {
-      if (w[i] === w[i - 1]) add(sound, w.slice(0, i) + w.slice(i + 1));                      // undouble
-      else if (VOWELS.indexOf(w[i]) === -1 && i < w.length - 1 && /[a-z]/.test(w[i])) add(other, w.slice(0, i) + w[i] + w.slice(i)); // double
-      if (VOWELS.indexOf(w[i]) > -1) VOWELS.split("").forEach(function (v) { if (v !== w[i]) add(other, w.slice(0, i) + v + w.slice(i + 1)); });
-      if (i < w.length - 1 && w[i] !== w[i + 1]) add(other, w.slice(0, i) + w[i + 1] + w[i] + w.slice(i + 2)); // swap two letters
-      if (w.length > 3 && i < w.length - 1) add(other, w.slice(0, i) + w.slice(i + 1));                     // drop a letter
+      if (w[i] === w[i - 1]) add(dbl, w.slice(0, i) + w.slice(i + 1));                      // undouble
+      else if (VOWELS.indexOf(w[i]) === -1 && /[a-z]/.test(w[i]) && "hjkqvwxy".indexOf(w[i]) === -1 && VOWELS.indexOf(w[i - 1]) > -1 && !!w[i + 1] && VOWELS.indexOf(w[i + 1]) > -1) add(dbl, w.slice(0, i) + w[i] + w.slice(i)); // double after a vowel
+      if (VOWELS.indexOf(w[i]) > -1 && i < w.length - 1 && w.length >= 4) "aeiou".split("").forEach(function (v) { if (v !== w[i]) add(vow, w.slice(0, i) + v + w.slice(i + 1)); }); // swap a middle vowel
+      if (w.length >= 5 && i >= 2 && i < w.length - 1 && w[i] !== w[i + 1] && (VOWELS.indexOf(w[i]) > -1 || VOWELS.indexOf(w[i + 1]) > -1)) add(swap, w.slice(0, i) + w[i + 1] + w[i] + w.slice(i + 2)); // swap two letters
+      if (w.length >= 6 && i >= 3 && i < w.length - 2 && VOWELS.indexOf(w[i]) > -1 && VOWELS.indexOf(w[i - 1]) === -1) { // drop a quiet middle vowel (definitly)
+        const d = w.slice(0, i) + w.slice(i + 1), runs = function (x) { return (x.match(/[^aeiouy]{3,}/g) || []).length; };
+        if (runs(d) <= runs(w)) add(drop, d);
+      }
     }
-    if (w.slice(-1) === "e" && w.length > 3) add(sound, w.slice(0, -1)); else if (VOWELS.indexOf(w.slice(-1)) === -1) add(other, w + "e");
-    if (VOWELS.indexOf(w[0]) > -1) VOWELS.split("").forEach(function (v) { if (v !== w[0]) add(other, v + w.slice(1)); });
+    if (w.slice(-1) === "e" && w.length > 3) add(sound, w.slice(0, -1)); // silent e left off
     const keepCase = function (c) { return word[0] === word[0].toUpperCase() ? c[0].toUpperCase() + c.slice(1) : c; };
-    const all = shuffle(sound).concat(shuffle(other)).filter(function (c, i, arr) { return arr.indexOf(c) === i && !isRealWord(c) && !unsafeWord(c); });
+    const all = shuffle(sound).concat(shuffle(dbl), shuffle(drop), shuffle(vow), shuffle(swap))
+      .filter(function (c, i, arr) { return arr.indexOf(c) === i && !isRealWord(c) && !unsafeWord(c) && plausible(c, w); });
     return all.map(keepCase);
+  }
+
+  /* A misspelling must look like something a student might really write: every
+     letter pair (and the start and end of the word) must be common in English
+     spelling, so no "duu" or "dui" for "due". Learned from the spelling bank. */
+  let pairs = null;
+  function plausible(c, w) {
+    if (!pairs) {
+      pairs = {};
+      Object.keys(BD.SPELLING).forEach(function (g) { BD.SPELLING[g].forEach(function (x) {
+        const s = "^" + String(x[0]).toLowerCase() + "$";
+        for (let i = 0; i < s.length - 1; i++) { const k = s.slice(i, i + 2); pairs[k] = (pairs[k] || 0) + 1; }
+      }); });
+    }
+    if (c.length < 3 || (w && w.length <= 3 && c.length < w.length)) return false; // short words: no dropped letters
+    if (/(.)\1\1/.test(c)) return false;
+    const s = "^" + c + "$";
+    for (let i = 0; i < s.length - 1; i++) if ((pairs[s.slice(i, i + 2)] || 0) < 8) return false;
+    return true;
   }
 
   /* Letter tiles in a mixed-up order that never spells the word itself or a rude word. */

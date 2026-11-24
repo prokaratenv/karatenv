@@ -1,4 +1,5 @@
-/* MATH DOJO — flashcards for + − × ÷ at grades 3 to 7. */
+/* MATH DOJO — flashcards for + − × ÷ (Pre-K to 5th) and the middle school
+   strands (6th to 8th: ratios, equations, number system, geometry; see mathtopics.js). */
 window.BD = window.BD || {};
 
 BD.MathGame = (function () {
@@ -6,8 +7,19 @@ BD.MathGame = (function () {
     add: { sym: "+", label: "Addition" },
     sub: { sym: "−", label: "Subtraction" },
     mul: { sym: "×", label: "Multiplication" },
-    div: { sym: "÷", label: "Division" }
+    div: { sym: "÷", label: "Division" },
+    // 6th to 8th grade strands (labels change by grade: see topicLabel)
+    ratio: { sym: "%", label: "Ratios and rates", topic: true },
+    expr: { sym: "x", label: "Equations", topic: true },
+    numsys: { sym: "±", label: "Number system", topic: true },
+    geo: { sym: "△", label: "Geometry and data", topic: true },
+    fact: { sym: "×", label: "Fact fluency", topic: true }
   };
+  const TOPICS = ["ratio", "expr", "numsys", "geo"];
+  const isTopic = function (op) { return !!(OPS[op] && OPS[op].topic); };
+  function opLabel(op, grade) { return isTopic(op) && BD.MathTopics ? BD.MathTopics.label(op, grade) : OPS[op].label; }
+  /* The skills a grade shows (chips and flashcards): + − × ÷ through 5th, strands from 6th. */
+  function shownOps(grade) { return Number(grade) >= 6 ? TOPICS.slice() : ALL_OPS; }
   const PRACTICE_CARDS = 20;
   const PASS = 70; // below this percent, the level must be redone
   const CLOCK_SECONDS = 60;
@@ -70,7 +82,8 @@ BD.MathGame = (function () {
       div: function () { return chance(0.4) ? null : (function () { const d = r(2, 9), q = r(11, 99); return [d * q, d]; })(); }
     },
     6: {
-      about: "Bigger multi-digit problems, 2-digit × 2-digit, 2-digit divisors",
+      about: "Ratios and percents, expressions and one-step equations, fraction division and integers, area, mean and median",
+      ops: TOPICS,
       add: function () { return chance(0.5) ? [r(1000, 9999), r(1000, 9999)] : [r(100, 999), r(100, 999)]; },
       mul: function () {
         const roll = Math.random();
@@ -84,11 +97,13 @@ BD.MathGame = (function () {
       }
     },
     7: {
-      about: "Integers: positive and negative numbers with all four operations",
+      about: "Proportions, percent change, discounts and tax, two-step equations, integers, circles, angles and probability",
+      ops: TOPICS,
       integers: true, range: [50, 12]
     },
     8: {
-      about: "Bigger integers: negatives up to 100, × and ÷ with 2-digit numbers",
+      about: "Slope and functions, multi-step equations and systems, exponents, roots and scientific notation, Pythagorean theorem and volume",
+      ops: TOPICS,
       integers: true, range: [100, 20]
     }
   };
@@ -105,6 +120,7 @@ BD.MathGame = (function () {
 
   function makeProblem(op, grade) {
     let a, b;
+    if (isTopic(op)) return BD.MathTopics.make(op, Math.max(5, grade)); // middle school strands
     const L = LEVELS[grade];
     if (L.integers && chance(0.75)) {
       const big = L.range[0], small = L.range[1];
@@ -131,6 +147,7 @@ BD.MathGame = (function () {
 
   const num = function (n) { return n < 0 ? "−" + Math.abs(n) : String(n); };
   function show(p) {
+    if (p.text) return p.text;
     const right = p.b < 0 ? "(" + num(p.b) + ")" : num(p.b);
     return num(p.a) + " " + OPS[p.op].sym + " " + right;
   }
@@ -139,6 +156,8 @@ BD.MathGame = (function () {
   let S = null;
   const $ = function (id) { return document.getElementById(id); };
 
+  /* A missed problem, rebuilt for another try. */
+  function again(t) { return t.text ? Object.assign({}, t, { key: t.text }) : build(t.op, t.a, t.b, t.grade); }
   function trickyFor(player, grade, ops) {
     return Object.values(player.tricky || {})
       .filter(function (t) { return t.grade === grade && ops.indexOf(t.op) !== -1; })
@@ -153,7 +172,8 @@ BD.MathGame = (function () {
       let g = S.grade;
       if (S.stripe) { g = BD.Rank.itemGrade(S.grade, S.stripe.belt); if (opsFor(g).indexOf(op) === -1) g = S.grade; }
       if (S.stripe && S.stripe.skill && S.stripe.skill.up && S.grade < BD.MAX_GRADE && opsFor(S.grade + 1).indexOf(op) !== -1) g = S.grade + 1; // "Challenge mix" part
-      p = makeProblem(op, g);
+      // 6th to 8th: a small share of quick fact fluency as a warm-up (never in tests or flashcards)
+      p = S.grade >= 6 && !S.test && S.mode !== "flash" && chance(0.15) ? makeProblem("fact", g) : makeProblem(op, g);
       if (recent.indexOf(p.key) === -1) break;
     }
     return p;
@@ -169,23 +189,23 @@ BD.MathGame = (function () {
     if (!ops.length) ops = allowed.slice();
     $("mathSetupBody").innerHTML =
       (retry ? '<div class="redo-note"><strong>Redo this level</strong><p>Score ' + PASS + '% or better on ' + BD.gradeLabel(grade) + ' ' +
-        ops.map(function (o) { return OPS[o].label.toLowerCase(); }).join(", ") + ' to unlock higher grades. Read Sensei\'s tips first. Too hard right now? Pick a lower grade below.</p>' +
+        ops.map(function (o) { return opLabel(o, grade).toLowerCase(); }).join(", ") + ' to unlock higher grades. Read Sensei\'s tips first. Too hard right now? Pick a lower grade below.</p>' +
         '<button type="button" class="btn btn-small" id="mathTipsBtn">Read the tips</button></div>' : '') +
       (function () {
         const done = flashToday(p).ops;
         return '<div class="setup-block flash-block"><h3 class="label">⚡ Daily Flashcards</h3><p class="muted small">' + FLASH_CARDS + ' quick cards of one skill. Finish a set (70%+) for a <strong>+' + FLASH_BONUS + ' bonus</strong>, once per skill each day (up to +' + (FLASH_BONUS * 4) + ' a day). Today: <strong>+' + (done.length * FLASH_BONUS) + '</strong></p><div class="flash-grid" id="mathFlashPick">' +
-          Object.keys(OPS).map(function (k) {
+          shownOps(grade).map(function (k) {
             const ok = allowed.indexOf(k) !== -1, got = done.indexOf(k) !== -1;
             return '<button type="button" class="flash-btn' + (got ? " done" : "") + '" data-flash="' + k + '"' + (ok && !retry ? "" : " disabled") + '>' +
-              '<span class="op-sym">' + OPS[k].sym + '</span><span class="flash-name">' + OPS[k].label + '</span><span class="flash-state">' + (!ok ? "Starts in 2nd grade" : got ? "✓ Bonus earned today" : "+" + FLASH_BONUS + " bonus") + '</span></button>';
+              '<span class="op-sym">' + OPS[k].sym + '</span><span class="flash-name">' + opLabel(k, grade) + '</span><span class="flash-state">' + (!ok ? "Starts in 2nd grade" : got ? "✓ Bonus earned today" : "+" + FLASH_BONUS + " bonus") + '</span></button>';
           }).join("") + '</div></div>';
       })() +
       '<div class="setup-block"><h3 class="label">Grade level</h3>' + BD.UI.gradePicker("mathGradePick", grade, !!retry) +
       '<p class="muted" id="mathLevelAbout">' + LEVELS[grade].about + '</p></div>' +
       '<div class="setup-block"><h3 class="label">Which skills?</h3><div class="chips" id="mathOpsPick">' +
-      Object.keys(OPS).map(function (k) {
+      shownOps(grade).map(function (k) {
         return '<button type="button" class="chip op-chip' + (ops.indexOf(k) !== -1 ? ' on' : '') + '" data-op="' + k + '" aria-pressed="' + (ops.indexOf(k) !== -1) + '"' + (retry || allowed.indexOf(k) === -1 ? ' disabled' : '') + (allowed.indexOf(k) === -1 ? ' title="Starts in 2nd grade"' : '') + '>' +
-          '<span class="op-sym">' + OPS[k].sym + '</span>' + OPS[k].label + '</button>';
+          '<span class="op-sym">' + OPS[k].sym + '</span>' + opLabel(k, grade) + '</button>';
       }).join("") + '</div></div>' +
       '<div class="setup-block"><h3 class="label">Pick a challenge</h3><div class="mode-grid">' +
       '<button type="button" class="mode-card" data-mode="practice" id="mathModePractice"><strong>Practice Kata</strong><span>' + PRACTICE_CARDS + ' cards, no clock. Missed cards come back so you can get them right.</span></button>' +
@@ -205,7 +225,7 @@ BD.MathGame = (function () {
       const k = b.dataset.op, cur = p.mathOps.slice();
       const i = cur.indexOf(k);
       if (i !== -1 && cur.length > 1) cur.splice(i, 1); else if (i === -1) cur.push(k);
-      p.mathOps = Object.keys(OPS).filter(function (o) { return cur.indexOf(o) !== -1; });
+      p.mathOps = shownOps(grade).filter(function (o) { return cur.indexOf(o) !== -1; });
       BD.Store.save(); BD.Sound.tap(); openSetup();
     });
     $("mathFlashPick").addEventListener("click", function (e) {
@@ -251,7 +271,7 @@ BD.MathGame = (function () {
     } else if (mode === "flash") {
       for (let n = 0; n < FLASH_CARDS; n++) S.queue.push(freshProblem());
     } else if (mode === "practice") {
-      const tricky = trickyFor(p, S.grade, S.ops).slice(0, 4).map(function (t) { return build(t.op, t.a, t.b, t.grade); });
+      const tricky = trickyFor(p, S.grade, S.ops).slice(0, 4).map(again);
       for (let n = 0; n < (S.young ? 10 : PRACTICE_CARDS) - tricky.length; n++) S.queue.push(freshProblem());
       tricky.forEach(function (t) { S.queue.splice(r(2, S.queue.length), 0, t); });
     } else {
@@ -261,7 +281,7 @@ BD.MathGame = (function () {
     }
     buildKeypad();
     BD.UI.syncGradeSelect("mathGradeSel", "math");
-    BD.UI.testMode("screen-math-play", S.test ? "Math stripe test" + (S.stripe.skill ? " · Part " + (S.stripe.part + 1) + " of 4: " + S.stripe.skill.label : "") : S.stripe ? "Math stripe practice · " + BD.BELTS[S.stripe.belt].name + " Belt" : mode === "flash" ? "⚡ " + OPS[S.ops[0]].label + " flashcards" : "", S.test);
+    BD.UI.testMode("screen-math-play", S.test ? "Math stripe test" + (S.stripe.skill ? " · Part " + (S.stripe.part + 1) + " of 4: " + S.stripe.skill.label : "") : S.stripe ? "Math stripe practice · " + BD.BELTS[S.stripe.belt].name + " Belt" : mode === "flash" ? "⚡ " + opLabel(S.ops[0], S.grade) + " flashcards" : "", S.test);
     BD.UI.show("screen-math-play");
     BD.Cast.say("mathSay", "start");
     BD.Scratch.close(); BD.Scratch.clear();
@@ -273,7 +293,7 @@ BD.MathGame = (function () {
     if (!S || (auto && (S.mode === "clock" || !BD.ReadAloud.auto(S.grade)))) return;
     const q = current();
     // read-along hook: the problem card glows while it is read
-    BD.ReadAloud.read([{ el: $("mathProblem"), text: (!$("mathDots").hidden ? ($("mathDots").classList.contains("pics") ? "Count the pictures. Tap them to count. " : "Count the dots. ") : "") + "What is " + BD.ReadAloud.words(show(q)) + "?" }]);
+    BD.ReadAloud.read([{ el: $("mathProblem"), text: (!$("mathDots").hidden ? ($("mathDots").classList.contains("pics") ? "Count the pictures. Tap them to count. " : "Count the dots. ") : "") + (q.say ? q.say + (/\?$/.test(q.say) ? "" : "?") : "What is " + BD.ReadAloud.words(show(q)) + "?") }]);
   }
 
   function tick() {
@@ -288,6 +308,7 @@ BD.MathGame = (function () {
   function render() {
     const q = current();
     $("mathProblem").textContent = show(q) + " =";
+    $("mathProblem").classList.toggle("wordy", show(q).length > 16); // word problems (6th to 8th) use a smaller, readable size
     // Pre-K to 2nd: pictures to tap and count, and big answer buttons
     const pics = S.young && (q.op === "add" || q.op === "sub") && q.a <= 10 && q.b <= 10;
     const dots = LEVELS[S.grade].dots || pics;
@@ -325,7 +346,7 @@ BD.MathGame = (function () {
     else tick();
     $("mathStreak").textContent = S.streak >= 3 ? "Combo ×" + S.streak : "";
     $("mathScore").textContent = S.xp + " XP";
-    $("mathKeyMinus").hidden = S.grade < 7; // negative numbers start in grade 7
+    $("mathKeyMinus").hidden = S.grade < 6 && q.answer >= 0; // negative numbers start in 6th grade
     $("mathAsk").hidden = S.mode === "clock" || S.test;
     // Hints: a strategy, then a worked first step (never in stripe tests)
     BD.Hints.bar($("mathCard").parentNode, "math", $("mathExplain"));
@@ -350,7 +371,7 @@ BD.MathGame = (function () {
     if (!S || S.locked) return;
     if (k === "go") { if (BD.Scratch.isOpen()) BD.Scratch.close(); return submit(); }
     if (k === "⌫") S.input = S.input.slice(0, -1);
-    else if (k === "−") { if (S.grade >= 7) S.input = S.input.charAt(0) === "-" ? S.input.slice(1) : "-" + S.input; }
+    else if (k === "−") { if (S.grade >= 6 || current().answer < 0) S.input = S.input.charAt(0) === "-" ? S.input.slice(1) : "-" + S.input; }
     else if (S.input.replace("-", "").length < 6) S.input += k;
     BD.Sound.tap();
     $("mathAnswer").textContent = S.input ? S.input.replace("-", "−") : "?";
@@ -383,7 +404,8 @@ BD.MathGame = (function () {
     } else {
       S.streak = 0; st.w++;
       S.missed.push(q);
-      p.tricky[q.key] = { op: q.op, a: q.a, b: q.b, grade: q.grade, misses: Math.min(3, (tk ? tk.misses : 0) + 2) };
+      p.tricky[q.key] = q.text ? { op: q.op, text: q.text, answer: q.answer, say: q.say, hints: q.hints, steps: q.steps, grade: q.grade, misses: Math.min(3, (tk ? tk.misses : 0) + 2) }
+        : { op: q.op, a: q.a, b: q.b, grade: q.grade, misses: Math.min(3, (tk ? tk.misses : 0) + 2) };
       if (S.mode === "practice" && !q.retry && !S.test) {
         const again = Object.assign({}, q, { retry: true });
         S.queue.splice(Math.min(S.i + 3, S.queue.length), 0, again);
@@ -418,7 +440,7 @@ BD.MathGame = (function () {
       revealed: answered,
       chips: answered ? ["Why is my answer wrong?", "Show me a trick to remember it", "Explain it a different way"]
                       : ["How do I start?", "Give me a hint", "Explain this kind of problem"],
-      facts: "Math flashcard (" + OPS[q.op].label + ", grade " + S.grade + "): " + show(q) + " = ?\n" +
+      facts: "Math problem (" + opLabel(q.op, S.grade) + ", grade " + S.grade + "): " + show(q) + " = ?\n" +
         "Correct answer: " + num(q.answer) + "\n" +
         (answered ? "The student answered " + String(S.lastWrong).replace("-", "−") + ", which is wrong. The correct answer has been shown to them.\n" +
           "Built-in steps they saw: " + BD.Explain.math(q).join(" ")
@@ -436,7 +458,7 @@ BD.MathGame = (function () {
       if (Date.now() >= S.endsAt) return finish();
       S.queue.push(chance(0.2) ? (function () {
         const t = trickyFor(BD.Store.current(), S.grade, S.ops)[0];
-        return t ? build(t.op, t.a, t.b, t.grade) : freshProblem();
+        return t ? again(t) : freshProblem();
       })() : freshProblem());
     } else if (S.i >= S.queue.length) return finish();
     BD.Scratch.clear();
@@ -482,10 +504,10 @@ BD.MathGame = (function () {
     if (mode === "flash") {
       const ft = flashToday(p), op = S.ops[0];
       if (S.answered >= FLASH_CARDS && acc >= PASS && ft.ops.indexOf(op) === -1) { ft.ops.push(op); flashBonus = BD.addXP(p, FLASH_BONUS); }
-      const left = Object.keys(OPS).filter(function (o) { return opsFor(grade).indexOf(o) !== -1 && ft.ops.indexOf(o) === -1; });
-      flashNote = flashBonus ? "⚡ +" + FLASH_BONUS + " flashcard bonus! Today: +" + (ft.ops.length * FLASH_BONUS) + " of " + (FLASH_BONUS * 4) + "." + (left.length ? " Still open today: " + left.map(function (o) { return OPS[o].label.toLowerCase(); }).join(", ") + "." : " All four done today!")
+      const left = shownOps(grade).filter(function (o) { return opsFor(grade).indexOf(o) !== -1 && ft.ops.indexOf(o) === -1; });
+      flashNote = flashBonus ? "⚡ +" + FLASH_BONUS + " flashcard bonus! Today: +" + (ft.ops.length * FLASH_BONUS) + " of " + (FLASH_BONUS * 4) + "." + (left.length ? " Still open today: " + left.map(function (o) { return opLabel(o, grade).toLowerCase(); }).join(", ") + "." : " All four done today!")
         : acc < PASS ? "Score " + PASS + "% or better on a set to earn the +" + FLASH_BONUS + " bonus. Try again!"
-        : "You already earned today's " + OPS[op].label.toLowerCase() + " bonus. Great extra practice!" + (left.length ? " Bonus still open: " + left.map(function (o) { return OPS[o].label.toLowerCase(); }).join(", ") + "." : "");
+        : "You already earned today's " + opLabel(op, grade).toLowerCase() + " bonus. Great extra practice!" + (left.length ? " Bonus still open: " + left.map(function (o) { return opLabel(o, grade).toLowerCase(); }).join(", ") + "." : "");
     }
     const belt = BD.Rank.practice(p, "math", grade, S.xp - (S.banked || 0)); S.banked = S.xp;
     BD.Store.recordSession(p, {
@@ -517,7 +539,7 @@ BD.MathGame = (function () {
       subtitle: "Math Dojo · " + BD.gradeLabel(S.grade) + " · " + S.ops.map(function (o) { return OPS[o].sym; }).join(" "),
       stats: [["Correct", S.correct + (S.mode !== "clock" ? " / " + S.answered : "")], ["Accuracy", acc + "%"], ["Best streak", S.bestStreak], ["XP earned", "+" + S.xp]].concat(flashBonus ? [["Bonus", "+" + flashBonus]] : []),
       belt: belt,
-      listTitle: uniqueMissed.length ? "Facts to practice" : "",
+      listTitle: uniqueMissed.length ? (grade >= 6 ? "Problems to practice" : "Facts to practice") : "",
       list: uniqueMissed.slice(0, 12).map(function (q) { return show(q) + " = " + num(q.answer); }),
       levelUp: ready && !failed && mode !== "flash" ? { text: "You got " + acc + "% at " + BD.gradeLabel(grade) + ". Ready to try " + BD.gradeLabel((grade + 1)) + "?", action: function () { p.mathGrade = grade + 1; BD.Store.save(); openSetup(); } } : null,
       again: function () { start(mode, stripeAgain ? null : ops, stripeAgain); },
@@ -528,7 +550,7 @@ BD.MathGame = (function () {
 
   /* Tips for each skill, plus worked examples of facts that were missed. */
   function lessonHTML(grade, ops, missed) {
-    const keys = grade >= 7 ? ["int"].concat(ops) : ops;
+    const keys = ops.filter(function (k) { return BD.Explain.TIPS[k]; });
     let html = keys.map(function (k) {
       const t = BD.Explain.TIPS[k];
       return '<div class="tip"><h3>' + t.title + '</h3><ul>' + t.points.map(function (x) { return "<li>" + BD.UI.esc(x) + "</li>"; }).join("") + '</ul></div>';
@@ -588,9 +610,9 @@ BD.MathGame = (function () {
     const done = flashToday(p).ops, allowed = opsFor(p.mathGrade), retry = p.retry && p.retry.math;
     BD.UI.sheet("Daily Flashcards",
       '<h4 class="label">Math · ' + BD.gradeLabel(p.mathGrade) + '</h4><p class="muted small">' + FLASH_CARDS + ' quick cards of one skill. Finish a set with 70% or better for a <strong>+' + FLASH_BONUS + ' bonus</strong>, once per skill each day.</p>' +
-      '<div class="flash-grid" id="flashPickHome">' + Object.keys(OPS).map(function (k) {
+      '<div class="flash-grid" id="flashPickHome">' + shownOps(p.mathGrade).map(function (k) {
         const ok = allowed.indexOf(k) !== -1 && !retry, got = done.indexOf(k) !== -1;
-        return '<button type="button" class="flash-btn' + (got ? " done" : "") + '" data-flash="' + k + '"' + (ok ? "" : " disabled") + '><span class="op-sym">' + OPS[k].sym + '</span><span class="flash-name">' + OPS[k].label + '</span><span class="flash-state">' + (allowed.indexOf(k) === -1 ? (k === "div" ? "Starts in 3rd grade" : "Starts in 2nd grade") : got ? "✓ Bonus earned" : "+" + FLASH_BONUS + " bonus") + '</span></button>';
+        return '<button type="button" class="flash-btn' + (got ? " done" : "") + '" data-flash="' + k + '"' + (ok ? "" : " disabled") + '><span class="op-sym">' + OPS[k].sym + '</span><span class="flash-name">' + opLabel(k, p.mathGrade) + '</span><span class="flash-state">' + (allowed.indexOf(k) === -1 ? (k === "div" ? "Starts in 3rd grade" : "Starts in 2nd grade") : got ? "✓ Bonus earned" : "+" + FLASH_BONUS + " bonus") + '</span></button>';
       }).join("") + '</div>' +
       '<h4 class="label">Spelling · ' + BD.gradeLabel(p.spellingGrade) + '</h4><p class="muted small">10 words of one puzzle type. 70% or better earns <strong>+' + BD.WordQuiz.SPELL_FLASH_BONUS + '</strong>, once per type each day.</p>' + BD.WordQuiz.flashHTML(p));
     document.getElementById("infoBody").onclick = function (e) {
@@ -600,5 +622,5 @@ BD.MathGame = (function () {
     };
   }
 
-  return { flashTile: flashTile, openFlash: openFlash, FLASH_BONUS: FLASH_BONUS, flashToday: flashToday, bankNow: bankNow, opsFor: opsFor, stop: stop, start: start, openSetup: openSetup, bind: bind, makeProblem: makeProblem, LEVELS: LEVELS, OPS: OPS, show: show, PASS: PASS };
+  return { opLabel: opLabel, isTopic: isTopic, TOPICS: TOPICS, flashTile: flashTile, openFlash: openFlash, FLASH_BONUS: FLASH_BONUS, flashToday: flashToday, bankNow: bankNow, opsFor: opsFor, stop: stop, start: start, openSetup: openSetup, bind: bind, makeProblem: makeProblem, LEVELS: LEVELS, OPS: OPS, show: show, PASS: PASS };
 })();

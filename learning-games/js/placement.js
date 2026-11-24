@@ -48,7 +48,7 @@ BD.Placement = (function () {
     // older grades: lean on the grade's newest skill so levels are easier to tell apart
     const op = grade >= 2 && Math.random() < 0.55 ? ops[ops.length - 1] : ops[r(ops.length)];
     const q = BD.MathGame.makeProblem(op, grade);
-    const ans = q.answer, neg = grade >= 7, young = grade <= 0;
+    const ans = q.answer, neg = grade >= 6 || ans < 0, young = grade <= 0;
     const cands = shuffle([ans + 1, ans - 1, ans + 2, ans - 2, ans + 10, ans - 10, ans * 2, Math.round(ans / 2), ans + 5, ans - 3]);
     const wrong = [];
     cands.forEach(function (c) { if (wrong.length < (young ? 2 : 3) && c !== ans && wrong.indexOf(c) === -1 && (neg || c >= 0) && Number.isInteger(c) && (!young || Math.abs(c - ans) <= 3)) wrong.push(c); });
@@ -64,7 +64,7 @@ BD.Placement = (function () {
     }
     return {
       prompt: BD.MathGame.show(q) + " = ?", html: html, choices: shuffle([ans].concat(wrong)).map(fmt), answer: fmt(ans),
-      say: "What is " + BD.ReadAloud.words(BD.MathGame.show(q)) + "?"
+      say: q.say || "What is " + BD.ReadAloud.words(BD.MathGame.show(q)) + "?"
     };
   }
 

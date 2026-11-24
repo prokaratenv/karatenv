@@ -876,12 +876,19 @@ BD.SentenceGen = (function () {
     const list = T.filter(function (x) { return x[0] <= grade && x[0] >= grade - 2; });
     return (poolCache[grade] = { list: list, w: list.map(function (x) { return [3, 2, 1][grade - x[0]]; }) });
   }
+  /* 6th to 8th grade: spend the practice on grade-level skills (commas with
+     opening words, extra information and joined sentences, semicolons, colons,
+     tricky subject-verb agreement, tense, pronouns, sound-alike words) instead
+     of the basics they mastered years ago (capital at the start, end marks,
+     simple misspellings like "hav"). */
+  const MIDDLE = { capFirst: 0.3, endMark: 0.35, capI: 0.3, misspell: 0.35, pastTense: 0.5, plural: 0.5, comma: 2, semicolon: 2.5, colon: 2.2, agreement: 1.8, tense: 2, pronoun: 1.8, homophone: 1.6, apostrophe: 1.4, quotes: 1.1 };
+  function emph(name, grade) { return grade >= 6 && MIDDLE[name] ? MIDDLE[name] : 1; }
   function pickInjector(type, grade, sw) {
     const fns = injectors(type, grade);
     if (!fns.length) return null;
     const ws = fns.map(function (f) {
-      if (f.name === "comma") return 1.5 * Math.max.apply(null, Object.keys(COMMA_MIN).map(function (k) { return COMMA_MIN[k] <= grade ? (sw[k] || 1) : 0; }));
-      return sw[f.name] || 1;
+      if (f.name === "comma") return 1.5 * emph("comma", grade) * Math.max.apply(null, Object.keys(COMMA_MIN).map(function (k) { return COMMA_MIN[k] <= grade ? (sw[k] || 1) * (grade >= 6 && COMMA_MIN[k] >= 5 ? 2 : 1) : 0; }));
+      return (sw[f.name] || 1) * emph(f.name, grade);
     });
     return fns[weightedIndex(ws)];
   }
@@ -898,7 +905,7 @@ BD.SentenceGen = (function () {
     const sw = opts.sw || skillWeights(opts.p, grade);
     // only aim at mistake types this grade can have
     const w = {};
-    Object.keys(weights || {}).forEach(function (k) { if (injectors(k, grade).length) w[k] = weights[k]; });
+    Object.keys(weights || {}).forEach(function (k) { if (injectors(k, grade).length) w[k] = weights[k] * (grade >= 6 ? ({ cap: 0.5, punct: 1.6, spell: 0.8, grammar: 1.5 })[k] || 1 : 1); });
     if (!Object.keys(w).length) { w.cap = 1; w.punct = 1; }
     const target = opts.target && skillOk(opts.target, grade) ? opts.target : null;
     for (let attempt = 0; attempt < 60; attempt++) {

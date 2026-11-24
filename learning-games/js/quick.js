@@ -14,13 +14,13 @@ BD.Quick = (function () {
     const ops = BD.MathGame.opsFor(grade).filter(function (o) { return !own || own.indexOf(o) !== -1; });
     if (!ops.length) ops.push(BD.MathGame.opsFor(base)[0]);
     const q = BD.MathGame.makeProblem(ops[r(ops.length)], grade);
-    const ans = q.answer, neg = grade >= 7;
+    const ans = q.answer, neg = grade >= 6 || ans < 0;
     const cands = shuffle([ans + 1, ans - 1, ans + 2, ans - 2, ans + 10, ans - 10, ans * 2, Math.round(ans / 2), ans + 5, ans - 3]);
     const wrong = [];
     cands.forEach(function (c) { if (wrong.length < 3 && c !== ans && wrong.indexOf(c) === -1 && (neg || c >= 0) && Number.isInteger(c)) wrong.push(c); });
     const fmt = function (n) { return String(n).replace("-", "−"); };
     const shown = BD.MathGame.show(q) + " = ?";
-    return { kind: "math", label: "Math", prompt: shown, choices: shuffle([ans].concat(wrong)).map(fmt), answer: fmt(ans), say: "What is " + BD.ReadAloud.words(BD.MathGame.show(q)) + "?" };
+    return { kind: "math", label: "Math", prompt: shown, choices: shuffle([ans].concat(wrong)).map(fmt), answer: fmt(ans), say: q.say || "What is " + BD.ReadAloud.words(BD.MathGame.show(q)) + "?" };
   }
 
   function spelling(grade) {

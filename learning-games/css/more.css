@@ -726,4 +726,12 @@ body.has-tabs .footer { margin-top: 16px; }
 .sp-mini { display: flex; gap: 10px; align-items: center; justify-content: center; padding: 10px; border-radius: 14px; background: rgba(92, 191, 193, .12); margin-bottom: 8px; }
 .sp-mini .sp-kind { display: block; font-size: .8rem; margin: 0; }
 .sp-list { list-style: none; padding: 0; display: grid; gap: 6px; }
+
+/* 6th to 8th grade word problems: readable size instead of giant flashcard digits */
+.problem.wordy { font-size: clamp(1.25rem, 5.4vw, 2rem); line-height: 1.25; max-width: 32ch; margin: 0 auto; text-wrap: balance; }
+#screen-math-play .problem.wordy { font-size: clamp(1.2rem, 5.2vw, 1.9rem); padding: 0 30px; }
+/* When a hint is showing, the hint takes the full row so the text has room */
+#screen-math-play .hint-bar:has(.hint-line) { display: flex; flex-wrap: wrap; width: 100%; margin-right: 0; }
+#screen-math-play .hint-bar:has(.hint-line) .hint-btn { width: auto; flex: 0 0 auto; }
+#screen-math-play .hint-bar:has(.hint-line) .hint-box { flex: 1 1 100%; }
 #spCheck { width: 100%; }
