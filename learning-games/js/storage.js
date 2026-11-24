@@ -18,6 +18,9 @@ BD.BELTS = [
 ];
 /* High Rank Uniform collar stripe: the belt color, or gold at Black Belt. */
 BD.collarColor = function (beltColor) { return String(beltColor).toUpperCase() === BD.BELTS[8].color.toUpperCase() ? "#F2C230" : beltColor; };
+/* High Rank trim paint for the champion art: shiny gold sheen at Black Belt and every degree, the belt color otherwise. */
+BD.GOLD_TRIM = "linear-gradient(120deg, #F3C64A 0%, #B07D12 18%, #FFE38A 34%, #C8961F 50%, #8C6410 66%, #F6D46A 82%, #A9780F 100%)";
+BD.collarPaint = function (beltColor) { return String(beltColor).toUpperCase() === BD.BELTS[8].color.toUpperCase() ? BD.GOLD_TRIM : beltColor; };
 BD.GRADES = [-1, 0, 1, 2, 3, 4, 5, 6, 7, 8]; // -1 = Pre-K, 0 = Kindergarten
 BD.MIN_GRADE = -1;
 BD.MAX_GRADE = 8;

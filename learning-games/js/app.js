@@ -71,8 +71,8 @@ BD.UI = (function () {
         logo = '<i class="champ-belt" style="background:' + logoColor + ';background-size:' + (w * 100).toFixed(2) + '% ' + (h * 100).toFixed(2) + '%;background-position:' + pos(box[0], w) + ' ' + pos(box[1], h) + ';background-repeat:no-repeat;-webkit-mask-image:' + m + ';mask-image:' + m + '"></i>';
       } else logo = layer(a.logo, logoColor);
     }
-    // High Rank Uniform: the collar stripe has its own layer (belt color; gold at Black Belt)
-    const collar = a.collar ? layer(a.collar, BD.collarColor(beltColor)) : "";
+    // High Rank Uniform: the full-length trim has its own layer (belt color; shiny gold at Black Belt and degrees)
+    const collar = a.collar ? layer(a.collar, BD.collarPaint(beltColor)) : ""; // full-length trim: belt color, shiny gold at Black Belt
     return '<span class="champ' + (a.band !== null ? " age-" + a.band : "") + '" style="--belt:' + beltColor + '"><img src="' + a.src + '" alt="' + esc(BD.Cast.name(key)) + '">' +
       layer(a.mask) + collar + logo + '</span>';
   }
