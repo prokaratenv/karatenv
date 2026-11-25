@@ -146,6 +146,11 @@ BD.Little = (function () {
       const vals = distinct(n, function () { const x = s + pick([-1, 1, 2]); return x >= 1 ? x : s + 2; }, s);
       return { d: "math", say: NUM[a] + " " + c[1] + " and " + NUM[b] + " more. How many in all?", show: '<div class="lit-count">' + row(c[0], a) + '<b class="lit-op">+</b>' + row(c[0], b, "b") + '</div>', showText: row(c[0], a) + " + " + row(c[0], b), choices: shuffle(vals.map(numChoice)), answer: String(s), praise: NUM[s] + " in all!" };
     },
+    takeAway: function (lv, n) { // Pre-K: take away within 5 with pictures (ELOF P-MATH 6)
+      const c = pick(COUNT), a = 2 + r(4), b = 1 + r(a - 1), left = a - b;
+      const vals = distinct(n, function () { const x = left + pick([-1, 1, 2]); return x >= 0 ? x : left + 2; }, left);
+      return { d: "math", say: NUM[a] + " " + c[1] + ". " + NUM[b] + " go away. How many are left?", show: '<div class="lit-count">' + row(c[0], left) + row(c[0], b, "gone") + '</div>', showText: row(c[0], a), choices: shuffle(vals.map(numChoice)), answer: String(left), praise: NUM[left] + " left!" };
+    },
     /* ---- Letters ---- */
     letterID: function (lv, n) {
       const lower = lv >= 0, set = lv <= -2 ? PS_LETTERS : ABC, a = pick(set);
@@ -224,6 +229,13 @@ BD.Little = (function () {
       const items = []; for (let i = 0; i < k - 1; i++) items.push({ e: same, v: "same" + i }); items.push({ e: odd, v: "odd" });
       return { d: "comprehension", say: "Which one is different?", show: "", choices: shuffle(items.map(function (x) { return { h: '<span class="lit-pic big">' + x.e + '</span>', v: x.v, t: x.e, say: "" }; })), answer: "odd", praise: "That one is different!" };
     },
+    position: function (lv, n) { // above, below, next to (ELOF P-MATH 10)
+      const t = pick([["🐱", "cat"], ["🐦", "bird"], ["⭐", "star"], ["🎈", "balloon"], ["🐞", "ladybug"]]), box = pick([["📦", "box"], ["🪑", "chair"], ["🧺", "basket"]]);
+      const all = lv <= -2 ? ["above", "below"] : ["above", "below", "next to"], want = pick(all);
+      const scene = function (p) { return '<span class="lit-pos pos-' + p.replace(" ", "-") + '"><span class="lit-pic">' + t[0] + '</span><span class="lit-pic">' + box[0] + '</span></span>'; };
+      return { d: "comprehension", noText: true, say: "Tap the picture where the " + t[1] + " is " + want + " the " + box[1] + ".", show: '<span class="lit-ear">🔊</span>',
+        choices: shuffle(all.map(function (p) { return { h: scene(p), v: p, t: t[0] + " " + p + " " + box[0], say: "the " + t[1] + " is " + p + " the " + box[1] }; })), answer: want, praise: want.charAt(0).toUpperCase() + want.slice(1) + "!" };
+    },
     pattern: function (lv, n) {
       const pool = shuffle(["🍎", "🍌", "⭐", "🔵", "🐶", "🌸", "🚗", "🟡"]), A = pool[0], B = pool[1], C = pool[2];
       const kind = lv >= 0 ? pick(["AB", "ABB", "ABC"]) : pick(["AB", "AB", "ABB"]);
@@ -246,10 +258,10 @@ BD.Little = (function () {
   };
   /* Which kinds of items each game uses at each level. */
   const MIX = {
-    math: { "-2": ["numID", "count", "count", "more"], "-1": ["numID", "count", "count", "more"], "0": ["numID", "count", "compare", "addPics"] },
+    math: { "-2": ["numID", "count", "count", "more"], "-1": ["numID", "count", "count", "more", "addPics", "takeAway"], "0": ["numID", "count", "compare", "addPics"] },
     reading: { "-2": ["letterID", "letterID", "letterOrNum"], "-1": ["letterID", "matchCase", "letterOrNum"], "0": ["letterID", "matchCase"] },
     spelling: { "-2": ["listen", "listen", "firstSound"], "-1": ["firstSound", "firstSound", "rhyme", "letterSound", "listen"], "0": ["letterSound", "rhyme", "blend", "firstSound"] },
-    comprehension: { "-2": ["color", "shape", "size", "different"], "-1": ["colorThing", "shape", "pattern", "sort", "sequence", "color"], "0": ["shape", "pattern", "sequence", "sort"] }
+    comprehension: { "-2": ["color", "shape", "size", "different", "position"], "-1": ["colorThing", "shape", "pattern", "sort", "sequence", "color", "position"], "0": ["shape", "pattern", "sequence", "sort"] }
   };
   /* The 4 stripe-test parts for each game (Preschool and Pre-K). */
   const PARTS = {

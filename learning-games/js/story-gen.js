@@ -2100,7 +2100,7 @@ BD.StoryGen = (function () {
 
   /* 6th to 8th grade: author's purpose (a main-idea skill) and text
      structure (a reading-between-the-lines skill), on top of each genre's own
-     questions. */
+     questions. 3rd to 5th get the text structure question only. */
   function middleQs(genre, out) {
     const fiction = genre === "story" || genre === "dojo";
     const subj = String(out.subject || "this topic").replace(/^(a|an|the) /i, "");
@@ -2143,7 +2143,7 @@ BD.StoryGen = (function () {
         const out = GEN[genre](c);
         const text = out.sents.join(" ").replace(/\s+/g, " ").trim();
         const n = countSent(text);
-        const cands = out.qs.concat(vocabQs(c, text), band === 3 ? middleQs(genre, out) : []).filter(function (q) { return q.keys.length && kwScore(q.keys, q.answer) === 2; });
+        const cands = out.qs.concat(vocabQs(c, text), band === 3 ? middleQs(genre, out) : band === 2 ? middleQs(genre, out).filter(function (q) { return q.type === "infer"; }) : []) // 3rd-5th: text structure (RI.3.8, RI.4.5, RI.5.5).filter(function (q) { return q.keys.length && kwScore(q.keys, q.answer) === 2; });
         const qs = chooseQs(cands, band, focus);
         const lenOk = n >= len[0] && n <= len[1];
         const focusOk = !focus || qs.filter(function (q) { return q.type === focus; }).length >= 2;

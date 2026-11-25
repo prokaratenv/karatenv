@@ -6,9 +6,9 @@
      device when offline. Everything else loads from the device first.
    - Saving progress, family sync and sign-ups are never cached: they wait on
      the device and send when the connection is back. */
-const VERSION = "2155d037bfbb";
+const VERSION = "de1302024597";
 const CACHE = "brain-dojo-" + VERSION;
-const STAMP = "b70b49d778"; // the ?v= the current pages ask for
+const STAMP = "5698f009e0"; // the ?v= the current pages ask for
 const FONTS = "brain-dojo-fonts";
 const CORE = [
 "./",
@@ -158,6 +158,7 @@ const CORE = [
 "js/sentence-gen.js",
 "js/settings.js",
 "js/spanish.js",
+"js/standards.js",
 "js/storage.js",
 "js/story-gen.js",
 "js/studio.js",

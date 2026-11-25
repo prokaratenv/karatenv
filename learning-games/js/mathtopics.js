@@ -315,6 +315,7 @@ BD.MathTopics = (function () {
     0: {
       add: function () {
         const k = Math.random();
+        if (k < 0.2) { const t = r(1, 9) * 10; return e("Count by 10s: " + t + ", " + (t + 10) + ", ?", t + 20, "Count by tens: " + t + ", " + (t + 10) + ", what comes next?", "Counting by 10s adds one ten each time.", (t + 10) + " and 10 more is " + (t + 20) + "."); } // K.CC.1
         if (k < 0.4) { const v = r(5, 99); return e("The number after " + v, v + 1, "What number comes after " + v + "?", "Count: " + v + ", ...", "One more than " + v + "."); }
         if (k < 0.7) { const a = r(1, 10), b = r(1, 10); if (a === b) return e("10 and " + a + " more", 10 + a, "ten and " + a + " more", "Start at 10 and count on " + a + ".", "10, then " + a + " more."); return e("The bigger number: " + a + " or " + b, Math.max(a, b), "Which is bigger, " + a + " or " + b + "?", "Count to both numbers. Which do you reach last?", "The bigger number comes later when you count."); }
         const o = r(1, 9); return e("10 and " + o + " more", 10 + o, "ten and " + o + " more", "Start at 10 and count on " + o + ".", "1 ten and " + o + " ones.");

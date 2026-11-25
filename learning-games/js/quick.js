@@ -38,6 +38,36 @@ BD.Quick = (function () {
     };
   }
 
+  /* Middle school language items. Clear pronouns (6th+), dangling modifiers (7th+), active and passive voice (8th). */
+  const PAIRS = [["the coach", "the player"], ["the teacher", "the student"], ["the pilot", "the mechanic"], ["the doctor", "the nurse"], ["my aunt", "my cousin"], ["the captain", "the new member"], ["the artist", "the reporter"], ["the driver", "the guard"]];
+  const PRON = [["talked to", "smiled"], ["met", "laughed"], ["called", "was happy"], ["thanked", "felt proud"], ["helped", "felt better"]];
+  const MODS = [["walking to school", "the rain started"], ["opening the box", "a spring popped out"], ["climbing the hill", "the sun came out"], ["reading the map", "a bird landed nearby"], ["waiting for the bus", "the wind picked up"], ["cleaning my room", "an old photo fell out"]];
+  const VOICE = [["The chef", "cooked", "the soup", "cooked"], ["Our class", "planted", "the garden", "planted"], ["The storm", "damaged", "the roof", "damaged"], ["The students", "wrote", "the report", "written"], ["The band", "played", "the song", "played"], ["The scientist", "tested", "the sample", "tested"], ["The mayor", "opened", "the new park", "opened"], ["The team", "won", "the championship", "won"], ["My brother", "painted", "the fence", "painted"], ["The dog", "chased", "the ball", "chased"]];
+  const cap = function (t) { return t.charAt(0).toUpperCase() + t.slice(1); };
+  function middleLang(grade) {
+    const kinds = ["pronoun"].concat(grade >= 7 ? ["modifier"] : [], grade >= 8 ? ["voice", "voice"] : []);
+    const k = kinds[r(kinds.length)];
+    if (k === "pronoun") {
+      const p = PAIRS[r(PAIRS.length)], v = PRON[r(PRON.length)];
+      const right = "When " + p[0] + " " + v[0] + " " + p[1] + ", " + p[0] + " " + v[1] + ".";
+      const vague = "When " + p[0] + " " + v[0] + " " + p[1] + ", they " + v[1].replace(/^was /, "were ").replace(/^felt /, "felt ") + ".";
+      const frag = "When " + p[0] + " " + v[0] + " " + p[1] + ".";
+      return { kind: "grammar", label: "Reading", skill: "pronouns", prompt: "Which sentence makes it clear who did it?", choices: shuffle([cap(right), cap(vague), cap(frag)]), answer: cap(right), long: true, say: "Which sentence makes it clear who did it?" };
+    }
+    if (k === "modifier") {
+      const m = MODS[r(MODS.length)];
+      const right = "While I was " + m[0] + ", " + m[1] + ".";
+      const dangle = cap(m[0]) + ", " + m[1] + ".";
+      const comma = "While I was " + m[0] + " " + m[1].replace(/ (\w+)$/, ", $1") + ".";
+      return { kind: "grammar", label: "Reading", skill: "modifiers", prompt: "Which sentence is written correctly?", choices: shuffle([right, dangle, comma]), answer: right, long: true, say: "Which sentence is written correctly?" };
+    }
+    const v = VOICE[r(VOICE.length)], wantActive = Math.random() < 0.5;
+    const active = v[0] + " " + v[1] + " " + v[2] + ".";
+    const passive = cap(v[2]) + " was " + v[3] + " by " + v[0].toLowerCase() + ".";
+    const noAgent = cap(v[2]) + " was " + v[3] + ".";
+    return { kind: "grammar", label: "Reading", skill: "voice", prompt: wantActive ? "Which sentence uses the active voice?" : "Which sentence uses the passive voice and names who did it?", choices: shuffle([active, passive, noAgent]), answer: wantActive ? active : passive, long: true, say: wantActive ? "Which sentence uses the active voice?" : "Which sentence uses the passive voice and names who did it?" };
+  }
+
   function grammar(grade) {
     if (Number(grade) <= -1 && BD.Little) return BD.Little.quick(grade, "grammar");
     // 4th grade and up: complete sentences vs fragments and run-ons (Common Core L.4.1f), a quarter of the time
@@ -56,6 +86,8 @@ BD.Quick = (function () {
         }
       } catch (e) { /* fall through to the usual item */ }
     }
+    // 6th to 8th grade language skills as "pick the best sentence" (Common Core L.6.1d, L.7.1c, L.8.1b)
+    if (Number(grade) >= 6 && Math.random() < 0.3) { const ms = middleLang(grade); if (ms) return ms; }
     // endless sentences from the generator first (never the same one twice for this student)
     if (BD.SentenceGen && BD.SentenceGen.choice) {
       try {

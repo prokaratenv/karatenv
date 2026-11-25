@@ -106,9 +106,35 @@ BD.Mixed = (function () {
         if (wrong.length >= 2) out.push({ subject: "comprehension", g: base, kind: "choice", label: "Stories", passage: ps.text, title: ps.title, prompt: q.q, qtype: q.type,
           hint: q.hint, choices: shuffle([right].concat(wrong)), answer: right, long: true, say: [{ text: q.q }] });
       });
+      // 3rd grade and up: cite text evidence (RL/RI.x.1). Pick the story sentence that supports a detail answer.
+      if (base >= 3 && out.length >= 2) {
+        const dq = qs.filter(function (q) { return q.type === "detail" && q.keys && q.keys.length; })[0];
+        const ev = dq ? evidenceItem(ps, dq, base) : null;
+        if (ev) { if (out.length >= n) out[out.length - 1] = ev; else out.push(ev); }
+      }
       if (out.length >= Math.min(2, n)) { out.forEach(function (it, i) { it.storyIx = i; it.storyN = out.length; }); return out; }
     }
     return [];
+  }
+
+  /* "Which sentence best supports the answer?" The right sentence is the only one
+     that holds the answer's key words; the two wrong ones share none of them. */
+  function evidenceItem(ps, q, base) {
+    const sents = (String(ps.text).match(/[^.!?]+[.!?]+["'\u201d]?/g) || []).map(function (x) { return x.trim(); }).filter(function (x) { return x.split(/\s+/).length >= 4; });
+    if (sents.length < 4) return null;
+    const low = function (t) { return " " + String(t).toLowerCase().replace(/[^a-z0-9' ]/g, " ") + " "; };
+    const score = function (t) { const l = low(t); return q.keys.reduce(function (n, grp) { return n + (grp.some(function (w) { return l.indexOf(String(w).toLowerCase()) !== -1; }) ? 1 : 0); }, 0); };
+    const sc = sents.map(function (t) { return { t: t, n: score(t) }; });
+    const top = Math.max.apply(null, sc.map(function (x) { return x.n; }));
+    const best = sc.filter(function (x) { return x.n === top; });
+    if (top < 1 || best.length !== 1) return null;
+    const zero = shuffle(sc.filter(function (x) { return x.n === 0; }));
+    if (zero.length < 2) return null;
+    const right = best[0].t;
+    return { subject: "comprehension", g: base, kind: "choice", label: "Stories", passage: ps.text, title: ps.title, qtype: "evidence",
+      prompt: q.q + " The answer: " + q.answer.replace(/\.$/, "") + ". Which sentence from the story best supports that answer?",
+      hint: "Find the sentence that talks about the same thing as the answer.", choices: shuffle([right, zero[0].t, zero[1].t]), answer: right, long: true,
+      say: [{ text: "Which sentence from the story best supports the answer?" }] };
   }
 
   /* The round: singles shuffled, the story's questions kept together. */

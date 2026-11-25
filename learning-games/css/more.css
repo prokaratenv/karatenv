@@ -820,3 +820,25 @@ body.little-on #screen-home > :not(#littleHome) { display: none !important; }
 .lp-levels { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; width: 100%; max-width: 420px; }
 .lp-levels li { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; text-align: left; }
 .lp-levels .lp-dom-ico { min-width: 52px; height: 52px; font-size: 1.2rem; }
+
+/* Little Ninjas: position words and take-away pictures */
+.lit-pos { display: inline-flex; align-items: center; justify-content: center; gap: 2px; min-width: 64px; min-height: 88px; }
+.lit-pos.pos-above { flex-direction: column; }
+.lit-pos.pos-below { flex-direction: column-reverse; }
+.lit-pos.pos-next-to { flex-direction: row; }
+.lit-pic.gone { opacity: .35; position: relative; }
+.lit-pic.gone::after { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 4px; background: #FF5C6E; transform: rotate(-35deg); border-radius: 2px; }
+
+/* Parents: About our learning */
+.std-wrap summary { cursor: pointer; padding: 4px 0; }
+.std-src { list-style: none; padding: 0; margin: 6px 0 12px; display: grid; gap: 8px; }
+.std-src li { display: grid; gap: 2px; }
+.std-src a { color: var(--sky, #5CBFC1); }
+.std-band h5 { margin: 12px 0 4px; font-size: .95rem; }
+.std-wrap { max-width: 100%; overflow: hidden; }
+.std-wrap .table-wrap { overflow-x: auto; max-width: 100%; }
+.std-table { font-size: .8rem; width: 100%; table-layout: fixed; }
+.std-table th, .std-table td { vertical-align: top; text-align: left; white-space: normal; overflow-wrap: anywhere; padding: 6px 6px; }
+.std-table thead th:nth-child(1) { width: 26%; } .std-table thead th:nth-child(3) { width: 30%; }
+.std-code { color: var(--muted, #9fb0cc); }
+.std-wrap p { overflow-wrap: anywhere; }
