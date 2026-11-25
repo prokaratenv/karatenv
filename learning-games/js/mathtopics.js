@@ -301,6 +301,127 @@ BD.MathTopics = (function () {
     it.op = op; it.grade = grade; it.key = it.text;
     return it;
   }
+  /* ================= Kindergarten to 5th grade: the Common Core strands beyond fact drills =================
+     A share of each K-5 round (never flashcards) comes from the grade's other core strands:
+       add : counting, place value and number sense (K.CC, 1-2.NBT, 3-5.NBT)
+       sub : measurement, time and money (1-5.MD)
+       mul : equal groups, arrays, area and perimeter, geometry (2.OA, 3.MD, 4.MD, 5.MD)
+       div : fractions and decimals (3.NF, 4.NF, 5.NF, 5.NBT)
+     Every answer is a whole number, sized for quick recall. */
+  const words = function (t) { return t.replace(/\//g, " over ").replace(/×/g, " times ").replace(/\?/g, "what number"); };
+  function e(text, answer, say, h1, h2, steps) { return mk(text, answer, say || words(text), h1, h2, steps || [h1, h2]); }
+  const FR = { 2: "halves", 3: "thirds", 4: "fourths", 5: "fifths", 6: "sixths", 8: "eighths", 10: "tenths", 12: "twelfths" };
+  const ELEM = {
+    0: {
+      add: function () {
+        const k = Math.random();
+        if (k < 0.4) { const v = r(5, 99); return e("The number after " + v, v + 1, "What number comes after " + v + "?", "Count: " + v + ", ...", "One more than " + v + "."); }
+        if (k < 0.7) { const a = r(1, 10), b = r(1, 10); if (a === b) return e("10 and " + a + " more", 10 + a, "ten and " + a + " more", "Start at 10 and count on " + a + ".", "10, then " + a + " more."); return e("The bigger number: " + a + " or " + b, Math.max(a, b), "Which is bigger, " + a + " or " + b + "?", "Count to both numbers. Which do you reach last?", "The bigger number comes later when you count."); }
+        const o = r(1, 9); return e("10 and " + o + " more", 10 + o, "ten and " + o + " more", "Start at 10 and count on " + o + ".", "1 ten and " + o + " ones.");
+      },
+      sub: function () { const sh = pick([["triangle", 3], ["square", 4], ["rectangle", 4], ["hexagon", 6]]); return e("Corners on a " + sh[0], sh[1], "How many corners does a " + sh[0] + " have?", "Picture a " + sh[0] + " and count each point.", "A " + sh[0] + " has " + sh[1] + " sides and the same number of corners."); }
+    },
+    1: {
+      add: function () {
+        const k = Math.random();
+        if (k < 0.35) { const t = r(1, 9), o = r(0, 9); return e(t + " tens and " + o + " ones", t * 10 + o, null, "Each ten is 10. " + t + " tens is " + (t * 10) + ".", (t * 10) + " and " + o + " more."); }
+        if (k < 0.7) { const v = r(11, 89); return e("10 more than " + v, v + 10, null, "10 more changes the tens digit by 1.", (Math.floor(v / 10) + 1) + " tens and " + (v % 10) + " ones."); }
+        const v = r(21, 99); return e("The tens digit in " + v, Math.floor(v / 10), "In " + v + ", what is the tens digit?", "The tens digit is on the left.", v + " is " + Math.floor(v / 10) + " tens and " + (v % 10) + " ones.");
+      },
+      sub: function () {
+        if (Math.random() < 0.5) { const h = r(1, 12); return e("Short hand on " + h + ", long hand on 12. What hour", h, "The short hand points to " + h + " and the long hand points to 12. What hour is it?", "The short hand tells the hour.", "Long hand on 12 means o'clock. It is " + h + " o'clock."); }
+        const a = r(2, 9), c = r(a + 2, 18); return e(a + " + ? = " + c + ". Missing number", c - a, a + " plus what number equals " + c + "?", "Count up from " + a + " to " + c + ".", c + " − " + a + " = " + (c - a) + ".");
+      }
+    },
+    2: {
+      add: function () {
+        const k = Math.random();
+        if (k < 0.35) { const h = r(1, 9), t = r(0, 9), o = r(0, 9); return e(h + " hundreds, " + t + " tens, " + o + " ones", h * 100 + t * 10 + o, null, "Hundreds go first, then tens, then ones.", h + " hundreds is " + (h * 100) + ". Add " + (t * 10) + " and " + o + "."); }
+        if (k < 0.7) { const v = r(100, 890), d = pick([10, 100]); return e(d + " more than " + v, v + d, null, d === 10 ? "Change the tens digit by 1." : "Change the hundreds digit by 1.", v + " + " + d + " = " + (v + d) + "."); }
+        const st = pick([2, 5, 10]), s0 = st * r(1, 8); return e("Skip count by " + st + "s: " + s0 + ", " + (s0 + st) + ", " + (s0 + 2 * st) + ", next", s0 + 3 * st, "Skip count by " + st + "s. " + s0 + ", " + (s0 + st) + ", " + (s0 + 2 * st) + ". What comes next?", "Add " + st + " each time.", (s0 + 2 * st) + " + " + st + ".");
+      },
+      sub: function () {
+        if (Math.random() < 0.55) {
+          const q = r(0, 3), d = r(0, 4), n = r(0, 4), p = r(0, 4); if (q + d + n + p === 0) return ELEM[2].sub();
+          const parts = []; if (q) parts.push(q + (q > 1 ? " quarters" : " quarter")); if (d) parts.push(d + (d > 1 ? " dimes" : " dime")); if (n) parts.push(n + (n > 1 ? " nickels" : " nickel")); if (p) parts.push(p + (p > 1 ? " pennies" : " penny"));
+          return e(parts.join(", ") + " (cents)", q * 25 + d * 10 + n * 5 + p, "How many cents is " + parts.join(", ") + "?", "Quarter 25, dime 10, nickel 5, penny 1.", "Start with the biggest coins and count on.");
+        }
+        const m = r(1, 11); return e("Long hand on the " + m + ". Minutes after the hour", m * 5, "The long hand points to the " + m + ". How many minutes after the hour?", "Count by 5s for each number on the clock.", m + " fives: " + (m * 5) + ".");
+      },
+      mul: function () {
+        if (Math.random() < 0.3) { const sh = pick([["halves", 2], ["thirds", 3], ["fourths", 4]]); return e("Equal parts in " + sh[0], sh[1], "A shape is cut into " + sh[0] + ". How many equal parts?", "Halves means 2, thirds means 3.", "Fourths means 4 equal parts."); }
+        const a = r(2, 5), b = r(2, 5); return e(a + " rows of " + b, a * b, a + " rows of " + b + ". How many in all?", "Add " + b + " again for each row.", Array(a).fill(b).join(" + ") + " = " + (a * b) + ".");
+      }
+    },
+    3: {
+      add: function () {
+        const t = pick([10, 100]), v = t === 10 ? r(11, 99) : r(110, 990); if (v % t === t / 2) return ELEM[3].add();
+        const ans = Math.round(v / t) * t; return e("Round " + v + " to the nearest " + t, ans, null, "Look at the " + (t === 10 ? "ones" : "tens") + " digit. 5 or more rounds up.", v + " is closer to " + ans + ".");
+      },
+      sub: function () {
+        if (Math.random() < 0.5) { const h = r(1, 11), m = 5 * r(0, 6), d = 5 * r(1, 5); return e("Starts at " + h + ":" + (m < 10 ? "0" : "") + m + ", lasts " + d + " minutes. Ends at " + h + ":__", m + d, "It starts at " + h + " " + (m === 0 ? "o'clock" : m) + " and lasts " + d + " minutes. How many minutes after " + h + " does it end?", "Add the minutes: " + m + " + " + d + ".", "It ends at " + h + ":" + (m + d) + "."); }
+        const w = r(3, 9), l = r(3, 9); return e("Perimeter of a " + l + " by " + w + " rectangle", 2 * (l + w), null, "Perimeter is the distance around: add all 4 sides.", l + " + " + w + " + " + l + " + " + w + ".");
+      },
+      mul: function () { const w = r(2, 9), l = r(2, 9); return e("Area of a " + l + " by " + w + " rectangle (square units)", l * w, "What is the area of a " + l + " by " + w + " rectangle?", "Area is rows times columns.", l + " × " + w + " = " + (l * w) + "."); },
+      div: function () {
+        const k = Math.random();
+        if (k < 0.35) { const d = pick([2, 3, 4, 6, 8]); return e(FR[d][0].toUpperCase() + FR[d].slice(1) + " in one whole", d, "How many " + FR[d] + " make one whole?", "The bottom number tells how many equal parts.", "1 whole = " + d + "/" + d + "."); }
+        const d = pick([2, 3, 4]), m = pick([2, 3, 4].filter(function (x) { return d * x <= 8; })), nmr = r(1, d - 1);
+        return e(nmr + "/" + d + " = ?/" + (d * m) + ". Missing number", nmr * m, nmr + " over " + d + " equals what number over " + (d * m) + "?", "The bottom went from " + d + " to " + (d * m) + ": that's times " + m + ".", "Do the same to the top: " + nmr + " × " + m + ".");
+      }
+    },
+    4: {
+      add: function () {
+        if (Math.random() < 0.5) {
+          const v = r(10000, 99999), places = [["ones", 1], ["tens", 10], ["hundreds", 100], ["thousands", 1000], ["ten thousands", 10000]], pl = pick(places.slice(1));
+          return e("The " + pl[0] + " digit in " + v.toLocaleString("en-US"), Math.floor(v / pl[1]) % 10, "In " + v + ", what digit is in the " + pl[0] + " place?", "From the right: ones, tens, hundreds, thousands, ten thousands.", "Count places from the right to the " + pl[0] + " place.");
+        }
+        const v = r(1100, 98900); if (v % 1000 === 500) return ELEM[4].add();
+        const ans = Math.round(v / 1000) * 1000; return e("Round " + v.toLocaleString("en-US") + " to the nearest 1,000", ans, "Round " + v + " to the nearest thousand.", "Look at the hundreds digit. 5 or more rounds up.", v.toLocaleString("en-US") + " is closer to " + ans.toLocaleString("en-US") + ".");
+      },
+      sub: function () {
+        const c = pick([["Inches in", 12, "feet"], ["Feet in", 3, "yards"], ["Minutes in", 60, "hours"], ["Ounces in", 16, "pounds"], ["Centimeters in", 100, "meters"]]), q = r(2, 6);
+        if (Math.random() < 0.3) { const a = r(20, 160); return e("A straight angle is 180°. One part is " + a + "°. The other part", 180 - a, null, "The two parts add up to 180.", "180 − " + a + "."); }
+        return e(c[0] + " " + q + " " + c[2], c[1] * q, "How many " + c[0].replace(" in", "").toLowerCase() + " are in " + q + " " + c[2] + "?", "1 " + c[2].replace(/s$/, "") + " = " + c[1] + ".", q + " × " + c[1] + ".");
+      },
+      mul: function () {
+        if (Math.random() < 0.4) { const w = r(3, 12), l = r(3, 12); return e("A rectangle has area " + (l * w) + " and length " + l + ". Width", w, null, "Area = length × width.", (l * w) + " ÷ " + l + "."); }
+        if (Math.random() < 0.5) { const f = pick([3, 4, 6, 7, 8, 9]), lo = r(30, 80), ans = Math.ceil((lo + 1) / f) * f; return e("The first multiple of " + f + " after " + lo, ans, null, "Count by " + f + "s past " + lo + ".", "Find the first number in the " + f + "s list bigger than " + lo + "."); }
+        return e("A right angle (degrees)", 90, "How many degrees is a right angle?", "A right angle is a square corner.", "A quarter turn is 90 degrees.");
+      },
+      div: function () {
+        const k = Math.random();
+        if (k < 0.3) { const d = pick([3, 4, 5, 6]), m = pick([2, 3, 4].filter(function (x) { return d * x <= 12; })), nmr = r(1, d - 1); return e(nmr + "/" + d + " = ?/" + (d * m) + ". Missing number", nmr * m, null, "Times the top and bottom by the same number.", "Bottom: " + d + " × " + m + ". Top: " + nmr + " × " + m + "."); }
+        if (k < 0.55) { const d = pick([5, 6, 8, 10, 12]), a = r(1, d - 2), b = r(1, d - 1 - a); return e(a + "/" + d + " + " + b + "/" + d + " = ?/" + d, a + b, null, "Same bottom number: just add the tops.", a + " + " + b + "."); }
+        if (k < 0.75) { const d = pick([3, 4, 5, 6, 8]), nmr = r(1, d - 1), w = r(2, 5); return e(w + " × " + nmr + "/" + d + " = ?/" + d, w * nmr, null, "Multiply the top by " + w + ". The bottom stays " + d + ".", w + " × " + nmr + " = " + (w * nmr) + "."); }
+        const h = r(11, 99); return e("0." + h + " = ?/100", h, "zero point " + String(h).split("").join(" ") + " equals what number over 100?", "Two decimal places means hundredths.", "0." + h + " is " + h + " hundredths.");
+      }
+    },
+    5: {
+      add: function () { return Math.random() < 0.5 ? G5.numsys() : (function () { const p = r(2, 4), ans = Math.pow(10, p); return e("10 to the power of " + p, ans, null, "Multiply 10 by itself " + p + " times.", "Write a 1 and " + p + " zeros."); })(); },
+      sub: function () {
+        if (Math.random() < 0.5) { const c = pick([["Centimeters in", 100, "meters"], ["Grams in", 1000, "kilograms"], ["Milliliters in", 1000, "liters"], ["Inches in", 12, "feet"], ["Ounces in", 16, "pounds"]]), q = r(2, 9); return e(c[0] + " " + q + " " + c[2], c[1] * q, "How many " + c[0].replace(" in", "").toLowerCase() + " are in " + q + " " + c[2] + "?", "1 " + c[2].replace(/s$/, "") + " = " + c[1] + ".", q + " × " + c[1] + "."); }
+        const a = r(11, 79) / 10; if (Number.isInteger(a)) return ELEM[5].sub(); const b = Math.round((r(2, 9) - (a % 1)) * 10) / 10; const sum = Math.round((a + b) * 10) / 10; if (!Number.isInteger(sum) || b <= 0) return ELEM[5].sub();
+        return e(a + " + " + b, sum, null, "Add the tenths first: they make a whole.", "Line up the decimal points and add.");
+      },
+      mul: function () { return Math.random() < 0.6 ? G5.geo() : G5.expr(); },
+      div: function () {
+        if (Math.random() < 0.5) return G5.ratio();
+        const pairs = [[2, 4], [2, 6], [3, 6], [4, 8], [2, 8], [3, 12], [4, 12]], pr = pick(pairs), a = r(1, pr[0] - 1), b = r(1, pr[1] - 1), m = pr[1] / pr[0], top = a * m + b;
+        if (top >= pr[1]) return ELEM[5].div();
+        return e(a + "/" + pr[0] + " + " + b + "/" + pr[1] + " = ?/" + pr[1], top, null, "Make the bottoms match: " + a + "/" + pr[0] + " = " + (a * m) + "/" + pr[1] + ".", (a * m) + " + " + b + " = " + top + ".");
+      }
+    }
+  };
+  /* elem(op, grade) -> a strand item for K-5, or null when the grade has none for that operation. */
+  function elem(op, grade) {
+    const g = Number(grade), set = ELEM[g]; if (!set || !set[op]) return null;
+    let it = null;
+    for (let k = 0; k < 6; k++) { it = set[op](); if (it && Number.isInteger(it.answer) && it.answer >= 0) break; it = null; }
+    if (!it) return null;
+    it.op = op; it.grade = g; it.key = it.text; it.strand = true;
+    return it;
+  }
   function label(op, grade) { const L = LABELS[Math.max(5, Math.min(8, Number(grade)))] || LABELS[6]; return op === "fact" ? "Fact fluency" : L[op] || op; }
-  return { make: make, label: label, STRANDS: STRANDS, LABELS: LABELS };
+  return { make: make, elem: elem, label: label, STRANDS: STRANDS, LABELS: LABELS };
 })();

@@ -40,6 +40,22 @@ BD.Quick = (function () {
 
   function grammar(grade) {
     if (Number(grade) <= -1 && BD.Little) return BD.Little.quick(grade, "grammar");
+    // 4th grade and up: complete sentences vs fragments and run-ons (Common Core L.4.1f), a quarter of the time
+    if (Number(grade) >= 4 && Math.random() < 0.25 && BD.SentenceGen && BD.SentenceGen.choice) {
+      try {
+        const st = BD.Store && BD.Store.current();
+        const starts = /^(The|A|An|My|Our|Your|Their|His|Her|We|They|It|This|That|These|Those|Some|Many|Every|After|When|If|Today|Yesterday)\b/;
+        const plain = function (t) { return t && !/["“”]/.test(t) && starts.test(t); };
+        const pickPlain = function () { for (let k = 0; k < 8; k++) { const c = BD.SentenceGen.choice(grade, st); if (c && plain(c.right)) return c.right; } return null; };
+        const s1 = pickPlain(), s2 = pickPlain();
+        if (plain(s1) && plain(s2) && s1 !== s2 && /[.!]$/.test(s1) && s1.length < 90 && s2.length < 90) {
+          const lc = function (t) { return /^I\b/.test(t) ? t : t.charAt(0).toLowerCase() + t.slice(1); };
+          const runOn = s1.replace(/[.!]$/, "") + " " + lc(s2);
+          const frag = "Because " + lc(s1);
+          return { kind: "grammar", label: "Reading", skill: "sentences", prompt: "Which sentence is written correctly?", choices: shuffle([s1, runOn, frag]), answer: s1, long: true, say: "Which one is a complete sentence, written correctly?" };
+        }
+      } catch (e) { /* fall through to the usual item */ }
+    }
     // endless sentences from the generator first (never the same one twice for this student)
     if (BD.SentenceGen && BD.SentenceGen.choice) {
       try {

@@ -118,8 +118,13 @@ BD.MathGame = (function () {
     }
   }
 
-  function makeProblem(op, grade) {
+  /* K to 5th: a share of each round comes from the grade's other Common Core strands (place value,
+     measurement, time and money, geometry, fractions and decimals). Flashcards stay pure facts. */
+  const STRAND_SHARE = { 0: 0.25, 1: 0.3, 2: 0.3, 3: 0.35, 4: 0.4, 5: 0.45 };
+  function makeProblem(op, grade, factsOnly) {
     let a, b;
+    const sg = Number(grade);
+    if (!factsOnly && STRAND_SHARE[sg] && BD.MathTopics && BD.MathTopics.elem && chance(STRAND_SHARE[sg])) { const it = BD.MathTopics.elem(op, sg); if (it) return it; }
     if (isTopic(op)) return BD.MathTopics.make(op, Math.max(5, grade)); // middle school strands
     const L = LEVELS[grade];
     if (L.integers && chance(0.75)) {
@@ -173,7 +178,7 @@ BD.MathGame = (function () {
       if (S.stripe) { g = BD.Rank.itemGrade(S.grade, S.stripe.belt); if (opsFor(g).indexOf(op) === -1) g = S.grade; }
       if (S.stripe && S.stripe.skill && S.stripe.skill.up && S.grade < BD.MAX_GRADE && opsFor(S.grade + 1).indexOf(op) !== -1) g = S.grade + 1; // "Challenge mix" part
       // 6th to 8th: a small share of quick fact fluency as a warm-up (never in tests or flashcards)
-      p = S.grade >= 6 && !S.test && S.mode !== "flash" && chance(0.15) ? makeProblem("fact", g) : makeProblem(op, g);
+      p = S.grade >= 6 && !S.test && S.mode !== "flash" && chance(0.15) ? makeProblem("fact", g) : makeProblem(op, g, S.mode === "flash");
       if (recent.indexOf(p.key) === -1) break;
     }
     return p;
@@ -313,7 +318,7 @@ BD.MathGame = (function () {
     $("mathProblem").classList.toggle("wordy", show(q).length > 16); // word problems (6th to 8th) use a smaller, readable size
     // Pre-K to 2nd: pictures to tap and count, and big answer buttons
     const pics = S.young && (q.op === "add" || q.op === "sub") && q.a <= 10 && q.b <= 10;
-    const dots = LEVELS[S.grade].dots || pics;
+    const dots = !q.text && (LEVELS[S.grade].dots || pics); // word items (strands) have no counting dots
     $("mathDots").hidden = !dots;
     $("mathDots").classList.toggle("pics", !!pics);
     $("mathKeypad").hidden = !!S.young;
@@ -625,5 +630,5 @@ BD.MathGame = (function () {
     };
   }
 
-  return { opLabel: opLabel, isTopic: isTopic, TOPICS: TOPICS, flashTile: flashTile, openFlash: openFlash, FLASH_BONUS: FLASH_BONUS, flashToday: flashToday, bankNow: bankNow, opsFor: opsFor, stop: stop, start: start, openSetup: openSetup, bind: bind, makeProblem: makeProblem, LEVELS: LEVELS, OPS: OPS, show: show, PASS: PASS };
+  return { peek: function () { return S && !S.done ? current() : null; }, opLabel: opLabel, isTopic: isTopic, TOPICS: TOPICS, flashTile: flashTile, openFlash: openFlash, FLASH_BONUS: FLASH_BONUS, flashToday: flashToday, bankNow: bankNow, opsFor: opsFor, stop: stop, start: start, openSetup: openSetup, bind: bind, makeProblem: makeProblem, LEVELS: LEVELS, OPS: OPS, show: show, PASS: PASS };
 })();
