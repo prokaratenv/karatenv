@@ -1,7 +1,7 @@
 /* BLACK BELT DEGREE TEST — after a Black Belt's 4 degree stripes are full,
    a mixed test (math, spelling and reading questions, no hints) promotes them
    to the next degree: 1st, 2nd and 3rd Degree (+250 XP each), 4th and 5th
-   Degree (+500 XP each). 5th Degree is Master Rank. 85% to pass; try again
+   Degree (+500 XP each). 5th Degree is Master Rank. 80% to pass; try again
    any time. */
 window.BD = window.BD || {};
 

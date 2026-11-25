@@ -4,7 +4,7 @@
    - Each belt needs 4 stripes: Math, Reading, Spelling, Comprehension.
      Spanish is bonus training only: practice earns extra XP (up to 100 per
      belt, refilled each new belt), but there is no Spanish stripe or test.
-   - A stripe is earned by passing its stripe test (85% or better), any time.
+   - A stripe is earned by passing its stripe test (80% or better), any time.
    - Practice fills a stripe meter in Belt XP (about 10 Belt XP per minute of
      focused practice in any subject; see NORM). A stripe meter grows with the
      belt: White 450, Yellow 900, Orange 1200, Blue 1650, Green 2100, Purple
@@ -23,7 +23,7 @@
    - PACING (so the journey lasts):
      * A stripe test comes in 4 parts, each a different skill. Part 1 opens at
        25% of the stripe meter, part 2 at 50%, part 3 at 75%, part 4 when full. Pass all 4
-       (85% each) to earn the stripe. Earned stripes "Retest" as one mixed test.
+       (80% each) to earn the stripe. Earned stripes "Retest" as one mixed test.
      * Easier work earns fewer points. Each subject has a level (p.peak: the
        highest grade placed or moved up to; clicking a lower grade never lowers
        it). Practice below that level still builds THAT grade's belt, at
@@ -31,7 +31,7 @@
 window.BD = window.BD || {};
 
 BD.Rank = (function () {
-  const PASS = 85;
+  const PASS = 80; // 5 of 6, 4 of 5 and 8 of 10 all pass
   /* Belt XP per stripe for each belt (White to Red); Black works on degrees. */
   const STRIPE_XP = [450, 900, 1200, 1650, 2100, 2550, 2850, 3300];
   /* Belt XP per game XP: evens out how fast each game pays (about 10 Belt XP a minute). */
@@ -235,7 +235,7 @@ BD.Rank = (function () {
     const d = r.deg || 0, size = degStripe(Math.min(d, 4)), x = Math.min(4 * size, r.dxp || 0);
     return { deg: d, next: Math.min(5, d + 1), master: d >= 5, size: size, xp: Math.floor(x), max: 4 * size, stripes: d >= 5 ? 4 : Math.min(4, Math.floor(x / size)), ready: d < 5 && x >= 4 * size, testXP: size, day: degDay(Math.min(d, 4)), name: DEG_NAMES[Math.min(5, d)], nextName: DEG_NAMES[Math.min(5, d + 1)] };
   }
-  /* A Degree Test result (mixed questions, 85% to pass). */
+  /* A Degree Test result (mixed questions, 80% to pass). */
   function degreeDone(p, grade, pct) {
     const r = rec(p, grade), i = degInfo(r), out = { grade: grade, pct: pct, passed: pct >= PASS && i.ready, from: i.deg, xp: 0 };
     if (out.passed) {
@@ -362,14 +362,14 @@ BD.Rank = (function () {
     if (r.belt >= 8) {
       const d = degInfo(r);
       if (d.master) return [{ kind: "degree", title: "Master Rank!", sub: "You earned every degree in " + BD.gradeLabel(g) + ". Keep your skills sharp." }];
-      if (d.ready) return [{ kind: "degreeTest", title: d.nextName + " test", sub: "Mixed questions from every subject. Score 85% to promote." }];
+      if (d.ready) return [{ kind: "degreeTest", title: d.nextName + " test", sub: "Mixed questions from every subject. Score " + PASS + "% to promote." }];
       return [{ kind: "stripePractice", subject: lowKey(r), title: "Train for your " + d.nextName, sub: d.xp + " / " + d.max + " Belt XP · " + d.stripes + " of 4 degree stripes. Practice any subject." }];
     }
     const open = SUBJECTS.filter(function (s) { return !s.optional && !r.stripes[s.key]; });
     const ready = open.filter(function (s) { const n = nextPart(r, s.key); return n && n.open; });
     ready.forEach(function (s) {
       const n = nextPart(r, s.key), sk = partSkills(s.key, g)[n.i];
-      out.push({ kind: "stripeTest", subject: s.key, title: s.label + " stripe test: Part " + (n.i + 1) + " of 4", sub: sk.label + ". Score 85% to pass this part." });
+      out.push({ kind: "stripeTest", subject: s.key, title: s.label + " stripe test: Part " + (n.i + 1) + " of 4", sub: sk.label + ". Score " + PASS + "% to pass this part." });
     });
     if (!ready.length && open.length) {
       const low = open.slice().sort(function (a, b) { return (r.xp[a.key] || 0) - (r.xp[b.key] || 0); })[0];

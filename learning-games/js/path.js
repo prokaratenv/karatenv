@@ -108,7 +108,7 @@ BD.Path = (function () {
   function degreeRender(p, box, g, r) {
     const d = BD.Rank.degInfo(r), REG = BD.Quest.REGIONS, reg = REG[REG.length - 1], b = bossInfo(p), nx = next(p);
     const rows = [];
-    if (d.ready) rows.push({ id: "deg-test", t: d.nextName + " test", s: "Mixed questions from every subject · 85% to promote", icon: "test", first: true });
+    if (d.ready) rows.push({ id: "deg-test", t: d.nextName + " test", s: "Mixed questions from every subject · " + BD.Rank.PASS + "% to promote", icon: "test", first: true });
     if (!b.beat) rows.push({ id: "boss", t: "Beat " + b.boss.name, s: "Black Belt boss · win a trophy", img: b.boss.img, first: !rows.length && nx.kind === "boss" });
     if (!d.master && !d.ready && BD.Mixed) rows.push({ id: "mixed", t: "Daily Training", s: "All 4 subjects mixed · fills your degree meter", icon: "grad", first: nx.kind === "mixed" || !rows.length });
     if (!d.master && !d.ready) ORDER.forEach(function (k) { if (rows.length < 3) rows.push({ id: "deg-" + k, t: NAME[k] + " practice", s: "Fills your degree meter: " + d.xp + " of " + d.max + " Belt XP", icon: k, subject: k, first: !rows.length }); });
@@ -166,7 +166,7 @@ BD.Path = (function () {
     for (let c = 0; c < 4; c++) if (list.some(function (n) { return n.ch === c && !n.side && n.state !== "done"; })) return c;
     return 3;
   }
-  const LEN = { math: "10 problems", reading: "5 sentences", spelling: "6 words", comprehension: "3 to 4 questions" };
+  const LEN = { math: "10 problems", reading: "5 sentences", spelling: "6 words", comprehension: "4 questions, one miss OK" };
   function skillOf(n, g) {
     try { const sk = BD.Rank.partSkills(n.subject, g)[n.part]; return sk && sk.label ? sk.label : ""; } catch (e) { return ""; }
   }

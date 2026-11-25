@@ -5,8 +5,10 @@
 window.BD = window.BD || {};
 
 BD.Reading = (function () {
-  const PASSAGES_PER_ROUND = 2, TRIES = 2, PASS = 70;
-  const XP = [[0, 12, 25], [0, 8, 15]]; // [try][score]
+  const PASSAGES_PER_ROUND = 1, TRIES = 2, PASS = 60; // one story (3 questions) per round; one miss is never a fail
+  const XP = [[0, 15, 30], [0, 10, 20]]; // [try][score]: typed answers take longer, so they earn more
+  /* "Partly there" counts most of a question: 1 = got it, 0.75 = partly, 0 = not yet. */
+  function credit(best) { return best === 2 ? 1 : best === 1 ? 0.75 : 0; }
   const $ = function (id) { return document.getElementById(id); };
   let R = null;
 
@@ -166,24 +168,26 @@ BD.Reading = (function () {
     return out;
   }
 
-  /* One part of the Comprehension stripe test: 3 or 4 questions of one kind
-     (main idea, details, reading between the lines, word meaning), drawn from
-     short stories. Falls back to a whole story if that kind is rare. */
+  /* One part of the Comprehension stripe test: 4 questions of one kind
+     (main idea, details, reading between the lines, word meaning), from as few
+     short stories as possible (stories are written to lean on that kind).
+     Falls back to a whole story if that kind is rare. */
   function partPassages(p, grade, beltIndex, type) {
     const out = [], seen = [];
     let n = 0;
-    for (let k = 0; k < 4 && n < 3; k++) {
-      beltPassages(p, grade, beltIndex).forEach(function (x) {
-        if (!x || seen.indexOf(x.id) !== -1 || n >= 4) return; seen.push(x.id);
-        const qs = (x.questions || []).filter(function (q) { return q.type === type; }).slice(0, 4 - n);
-        if (qs.length) { out.push(Object.assign({}, x, { questions: qs })); n += qs.length; }
-      });
+    for (let k = 0; k < 6 && n < 4; k++) {
+      const g = BD.Rank.itemGrade(grade, beltIndex);
+      let x = null;
+      if (BD.StoryGen) { try { x = BD.StoryGen.pick(p, g, 1, type, out.concat(seen.map(function (id) { return { id: id }; })))[0]; } catch (e) { x = null; } }
+      if (!x) x = beltPassages(p, grade, beltIndex)[0];
+      if (!x || seen.indexOf(x.id) !== -1) continue; seen.push(x.id);
+      const qs = (x.questions || []).filter(function (q) { return q.type === type; }).slice(0, 4 - n);
+      if (qs.length) { out.push(Object.assign({}, x, { questions: qs })); n += qs.length; }
     }
     if (n < 2) { const one = beltPassages(p, grade, beltIndex)[0]; return one ? [one] : out; }
     return out;
   }
 
-  /* stripe = { grade, belt, test } when started from the belt panel. */
   function start(focus, stripe) {
     const p = BD.Store.current();
     if (BD.Little && BD.Little.take("reading", stripe)) return; // Preschool and Pre-K: the Little Ninjas picture games
@@ -373,14 +377,16 @@ BD.Reading = (function () {
 
   function finish() {
     const p = BD.Store.current(), grade = R.grade;
-    const max = R.results.length * 2;
-    const pts = R.results.reduce(function (a, x) { return a + x.best; }, 0);
-    const acc = Math.round(100 * pts / max);
+    const max = R.results.length;
+    const pts = R.results.reduce(function (a, x) { return a + credit(x.best); }, 0);
+    const acc = Math.round(100 * pts / Math.max(1, max));
     const full = R.results.filter(function (x) { return x.best === 2; }).length;
     if (R.test) {
       p.seenPassages = R.passages.map(function (x) { return x.id; }).concat(p.seenPassages).slice(0, 200);
       const review = R.results.filter(function (x) { return x.best < 2; }).map(function (x) { return x.q + " → " + x.answer; });
-      BD.UI.stripeResult({ subject: "comprehension", grade: grade, part: R.stripe ? R.stripe.part : undefined, pct: acc, score: pts + " / " + max + " points", review: review, again: function () { start(null, Object.assign({}, R.stripe, { grade: grade, belt: BD.Rank.rec(p, grade).belt, test: true })); } });
+      // Story tests: everything right but one question passes (3 of 4, 4 of 5, 5 of 6), even below the % bar.
+      const passPct = R.results.length >= 3 && pts >= R.results.length - 1 ? Math.max(acc, BD.Rank.PASS) : acc;
+      BD.UI.stripeResult({ subject: "comprehension", grade: grade, part: R.stripe ? R.stripe.part : undefined, pct: passPct, realPct: acc, oneMiss: passPct > acc, score: (Math.round(pts * 4) / 4) + " / " + max + " questions", review: review, again: function () { start(null, Object.assign({}, R.stripe, { grade: grade, belt: BD.Rank.rec(p, grade).belt, test: true })); } });
       return;
     }
     const stripeAgain = R.stripe ? { grade: grade, belt: BD.Rank.rec(p, grade).belt, test: false } : null;
@@ -397,7 +403,7 @@ BD.Reading = (function () {
     BD.UI.results({
       title: failed ? "Let's train this again" : wasRetry ? "Level passed!" : acc >= 90 ? "Outstanding reading!" : "Strong reading!",
       subtitle: "Story Scrolls · " + BD.gradeLabel(grade) + (R.focus ? " · Focus: " + BD.READ_TYPES[R.focus].label : ""),
-      failed: failed ? "You scored " + acc + "%. You need " + PASS + "% to pass " + BD.gradeLabel(grade) + ". Read the reading tips below, then try two new stories at this level." : null,
+      failed: failed ? "You scored " + acc + "%. You need " + PASS + "% to pass " + BD.gradeLabel(grade) + ". Read the reading tips below, then try a new story at this level." : null,
       passedRetry: wasRetry && !failed ? "You passed with " + acc + "%. All grade levels are unlocked again." : null,
       stats: [["Got it", full + " / " + R.results.length], ["Score", acc + "%"], ["Stories", R.passages.length], ["XP earned", "+" + R.xp]],
       belt: belt,
@@ -405,7 +411,7 @@ BD.Reading = (function () {
       listTitle: "", list: [],
       levelUp: ready ? { text: "You scored " + acc + "% at " + BD.gradeLabel(grade) + ". Ready for " + BD.gradeLabel((grade + 1)) + " stories?", action: function () { p.readingGrade = grade + 1; BD.Store.save(p); start(); } } : null,
       again: function () { start(null, stripeAgain); },
-      againLabel: failed ? "Redo this level" : "Two new stories",
+      againLabel: failed ? "Redo this level" : "New story",
       setup: null
     });
   }
@@ -432,14 +438,14 @@ BD.Reading = (function () {
   /* ---------- Sensei's plan items for reading ---------- */
   function planItems(p) {
     const items = [];
-    if (p.retry && p.retry.reading) return [{ kind: "readRetry", title: "Pass " + BD.gradeLabel(p.retry.reading.grade) + " Story Scrolls", sub: "Score 70% to unlock other grades." }];
+    if (p.retry && p.retry.reading) return [{ kind: "readRetry", title: "Pass " + BD.gradeLabel(p.retry.reading.grade) + " Story Scrolls", sub: "Score " + PASS + "% to unlock other grades." }];
     const g = p.readingGrade;
     const rates = Object.keys(BD.READ_TYPES).map(function (t) { const a = (p.readRecent[g] || {})[t]; return { t: t, n: a ? a.length : 0, r: BD.Coach.rate(a) }; }).filter(function (x) { return x.n >= 3; });
     const weak = rates.filter(function (x) { return x.r < 0.7; }).sort(function (a, b) { return a.r - b.r; })[0];
     if (weak) items.push({ kind: "readFocus", type: weak.t, title: "Practice " + BD.READ_TYPES[weak.t].label.toLowerCase() + " questions", sub: BD.gradeLabel(g) + " stories · " + Math.round(weak.r * 100) + "% lately." });
     else if (g < BD.MAX_GRADE && rates.length >= 3 && rates.every(function (x) { return x.r >= 0.85 && x.n >= 5; }))
       items.push({ kind: "readUp", grade: g + 1, title: "Ready for " + BD.gradeLabel((g + 1)) + " stories", sub: "You're understanding almost everything at " + BD.gradeLabel(g) + "." });
-    else if (!p.sessions.some(function (x) { return x.game === "reading"; })) items.push({ kind: "readStart", title: "Try Story Scrolls", sub: "Read two short stories and answer in your own words." });
+    else if (!p.sessions.some(function (x) { return x.game === "reading"; })) items.push({ kind: "readStart", title: "Try Story Scrolls", sub: "Read a short story and answer in your own words." });
     return items;
   }
 
