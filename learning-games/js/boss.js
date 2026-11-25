@@ -20,8 +20,17 @@ BD.QuickUI = (function () {
       (q.sub ? '<p class="qq-sub">' + (q.subIsHTML ? q.sub : esc(q.sub)) + '</p>' : '') +
       '<div class="qq-choices' + (q.long ? ' long' : '') + '">' + q.choices.map(function (c, i) {
         return '<button type="button" class="choice qq-choice" data-i="' + i + '">' + esc(c) + '</button>';
-      }).join("") + '</div>';
+      }).join("") + '</div>' +
+      // math: scratch paper always (tests too); Teach me only where hints are allowed (boss battles, kata), never in tests
+      (q.kind === "math" && q.prob && opts.tools !== false ? '<div class="qq-tools"><button type="button" class="btn btn-quiet scratch-btn" data-qtool="scratch"><span aria-hidden="true">✏️</span> Scratch paper</button>' +
+        (opts.hints && BD.Teach && BD.Teach.has(BD.Teach.topicOf(q.prob)) ? '<button type="button" class="btn btn-quiet teach-btn" data-qtool="teach"><span aria-hidden="true">🎓</span> Teach me</button>' : '') + '</div>' : '');
     el.onclick = function (e) {
+      const t = e.target.closest("[data-qtool]");
+      if (t) {
+        if (t.dataset.qtool === "scratch" && BD.Scratch) { BD.Scratch.clear(); BD.Scratch.open({ problem: function () { return q.prompt; } }); }
+        else if (t.dataset.qtool === "teach" && BD.Teach) BD.Teach.open(q.prob, { grade: opts.grade });
+        return;
+      }
       const b = e.target.closest(".qq-choice"); if (!b || b.disabled) return;
       onPick(q.choices[Number(b.dataset.i)], b);
     };

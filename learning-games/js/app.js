@@ -324,7 +324,13 @@ BD.UI = (function () {
     $("stripeSay").textContent = "Zumi: " + (res.partOnly && res.partPassed ? BD.Cast.line("win") + " Next up: Part " + (np.i + 1) + ", " + BD.Rank.partSkills(o.subject, o.grade)[np.i].label + (np.open ? ". It's ready when you are!" : ". It opens at " + np.need + " practice XP.") :
       res.passed ? BD.Cast.line("win") : BD.Cast.line("retry"));
     $("stripeReview").hidden = !o.review || !o.review.length;
-    $("stripeReviewList").innerHTML = (o.review || []).slice(0, 12).map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("");
+    // Missed test problems become teaching moments: each gets a Teach me lesson (tests themselves stay hint-free)
+    const tq = o.teach || [];
+    $("stripeReviewList").innerHTML = (o.review || []).slice(0, 12).map(function (x, i) {
+      const can = tq[i] && BD.Teach && BD.Teach.has(BD.Teach.topicOf(tq[i]));
+      return "<li>" + esc(x) + (can ? ' <button type="button" class="btn btn-small btn-quiet teach-btn" data-teach-i="' + i + '"><span aria-hidden="true">🎓</span> Teach me</button>' : "") + "</li>";
+    }).join("");
+    $("stripeReviewList").onclick = function (e) { const b = e.target.closest("[data-teach-i]"); if (b) BD.Teach.open(tq[Number(b.dataset.teachI)], { grade: o.grade }); };
     $("stripeRetry").hidden = res.passed || !!res.partPassed;
     $("stripeHome").textContent = res.graduated ? "Graduate!" : "Back to my belt";
     $("stripeHome").onclick = function () { if (res.graduated) graduation(res); else home(); };

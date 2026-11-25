@@ -265,7 +265,8 @@ BD.Placement = (function () {
       (it.sub ? '<p class="place-sub">' + esc(it.sub) + '</p>' : "") +
       '<div class="place-choices' + (it.long ? " long" : "") + (it.choices.length === 3 && !it.long ? " three" : "") + '">' +
       it.choices.map(function (c, i) { return '<button type="button" class="choice place-choice" data-pl="pick" data-i="' + i + '">' + esc(c) + '</button>'; }).join("") +
-      '</div><p class="place-feedback" id="placeFeedback" role="status" aria-live="polite"></p></div>';
+      '</div>' + (s.key === "math" && st.grade >= 1 && BD.Scratch ? '<button type="button" class="btn btn-quiet scratch-btn" data-pl="scratch"><span aria-hidden="true">✏️</span> Scratch paper</button>' : '') +
+      '<p class="place-feedback" id="placeFeedback" role="status" aria-live="polite"></p></div>';
     if (BD.ReadAloud.auto(st.grade)) speak();
   }
   function speak() {
@@ -371,6 +372,7 @@ BD.Placement = (function () {
     const act = b.dataset.pl;
     if (act === "go" || act === "ready") { if (BD.Sound) BD.Sound.tap(); if (act === "go") nextSubject(); else ask(); }
     else if (act === "say") speak();
+    else if (act === "scratch") { const it = S.item; BD.Scratch.clear(); BD.Scratch.open({ problem: function () { return it ? it.prompt : ""; } }); }
     else if (act === "pick") pick(Number(b.dataset.i));
     else if (act === "done") { if (BD.Sound) BD.Sound.tap(); close(false); BD.UI.home(); } // either way the student is ready to train
   }

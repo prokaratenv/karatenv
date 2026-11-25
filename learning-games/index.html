@@ -28,8 +28,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cabin:wght@400;600;700&family=Montserrat:ital,wght@0,600;0,700;0,800;0,900;1,800;1,900&display=swap">
-<link rel="stylesheet" href="css/style.css?v=446dfdd2a5">
-<link rel="stylesheet" href="css/more.css?v=446dfdd2a5">
+<link rel="stylesheet" href="css/style.css?v=3152cd14d3">
+<link rel="stylesheet" href="css/more.css?v=3152cd14d3">
 <script>
 /* Get onto the newest version even if an older offline copy is in charge (this page itself is always fresh). */
 (function () {
@@ -300,10 +300,12 @@
         <p class="muted small">This card will come back in a few cards. Try it again then!</p>
         <div class="explain-actions">
           <button type="button" class="btn sensei-btn" id="mathExplainAsk">Still confused? Ask Sensei</button>
+          <button type="button" class="btn btn-gold teach-btn" id="mathExplainTeach" hidden><span aria-hidden="true">🎓</span> Teach me step by step</button>
           <button type="button" class="btn btn-primary" id="mathGotIt">Got it, next card</button>
         </div>
       </div>
       <button type="button" class="btn btn-quiet scratch-btn" id="mathScratch"><span aria-hidden="true">✏️</span> Scratch paper</button>
+      <button type="button" class="btn btn-quiet teach-btn" id="mathTeach"><span aria-hidden="true">🎓</span> Teach me</button>
       <div class="pic-choices" id="mathChoices" hidden></div>
       <div class="keypad" id="mathKeypad"></div>
     </section>
@@ -716,75 +718,76 @@
   </div>
 </div>
 
-<script src="data/sentence-bank.js?v=446dfdd2a5"></script>
-<script src="data/reading-bank.js?v=446dfdd2a5"></script>
-<script src="data/spanish-bank.js?v=446dfdd2a5"></script>
-<script src="data/spelling-bank.js?v=446dfdd2a5"></script>
-<script src="data/spelling-hints.js?v=446dfdd2a5"></script>
-<script src="data/spelling-hints-68.js?v=446dfdd2a5"></script>
-<script src="data/near-words.js?v=446dfdd2a5"></script>
-<script src="js/wordsafe.js?v=446dfdd2a5"></script>
-<script src="js/config.js?v=446dfdd2a5"></script>
-<script src="js/storage.js?v=446dfdd2a5"></script>
-<script src="js/icons.js?v=446dfdd2a5"></script>
-<script src="js/cast.js?v=446dfdd2a5"></script>
-<script src="js/logo-box.js?v=446dfdd2a5"></script>
-<script src="js/rank.js?v=446dfdd2a5"></script>
-<script src="js/builder.js?v=446dfdd2a5"></script>
-<script src="js/studio.js?v=446dfdd2a5"></script>
-<script src="js/effects.js?v=446dfdd2a5"></script>
-<script src="js/kid.js?v=446dfdd2a5"></script>
-<script src="js/breaks.js?v=446dfdd2a5"></script>
-<script src="js/music.js?v=446dfdd2a5"></script>
-<script src="js/explain.js?v=446dfdd2a5"></script>
-<script src="js/hints.js?v=446dfdd2a5"></script>
-<script src="js/coach.js?v=446dfdd2a5"></script>
-<script src="js/sentence-gen.js?v=446dfdd2a5"></script>
-<script src="js/story-gen.js?v=446dfdd2a5"></script>
-<script src="js/phonics.js?v=446dfdd2a5"></script>
-<script src="js/reading-game.js?v=446dfdd2a5"></script>
-<script src="js/word-quiz.js?v=446dfdd2a5"></script>
-<script src="js/school.js?v=446dfdd2a5"></script>
-<script src="js/sync.js?v=446dfdd2a5"></script>
-<script src="js/sensei.js?v=446dfdd2a5"></script>
-<script src="js/mathtopics.js?v=446dfdd2a5"></script>
-<script src="js/math-game.js?v=446dfdd2a5"></script>
-<script src="js/sentence-game.js?v=446dfdd2a5"></script>
-<script src="js/scratch.js?v=446dfdd2a5"></script>
-<script src="js/quick.js?v=446dfdd2a5"></script>
-<script src="js/boss.js?v=446dfdd2a5"></script>
-<script src="js/little.js?v=446dfdd2a5"></script>
-<script src="js/mixed.js?v=446dfdd2a5"></script>
-<script src="js/duel.js?v=446dfdd2a5"></script>
-<script src="js/tournament.js?v=446dfdd2a5"></script>
-<script src="js/teams.js?v=446dfdd2a5"></script>
-<script src="js/challenge.js?v=446dfdd2a5"></script>
-<script src="js/badges.js?v=446dfdd2a5"></script>
-<script src="js/mini.js?v=446dfdd2a5"></script>
-<script src="js/backup.js?v=446dfdd2a5"></script>
-<script src="js/certificate.js?v=446dfdd2a5"></script>
-<script src="js/parent.js?v=446dfdd2a5"></script>
-<script src="js/dojo.js?v=446dfdd2a5"></script>
-<script src="js/quest.js?v=446dfdd2a5"></script>
-<script src="js/leads.js?v=446dfdd2a5"></script>
-<script src="js/family.js?v=446dfdd2a5"></script>
-<script src="js/settings.js?v=446dfdd2a5"></script>
-<script src="js/standards.js?v=446dfdd2a5"></script>
-<script src="data/spanish-course.js?v=446dfdd2a5"></script>
-<script src="js/spanish.js?v=446dfdd2a5"></script>
-<script src="js/placement.js?v=446dfdd2a5"></script>
-<script src="js/readalong.js?v=446dfdd2a5"></script>
-<script src="js/digest.js?v=446dfdd2a5"></script>
-<script src="js/bugs.js?v=446dfdd2a5"></script>
-<script src="js/goals.js?v=446dfdd2a5"></script>
-<script src="js/phrases.js?v=446dfdd2a5"></script>
-<script src="js/prefs.js?v=446dfdd2a5"></script>
-<script src="js/feel.js?v=446dfdd2a5"></script>
-<script src="js/install.js?v=446dfdd2a5"></script>
-<script src="js/path.js?v=446dfdd2a5"></script>
-<script src="js/degrees.js?v=446dfdd2a5"></script>
-<script src="js/correct.js?v=446dfdd2a5"></script>
-<script src="js/alive.js?v=446dfdd2a5"></script>
-<script src="js/app.js?v=446dfdd2a5"></script>
+<script src="data/sentence-bank.js?v=3152cd14d3"></script>
+<script src="data/reading-bank.js?v=3152cd14d3"></script>
+<script src="data/spanish-bank.js?v=3152cd14d3"></script>
+<script src="data/spelling-bank.js?v=3152cd14d3"></script>
+<script src="data/spelling-hints.js?v=3152cd14d3"></script>
+<script src="data/spelling-hints-68.js?v=3152cd14d3"></script>
+<script src="data/near-words.js?v=3152cd14d3"></script>
+<script src="js/wordsafe.js?v=3152cd14d3"></script>
+<script src="js/config.js?v=3152cd14d3"></script>
+<script src="js/storage.js?v=3152cd14d3"></script>
+<script src="js/icons.js?v=3152cd14d3"></script>
+<script src="js/cast.js?v=3152cd14d3"></script>
+<script src="js/logo-box.js?v=3152cd14d3"></script>
+<script src="js/rank.js?v=3152cd14d3"></script>
+<script src="js/builder.js?v=3152cd14d3"></script>
+<script src="js/studio.js?v=3152cd14d3"></script>
+<script src="js/effects.js?v=3152cd14d3"></script>
+<script src="js/kid.js?v=3152cd14d3"></script>
+<script src="js/breaks.js?v=3152cd14d3"></script>
+<script src="js/music.js?v=3152cd14d3"></script>
+<script src="js/explain.js?v=3152cd14d3"></script>
+<script src="js/teach.js?v=3152cd14d3"></script>
+<script src="js/hints.js?v=3152cd14d3"></script>
+<script src="js/coach.js?v=3152cd14d3"></script>
+<script src="js/sentence-gen.js?v=3152cd14d3"></script>
+<script src="js/story-gen.js?v=3152cd14d3"></script>
+<script src="js/phonics.js?v=3152cd14d3"></script>
+<script src="js/reading-game.js?v=3152cd14d3"></script>
+<script src="js/word-quiz.js?v=3152cd14d3"></script>
+<script src="js/school.js?v=3152cd14d3"></script>
+<script src="js/sync.js?v=3152cd14d3"></script>
+<script src="js/sensei.js?v=3152cd14d3"></script>
+<script src="js/mathtopics.js?v=3152cd14d3"></script>
+<script src="js/math-game.js?v=3152cd14d3"></script>
+<script src="js/sentence-game.js?v=3152cd14d3"></script>
+<script src="js/scratch.js?v=3152cd14d3"></script>
+<script src="js/quick.js?v=3152cd14d3"></script>
+<script src="js/boss.js?v=3152cd14d3"></script>
+<script src="js/little.js?v=3152cd14d3"></script>
+<script src="js/mixed.js?v=3152cd14d3"></script>
+<script src="js/duel.js?v=3152cd14d3"></script>
+<script src="js/tournament.js?v=3152cd14d3"></script>
+<script src="js/teams.js?v=3152cd14d3"></script>
+<script src="js/challenge.js?v=3152cd14d3"></script>
+<script src="js/badges.js?v=3152cd14d3"></script>
+<script src="js/mini.js?v=3152cd14d3"></script>
+<script src="js/backup.js?v=3152cd14d3"></script>
+<script src="js/certificate.js?v=3152cd14d3"></script>
+<script src="js/parent.js?v=3152cd14d3"></script>
+<script src="js/dojo.js?v=3152cd14d3"></script>
+<script src="js/quest.js?v=3152cd14d3"></script>
+<script src="js/leads.js?v=3152cd14d3"></script>
+<script src="js/family.js?v=3152cd14d3"></script>
+<script src="js/settings.js?v=3152cd14d3"></script>
+<script src="js/standards.js?v=3152cd14d3"></script>
+<script src="data/spanish-course.js?v=3152cd14d3"></script>
+<script src="js/spanish.js?v=3152cd14d3"></script>
+<script src="js/placement.js?v=3152cd14d3"></script>
+<script src="js/readalong.js?v=3152cd14d3"></script>
+<script src="js/digest.js?v=3152cd14d3"></script>
+<script src="js/bugs.js?v=3152cd14d3"></script>
+<script src="js/goals.js?v=3152cd14d3"></script>
+<script src="js/phrases.js?v=3152cd14d3"></script>
+<script src="js/prefs.js?v=3152cd14d3"></script>
+<script src="js/feel.js?v=3152cd14d3"></script>
+<script src="js/install.js?v=3152cd14d3"></script>
+<script src="js/path.js?v=3152cd14d3"></script>
+<script src="js/degrees.js?v=3152cd14d3"></script>
+<script src="js/correct.js?v=3152cd14d3"></script>
+<script src="js/alive.js?v=3152cd14d3"></script>
+<script src="js/app.js?v=3152cd14d3"></script>
 </body>
 </html>

@@ -21,7 +21,7 @@ BD.Quick = (function () {
     cands.forEach(function (c) { if (wrong.length < 3 && c !== ans && wrong.indexOf(c) === -1 && (neg || c >= 0) && Number.isInteger(c)) wrong.push(c); });
     const fmt = function (n) { return String(n).replace("-", "−"); };
     const shown = BD.MathGame.show(q) + " = ?";
-    return { kind: "math", label: "Math", prompt: shown, choices: shuffle([ans].concat(wrong)).map(fmt), answer: fmt(ans), say: q.say || "What is " + BD.ReadAloud.words(BD.MathGame.show(q)) + "?" };
+    return { kind: "math", label: "Math", prompt: shown, choices: shuffle([ans].concat(wrong)).map(fmt), answer: fmt(ans), say: q.say || "What is " + BD.ReadAloud.words(BD.MathGame.show(q)) + "?", prob: q };
   }
 
   function spelling(grade) {

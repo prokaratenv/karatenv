@@ -60,7 +60,7 @@ BD.Duel = (function () {
   function ask(pl) {
     if (!D || D.over) return;
     pl.q = BD.Quick.question(pl.grade);
-    BD.QuickUI.render($("duelQ" + pl.n), pl.q, function (v) { pick(pl, v); });
+    BD.QuickUI.render($("duelQ" + pl.n), pl.q, function (v) { pick(pl, v); }, { tools: false }); // two players share the screen: no full-screen scratch pad
   }
   function pick(pl, v) {
     if (!D || D.over || Date.now() < pl.frozenUntil || pl.busy) return;

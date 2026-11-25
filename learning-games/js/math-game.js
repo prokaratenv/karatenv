@@ -355,6 +355,9 @@ BD.MathGame = (function () {
     $("mathScore").textContent = S.xp + " XP";
     $("mathKeyMinus").hidden = S.grade < 6 && q.answer >= 0; // negative numbers start in 6th grade
     $("mathAsk").hidden = S.mode === "clock" || S.test;
+    // Teach me: a step-by-step lesson for this kind of problem (never during tests or timed rounds)
+    S.teachUsed = false;
+    $("mathTeach").hidden = !BD.Teach || S.test || S.mode === "clock" || S.mode === "flash" || !BD.Teach.has(BD.Teach.topicOf(q));
     // Hints: a strategy, then a worked first step (never in stripe tests)
     BD.Hints.bar($("mathCard").parentNode, "math", $("mathExplain"));
     const base = BD.Hints.math(q);
@@ -400,7 +403,8 @@ BD.MathGame = (function () {
     if (right) {
       S.correct++; S.streak++; S.bestStreak = Math.max(S.bestStreak, S.streak); st.r++;
       if (!S.test && BD.Correct) BD.Correct.hit(p, document.getElementById("mathAnswer"));
-      const gain = Math.max(2, Math.round((10 + Math.min(S.streak - 1, 10)) * BD.Hints.factor(BD.Hints.used("math"))));
+      const fac = Math.min(BD.Hints.factor(BD.Hints.used("math")), S.teachUsed ? BD.Hints.FACTOR[1] : 1); // a Teach me lesson counts like one hint
+      const gain = Math.max(2, Math.round((10 + Math.min(S.streak - 1, 10)) * fac));
       S.xp += gain;
       if (tk) { tk.misses--; if (tk.misses <= 0) delete p.tricky[q.key]; }
       $("mathCard").className = "flashcard is-right";
@@ -429,9 +433,13 @@ BD.MathGame = (function () {
   }
 
   function showExplain(q) {
-    S.explaining = true;
+    S.explaining = true; S.explainQ = q;
     $("mathSteps").innerHTML = BD.Explain.math(q).map(function (t) { return "<li>" + BD.UI.esc(t) + "</li>"; }).join("");
     $("mathExplainTitle").textContent = "How to solve " + show(q);
+    const canTeach = !!(BD.Teach && BD.Teach.has(BD.Teach.topicOf(q)));
+    $("mathExplainTeach").hidden = !canTeach;
+    $("mathExplainTeach").classList.toggle("pulse", !!(canTeach && q.retry)); // missed twice: gently point to the lesson
+    $("mathExplainTeach").innerHTML = '<span aria-hidden="true">🎓</span> ' + (q.retry ? "Missed it twice? Teach me step by step" : "Teach me step by step");
     $("mathExplain").hidden = false;
     $("mathKeypad").hidden = true; $("mathChoices").hidden = true;
     setTimeout(function () { $("mathGotIt").focus(); }, 50);
@@ -495,8 +503,9 @@ BD.MathGame = (function () {
     const acc = S.answered ? Math.round(100 * S.correct / S.answered) : 0;
     if (S.test) {
       const review = [];
-      S.missed.forEach(function (q) { const t = show(q) + " = " + num(q.answer); if (review.indexOf(t) === -1) review.push(t); });
-      BD.UI.stripeResult({ subject: "math", grade: grade, part: S.stripe ? S.stripe.part : undefined, pct: acc, score: S.correct + " / " + S.answered, review: review, again: function () { start("practice", null, Object.assign({}, S.stripe, { grade: grade, belt: BD.Rank.rec(p, grade).belt, test: true })); } });
+      const teach = [];
+      S.missed.forEach(function (q) { const t = show(q) + " = " + num(q.answer); if (review.indexOf(t) === -1) { review.push(t); teach.push(q); } });
+      BD.UI.stripeResult({ subject: "math", grade: grade, part: S.stripe ? S.stripe.part : undefined, pct: acc, score: S.correct + " / " + S.answered, review: review, teach: teach, again: function () { start("practice", null, Object.assign({}, S.stripe, { grade: grade, belt: BD.Rank.rec(p, grade).belt, test: true })); } });
       return;
     }
     let record = false;
@@ -593,6 +602,13 @@ BD.MathGame = (function () {
       const b = e.target.closest("[data-key]"); if (b) press(b.dataset.key);
     });
     $("mathQuit").addEventListener("click", BD.UI.back);
+    const teachNow = function () {
+      if (!S || S.test || !BD.Teach) return;
+      S.teachUsed = true;
+      BD.Teach.open(S.explaining ? S.explainQ || current() : current(), { grade: S.grade });
+    };
+    $("mathTeach").addEventListener("click", teachNow);
+    $("mathExplainTeach").addEventListener("click", teachNow);
     $("mathScratch").addEventListener("click", function () {
       if (!S) return;
       BD.Scratch.open({ problem: function () { return S ? show(current()) + " = ?" : ""; }, answerEl: $("mathAnswer"), keypadEl: $("mathKeypad") });

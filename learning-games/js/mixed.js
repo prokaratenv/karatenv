@@ -256,7 +256,8 @@ BD.Mixed = (function () {
   function renderMath(el, it) {
     S.typed = "";
     el.innerHTML = '<p class="mix-problem">' + esc(it.prompt) + ' <span class="mix-ans" id="mixAns">?</span></p>' +
-      '<button type="button" class="btn btn-quiet scratch-btn mix-scratch" id="mixScratch">' + '<span aria-hidden="true">✏️</span><span>Scratch paper</span></button>' +
+      '<div class="mix-tools">' + '<button type="button" class="btn btn-quiet scratch-btn mix-scratch" id="mixScratch">' + '<span aria-hidden="true">✏️</span><span>Scratch paper</span></button>' +
+      (it.mq && BD.Teach && BD.Teach.has(BD.Teach.topicOf(it.mq)) ? BD.Teach.button("mix-teach") : "") + '</div>' +
       '<div class="keypad mix-keys" id="mixKeys">' + ["7", "8", "9", "4", "5", "6", "1", "2", "3", it.neg ? "−" : "", "0", "⌫"].map(function (k) {
         return k ? '<button type="button" class="key' + (k === "⌫" ? " key-back" : k === "−" ? " key-minus" : "") + '" data-k="' + k + '">' + k + '</button>' : '<span></span>';
       }).join("") + '<button type="button" class="key key-go" data-k="go">Check</button></div>';
@@ -276,6 +277,9 @@ BD.Mixed = (function () {
       BD.Sound.tap();
       $("mixAns").textContent = S.typed ? S.typed.replace("-", "−") : "?";
     };
+    S.teachUsed = false;
+    const tb = el.querySelector(".mix-teach");
+    if (tb) tb.onclick = function () { S.teachUsed = true; BD.Teach.open(it.mq, { grade: it.g }); };
     el.querySelector("#mixScratch").onclick = function () {
       if (!BD.Scratch) return;
       BD.Scratch.clear();
@@ -295,7 +299,7 @@ BD.Mixed = (function () {
     });
     if (ok) {
       b.c++; S.right++;
-      const raw = Math.max(2, Math.round(SUBJ[k].xp * BD.Hints.factor(hintsUsed)));
+      const raw = Math.max(2, Math.round(SUBJ[k].xp * Math.min(BD.Hints.factor(hintsUsed), S.teachUsed ? BD.Hints.FACTOR[1] : 1))); // Teach me counts like one hint
       const res = BD.Rank.practice(p, SUBJ[k].game, it.g, raw);
       b.raw += res.earned; b.belt += res.gained || 0; S.xp += res.earned;
       b.res = res;
@@ -310,8 +314,11 @@ BD.Mixed = (function () {
       BD.Sound.wrong();
       if (BD.Mini && BD.Mini.react) BD.Mini.react("wrong");
       if (it.kind === "math") $("mixCard").classList.add("is-wrong");
-      $("mixFb").innerHTML = '<p class="lose-line">The answer is <strong>' + esc(String(it.answer).replace("-", "−")) + '</strong>.</p><button type="button" class="btn btn-primary" id="mixNext">Next</button>';
+      $("mixFb").innerHTML = '<p class="lose-line">The answer is <strong>' + esc(String(it.answer).replace("-", "−")) + '</strong>.</p>' +
+        (it.mq && BD.Teach && BD.Teach.has(BD.Teach.topicOf(it.mq)) ? '<button type="button" class="btn btn-gold teach-btn" id="mixTeachAfter"><span aria-hidden="true">🎓</span> Teach me how</button> ' : '') +
+        '<button type="button" class="btn btn-primary" id="mixNext">Next</button>';
       $("mixNext").onclick = go;
+      if ($("mixTeachAfter")) $("mixTeachAfter").onclick = function () { BD.Teach.open(it.mq, { grade: it.g }); };
     }
     BD.Store.save(p);
   }
