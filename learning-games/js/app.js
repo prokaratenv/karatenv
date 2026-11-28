@@ -814,6 +814,7 @@ BD.UI = (function () {
         BD.Parent.card(p) +
         BD.School.parentHTML(p) +
         (BD.Teams ? BD.Teams.parentHTML(p) : "") +
+        (BD.XmasTree ? BD.XmasTree.parentHTML(p) : "") +
         (BD.Settings ? BD.Settings.studentHTML(p) : "") +
         (redoList(p).length ? '<div class="redo-note"><strong>Redo needed</strong><p>' + redoList(p).join(", ") +
           '. Scored under ' + BD.MathGame.PASS + '%, so this level stays locked in until they pass it.</p><button type="button" class="btn btn-small" data-act="clearRedo">Unlock all levels</button></div>' : '') +

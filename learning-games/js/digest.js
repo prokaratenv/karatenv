@@ -57,6 +57,7 @@ BD.Digest = (function () {
     }
 
     if (BD.Spanish && BD.Spanish.line) { const sl = BD.Spanish.line(p); if (sl) wins.push(sl); }
+    if (BD.XmasTree && BD.XmasTree.digestLine) { const xl = BD.XmasTree.digestLine(p); if (xl) wins.push(xl); }
     if (BD.Phrases && BD.Phrases.digestLine) { const pl = BD.Phrases.digestLine(p, from, to); if (pl) wins.unshift(pl); }
     const weak = [], ins = BD.Parent.insight(p);
     const addWeak = function (s) { if (s && weak.indexOf(s) === -1) weak.push(s); };

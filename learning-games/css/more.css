@@ -899,3 +899,36 @@ html.holiday .hol-holly { vertical-align: -3px; margin-right: 6px; }
 /* snow caps on the main buttons and cards */
 html.holiday .start-btn, html.holiday .belt-card, html.holiday .game-tile, html.holiday .lh-play { box-shadow: inset 0 5px 0 rgba(255,255,255,.85), inset 0 9px 6px -4px rgba(255,255,255,.35), var(--hol-shadow, 0 6px 16px rgba(0,0,0,.25)); }
 @media (prefers-reduced-motion: reduce) { html.holiday .hol-lights i { animation: none; } }
+
+/* Christmas Tree Reading Challenge (js/xmas-tree.js) */
+.xt { display: grid; gap: 10px; }
+.xt-art { display: flex; justify-content: center; }
+.xt-tree { width: min(240px, 62vw); height: auto; overflow: visible; }
+.xt-tree.small { width: 100%; }
+.xt-next { opacity: .22; }
+.xt-pop { animation: xtPop .9s cubic-bezier(.2, 1.4, .4, 1) both; transform-origin: 100px 120px; transform-box: view-box; }
+@keyframes xtPop { 0% { opacity: 0; transform: scale(.6) translateY(-14px); } 100% { opacity: 1; transform: none; } }
+.xt-bulb { animation: xtTwinkle 1.4s ease-in-out infinite alternate; }
+@keyframes xtTwinkle { from { opacity: .45; } to { opacity: 1; } }
+.xt-star { filter: drop-shadow(0 0 6px rgba(255, 213, 79, .9)); }
+@media (prefers-reduced-motion: reduce) {
+  .xt-bulb, .xt-pop { animation: none !important; }
+}
+.xt-lead { margin: 0; text-align: center; }
+.xt-day { margin: 0; text-align: center; color: var(--muted, #9fb0cc); font-size: .9rem; }
+.xt-cheer { margin: 0; text-align: center; font-weight: 800; color: #E0BA77; }
+.xt-form { display: grid; gap: 10px; }
+.xt-form label { display: grid; gap: 4px; font-weight: 700; font-size: .92rem; }
+.xt-form input, .xt-form textarea { width: 100%; box-sizing: border-box; font: inherit; border-radius: 12px; padding: 10px; border: 1px solid rgba(255, 255, 255, .25); background: rgba(0, 0, 0, .25); color: inherit; }
+.xt-pages { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.xt-msg { min-height: 1.2em; margin: 0; color: #FF8A8A; font-weight: 700; font-size: .9rem; }
+.xt-logs summary { cursor: pointer; font-weight: 700; }
+.xt-logs ol, .xt-plog { padding-left: 1.2em; display: grid; gap: 6px; }
+.xt-card { display: flex; align-items: center; gap: 12px; text-align: left; }
+.xt-mini { flex: 0 0 56px; width: 56px; }
+.xt-hero { position: absolute; left: 0; bottom: 34px; width: 64px; pointer-events: none; filter: drop-shadow(0 4px 6px rgba(0, 0, 0, .4)); }
+.xt-hero[hidden] { display: none; }
+.lh-top { position: relative; }
+.lh-xt { left: 4px; bottom: 4px; width: 58px; }
+.xt-locker-art { width: 64px; display: block; margin: 0 auto; }
+.xt-toggle { display: flex; gap: 6px; align-items: center; justify-content: center; font-size: .82rem; margin-top: 6px; }

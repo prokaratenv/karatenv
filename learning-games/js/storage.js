@@ -134,6 +134,7 @@ BD.Store = (function () {
     if (BD.Quest) BD.Quest.sanitize(p);
     if (BD.Breaks) BD.Breaks.sanitize(p);
     if (BD.Placement) BD.Placement.sanitize(p);
+    if (BD.XmasTree) BD.XmasTree.sanitize(p);
     if (BD.Teach && BD.Teach.sanitize) BD.Teach.sanitize(p);
     if (BD.Little && BD.Little.sanitize) BD.Little.sanitize(p);
     if (BD.Spanish) BD.Spanish.sanitize(p);

@@ -187,6 +187,7 @@ BD.Badges = (function () {
         const got = hasGear(p, b.gear), g = GEAR[b.gear];
         return '<div class="locker-item' + (got ? " got" : " locked") + '"><img src="' + g.img + '" alt=""><strong>' + g.name + '</strong><span class="locker-badge">' + (got ? "🏅 " + esc(b.name) : "🔒 " + esc(b.how)) + '</span></div>';
       }).join("") + '</div>' +
+      (BD.XmasTree ? BD.XmasTree.lockerHTML(p) : '') +
       '<h4 class="label">Skills</h4><div class="locker">' + BADGES.filter(function (b) { return b.skill; }).map(function (b) {
         const got = !!(p.badges && p.badges[b.id]);
         return '<div class="locker-item skill' + (got ? " got" : " locked") + '"><span class="skill-icon" aria-hidden="true">🥋</span><strong>' + esc(b.name) + '</strong><span class="locker-badge">' + (got ? "🏅 Unlocked: every 5 right in a row is a judo throw" : "🔒 " + esc(b.how)) + '</span></div>';
@@ -197,6 +198,8 @@ BD.Badges = (function () {
     check(p);
     BD.UI.sheet("Gear locker", lockerHTML(p));
     document.getElementById("infoBody").onclick = function (e) {
+      const xt = e.target.closest("[data-xtree-toggle]");
+      if (xt && BD.XmasTree) { BD.XmasTree.toggle(p, xt.checked); BD.Sound.tap(); return; }
       const b = e.target.closest("[data-outfit]"); if (!b) return;
       p.outfit = b.dataset.outfit; BD.Store.save(p); BD.Sound.tap();
       document.getElementById("infoBody").innerHTML = lockerHTML(p);
