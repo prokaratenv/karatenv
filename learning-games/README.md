@@ -639,3 +639,13 @@ Preschool (ages 3 to 4, grade -2) and Pre-K (ages 4 to 5, grade -1) play voice-l
 - Sounds (spelling): listen and find, first sounds, rhymes and letter sounds (Pre-K).
 - Shapes & Colors (comprehension): colors, shapes, big and small, which is different, patterns, sorting, what comes next.
 Misses are gentle retries; after two misses the right answer glows. Rounds are 6 items (Preschool) or 8 (Pre-K). Stripes are a quarter the size with 150 Belt XP of full power a day (about 15 minutes), and the daily goal defaults to 15 minutes. A simple picture home (big Play button, four picture tiles, stickers, a Grown-ups button) is on by default for Preschool and Pre-K and can be switched per child in the Parents area. Preschool, Pre-K, Kindergarten and "Not sure" students get a voice-led picture check that places each game at Preschool, Pre-K or Kindergarten (or pick by age 3, 4 or 5). Kindergarten keeps its games; its spelling list is trimmed to short CVC and color/number sight words.
+
+## Holiday theme: how to turn it off
+
+The holiday theme (snowflakes, twinkling lights, snow caps, "Merry Christmas" greeting, red/green/gold confetti) lives in `js/holiday.js`.
+
+- It runs only from **2026-11-28 to 2026-12-31** (the device's local date) and turns itself off on **January 1, 2027** with no code change.
+- **Owner kill switch:** set `BD.HOLIDAY = { on: false, ... }` at the top of `js/holiday.js` (or delete the `<script src="js/holiday.js">` tag in `index.html`). Everything goes away: no snow, lights, caps, greeting, confetti colors or Parents switch.
+- **Parents:** Parents area > "Holiday decorations (this device)" turns it off instantly on that device (shown only during the season).
+- All holiday CSS is scoped under `html.holiday` (in `css/more.css`), and the only hook outside `holiday.js` is the guarded confetti color line in `js/effects.js`.
+- Test: `holiday-test.js` (in the scratchpad test kit) checks the dates, the switches and that "off" leaves no holiday DOM, classes or animation frames.

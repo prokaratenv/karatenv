@@ -41,7 +41,7 @@ BD.confetti = function (amount) {
   if (!canvas) return;
   const g = canvas.getContext("2d");
   const W = canvas.width = window.innerWidth, H = canvas.height = window.innerHeight;
-  const colors = BD.BELTS.slice(1).map(function (b) { return b.color; });
+  const colors = BD.Holiday && BD.Holiday.active() ? BD.Holiday.colors() : BD.BELTS.slice(1).map(function (b) { return b.color; });
   const parts = [];
   for (let i = 0; i < (amount || 120); i++) {
     parts.push({ x: W / 2 + (Math.random() - 0.5) * W * 0.4, y: H * 0.35, vx: (Math.random() - 0.5) * 14,
